@@ -99,6 +99,16 @@ pub(crate) fn get_command(
     session_shell: Arc<Shell>,
     allow_login_shell: bool,
 ) -> Result<ResolvedCommand, String> {
+    #[cfg(target_os = "trueos")]
+    {
+        if args.shell.is_some() || args.login.is_some() || args.workdir.is_some() {
+            return Err("Shell3 accepts native script text; shell, login, and Unix workdir options are unavailable".into());
+        }
+        return Ok(ResolvedCommand {
+            command: vec![args.cmd.clone()],
+            shell: ShellInvocation { shell: session_shell.as_ref().clone(), use_login_shell: false },
+        });
+    }
     let use_login_shell = match args.login {
         Some(true) if !allow_login_shell => {
             return Err(

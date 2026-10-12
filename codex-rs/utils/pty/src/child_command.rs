@@ -257,6 +257,7 @@ impl Command {
     }
 
     /// Launch with native platform settings and the existing compatibility fallback.
+    #[cfg(not(target_os = "trueos"))]
     pub fn spawn(mut self) -> io::Result<Child> {
         #[cfg(unix)]
         self.validate()?;
@@ -355,6 +356,13 @@ impl Command {
                 ChildKind::Tokio(child)
             },
         })
+    }
+    #[cfg(target_os = "trueos")]
+    pub fn spawn(self) -> io::Result<Child> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "TRUEOS uses Shell3 launch scripts; Unix child spawning is unavailable",
+        ))
     }
 }
 

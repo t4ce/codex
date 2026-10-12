@@ -9,10 +9,16 @@ workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-portable-pty = { workspace = true }
 tokio = { workspace = true, features = ["io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }
 
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
+portable-pty = { workspace = true }
+
+[target.'cfg(target_os = "trueos")'.dependencies]
+trueos = { workspace = true }
+
 [dev-dependencies]
+trueos = { workspace = true }
 codex-utils-cargo-bin = { workspace = true }
 ctor = { workspace = true }
 tempfile = { workspace = true }

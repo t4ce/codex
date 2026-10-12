@@ -1,6 +1,6 @@
 use core::fmt;
 use std::io;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::fd::RawFd;
 use std::process::ExitStatus;
 use std::sync::Arc;
@@ -8,8 +8,11 @@ use std::sync::Mutex as StdMutex;
 use std::sync::atomic::AtomicBool;
 
 use anyhow::anyhow;
+#[cfg(not(target_os = "trueos"))]
 use portable_pty::MasterPty;
+#[cfg(not(target_os = "trueos"))]
 use portable_pty::PtySize;
+#[cfg(not(target_os = "trueos"))]
 use portable_pty::SlavePty;
 use tokio::sync::broadcast;
 use tokio::sync::mpsc;
@@ -37,7 +40,7 @@ pub(crate) fn exit_code_from_status(status: ExitStatus) -> i32 {
         return code;
     }
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::process::ExitStatusExt;
         if let Some(signal) = status.signal() {
@@ -66,6 +69,7 @@ impl Default for TerminalSize {
     }
 }
 
+#[cfg(not(target_os = "trueos"))]
 impl From<TerminalSize> for PtySize {
     fn from(value: TerminalSize) -> Self {
         Self {
@@ -77,15 +81,16 @@ impl From<TerminalSize> for PtySize {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub(crate) trait PtyHandleKeepAlive: Send {}
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 impl<T: Send + ?Sized> PtyHandleKeepAlive for T {}
 
+#[cfg(not(target_os = "trueos"))]
 pub(crate) enum PtyMasterHandle {
     Resizable(Box<dyn MasterPty + Send>),
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     Opaque {
         raw_fd: RawFd,
         _handle: Box<dyn PtyHandleKeepAlive>,
@@ -93,7 +98,9 @@ pub(crate) enum PtyMasterHandle {
 }
 
 pub struct PtyHandles {
+    #[cfg(not(target_os = "trueos"))]
     pub _slave: Option<Box<dyn SlavePty + Send>>,
+    #[cfg(not(target_os = "trueos"))]
     pub(crate) _master: PtyMasterHandle,
 }
 
@@ -184,6 +191,7 @@ impl ProcessHandle {
 
     /// Resize the PTY in character cells.
     pub fn resize(&self, size: TerminalSize) -> anyhow::Result<()> {
+        #[cfg(not(target_os = "trueos"))]
         {
             let handles = self
                 ._pty_handles
@@ -192,7 +200,7 @@ impl ProcessHandle {
             if let Some(handles) = handles.as_ref() {
                 return match &handles._master {
                     PtyMasterHandle::Resizable(master) => master.resize(size.into()),
-                    #[cfg(unix)]
+                    #[cfg(all(unix, not(target_os = "trueos")))]
                     PtyMasterHandle::Opaque { raw_fd, .. } => resize_raw_pty(*raw_fd, size),
                 };
             }
@@ -277,7 +285,10 @@ impl Drop for ProcessHandle {
 }
 
 /// Adapts a closure into a `ChildTerminator` implementation.
+type SignalFn = Box<dyn FnMut(ProcessSignal) -> io::Result<()> + Send + Sync>;
+
 struct ClosureTerminator {
+    signaler: Option<SignalFn>,
     inner: Option<Box<dyn FnMut() + Send + Sync>>,
     #[cfg(windows)]
     interrupt_terminates: bool,
@@ -285,6 +296,9 @@ struct ClosureTerminator {
 
 impl ChildTerminator for ClosureTerminator {
     fn signal(&mut self, signal: ProcessSignal) -> io::Result<()> {
+        if let Some(signaler) = self.signaler.as_mut() {
+            return signaler(signal);
+        }
         #[cfg(windows)]
         if self.interrupt_terminates {
             return self.kill();
@@ -301,7 +315,7 @@ impl ChildTerminator for ClosureTerminator {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn resize_raw_pty(raw_fd: RawFd, size: TerminalSize) -> anyhow::Result<()> {
     let mut winsize = libc::winsize {
         ws_row: size.rows,
@@ -376,6 +390,13 @@ pub struct ProcessDriver {
 
 /// Build a `SpawnedProcess` from a driver that supplies stdin/output/exit channels.
 pub fn spawn_from_driver(driver: ProcessDriver) -> SpawnedProcess {
+    spawn_from_driver_with_signaler(driver, None)
+}
+
+pub(crate) fn spawn_from_driver_with_signaler(
+    driver: ProcessDriver,
+    signaler: Option<SignalFn>,
+) -> SpawnedProcess {
     let ProcessDriver {
         writer_tx,
         stdout_rx: stdout_driver_rx,
@@ -455,6 +476,7 @@ pub fn spawn_from_driver(driver: ProcessDriver) -> SpawnedProcess {
     let handle = ProcessHandle::new(
         writer_tx,
         Box::new(ClosureTerminator {
+            signaler,
             inner: terminator,
             #[cfg(windows)]
             interrupt_terminates,

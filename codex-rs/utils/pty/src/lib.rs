@@ -6,16 +6,26 @@ pub use child_command::Command;
 pub use child_command::DescriptorPolicy;
 pub use child_command::ProcessMode;
 pub use child_command::SpawnFallback;
+mod child_fds;
 #[cfg(target_os = "linux")]
 mod linux_fds;
+#[cfg_attr(target_os = "trueos", path = "trueos_pipe.rs")]
 pub mod pipe;
 mod process;
 pub mod process_group;
+#[cfg_attr(target_os = "trueos", path = "trueos.rs")]
 pub mod pty;
+#[cfg(all(test, not(target_os = "trueos")))]
+#[path = "trueos.rs"]
+mod trueos_backend_tests;
 pub use pty::ChildFds;
+#[cfg(target_os = "trueos")]
+pub use pty::install_shell3_backend;
+#[cfg(target_os = "trueos")]
+pub use pty::spawn_script as spawn_shell3_script;
 #[cfg(test)]
 mod tests;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod unix_io;
 #[cfg(windows)]
 mod win;
