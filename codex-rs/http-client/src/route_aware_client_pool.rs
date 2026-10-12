@@ -119,9 +119,11 @@ impl RouteAwareRequestError {
 
         let mut source: Option<&(dyn std::error::Error + 'static)> = Some(self);
         while let Some(error) = source {
-            if error.downcast_ref::<rustls::Error>().is_some()
-                || error.downcast_ref::<native_tls::Error>().is_some()
-            {
+            if error.downcast_ref::<rustls::Error>().is_some() {
+                return Some(RouteFailureClass::TlsError);
+            }
+            #[cfg(not(target_os = "trueos"))]
+            if error.downcast_ref::<native_tls::Error>().is_some() {
                 return Some(RouteFailureClass::TlsError);
             }
             if error.to_string() == "tunnel error: proxy authorization required" {

@@ -172,7 +172,7 @@ pretty_assertions = { workspace = true }
 sha2 = { workspace = true }
 sqlx = { version = "=0.9.0", default-features = false, features = ["chrono", "json", "migrate", "runtime-tokio", "tls-rustls", "sqlite-bundled", "time", "uuid"] }
 tar = { workspace = true }
-tokio-tungstenite = { version = "0.28.0", features = ["proxy", "rustls-tls-native-roots"] }
+tokio-tungstenite = { workspace = true }
 vt100 = { workspace = true }
 wiremock = { workspace = true }
 zstd = { workspace = true }

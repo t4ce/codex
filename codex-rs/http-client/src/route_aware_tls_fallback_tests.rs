@@ -1,3 +1,5 @@
+#![cfg(not(target_os = "trueos"))]
+
 use std::io;
 use std::io::Read;
 use std::io::Write;

@@ -54,7 +54,7 @@ opentelemetry_sdk = { workspace = true, features = [
 ] }
 http = { workspace = true }
 os_info = { workspace = true }
-reqwest = { workspace = true }
+reqwest = { workspace = true, features = ["rustls-tls-native-roots"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 strum_macros = { workspace = true }

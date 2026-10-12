@@ -446,7 +446,7 @@ regex = "1.12.3"
 regex-automata = { version = "0.4.13", default-features = false, features = ["std", "syntax", "unicode", "nfa-pikevm"] }
 regex-lite = "0.1.8"
 regex-syntax = "0.8.8"
-reqwest = { version = "0.12", features = ["cookies"] }
+reqwest = { version = "0.12", default-features = false, features = ["cookies", "http2"] }
 rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", rev = "4048ac40e958fb1a7d614617a2ae8d26666ee2fa", version = "=3.5.1", default-features = false }
 runfiles = { git = "https://github.com/dzbarsky/rules_rust", rev = "b56cbaa8465e74127f1ea216f813cd377295ad81" }
 rustix = { version = "1.1.4", features = ["net"] }
@@ -514,10 +514,7 @@ tokio = "1"
 tokio-rustls = "0.26.4"
 tokio-stream = "0.1.18"
 tokio-test = "0.4"
-tokio-tungstenite = { version = "0.28.0", features = [
-    "proxy",
-    "rustls-tls-native-roots",
-] }
+tokio-tungstenite = { path = "vendor/tokio-tungstenite-0.28.0-openai", version = "0.28.0", features = ["proxy", "rustls-tls-native-roots"] }
 tokio-util = "0.7.18"
 toml = "0.9.5"
 toml_edit = "0.24.0"
@@ -532,7 +529,7 @@ tree-sitter = "0.25.10"
 tree-sitter-bash = "0.25"
 tree-sitter-powershell = "=0.26.4"
 ts-rs = "11"
-tungstenite = { version = "0.27.0", features = ["deflate", "proxy"] }
+tungstenite = { path = "vendor/tungstenite-0.27.0-openai", version = "0.27.0", features = ["deflate", "proxy"] }
 uds_windows = "1.1.0"
 unicode-segmentation = "1.12.0"
 unicode-width = "0.2"
@@ -641,11 +638,8 @@ opt-level = 0
 # Uncomment to debug local changes.
 # ratatui = { path = "../../ratatui" }
 crossterm = { git = "https://github.com/openai-oss-forks/crossterm", rev = "ed1cdab335221515706178d68495bba2aed1924f" }
-tokio-tungstenite = { git = "https://github.com/openai-oss-forks/tokio-tungstenite", rev = "0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186" }
-tungstenite = { git = "https://github.com/openai-oss-forks/tungstenite-rs", rev = "4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }
 
 # Uncomment to debug local changes.
 # rmcp = { path = "../../rust-sdk/crates/rmcp" }
 
 [patch."ssh://git@github.com/openai-oss-forks/tungstenite-rs.git"]
-tungstenite = { git = "https://github.com/openai-oss-forks/tungstenite-rs", rev = "4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }
