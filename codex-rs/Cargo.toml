@@ -439,21 +439,22 @@ ratatui = { version = "0.30.2", default-features = false, features = [
 ] }
 ratatui-macros = "0.7.2"
 rcgen = { version = "0.14.7", default-features = false, features = [
-    "aws_lc_rs",
+    "ring",
     "pem",
 ] }
 regex = "1.12.3"
 regex-automata = { version = "0.4.13", default-features = false, features = ["std", "syntax", "unicode", "nfa-pikevm"] }
 regex-lite = "0.1.8"
 regex-syntax = "0.8.8"
-reqwest = { version = "0.12", default-features = false, features = ["cookies", "http2"] }
+reqwest = { path = "../../TRUEOS-Blueprints/vendor/reqwest-0.13.3", version = "=0.13.3", default-features = false, features = ["cookies", "http2", "query", "form", "charset", "rustls"] }
 rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", rev = "4048ac40e958fb1a7d614617a2ae8d26666ee2fa", version = "=3.5.1", default-features = false }
 runfiles = { git = "https://github.com/dzbarsky/rules_rust", rev = "b56cbaa8465e74127f1ea216f813cd377295ad81" }
 rustix = { version = "1.1.4", features = ["net"] }
 rustls = { version = "0.23.45", default-features = false, features = [
-    "aws_lc_rs",
     "std",
+    "tls12",
 ] }
+rustls-rustcrypto = { path = "../../TRUEOS-Blueprints/vendor/rustls-rustcrypto-0.0.2-alpha", version = "0.0.2-alpha", default-features = false, features = ["std", "tls12"] }
 rustls-native-certs = "0.8.3"
 rustls-pki-types = "1.14.0"
 schemars = "0.8.22"
@@ -511,7 +512,7 @@ tikv-jemallocator = "=0.7.0"
 time = "0.3.47"
 tiny_http = "0.12"
 tokio = "1"
-tokio-rustls = "0.26.4"
+tokio-rustls = { version = "0.26.4", default-features = false, features = ["tls12"] }
 tokio-stream = "0.1.18"
 tokio-test = "0.4"
 tokio-tungstenite = { path = "vendor/tokio-tungstenite-0.28.0-openai", version = "0.28.0", features = ["proxy", "rustls-tls-native-roots"] }
@@ -635,6 +636,8 @@ inherits = "test"
 opt-level = 0
 
 [patch.crates-io]
+rustls-rustcrypto = { path = "../../TRUEOS-Blueprints/vendor/rustls-rustcrypto-0.0.2-alpha" }
+rama-tls-rustls = { path = "../../TRUEOS-Blueprints/vendor/rama-tls-rustls-0.3.0-alpha.4-rustcrypto" }
 # Uncomment to debug local changes.
 # ratatui = { path = "../../ratatui" }
 crossterm = { git = "https://github.com/openai-oss-forks/crossterm", rev = "ed1cdab335221515706178d68495bba2aed1924f" }

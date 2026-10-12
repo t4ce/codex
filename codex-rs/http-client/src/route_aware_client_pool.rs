@@ -129,7 +129,11 @@ impl RouteAwareRequestError {
             if error.to_string() == "tunnel error: proxy authorization required" {
                 return Some(RouteFailureClass::ProxyAuthenticationRequired);
             }
-            source = error.source();
+            source = error
+                .downcast_ref::<io::Error>()
+                .and_then(|error| error.get_ref())
+                .map(|inner| inner as &(dyn std::error::Error + 'static))
+                .or_else(|| error.source());
         }
 
         match self {

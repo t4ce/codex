@@ -8,7 +8,7 @@ const EMPTY_ALGORITHMS: rustls::crypto::WebPkiSupportedAlgorithms =
 
 #[test]
 fn ensure_provider_preserves_preinstalled_provider() {
-    let mut provider = rustls::crypto::aws_lc_rs::default_provider();
+    let mut provider = rustls_rustcrypto::provider();
     provider.signature_verification_algorithms = EMPTY_ALGORITHMS;
     assert!(provider.install_default().is_ok());
 
