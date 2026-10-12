@@ -19,10 +19,52 @@ name = "codex_cli"
 path = "src/lib.rs"
 doctest = false
 
-[lints]
-workspace = true
+# Explicit inheritance keeps standalone Blueprint staging valid.
+[lints.rust]
+
+
+[lints.clippy]
+await_holding_invalid_type = "deny"
+await_holding_lock = "deny"
+disallowed_methods = "deny"
+expect_used = "deny"
+identity_op = "deny"
+manual_clamp = "deny"
+manual_filter = "deny"
+manual_find = "deny"
+manual_flatten = "deny"
+manual_map = "deny"
+manual_memcpy = "deny"
+manual_non_exhaustive = "deny"
+manual_ok_or = "deny"
+manual_range_contains = "deny"
+manual_retain = "deny"
+manual_strip = "deny"
+manual_try_fold = "deny"
+manual_unwrap_or = "deny"
+needless_borrow = "deny"
+needless_borrowed_reference = "deny"
+needless_collect = "deny"
+needless_late_init = "deny"
+needless_option_as_deref = "deny"
+needless_question_mark = "deny"
+needless_update = "deny"
+redundant_clone = "deny"
+redundant_closure = "deny"
+redundant_closure_for_method_calls = "deny"
+redundant_static_lifetimes = "deny"
+trivially_copy_pass_by_ref = "deny"
+uninlined_format_args = "deny"
+unnecessary_filter_map = "deny"
+unnecessary_lazy_evaluations = "deny"
+unnecessary_sort_by = "deny"
+unnecessary_to_owned = "deny"
+unwrap_used = "deny"
 
 [features]
+# The TRUEOS packer selects this feature and disables Cargo default features.
+# Launch the resulting CLI with --no-daemon.
+trueos-blueprint = []
 system-clipboard = ["codex-tui/system-clipboard"]
 default = ["system-clipboard"]
 bedrock = ["dep:codex-aws-auth", "codex-model-provider/bedrock", "codex-app-server/bedrock"]
@@ -35,7 +77,7 @@ external-reporting = ["codex-core/external-reporting", "codex-app-server/externa
 codex-utils-process = { workspace = true }
 anyhow = { workspace = true }
 chrono = { workspace = true }
-clap = { workspace = true, features = ["derive", "env"] }
+clap = { version = "4", features = ["derive", "env"] }
 clap_complete = { workspace = true }
 codex-app-server = { workspace = true }
 codex-app-server-daemon = { workspace = true }
@@ -81,33 +123,25 @@ codex-state = { workspace = true }
 codex-stdio-to-uds = { workspace = true }
 codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
-codex-tui = { workspace = true, default-features = false }
+codex-tui = { path = "../tui", default-features = false }
 codex-utils-absolute-path = { workspace = true }
 codex-utils-path = { workspace = true }
 codex-utils-path-uri = { workspace = true }
 codex-utils-redacted-string = { workspace = true }
 codex-websocket-auth = { workspace = true }
-crossterm = { workspace = true, features = ["event-stream"] }
+crossterm = { version = "0.29.0", features = ["event-stream"] }
 futures = { workspace = true }
 http = { workspace = true }
 libc = { workspace = true }
 os_info = { workspace = true }
 owo-colors = { workspace = true }
 regex-lite = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
+serde = { version = "1", features = ["rc", "derive"] }
 serde_json = { workspace = true }
 supports-color = { workspace = true }
 sys-locale = { workspace = true }
 tempfile = { workspace = true }
-tokio = { workspace = true, features = [
-    "io-std",
-    "macros",
-    "net",
-    "process",
-    "rt-multi-thread",
-    "signal",
-    "time",
-] }
+tokio = { version = "1", features = ["io-std", "macros", "net", "process", "rt-multi-thread", "signal", "time"] }
 toml = { workspace = true }
 tracing = { workspace = true }
 tracing-appender = { workspace = true }
@@ -121,12 +155,7 @@ tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-sandbox-rs" }
-windows-sys = { workspace = true, features = [
-    "Win32_Foundation",
-    "Win32_Storage_Packaging_Appx",
-    "Win32_System_Console",
-    "Win32_System_Threading",
-] }
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Storage_Packaging_Appx", "Win32_System_Console", "Win32_System_Threading"] }
 
 [dev-dependencies]
 app_test_support = { workspace = true }
@@ -141,9 +170,9 @@ jsonwebtoken = { workspace = true }
 predicates = { workspace = true }
 pretty_assertions = { workspace = true }
 sha2 = { workspace = true }
-sqlx = { workspace = true }
+sqlx = { version = "=0.9.0", default-features = false, features = ["chrono", "json", "migrate", "runtime-tokio", "tls-rustls", "sqlite-bundled", "time", "uuid"] }
 tar = { workspace = true }
-tokio-tungstenite = { workspace = true }
+tokio-tungstenite = { version = "0.28.0", features = ["proxy", "rustls-tls-native-roots"] }
 vt100 = { workspace = true }
 wiremock = { workspace = true }
 zstd = { workspace = true }

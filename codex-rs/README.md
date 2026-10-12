@@ -21,6 +21,30 @@ future platform clipboard API such as TRUEOS.
 To explicitly enable clipboard support with defaults disabled, add
 `--features system-clipboard` before `--`.
 
+## TRUEOS execution defaults
+
+When TRUEOS provides application isolation through VMX, set these user defaults
+in `~/.codex/config.toml`:
+
+```toml
+sandbox_mode = "danger-full-access"
+approval_policy = "never"
+```
+
+Then start the terminal interface without native clipboard support or the shared
+background server:
+
+```sh
+cargo run --bin codex --no-default-features -- --no-daemon
+```
+
+These settings disable Codex-managed command sandboxing and approval prompts;
+TRUEOS owns isolation and external access. Startup skips the bubblewrap probe
+for this policy. The native sandbox code remains compiled into the binary.
+The defaults apply to other Codex sessions using the same user config unless
+overridden. The exact `externalSandbox` policy is available through app-server
+requests, rather than the CLI sandbox setting.
+
 ## Optional integrations in this checkout
 
 This checkout disables these integrations by default. ChatGPT and OpenAI API
