@@ -282,9 +282,17 @@ impl ExecCommandHandler {
                 )));
             }
         }
+        #[cfg(not(target_os = "trueos"))]
         let resolved_command =
             get_command(&args, shell, turn_environment.config().allow_login_shell)
                 .map_err(FunctionCallError::RespondToModel)?;
+        #[cfg(target_os = "trueos")]
+        let resolved_command = if environment.is_remote() {
+            get_command(&args, shell, turn_environment.config().allow_login_shell)
+        } else {
+            super::get_shell3_command(&args, shell)
+        }
+        .map_err(FunctionCallError::RespondToModel)?;
         let command = resolved_command.command;
         let ExecCommandArgs {
             mut tty,

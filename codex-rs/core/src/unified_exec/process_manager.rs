@@ -1320,14 +1320,22 @@ impl UnifiedExecProcessManager {
         #[cfg(target_os = "trueos")]
         if !environment.is_remote() {
             if request.sandbox != codex_sandboxing::SandboxType::None {
-                return Err(UnifiedExecError::create_process("Shell3 command sessions require platform-managed VM permissions".into()));
+                return Err(UnifiedExecError::create_process(
+                    "Shell3 command sessions require platform-managed VM permissions".into(),
+                ));
             }
             let [script] = request.command.as_slice() else {
-                return Err(UnifiedExecError::create_process("Shell3 accepts one native launch script, without a Unix argv wrapper".into()));
+                return Err(UnifiedExecError::create_process(
+                    "Shell3 accepts one native launch script, without a Unix argv wrapper".into(),
+                ));
             };
             let spawned = codex_utils_pty::spawn_shell3_script(
-                script, tty.then_some(codex_utils_pty::TerminalSize::default()), true,
-            ).await.map_err(|error| UnifiedExecError::create_process(error.to_string()))?;
+                script,
+                tty.then_some(codex_utils_pty::TerminalSize::default()),
+                true,
+            )
+            .await
+            .map_err(|error| UnifiedExecError::create_process(error.to_string()))?;
             return UnifiedExecProcess::from_spawned(spawned, request.sandbox).await;
         }
         if environment.is_remote() || request.exec_server_shell_snapshot.is_some() {
@@ -1471,7 +1479,14 @@ impl UnifiedExecProcessManager {
             policy: exec_env_policy_from_shell_policy(shell_environment_policy),
             local_policy_env,
         };
+        #[cfg(not(target_os = "trueos"))]
         let shell_snapshot = shell_snapshot_request(request, &cwd, context);
+        #[cfg(target_os = "trueos")]
+        let shell_snapshot = if request.turn_environment.environment.is_remote() {
+            shell_snapshot_request(request, &cwd, context)
+        } else {
+            None
+        };
         let mut orchestrator = ToolOrchestrator::new();
         let mut runtime = UnifiedExecRuntime::new(self);
         let session_shell = context.session.user_shell();
