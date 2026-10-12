@@ -1,10 +1,12 @@
 //! Local clipboard text reads, executed only by the shared clipboard worker.
 //! WSL reads the Windows clipboard; it never falls back to a separate Linux clipboard.
 
+#[cfg(feature = "system-clipboard")]
 use codex_protocol::user_input::MAX_USER_INPUT_TEXT_CHARS;
 use std::time::Instant;
 
 /// Constructed on the clipboard worker, never on the UI thread.
+#[cfg(feature = "system-clipboard")]
 pub(crate) fn reader() -> impl FnMut(Instant) -> Result<String, String> {
     #[cfg(target_os = "linux")]
     let windows =
@@ -84,6 +86,7 @@ pub(crate) fn reader() -> impl FnMut(Instant) -> Result<String, String> {
 }
 
 #[cfg(not(target_os = "android"))]
+#[cfg(feature = "system-clipboard")]
 pub(crate) fn native_result(
     result: Result<String, arboard::Error>,
     deadline: Instant,
@@ -96,6 +99,7 @@ pub(crate) fn native_result(
     validate(text, deadline)
 }
 
+#[cfg(feature = "system-clipboard")]
 fn validate(text: String, deadline: Instant) -> Result<String, String> {
     if Instant::now() >= deadline {
         Err("clipboard read timed out".into())
@@ -107,6 +111,7 @@ fn validate(text: String, deadline: Instant) -> Result<String, String> {
 }
 
 #[cfg(target_os = "linux")]
+#[cfg(feature = "system-clipboard")]
 fn start_windows_reader(
     runtime: &tokio::runtime::Runtime,
 ) -> Result<tokio::process::Child, String> {
@@ -145,6 +150,7 @@ while ($null -ne [Console]::ReadLine()) {
 }
 
 #[cfg(any(target_os = "linux", all(test, unix)))]
+#[cfg(feature = "system-clipboard")]
 async fn read_command(
     child: &mut tokio::process::Child,
     deadline: Instant,
@@ -188,6 +194,12 @@ async fn read_command(
     validate(result.map_err(str::to_owned)?, deadline)
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "system-clipboard"))]
 #[path = "text_tests.rs"]
 mod tests;
+
+/// Backend entry point retained for future platform clipboard integration.
+#[cfg(not(feature = "system-clipboard"))]
+pub(crate) fn reader() -> impl FnMut(Instant) -> Result<String, String> {
+    |_| Err("system clipboard backend unavailable in this build".into())
+}

@@ -124,6 +124,7 @@ mod branch_summary;
 mod chatwidget;
 mod cli;
 mod clipboard_copy;
+#[cfg(any(feature = "system-clipboard", test))]
 mod clipboard_html;
 mod clipboard_paste;
 mod clock_format;

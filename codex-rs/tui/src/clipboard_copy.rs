@@ -18,18 +18,29 @@
 //! fallbacks retain the original text. Terminal writes are unacknowledged requests,
 //! so callers must distinguish them from confirmed native clipboard writes.
 //! Image paste lives in `clipboard_paste`.
+//! Without `system-clipboard`, the same handlers and worker use the disabled backend.
+//! Replace that backend to connect a platform API without changing UI dispatch.
 
+#[cfg(not(feature = "system-clipboard"))]
+mod disabled;
 pub(crate) mod primary;
+#[cfg(feature = "system-clipboard")]
 mod tmux;
+#[cfg(not(feature = "system-clipboard"))]
+use disabled::{copy_to_clipboard, osc52_copy, osc52_sequence};
 pub(crate) mod worker;
 
+#[cfg(feature = "system-clipboard")]
 use base64::Engine;
+#[cfg(feature = "system-clipboard")]
 use std::io::Write;
 use std::sync::Arc;
+#[cfg(feature = "system-clipboard")]
 use tmux::copy as tmux_clipboard_copy;
 
 /// Maximum raw bytes sent through tmux or directly encoded into OSC 52.
 /// Large payloads are rejected before encoding to avoid overwhelming the terminal.
+#[cfg(feature = "system-clipboard")]
 const OSC52_MAX_RAW_BYTES: usize = 100_000;
 /// Whether copied text should also have a rendered HTML representation and its source.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,6 +52,8 @@ pub(crate) enum CopyFormat {
 }
 
 /// A native clipboard write or an unacknowledged request to the user's terminal.
+// Preserve backend completion types for future platform integration.
+#[cfg_attr(not(feature = "system-clipboard"), allow(dead_code))]
 pub(crate) enum CopyOutcome {
     Copied(Option<ClipboardLease>),
     Requested,
@@ -92,6 +105,7 @@ impl CopyStatus {
 /// existing native lease unless the backend supplies a replacement.
 ///
 /// OSC 52 is supported by kitty, WezTerm, iTerm2, Ghostty, and others.
+#[cfg(feature = "system-clipboard")]
 fn copy_to_clipboard(
     text: &str,
     format: CopyFormat,
@@ -135,12 +149,12 @@ fn copy_to_clipboard(
 /// paths the lease is `None` — those backends do not require process-lifetime
 /// ownership.
 pub(crate) struct ClipboardLease {
-    #[cfg(target_os = "linux")]
+    #[cfg(all(feature = "system-clipboard", target_os = "linux"))]
     _clipboard: Option<arboard::Clipboard>,
 }
 
 impl ClipboardLease {
-    #[cfg(target_os = "linux")]
+    #[cfg(all(feature = "system-clipboard", target_os = "linux"))]
     fn native_linux(clipboard: arboard::Clipboard) -> Self {
         Self {
             _clipboard: Some(clipboard),
@@ -150,7 +164,7 @@ impl ClipboardLease {
     #[cfg(test)]
     pub(crate) fn test() -> Self {
         Self {
-            #[cfg(target_os = "linux")]
+            #[cfg(all(feature = "system-clipboard", target_os = "linux"))]
             _clipboard: None,
         }
     }
@@ -159,6 +173,7 @@ impl ClipboardLease {
 /// Core copy logic with injected backends, enabling deterministic unit tests
 /// without touching real clipboards or terminal I/O.
 #[derive(Clone, Copy)]
+#[cfg(feature = "system-clipboard")]
 struct CopyEnvironment {
     herdr_session: bool,
     ssh_session: bool,
@@ -166,6 +181,7 @@ struct CopyEnvironment {
     tmux_session: bool,
 }
 
+#[cfg(feature = "system-clipboard")]
 fn copy_to_clipboard_with(
     text: &str,
     format: CopyFormat,
@@ -254,6 +270,7 @@ pub(crate) fn is_wsl_session() -> bool {
 
 /// Write to the native clipboard. The TUI owns any process-wide stderr redirection.
 #[cfg(not(target_os = "android"))]
+#[cfg(feature = "system-clipboard")]
 fn arboard_copy(
     clipboard: Result<arboard::Clipboard, arboard::Error>,
     text: &str,
@@ -280,6 +297,7 @@ fn arboard_copy(
 
 /// Copy text into the Windows clipboard from a WSL process.
 #[cfg(target_os = "linux")]
+#[cfg(feature = "system-clipboard")]
 fn wsl_clipboard_copy(text: &str) -> Result<(), String> {
     let executable = codex_utils_path::system_executable("powershell.exe")
         .ok_or_else(|| "PowerShell is unavailable in the system PATH".to_string())?;
@@ -330,11 +348,13 @@ fn wsl_clipboard_copy(text: &str) -> Result<(), String> {
 }
 
 #[cfg(not(target_os = "linux"))]
+#[cfg(feature = "system-clipboard")]
 fn wsl_clipboard_copy(_text: &str) -> Result<(), String> {
     Err("WSL clipboard fallback unavailable on this platform".to_string())
 }
 
 /// Write text to the clipboard via the OSC 52 terminal escape sequence.
+#[cfg(feature = "system-clipboard")]
 fn osc52_copy(text: &str) -> Result<(), String> {
     let sequence = osc52_sequence(text, std::env::var_os("TMUX").is_some())?;
     #[cfg(unix)]
@@ -355,6 +375,7 @@ fn osc52_copy(text: &str) -> Result<(), String> {
     write_osc52_to_writer(std::io::stdout().lock(), &sequence)
 }
 
+#[cfg(feature = "system-clipboard")]
 fn write_osc52_to_writer(mut writer: impl Write, sequence: &str) -> Result<(), String> {
     writer
         .write_all(sequence.as_bytes())
@@ -364,6 +385,7 @@ fn write_osc52_to_writer(mut writer: impl Write, sequence: &str) -> Result<(), S
         .map_err(|e| format!("failed to flush OSC 52: {e}"))
 }
 
+#[cfg(feature = "system-clipboard")]
 fn osc52_sequence(text: &str, tmux: bool) -> Result<String, String> {
     let raw_bytes = text.len();
     if raw_bytes > OSC52_MAX_RAW_BYTES {
@@ -380,7 +402,7 @@ fn osc52_sequence(text: &str, tmux: bool) -> Result<String, String> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "system-clipboard"))]
 mod tests {
     use pretty_assertions::assert_eq;
     use std::cell::Cell;
@@ -899,6 +921,6 @@ mod tests {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "system-clipboard"))]
 #[path = "clipboard_copy/routing_tests.rs"]
 mod routing_tests;

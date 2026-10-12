@@ -23,7 +23,8 @@ doctest = false
 workspace = true
 
 [features]
-default = []
+system-clipboard = ["codex-tui/system-clipboard"]
+default = ["system-clipboard"]
 bedrock = ["dep:codex-aws-auth", "codex-model-provider/bedrock", "codex-app-server/bedrock"]
 local-models = ["codex-tui/local-models", "codex-exec/local-models"]
 voice = ["codex-core/voice", "codex-tui/voice"]
@@ -80,7 +81,7 @@ codex-state = { workspace = true }
 codex-stdio-to-uds = { workspace = true }
 codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
-codex-tui = { workspace = true }
+codex-tui = { workspace = true, default-features = false }
 codex-utils-absolute-path = { workspace = true }
 codex-utils-path = { workspace = true }
 codex-utils-path-uri = { workspace = true }

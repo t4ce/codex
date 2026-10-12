@@ -4,9 +4,12 @@ pub(crate) mod text;
 
 use std::path::Path;
 use std::path::PathBuf;
+#[cfg(all(feature = "system-clipboard", not(target_os = "android")))]
 use tempfile::Builder;
 
 #[derive(Debug, Clone)]
+// Preserve the error contract for future platform integration.
+#[cfg_attr(not(feature = "system-clipboard"), allow(dead_code))]
 pub enum PasteImageError {
     ClipboardUnavailable(String),
     NoImage(String),
@@ -51,7 +54,7 @@ pub struct PastedImageInfo {
 }
 
 /// Capture image from system clipboard, encode to PNG, and return bytes + info.
-#[cfg(not(target_os = "android"))]
+#[cfg(all(feature = "system-clipboard", not(target_os = "android")))]
 pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageError> {
     let _span = tracing::debug_span!("paste_image_as_png").entered();
     tracing::debug!("attempting clipboard image read");
@@ -116,16 +119,16 @@ pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageErro
     ))
 }
 
-/// Android/Termux does not support arboard; return a clear error.
-#[cfg(target_os = "android")]
+/// Retain the image paste entry point when the system backend is unavailable.
+#[cfg(any(not(feature = "system-clipboard"), target_os = "android"))]
 pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageError> {
     Err(PasteImageError::ClipboardUnavailable(
-        "clipboard image paste is unsupported on Android".into(),
+        "system clipboard backend unavailable in this build".into(),
     ))
 }
 
 /// Convenience: write to a temp file and return its path + info.
-#[cfg(not(target_os = "android"))]
+#[cfg(all(feature = "system-clipboard", not(target_os = "android")))]
 pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImageError> {
     // First attempt: read image from system clipboard via arboard (native paths or image data).
     match paste_image_as_png() {
@@ -164,6 +167,7 @@ pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImag
 /// Windows side to write the clipboard image to a temporary file, then return
 /// the corresponding WSL path.
 #[cfg(target_os = "linux")]
+#[cfg(feature = "system-clipboard")]
 fn try_wsl_clipboard_fallback(
     error: &PasteImageError,
 ) -> Result<(PathBuf, PastedImageInfo), PasteImageError> {
@@ -204,6 +208,7 @@ fn try_wsl_clipboard_fallback(
 /// clipboard image to a temporary PNG and return the Windows path to that file.
 /// Returns None if no command succeeded or no image was present.
 #[cfg(target_os = "linux")]
+#[cfg(feature = "system-clipboard")]
 fn try_dump_windows_clipboard_image() -> Option<String> {
     // Powershell script: save image from clipboard to a temp png and print the path.
     // Force UTF-8 output to avoid encoding issues between powershell.exe (UTF-16LE default)
@@ -236,11 +241,11 @@ fn try_dump_windows_clipboard_image() -> Option<String> {
     None
 }
 
-#[cfg(target_os = "android")]
+#[cfg(any(not(feature = "system-clipboard"), target_os = "android"))]
 pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImageError> {
     // Keep error consistent with paste_image_as_png.
     Err(PasteImageError::ClipboardUnavailable(
-        "clipboard image paste is unsupported on Android".into(),
+        "system clipboard backend unavailable in this build".into(),
     ))
 }
 
