@@ -113,6 +113,10 @@ mod dynamic_tools;
 mod effective_plugin_change;
 mod error_code;
 mod extensions;
+#[cfg(feature = "external-agent-imports")]
+mod external_agent_migration;
+#[cfg(not(feature = "external-agent-imports"))]
+#[path = "external_agent_migration_disabled.rs"]
 mod external_agent_migration;
 mod external_auth;
 mod filters;

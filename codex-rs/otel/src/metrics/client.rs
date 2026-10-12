@@ -1,4 +1,6 @@
+#[cfg(feature = "external-reporting")]
 use crate::config::OtelExporter;
+#[cfg(feature = "external-reporting")]
 use crate::config::OtelHttpProtocol;
 use crate::metrics::MetricsError;
 use crate::metrics::Result;
@@ -16,12 +18,19 @@ use opentelemetry::metrics::Gauge;
 use opentelemetry::metrics::Histogram;
 use opentelemetry::metrics::Meter;
 use opentelemetry::metrics::MeterProvider as _;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::OTEL_EXPORTER_OTLP_METRICS_TIMEOUT;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::Protocol;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithExportConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithHttpConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithTonicConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::tonic_types::metadata::MetadataMap;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::tonic_types::transport::ClientTlsConfig;
 use opentelemetry_sdk::Resource;
 use opentelemetry_sdk::metrics::InstrumentKind;
@@ -363,21 +372,29 @@ impl MetricsClient {
                 build_provider(resource, exporter, export_interval, runtime_reader.clone())
             }
             MetricsExporter::Otlp(exporter) => {
-                let temporality = otlp_metrics_temporality(
-                    &exporter,
-                    std::env::var("OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE")
-                        .ok()
-                        .as_deref(),
-                );
-                let exporter = crate::network_policy::PolicyExporter {
-                    exporter: build_otlp_metric_exporter(
-                        exporter,
-                        temporality,
-                        &http_client_factory,
-                    )?,
-                    policy: http_client_factory.network_policy().clone(),
-                };
-                build_provider(resource, exporter, export_interval, runtime_reader.clone())
+                #[cfg(not(feature = "external-reporting"))]
+                {
+                    let _ = exporter;
+                    return Err(MetricsError::ExporterDisabled);
+                }
+                #[cfg(feature = "external-reporting")]
+                {
+                    let temporality = otlp_metrics_temporality(
+                        &exporter,
+                        std::env::var("OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE")
+                            .ok()
+                            .as_deref(),
+                    );
+                    let exporter = crate::network_policy::PolicyExporter {
+                        exporter: build_otlp_metric_exporter(
+                            exporter,
+                            temporality,
+                            &http_client_factory,
+                        )?,
+                        policy: http_client_factory.network_policy().clone(),
+                    };
+                    build_provider(resource, exporter, export_interval, runtime_reader.clone())
+                }
             }
         };
 
@@ -595,6 +612,7 @@ where
     (provider, meter)
 }
 
+#[cfg(feature = "external-reporting")]
 fn otlp_metrics_temporality(exporter: &OtelExporter, preference: Option<&str>) -> Temporality {
     // Select before resolving Statsig to OTLP so its built-in route stays Delta.
     match exporter {
@@ -608,6 +626,7 @@ fn otlp_metrics_temporality(exporter: &OtelExporter, preference: Option<&str>) -
     }
 }
 
+#[cfg(feature = "external-reporting")]
 fn build_otlp_metric_exporter(
     exporter: OtelExporter,
     temporality: Temporality,

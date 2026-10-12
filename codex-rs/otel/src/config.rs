@@ -11,6 +11,9 @@ pub(crate) const STATSIG_API_KEY_HEADER: &str = "statsig-api-key";
 pub(crate) const STATSIG_API_KEY: &str = "client-MkRuleRQBd6qakfnDYqJVR9JuXcY57Ljly3vi5JVUIO";
 
 pub(crate) fn resolve_exporter(exporter: &OtelExporter) -> OtelExporter {
+    if !cfg!(feature = "external-reporting") {
+        return OtelExporter::None;
+    }
     match exporter {
         OtelExporter::Statsig => {
             // Keep the built-in Statsig default off in debug builds so

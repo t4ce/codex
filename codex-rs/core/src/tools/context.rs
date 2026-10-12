@@ -1,3 +1,4 @@
+use crate::audio_utils::estimate_audio_token_count;
 use crate::original_image_detail::sanitize_original_image_detail;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
@@ -15,7 +16,6 @@ use codex_protocol::models::ResponseItem;
 use codex_protocol::models::function_call_output_content_items_to_text;
 use codex_tools::LoadableToolSpec;
 use codex_tools::ToolName;
-use codex_utils_audio::estimate_audio_token_count;
 use codex_utils_output_truncation::TruncationPolicy;
 use codex_utils_output_truncation::approx_token_count;
 use codex_utils_output_truncation::formatted_truncate_text;

@@ -17,6 +17,7 @@ use crate::extensions::ThreadExtensionDependencies;
 use crate::extensions::app_server_extension_event_sink;
 use crate::extensions::thread_extensions;
 use crate::external_agent_migration::ExternalAgentConfigRequestProcessor;
+#[cfg(feature = "external-agent-imports")]
 use crate::external_agent_migration::ExternalAgentConfigRequestProcessorArgs;
 use crate::fs_watch::FsWatchManager;
 use crate::outgoing_message::ConnectionId;
@@ -559,6 +560,7 @@ impl MessageProcessor {
                     Some(on_effective_plugins_changed),
                 );
         }
+        #[cfg(feature = "external-agent-imports")]
         let external_agent_config_processor =
             ExternalAgentConfigRequestProcessor::new(ExternalAgentConfigRequestProcessorArgs {
                 outgoing: outgoing.clone(),
@@ -571,6 +573,8 @@ impl MessageProcessor {
                 arg0_paths,
                 codex_home: config.codex_home.to_path_buf(),
             });
+        #[cfg(not(feature = "external-agent-imports"))]
+        let external_agent_config_processor = ExternalAgentConfigRequestProcessor::new();
         let environment_processor =
             EnvironmentRequestProcessor::new(thread_manager.environment_manager());
         let fs_processor = FsRequestProcessor::new(

@@ -24,6 +24,12 @@ doctest = false
 [lints]
 workspace = true
 
+[features]
+default = []
+external-reporting = ["codex-core/external-reporting", "codex-analytics/external-reporting"]
+bedrock = ["dep:codex-aws-auth", "codex-model-provider/bedrock"]
+external-agent-imports = ["dep:codex-external-agent-migration"]
+
 [dependencies]
 codex-utils-process = { workspace = true }
 anyhow = { workspace = true }
@@ -37,7 +43,7 @@ axum = { workspace = true, default-features = false, features = [
 codex-analytics = { workspace = true }
 codex-agent-extension = { workspace = true }
 codex-arg0 = { workspace = true }
-codex-aws-auth = { workspace = true }
+codex-aws-auth = { workspace = true, optional = true }
 codex-cloud-config = { workspace = true }
 codex-code-mode = { workspace = true }
 codex-config = { workspace = true }
@@ -49,7 +55,7 @@ codex-diagnostics = { workspace = true }
 codex-home = { workspace = true }
 codex-exec-server = { workspace = true }
 codex-extension-api = { workspace = true }
-codex-external-agent-migration = { workspace = true }
+codex-external-agent-migration = { workspace = true, optional = true }
 codex-features = { workspace = true }
 codex-goal-extension = { workspace = true }
 codex-git-attribution = { workspace = true }

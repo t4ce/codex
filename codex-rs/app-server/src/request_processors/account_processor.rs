@@ -16,6 +16,8 @@ use codex_model_provider::is_supported_amazon_bedrock_region;
 use codex_otel::auth_storage::AuthStorageOriginator;
 use codex_rmcp_client::EnterpriseOAuthCredentialGuard;
 
+#[cfg(not(feature = "bedrock"))]
+mod bedrock_disabled;
 mod bedrock_gov_cloud;
 mod bedrock_setup;
 mod enterprise_login;
@@ -422,21 +424,30 @@ impl AccountRequestProcessor {
     }
 
     fn ensure_bedrock_login_allowed(&self) -> Result<(), JSONRPCErrorError> {
-        if self.auth_manager.is_workload_identity_selected() {
-            return Err(self.configured_auth_owned_by_host_error());
-        }
-        if self.auth_manager.is_external_chatgpt_auth_active() {
-            return Err(self.external_auth_active_error());
-        }
-        if !self
-            .auth_manager
-            .is_login_method_allowed(ForcedLoginMethod::Api)
+        #[cfg(not(feature = "bedrock"))]
         {
-            return Err(invalid_request(
-                "Amazon Bedrock login is disabled. Use ChatGPT login instead.",
-            ));
+            Err(invalid_request(
+                "Amazon Bedrock is disabled in this build; rebuild with --features bedrock",
+            ))
         }
-        Ok(())
+        #[cfg(feature = "bedrock")]
+        {
+            if self.auth_manager.is_workload_identity_selected() {
+                return Err(self.configured_auth_owned_by_host_error());
+            }
+            if self.auth_manager.is_external_chatgpt_auth_active() {
+                return Err(self.external_auth_active_error());
+            }
+            if !self
+                .auth_manager
+                .is_login_method_allowed(ForcedLoginMethod::Api)
+            {
+                return Err(invalid_request(
+                    "Amazon Bedrock login is disabled. Use ChatGPT login instead.",
+                ));
+            }
+            Ok(())
+        }
     }
 
     async fn login_api_key_common(

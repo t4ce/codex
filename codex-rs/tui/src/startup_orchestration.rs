@@ -13,6 +13,9 @@ pub(super) async fn run_main_inner(
     loader_overrides: LoaderOverrides,
     explicit_remote_endpoint: Option<RemoteAppServerEndpoint>,
 ) -> std::io::Result<AppExitInfo> {
+    if cli.oss || cli.oss_provider.is_some() {
+        codex_utils_oss::ensure_local_models_enabled()?;
+    }
     if cli.no_daemon && explicit_remote_endpoint.is_some() {
         return Err(std::io::Error::other(
             "--no-daemon cannot be used with --remote.",

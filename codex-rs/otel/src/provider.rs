@@ -1,4 +1,5 @@
 use crate::config::OtelExporter;
+#[cfg(feature = "external-reporting")]
 use crate::config::OtelHttpProtocol;
 use crate::config::OtelSettings;
 use crate::config::StatsigMetricsSettings;
@@ -14,21 +15,33 @@ use opentelemetry::trace::Span as _;
 use opentelemetry::trace::SpanBuilder;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::LogExporter;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::OTEL_EXPORTER_OTLP_LOGS_TIMEOUT;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::OTEL_EXPORTER_OTLP_TRACES_TIMEOUT;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::Protocol;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::SpanExporter;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithExportConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithHttpConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::WithTonicConfig;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::tonic_types::metadata::MetadataMap;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_otlp::tonic_types::transport::ClientTlsConfig;
 use opentelemetry_sdk::Resource;
 use opentelemetry_sdk::error::OTelSdkResult;
 use opentelemetry_sdk::logs::SdkLoggerProvider;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_sdk::runtime;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_sdk::trace::BatchSpanProcessor;
 use opentelemetry_sdk::trace::SdkTracerProvider;
 use opentelemetry_sdk::trace::Span;
@@ -36,6 +49,7 @@ use opentelemetry_sdk::trace::SpanData;
 use opentelemetry_sdk::trace::SpanProcessor;
 use opentelemetry_sdk::trace::Tracer;
 use opentelemetry_sdk::trace::TracerProviderBuilder;
+#[cfg(feature = "external-reporting")]
 use opentelemetry_sdk::trace::span_processor_with_async_runtime::BatchSpanProcessor as TokioBatchSpanProcessor;
 use opentelemetry_semantic_conventions as semconv;
 use std::collections::BTreeMap;
@@ -192,8 +206,10 @@ impl OtelProvider {
     }
 
     pub fn try_new(settings: &OtelSettings) -> Result<Option<Self>, Box<dyn Error>> {
-        let log_enabled = !matches!(settings.exporter, OtelExporter::None);
-        let trace_enabled = !matches!(settings.trace_exporter, OtelExporter::None);
+        let log_enabled = cfg!(feature = "external-reporting")
+            && !matches!(settings.exporter, OtelExporter::None);
+        let trace_enabled = cfg!(feature = "external-reporting")
+            && !matches!(settings.trace_exporter, OtelExporter::None);
         let metric_exporter = crate::config::resolve_exporter(&settings.metrics_exporter);
         let metrics_enabled = !matches!(metric_exporter, OtelExporter::None);
 
@@ -442,6 +458,7 @@ impl SpanProcessor for SpanAttributesProcessor {
     }
 }
 
+#[cfg(feature = "external-reporting")]
 fn build_logger(
     resource: &Resource,
     exporter: &OtelExporter,
@@ -525,6 +542,7 @@ fn build_logger(
     Ok(builder.build())
 }
 
+#[cfg(feature = "external-reporting")]
 fn build_tracer_provider(
     resource: &Resource,
     exporter: &OtelExporter,
@@ -851,4 +869,25 @@ mod tests {
             tracestate: BTreeMap::new(),
         }
     }
+}
+
+#[cfg(not(feature = "external-reporting"))]
+fn build_logger(
+    resource: &Resource,
+    _exporter: &OtelExporter,
+    _factory: &codex_http_client::HttpClientFactory,
+) -> Result<SdkLoggerProvider, Box<dyn Error>> {
+    Ok(SdkLoggerProvider::builder()
+        .with_resource(resource.clone())
+        .build())
+}
+
+#[cfg(not(feature = "external-reporting"))]
+fn build_tracer_provider(
+    resource: &Resource,
+    _exporter: &OtelExporter,
+    attributes: BTreeMap<String, String>,
+    _factory: &codex_http_client::HttpClientFactory,
+) -> Result<SdkTracerProvider, Box<dyn Error>> {
+    Ok(tracer_provider_builder(resource, attributes).build())
 }

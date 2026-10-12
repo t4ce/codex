@@ -318,7 +318,7 @@ impl AnalyticsEventsClient {
     ) -> Self {
         let destination = AnalyticsEventsDestination::from_base_url(base_url);
         Self {
-            queue: (analytics_enabled != Some(false))
+            queue: (cfg!(feature = "external-reporting") && analytics_enabled != Some(false))
                 .then(|| AnalyticsEventsQueue::new(Arc::clone(&auth_manager), destination)),
         }
     }
@@ -1116,3 +1116,15 @@ fn capture_track_events_request(
 #[cfg(test)]
 #[path = "client_tests.rs"]
 mod tests;
+
+#[cfg(all(test, not(feature = "external-reporting")))]
+mod external_reporting_disabled_tests {
+    use super::*;
+
+    #[test]
+    fn external_reporting_disabled_ignores_runtime_enable_request() {
+        let auth = AuthManager::from_auth_for_testing(CodexAuth::from_api_key("test-only"));
+        let client = AnalyticsEventsClient::new(auth, "http://127.0.0.1:1".into(), Some(true));
+        assert!(!client.is_enabled());
+    }
+}

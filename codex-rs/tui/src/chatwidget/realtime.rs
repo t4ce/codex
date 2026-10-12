@@ -298,6 +298,14 @@ impl ChatWidget {
             return;
         }
 
+        if !cfg!(feature = "voice") {
+            self.add_error_message(
+                "Voice support is disabled in this build. Rebuild with the `voice` feature."
+                    .to_string(),
+            );
+            return;
+        }
+
         if !RealtimeWebrtcSession::is_supported() {
             self.add_error_message(
                 "Voice requires macOS, an MSVC-based Windows build, or a glibc-based Linux build."

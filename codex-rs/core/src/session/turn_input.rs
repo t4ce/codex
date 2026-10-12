@@ -234,6 +234,17 @@ pub(super) async fn handle(
     submission_id: String,
 ) -> CodexResult<TurnInputSubmission> {
     let request = request.into();
+    #[cfg(not(feature = "voice"))]
+    if matches!(
+        &request.request.input,
+        SubmittedTurnInput::UserInput { content, .. }
+            if content.iter().any(|item| matches!(item, UserInput::Audio { .. } | UserInput::LocalAudio { .. }))
+    ) {
+        return Err(CodexErr::InvalidRequest(
+            "audio input is unavailable because voice support is disabled in this build; rebuild with the `voice` feature".to_string(),
+        ));
+    }
+
     let result = match mode {
         TurnInputMode::StartOrSteer => start_or_steer(session, request, submission_id).await,
         TurnInputMode::StartIfIdle => {

@@ -21,6 +21,10 @@ path = "tests/all.rs"
 [lints]
 workspace = true
 
+[features]
+default = []
+local-models = ["codex-utils-oss/local-models"]
+
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }

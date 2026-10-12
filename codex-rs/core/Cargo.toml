@@ -4,6 +4,11 @@ license.workspace = true
 name = "codex-core"
 version.workspace = true
 
+[features]
+default = []
+external-reporting = ["codex-otel/external-reporting", "codex-feedback/external-reporting", "codex-analytics/external-reporting"]
+voice = ["dep:codex-utils-audio"]
+
 [lib]
 name = "codex_core"
 path = "src/lib.rs"
@@ -74,7 +79,7 @@ codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
 codex-tools = { workspace = true }
 codex-utils-absolute-path = { workspace = true }
-codex-utils-audio = { workspace = true }
+codex-utils-audio = { workspace = true, optional = true }
 codex-utils-cache = { workspace = true }
 codex-utils-git-discovery = { workspace = true }
 codex-utils-image = { workspace = true }

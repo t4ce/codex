@@ -20,7 +20,7 @@ workspace = true
 
 [dependencies]
 codex-process-hardening = { workspace = true }
-codex-realtime-webrtc = { workspace = true }
+codex-realtime-webrtc = { workspace = true, features = ["voice"] }
 futures = { workspace = true }
 libloading = "=0.8.9"
 rand = { workspace = true }

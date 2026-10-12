@@ -26,12 +26,15 @@ use crate::ProviderCapabilities;
 #[cfg(test)]
 use crate::RemoteCompactionSupport;
 use crate::ResolvedResponsesProvider;
+#[cfg(feature = "bedrock")]
 use crate::amazon_bedrock::AmazonBedrockModelProvider;
 use crate::auth::ProviderAuthScope;
 use crate::auth::ResolvedProviderAuth;
 use crate::auth::auth_manager_for_provider;
 use crate::auth::resolve_provider_auth;
 use crate::auth::resolve_provider_auth_for_scope;
+#[cfg(not(feature = "bedrock"))]
+use crate::bedrock_disabled::AmazonBedrockModelProvider;
 use crate::combined_auth::compose_auth;
 use crate::models_endpoint::OpenAiModelsEndpoint;
 use crate::workspace_routing::WorkspaceRoutingContext;
@@ -64,11 +67,18 @@ pub struct ProviderAuthRecoveryMessages {
 pub enum ProviderAccountError {
     MissingChatgptAccountDetails,
     UnsupportedBedrockApiKeyAuth,
+    BedrockDisabled,
 }
 
 impl fmt::Display for ProviderAccountError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::BedrockDisabled => {
+                write!(
+                    f,
+                    "Amazon Bedrock is disabled in this build; rebuild with --features bedrock"
+                )
+            }
             Self::MissingChatgptAccountDetails => {
                 write!(f, "plan type is required for chatgpt authentication")
             }
@@ -576,20 +586,27 @@ impl ModelProvider for ConfiguredModelProvider {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "bedrock")]
     use std::future::Future;
     use std::num::NonZeroU64;
+    #[cfg(feature = "bedrock")]
     use std::task::Context;
+    #[cfg(feature = "bedrock")]
     use std::task::Waker;
 
     use codex_http_client::HttpClientFactory;
     use codex_http_client::OutboundProxyPolicy;
     use codex_login::auth::AgentIdentityAuthPolicy;
     use codex_login::auth::BedrockApiKeyAuth;
+    #[cfg(feature = "bedrock")]
     use codex_model_provider_info::AwsAuthRefreshConfig;
+    #[cfg(feature = "bedrock")]
     use codex_model_provider_info::AwsCredentialExportConfig;
+    #[cfg(feature = "bedrock")]
     use codex_model_provider_info::ModelProviderAwsAuthInfo;
     use codex_model_provider_info::WireApi;
     use codex_model_provider_info::create_oss_provider_with_base_url;
+    #[cfg(feature = "bedrock")]
     use codex_models_manager::ModelsManagerConfig;
     use codex_models_manager::manager::RefreshStrategy;
     use codex_protocol::account::PlanType;
@@ -597,6 +614,7 @@ mod tests {
     use codex_protocol::openai_models::ModelInfo;
     use codex_protocol::openai_models::ModelsResponse;
     use codex_protocol::protocol::SessionSource;
+    #[cfg(feature = "bedrock")]
     use codex_utils_redacted_string::RedactedString;
     use pretty_assertions::assert_eq;
     use serde_json::json;
@@ -609,6 +627,7 @@ mod tests {
 
     use super::*;
     use crate::auth::AgentIdentitySessionFallback;
+    #[cfg(feature = "bedrock")]
     use crate::shared_state::process_shared_state;
 
     fn provider_info_with_command_auth() -> ModelProviderInfo {
@@ -831,6 +850,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "bedrock")]
     fn create_model_provider_does_not_use_openai_auth_manager_for_amazon_bedrock_provider() {
         let provider = create_model_provider(
             ModelProviderInfo::create_amazon_bedrock_provider(Some(ModelProviderAwsAuthInfo {
@@ -848,6 +868,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(feature = "bedrock")]
     async fn shared_bedrock_auth_refresh_is_reused_only_for_matching_configuration() {
         const TEST_NAME: &str = "provider::tests::shared_bedrock_auth_refresh_is_reused_only_for_matching_configuration";
         const HELPER_ARG: &str = "CODEX_BEDROCK_SHARED_AUTH_REFRESH_COMMAND";
@@ -1081,6 +1102,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
     }
 
     #[tokio::test]
+    #[cfg(feature = "bedrock")]
     async fn create_model_provider_uses_managed_auth_for_amazon_bedrock_provider() {
         let auth = bedrock_api_key_auth();
         let provider = create_model_provider(
@@ -1182,6 +1204,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
     }
 
     #[test]
+    #[cfg(feature = "bedrock")]
     fn amazon_bedrock_provider_returns_bedrock_account_state() {
         let provider = create_model_provider(
             ModelProviderInfo::create_amazon_bedrock_provider(/*aws*/ None),
@@ -1200,6 +1223,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
     }
 
     #[tokio::test]
+    #[cfg(feature = "bedrock")]
     async fn amazon_bedrock_provider_creates_static_models_manager() {
         let provider = create_model_provider(
             ModelProviderInfo::create_amazon_bedrock_provider(/*aws*/ None),
@@ -1298,6 +1322,7 @@ printf '%s\n' '{"AccessKeyId":"exported","SecretAccessKey":"secret"}'
     }
 
     #[tokio::test]
+    #[cfg(feature = "bedrock")]
     async fn configured_bedrock_catalog_preserves_service_tiers() {
         let mut configured_model = codex_models_manager::bundled_models_response()
             .expect("bundled models should parse")

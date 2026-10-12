@@ -1290,34 +1290,55 @@ pub(crate) async fn handle_start(
     sub_id: String,
     params: ConversationStartParams,
 ) -> CodexResult<()> {
-    let prepared_start = match prepare_realtime_start(sess, params).await {
-        Ok(prepared_start) => prepared_start,
-        Err(err) => {
-            error!("failed to prepare realtime conversation: {err}");
+    #[cfg(not(feature = "voice"))]
+    {
+        let _ = params;
+        sess.send_event_raw(Event {
+            id: sub_id,
+            msg: EventMsg::RealtimeConversationRealtime(RealtimeConversationRealtimeEvent {
+                payload: RealtimeEvent::Error(
+                    "voice support is disabled in this build; rebuild with the `voice` feature"
+                        .to_string(),
+                ),
+            }),
+        })
+        .await;
+        return Ok(());
+    }
+
+    #[cfg(feature = "voice")]
+    {
+        let prepared_start = match prepare_realtime_start(sess, params).await {
+            Ok(prepared_start) => prepared_start,
+            Err(err) => {
+                error!("failed to prepare realtime conversation: {err}");
+                let message = err.to_string();
+                sess.send_event_raw(Event {
+                    id: sub_id,
+                    msg: EventMsg::RealtimeConversationRealtime(
+                        RealtimeConversationRealtimeEvent {
+                            payload: RealtimeEvent::Error(message),
+                        },
+                    ),
+                })
+                .await;
+                return Ok(());
+            }
+        };
+
+        if let Err(err) = handle_start_inner(sess, &sub_id, prepared_start).await {
+            error!("failed to start realtime conversation: {err}");
             let message = err.to_string();
             sess.send_event_raw(Event {
-                id: sub_id,
+                id: sub_id.clone(),
                 msg: EventMsg::RealtimeConversationRealtime(RealtimeConversationRealtimeEvent {
                     payload: RealtimeEvent::Error(message),
                 }),
             })
             .await;
-            return Ok(());
         }
-    };
-
-    if let Err(err) = handle_start_inner(sess, &sub_id, prepared_start).await {
-        error!("failed to start realtime conversation: {err}");
-        let message = err.to_string();
-        sess.send_event_raw(Event {
-            id: sub_id.clone(),
-            msg: EventMsg::RealtimeConversationRealtime(RealtimeConversationRealtimeEvent {
-                payload: RealtimeEvent::Error(message),
-            }),
-        })
-        .await;
+        Ok(())
     }
-    Ok(())
 }
 
 struct PreparedRealtimeConversationStart {
@@ -1876,13 +1897,29 @@ pub(crate) async fn handle_audio(
     sub_id: String,
     params: ConversationAudioParams,
 ) {
-    if let Err(err) = sess.conversation.audio_in(params.frame).await {
-        error!("failed to append realtime audio: {err}");
-        if sess.conversation.running_state().await.is_some() {
-            warn!("realtime audio input failed while the session was already ending");
-        } else {
-            send_conversation_error(sess, sub_id, err.to_string(), CodexErrorInfo::BadRequest)
-                .await;
+    #[cfg(not(feature = "voice"))]
+    {
+        let _ = params;
+        send_conversation_error(
+            sess,
+            sub_id,
+            "voice support is disabled in this build; rebuild with the `voice` feature".into(),
+            CodexErrorInfo::BadRequest,
+        )
+        .await;
+        return;
+    }
+
+    #[cfg(feature = "voice")]
+    {
+        if let Err(err) = sess.conversation.audio_in(params.frame).await {
+            error!("failed to append realtime audio: {err}");
+            if sess.conversation.running_state().await.is_some() {
+                warn!("realtime audio input failed while the session was already ending");
+            } else {
+                send_conversation_error(sess, sub_id, err.to_string(), CodexErrorInfo::BadRequest)
+                    .await;
+            }
         }
     }
 }

@@ -1,6 +1,9 @@
+#[cfg(feature = "bedrock")]
 mod amazon_bedrock;
 mod auth;
 mod bearer_auth_provider;
+#[cfg(not(feature = "bedrock"))]
+mod bedrock_disabled;
 mod capabilities;
 mod combined_auth;
 mod models_endpoint;
@@ -14,8 +17,11 @@ pub use workspace_routing::ResolvedResponsesProvider;
 pub use workspace_routing::ResponsesConnectionKey;
 pub use workspace_routing::WorkspaceRoutingContext;
 
+#[cfg(feature = "bedrock")]
 pub use amazon_bedrock::is_amazon_bedrock_gov_cloud_region;
+#[cfg(feature = "bedrock")]
 pub use amazon_bedrock::is_supported_amazon_bedrock_region;
+#[cfg(feature = "bedrock")]
 pub use amazon_bedrock::resolve_amazon_bedrock_region;
 pub use auth::AgentIdentitySessionFallback;
 pub use auth::ProviderAuthScope;
@@ -25,6 +31,12 @@ pub use auth::auth_provider_from_auth_manager;
 pub use auth::unauthenticated_auth_provider;
 pub use bearer_auth_provider::BearerAuthProvider;
 pub use bearer_auth_provider::BearerAuthProvider as CoreAuthProvider;
+#[cfg(not(feature = "bedrock"))]
+pub use bedrock_disabled::is_amazon_bedrock_gov_cloud_region;
+#[cfg(not(feature = "bedrock"))]
+pub use bedrock_disabled::is_supported_amazon_bedrock_region;
+#[cfg(not(feature = "bedrock"))]
+pub use bedrock_disabled::resolve_amazon_bedrock_region;
 pub use capabilities::ProviderCapabilities;
 pub use codex_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 pub use codex_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;

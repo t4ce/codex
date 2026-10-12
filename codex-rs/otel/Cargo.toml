@@ -12,10 +12,14 @@ path = "src/lib.rs"
 [lints]
 workspace = true
 
+[features]
+default = []
+external-reporting = ["dep:opentelemetry-otlp", "dep:opentelemetry-http", "reqwest/blocking", "reqwest/rustls-tls"]
+
 [dependencies]
 bytes = { workspace = true }
 codex-http-client = { workspace = true }
-opentelemetry-http = "0.31.0"
+opentelemetry-http = { version = "0.31.0", optional = true }
 chrono = { workspace = true }
 codex-utils-absolute-path = { workspace = true }
 codex-utils-stream-parser = { workspace = true }
@@ -26,7 +30,7 @@ eventsource-stream = { workspace = true }
 gethostname = { workspace = true }
 opentelemetry = { workspace = true, features = ["logs", "metrics", "trace"] }
 opentelemetry-appender-tracing = { workspace = true }
-opentelemetry-otlp = { workspace = true, features = [
+opentelemetry-otlp = { workspace = true, optional = true, features = [
     "grpc-tonic",
     "http-proto",
     "http-json",
@@ -50,7 +54,7 @@ opentelemetry_sdk = { workspace = true, features = [
 ] }
 http = { workspace = true }
 os_info = { workspace = true }
-reqwest = { workspace = true, features = ["blocking", "rustls-tls"] }
+reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 strum_macros = { workspace = true }

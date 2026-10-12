@@ -18,6 +18,11 @@ name = "codex_tui"
 path = "src/lib.rs"
 doctest = false
 
+[features]
+default = []
+local-models = ["codex-utils-oss/local-models"]
+voice = ["codex-realtime-webrtc/voice"]
+
 [lints]
 workspace = true
 

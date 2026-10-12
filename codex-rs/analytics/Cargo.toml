@@ -12,6 +12,10 @@ path = "src/lib.rs"
 [lints]
 workspace = true
 
+[features]
+default = []
+external-reporting = []
+
 [dependencies]
 codex-http-client = { workspace = true }
 codex-app-server-protocol = { workspace = true }

@@ -64,6 +64,7 @@ mod exec_args_tests;
 #[cfg(test)]
 #[path = "exec_server_args_tests.rs"]
 mod exec_server_args_tests;
+#[cfg(feature = "bedrock")]
 mod exec_server_auth;
 mod exec_server_command;
 mod exec_server_telemetry;

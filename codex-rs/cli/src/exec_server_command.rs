@@ -25,6 +25,7 @@ use codex_utils_absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use codex_websocket_auth::WebsocketAuthArgs;
 
+#[cfg(feature = "bedrock")]
 use crate::exec_server_auth;
 use crate::exec_server_telemetry;
 
@@ -202,15 +203,22 @@ impl ExecServerCommand {
             let direct_transport = self.remote_transport == ExecServerRemoteTransport::Direct;
             let (_otel, telemetry) = exec_server_telemetry::init(Some(&config));
             let auth_provider = if self.aws_sigv4 {
-                exec_server_auth::aws_sigv4_auth_provider(
-                    codex_aws_auth::AwsAuthConfig {
-                        profile: self.aws_profile,
-                        region: self.aws_region,
-                        service: self.aws_service,
-                    },
-                    config.http_client_factory(),
-                )
-                .await?
+                #[cfg(not(feature = "bedrock"))]
+                anyhow::bail!(
+                    "AWS authentication is disabled in this build; rebuild with --features bedrock"
+                );
+                #[cfg(feature = "bedrock")]
+                {
+                    exec_server_auth::aws_sigv4_auth_provider(
+                        codex_aws_auth::AwsAuthConfig {
+                            profile: self.aws_profile,
+                            region: self.aws_region,
+                            service: self.aws_service,
+                        },
+                        config.http_client_factory(),
+                    )
+                    .await?
+                }
             } else {
                 load_exec_server_remote_auth_provider(
                     &config,

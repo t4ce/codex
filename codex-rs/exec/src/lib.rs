@@ -309,6 +309,10 @@ pub async fn run_main(cli: Cli, arg0_paths: Arg0DispatchPaths) -> anyhow::Result
         worktree,
     } = shared;
 
+    if oss || oss_provider.is_some() {
+        codex_utils_oss::ensure_local_models_enabled()?;
+    }
+
     if worktree {
         if ignore_user_config {
             anyhow::bail!("--worktree cannot be combined with --ignore-user-config");

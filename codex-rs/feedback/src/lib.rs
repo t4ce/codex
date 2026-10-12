@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
+#[cfg(feature = "external-reporting")]
 use std::collections::btree_map::Entry;
 use std::fs;
 use std::io::Read;
@@ -9,14 +10,20 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::Mutex;
+#[cfg(feature = "external-reporting")]
 use std::time::Duration;
+#[cfg(feature = "external-reporting")]
 use std::time::Instant;
 
+#[cfg(feature = "external-reporting")]
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
+#[cfg(feature = "external-reporting")]
 use codex_http_client::ClientRouteClass;
+#[cfg(feature = "external-reporting")]
 use codex_http_client::HttpClientFactory;
+#[cfg(feature = "external-reporting")]
 use codex_http_client::RouteAwareClientPool;
 use codex_login::AuthEnvTelemetry;
 use codex_protocol::ThreadId;
@@ -35,8 +42,14 @@ mod daemon_logs;
 pub use daemon_logs::daemon_log_attachments;
 pub(crate) mod feedback_diagnostics;
 mod guardian;
+#[cfg(feature = "external-reporting")]
 mod report_upload;
+#[cfg(not(feature = "external-reporting"))]
+#[path = "report_upload_disabled.rs"]
+mod report_upload;
+#[cfg(feature = "external-reporting")]
 mod rollout_archive;
+#[cfg(feature = "external-reporting")]
 mod upload;
 pub use feedback_diagnostics::FEEDBACK_DIAGNOSTICS_ATTACHMENT_FILENAME;
 pub use feedback_diagnostics::FeedbackDiagnostic;
@@ -58,8 +71,10 @@ pub const CODEX_APP_DIRECTORY_CACHE_ATTACHMENT_FILENAME: &str = "codex-app-direc
 /// Filename used for the Windows sandbox log feedback attachment.
 pub const WINDOWS_SANDBOX_LOG_ATTACHMENT_FILENAME: &str = "windows-sandbox.log";
 const DEFAULT_MAX_BYTES: usize = 4 * 1024 * 1024; // 4 MiB
+#[cfg(feature = "external-reporting")]
 const SENTRY_DSN: &str =
     "https://ae32ed50620d7a7792c1ce5df38b3e3e@o33249.ingest.us.sentry.io/4510195390611458";
+#[cfg(feature = "external-reporting")]
 const UPLOAD_TIMEOUT: Duration = Duration::from_secs(/*secs*/ 300);
 // Raw collection budgets used by the report API, not the interactive upload.
 pub const MAX_ATTACHMENT_BYTES: usize = 64 * 1024 * 1024;
@@ -68,7 +83,9 @@ pub const MAX_ATTACHMENTS_BYTES: usize = 126 * 1024 * 1024;
 // they may already be compressed, and callers need an error for incomplete delivery.
 // This bounds the decoded request including framing, not guaranteed attachment storage.
 // https://develop.sentry.dev/sdk/foundations/envelopes/#size-limits
+#[cfg(feature = "external-reporting")]
 const MAX_DECODED_UPLOAD_BYTES: usize = 200 * 1024 * 1024;
+#[cfg(feature = "external-reporting")]
 const MAX_EVENT_BYTES: usize = 1024 * 1024;
 const FEEDBACK_TAGS_TARGET: &str = "feedback_tags";
 // Leave room for every feature, usage settings, and request/auth diagnostics.
@@ -397,6 +414,7 @@ impl RingBuffer {
 
 pub struct FeedbackSnapshot {
     bytes: Vec<u8>,
+    #[cfg_attr(not(feature = "external-reporting"), allow(dead_code))]
     tags: BTreeMap<String, String>,
     feedback_diagnostics: FeedbackDiagnostics,
     pub thread_id: String,
@@ -408,7 +426,7 @@ pub struct FeedbackAttachmentPath {
     pub attachment_filename_override: Option<String>,
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "external-reporting"))]
 #[path = "rollout_attachment_tests.rs"]
 mod rollout_attachment_tests;
 
@@ -531,6 +549,7 @@ impl FeedbackSnapshot {
             .snapshot_bytes();
     }
 
+    #[cfg(feature = "external-reporting")]
     fn feedback_event(
         &self,
         classification: &str,
@@ -610,6 +629,7 @@ impl FeedbackSnapshot {
     /// Success means HTTP acceptance, not durable attachment storage. Callers must
     /// retain their source files; errors can occur after part of a report is accepted.
     /// https://github.com/getsentry/relay/blob/master/relay-server/src/endpoints/common.rs
+    #[cfg(feature = "external-reporting")]
     pub async fn upload_feedback(
         &self,
         options: FeedbackUploadOptions<'_>,
@@ -624,6 +644,19 @@ impl FeedbackSnapshot {
         .await
     }
 
+    #[cfg(not(feature = "external-reporting"))]
+    pub async fn upload_feedback<T>(
+        &self,
+        options: FeedbackUploadOptions<'_>,
+        _http_client_factory: &T,
+    ) -> Result<()> {
+        let _ = options;
+        Err(anyhow!(
+            "external feedback reporting is disabled in this build"
+        ))
+    }
+
+    #[cfg(feature = "external-reporting")]
     async fn upload_feedback_with_dsn(
         &self,
         options: FeedbackUploadOptions<'_>,
@@ -761,6 +794,7 @@ impl FeedbackSnapshot {
         Ok(())
     }
 
+    #[cfg(feature = "external-reporting")]
     fn upload_tags(
         &self,
         classification: &str,
@@ -817,6 +851,7 @@ impl FeedbackSnapshot {
         tags
     }
 
+    #[cfg(feature = "external-reporting")]
     fn feedback_attachments<'a>(
         &'a self,
         headers: &'a sentry::protocol::EnvelopeHeaders,
@@ -917,6 +952,7 @@ impl FeedbackSnapshot {
     }
 }
 
+#[cfg(feature = "external-reporting")]
 fn display_classification(classification: &str) -> String {
     match classification {
         "bug" => "Bug".to_string(),
@@ -1003,15 +1039,15 @@ impl Visit for FeedbackTagsVisitor {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "external-reporting"))]
 #[path = "metadata_tests.rs"]
 mod metadata_tests;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "external-reporting"))]
 #[path = "feedback_event_tests.rs"]
 mod feedback_event_tests;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "external-reporting"))]
 mod tests {
     use std::ffi::OsStr;
     use std::fs;

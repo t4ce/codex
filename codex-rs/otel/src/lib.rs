@@ -7,7 +7,9 @@ pub(crate) mod trace_context;
 
 mod agent_response;
 mod guardian_assessment;
+#[cfg(feature = "external-reporting")]
 mod network_policy;
+#[cfg(feature = "external-reporting")]
 mod otlp;
 mod skill_invocation;
 mod targets;
@@ -100,4 +102,33 @@ pub fn start_global_timer(name: &str, tags: &[(&str, &str)]) -> MetricsResult<Ti
 /// OTEL metrics client, if the active metrics exporter is Statsig.
 pub fn global_statsig_metrics_settings() -> Option<StatsigMetricsSettings> {
     crate::metrics::global_statsig_settings()
+}
+
+#[cfg(all(test, not(feature = "external-reporting")))]
+mod external_reporting_disabled_tests {
+    use super::*;
+
+    #[test]
+    fn external_reporting_disabled_preserves_local_metrics() {
+        let exporter = opentelemetry_sdk::metrics::InMemoryMetricExporter::default();
+        let client = MetricsClient::new(MetricsConfig::in_memory("test", "local", "0", exporter))
+            .expect("local metrics remain available");
+        client
+            .counter("local.test", 1, &[])
+            .expect("local counter works");
+        client.shutdown().expect("local metrics shutdown works");
+    }
+
+    #[test]
+    fn external_reporting_disabled_rejects_explicit_network_exporter() {
+        let exporter = OtelExporter::OtlpGrpc {
+            endpoint: "http://127.0.0.1:1".into(),
+            headers: Default::default(),
+            tls: None,
+        };
+        assert!(matches!(
+            MetricsClient::new(MetricsConfig::otlp("test", "local", "0", exporter)),
+            Err(MetricsError::ExporterDisabled)
+        ));
+    }
 }

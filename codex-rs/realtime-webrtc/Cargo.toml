@@ -10,16 +10,27 @@ doctest = false
 [lints]
 workspace = true
 
+[features]
+default = []
+voice = [
+    "dep:codex-build-info",
+    "dep:codex-install-context",
+    "dep:codex-utils-pty",
+    "dep:futures",
+    "dep:tokio",
+    "dep:tracing",
+]
+
 [dependencies]
-codex-build-info = { workspace = true }
+codex-build-info = { workspace = true, optional = true }
 anyhow = { workspace = true }
-codex-install-context = { workspace = true }
-codex-utils-pty = { workspace = true }
-futures = { workspace = true, features = ["std"] }
+codex-install-context = { workspace = true, optional = true }
+codex-utils-pty = { workspace = true, optional = true }
+futures = { workspace = true, features = ["std"], optional = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync", "time"] }
-tracing = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync", "time"], optional = true }
+tracing = { workspace = true, optional = true }
 
 [dev-dependencies]
 codex-utils-cargo-bin = { workspace = true }

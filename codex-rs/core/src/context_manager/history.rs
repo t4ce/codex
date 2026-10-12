@@ -12,6 +12,7 @@
 #[path = "history_user_authorization.rs"]
 mod user_authorization;
 
+use crate::audio_utils::estimate_audio_token_count;
 use crate::context::BaseInstructionsFragment;
 use crate::context::ContextualUserFragment;
 use crate::context::ModelSwitchInstructions;
@@ -61,7 +62,6 @@ use codex_protocol::protocol::TokenUsage;
 use codex_protocol::protocol::TokenUsageInfo;
 use codex_protocol::protocol::TurnContextItem;
 use codex_protocol::protocol::WorldStateItem;
-use codex_utils_audio::estimate_audio_token_count;
 use codex_utils_cache::BlockingLruCache;
 use codex_utils_cache::sha1_digest;
 use codex_utils_output_truncation::TruncationPolicy;

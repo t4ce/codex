@@ -1,3 +1,5 @@
+#![cfg(feature = "bedrock")]
+
 use super::super::bedrock_auth::BedrockProviderConfig;
 use super::super::bedrock_auth::configure_bedrock_provider;
 use super::super::bedrock_auth::ensure_user_model_provider_can_be_bedrock;

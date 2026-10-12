@@ -23,6 +23,7 @@ pub enum MetricsError {
     #[error("counter increment must be non-negative for {name}: {inc}")]
     NegativeCounterIncrement { name: String, inc: i64 },
 
+    #[cfg(feature = "external-reporting")]
     #[error("failed to build OTLP metrics exporter")]
     ExporterBuild {
         #[source]
