@@ -7,6 +7,10 @@ version.workspace = true
 [lints]
 workspace = true
 
+[features]
+# Platform-specific: host builds retain their native PTY backend.
+sh3 = []
+
 [dependencies]
 anyhow = { workspace = true }
 tokio = { workspace = true, features = ["io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"] }

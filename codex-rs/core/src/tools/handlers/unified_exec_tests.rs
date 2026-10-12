@@ -695,8 +695,8 @@ async fn write_stdin_post_tool_use_payload_keeps_parallel_session_metadata_separ
 fn shell3_command_preserves_native_input_without_unix_argv() -> anyhow::Result<()> {
     let text = "\t§matrix-slot\nstatus";
     let args: ExecCommandArgs = serde_json::from_value(serde_json::json!({"cmd": text}))?;
-    let resolved =
-        get_shell3_command(&args, Arc::new(default_user_shell())).map_err(anyhow::Error::msg)?;
+    let resolved = get_shell3_command(&args, Arc::new(default_user_shell()), None)
+        .map_err(anyhow::Error::msg)?;
     assert_eq!(resolved.command, vec![text.to_owned()]);
     assert!(!resolved.shell.use_login_shell);
     Ok(())
@@ -714,8 +714,16 @@ fn shell3_command_rejects_unix_context_options() -> anyhow::Result<()> {
             .as_object_mut()
             .unwrap()
             .extend(option.as_object().unwrap().clone());
+        let environment: ExecCommandEnvironmentArgs = serde_json::from_value(input.clone())?;
         let args: ExecCommandArgs = serde_json::from_value(input)?;
-        assert!(get_shell3_command(&args, Arc::new(default_user_shell())).is_err());
+        assert!(
+            get_shell3_command(
+                &args,
+                Arc::new(default_user_shell()),
+                environment.workdir.as_deref()
+            )
+            .is_err()
+        );
     }
     Ok(())
 }

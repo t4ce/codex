@@ -64,7 +64,9 @@ unwrap_used = "deny"
 [features]
 # The TRUEOS packer selects this feature and disables Cargo default features.
 # Launch the resulting CLI with --no-daemon.
-trueos-blueprint = []
+trueos-blueprint = ["sh3"]
+# Select the native Shell3 command-session backend on TRUEOS.
+sh3 = ["codex-utils-pty/sh3"]
 system-clipboard = ["codex-tui/system-clipboard"]
 default = ["system-clipboard"]
 bedrock = ["dep:codex-aws-auth", "codex-model-provider/bedrock", "codex-app-server/bedrock"]

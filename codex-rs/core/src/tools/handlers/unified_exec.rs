@@ -98,8 +98,9 @@ fn post_unified_exec_tool_use_payload(
 pub(crate) fn get_shell3_command(
     args: &ExecCommandArgs,
     shell: Arc<Shell>,
+    workdir: Option<&str>,
 ) -> Result<ResolvedCommand, String> {
-    if args.shell.is_some() || args.login.is_some() || args.workdir.is_some() {
+    if args.shell.is_some() || args.login.is_some() || workdir.is_some() {
         return Err("Shell3 accepts native script text; shell, login, and Unix workdir options are unavailable".into());
     }
     Ok(ResolvedCommand {
