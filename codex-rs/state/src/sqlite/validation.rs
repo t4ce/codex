@@ -3,7 +3,10 @@
 //! Each file identity is checked at most once per shared SQLite configuration.
 //! Attempts are recorded before validation, including failed or cancelled checks.
 
+#[cfg(not(target_os = "trueos"))]
 use file_id::FileId;
+#[cfg(target_os = "trueos")]
+type FileId = std::path::PathBuf;
 use sqlx::SqlitePool;
 use std::collections::HashSet;
 use std::path::Path;
@@ -36,7 +39,10 @@ impl SqliteQuickCheckManager {
         path: &Path,
         budget: Duration,
     ) -> anyhow::Result<QuickCheckOutcome> {
+        #[cfg(not(target_os = "trueos"))]
         let id = file_id::get_file_id(path)?;
+        #[cfg(target_os = "trueos")]
+        let id = path.to_path_buf();
 
         if !self.0.lock().await.insert(id) {
             // Only check each file once for this owner.
@@ -52,6 +58,9 @@ pub(super) async fn quick_check(
     deadline: Instant,
 ) -> anyhow::Result<QuickCheckOutcome> {
     let mut connection = pool.acquire().await?;
+    #[cfg(target_os = "trueos")]
+    connection.set_query_timeout(deadline.saturating_duration_since(Instant::now()));
+    #[cfg(not(target_os = "trueos"))]
     connection
         .lock_handle()
         .await?
@@ -61,7 +70,10 @@ pub(super) async fn quick_check(
     let result = sqlx::query_scalar::<_, String>("PRAGMA quick_check(1)")
         .fetch_one(&mut *connection)
         .await;
+    #[cfg(not(target_os = "trueos"))]
     connection.lock_handle().await?.remove_progress_handler();
+    #[cfg(target_os = "trueos")]
+    connection.reset_query_timeout();
 
     connection.return_to_pool().await;
     match result.map_err(anyhow::Error::from) {

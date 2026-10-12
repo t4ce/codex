@@ -4,6 +4,7 @@
 //! from JSONL rollouts and mirrors it into a local SQLite database. Backfill
 //! orchestration and rollout scanning live in `codex-core`.
 
+#[cfg(not(target_os = "trueos"))]
 const _: () = assert!(
     libsqlite3_sys::SQLITE_VERSION_NUMBER >= 3_051_003,
     "bundled SQLite must include the WAL-reset corruption fix",

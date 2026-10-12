@@ -11,7 +11,6 @@ codex-history = { workspace = true }
 codex-protocol = { workspace = true }
 codex-utils-absolute-path = { workspace = true }
 file-id = { workspace = true }
-libsqlite3-sys = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -23,6 +22,9 @@ tokio = { workspace = true, features = ["fs", "io-util", "macros", "rt-multi-thr
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 uuid = { workspace = true }
+
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
+libsqlite3-sys = { workspace = true }
 
 [dev-dependencies]
 codex-git-utils = { workspace = true }

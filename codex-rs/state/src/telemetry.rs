@@ -14,6 +14,7 @@ use crate::LOG_WRITE_ENTRIES_METRIC;
 use crate::LOG_WRITE_MAX_ENTRY_BYTES_METRIC;
 use crate::LOG_WRITE_METRIC;
 use crate::LogEntry;
+#[cfg(not(target_os = "trueos"))]
 use crate::runtime::reclamation::ReclamationPass;
 
 use tracing::debug;
@@ -147,6 +148,7 @@ pub(crate) fn record_log_queue_drop(reason: &'static str, telemetry: Option<&dyn
     record_counter(telemetry, LOG_QUEUE_DROPPED_METRIC, &[("reason", reason)]);
 }
 
+#[cfg(not(target_os = "trueos"))]
 pub(crate) fn record_reclamation(
     db: &'static str,
     duration: Duration,

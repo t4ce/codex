@@ -132,6 +132,7 @@ pub fn is_sqlite_corruption_error(err: &anyhow::Error) -> bool {
 }
 
 fn sqlite_error_source_is_corruption(source: &(dyn std::error::Error + 'static)) -> bool {
+    #[cfg(not(target_os = "trueos"))]
     if let Some(err) = source.downcast_ref::<libsqlite3_sys::Error>() {
         return matches!(
             err.code,
@@ -156,9 +157,8 @@ fn sqlite_error_source_is_corruption(source: &(dyn std::error::Error + 'static))
         .and_then(|code| code.parse::<i32>().ok())
         .is_some_and(|code| {
             matches!(
-                libsqlite3_sys::Error::new(code).code,
-                libsqlite3_sys::ErrorCode::DatabaseCorrupt
-                    | libsqlite3_sys::ErrorCode::NotADatabase
+                code & 0xff,
+                11 | 26 // SQLITE_CORRUPT / SQLITE_NOTADB, including extended codes.
             )
         })
 }

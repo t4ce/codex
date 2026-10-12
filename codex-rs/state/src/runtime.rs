@@ -49,7 +49,11 @@ mod memories;
 mod memory_versions;
 mod projects;
 mod queued_items;
+#[cfg(not(target_os = "trueos"))]
 pub(crate) mod reclamation;
+#[cfg(target_os = "trueos")]
+#[path = "runtime/reclamation_remote.rs"]
+mod reclamation;
 pub(crate) mod recovery;
 mod remote_control;
 mod rollout_migration;
@@ -147,7 +151,13 @@ impl StateRuntime {
         let goals_path = sqlite.goals_db_path();
         let memories_path = sqlite.memories_db_path();
         let queue_path = sqlite.queue_db_path();
+        #[cfg(not(target_os = "trueos"))]
         let has_memories_v2 = tokio::fs::try_exists(sqlite.memories_v2_db_path()).await?;
+        #[cfg(target_os = "trueos")]
+        let has_memories_v2 = <Sqlite as sqlx::migrate::MigrateDatabase>::database_exists(
+            &format!("sqlite://{}", sqlite.memories_v2_db_path().display()),
+        )
+        .await?;
         let pool = match sqlite
             .open_state_db(&state_migrator, telemetry_override)
             .await
@@ -428,6 +438,9 @@ pub async fn sqlite_integrity_check(
             .execute(&mut *connection)
             .await?;
         // Interrupt SQLite itself: dropping a timed-out future leaves its worker scanning.
+        #[cfg(target_os = "trueos")]
+        connection.set_query_timeout(deadline.saturating_duration_since(Instant::now()));
+        #[cfg(not(target_os = "trueos"))]
         connection
             .lock_handle()
             .await?
@@ -451,7 +464,7 @@ pub async fn sqlite_integrity_check(
                 && error.code().is_some_and(|code| {
                     matches!(
                         code.parse::<i32>().ok().map(|code| code & 0xff),
-                        Some(libsqlite3_sys::SQLITE_INTERRUPT | libsqlite3_sys::SQLITE_BUSY)
+                        Some(9 | 5) // SQLITE_INTERRUPT / SQLITE_BUSY
                     )
                 }) =>
         {

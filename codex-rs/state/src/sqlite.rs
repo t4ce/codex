@@ -388,6 +388,8 @@ impl SqliteConfig {
                                     .execute(&mut *connection)
                                     .await?;
                             }
+                            // The TRUEOS service persists memory images; WAL is server-owned.
+                            #[cfg(not(target_os = "trueos"))]
                             sqlx::query("PRAGMA journal_mode = WAL")
                                 .execute(connection)
                                 .await?;
