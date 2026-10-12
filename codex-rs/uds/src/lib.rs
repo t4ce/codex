@@ -21,6 +21,8 @@ use tokio::io::ReadBuf;
 /// supported by the platform (0700 on Unix, a protected user-only DACL on Windows).
 /// Windows rejects existing directories unless they already have that owner and DACL;
 /// changing permissions cannot revoke access held through preexisting handles.
+/// TRUEOS uses TRUEOSFS access keys; Unix owner/mode restrictions are bypassed
+/// while access-key enforcement is being integrated on the development rig.
 pub async fn prepare_private_socket_directory(socket_dir: impl AsRef<Path>) -> IoResult<()> {
     platform::prepare_private_socket_directory(socket_dir.as_ref()).await
 }
@@ -104,6 +106,7 @@ mod platform {
     use std::io::ErrorKind;
     use std::io::Result as IoResult;
     use std::os::unix::fs::FileTypeExt;
+    #[cfg(not(target_os = "trueos"))]
     use std::os::unix::fs::PermissionsExt;
     use std::path::Path;
 
@@ -113,7 +116,9 @@ mod platform {
 
     /// Owner-only access keeps the control socket directory private while
     /// preserving owner traversal and socket path creation.
+    #[cfg(not(target_os = "trueos"))]
     const SOCKET_DIR_MODE: u32 = 0o700;
+    #[cfg(not(target_os = "trueos"))]
     const SOCKET_DIR_PERMISSION_BITS: u32 = 0o777;
 
     pub(super) type Stream = UnixStream;
@@ -122,6 +127,7 @@ mod platform {
 
     pub(super) async fn prepare_private_socket_directory(socket_dir: &Path) -> IoResult<()> {
         let mut dir_builder = fs::DirBuilder::new();
+        #[cfg(not(target_os = "trueos"))]
         dir_builder.mode(SOCKET_DIR_MODE);
         match dir_builder.create(socket_dir).await {
             Ok(()) => return Ok(()),
@@ -140,14 +146,19 @@ mod platform {
             ));
         }
 
-        let permissions = metadata.permissions();
-        // The SSH-over-UDS control socket is reachable by path, so the
-        // rendezvous directory must be owner-traversable while denying
-        // group/other access; exact 0700 fixes insecure modes and unusable
-        // owner-only modes like 0600.
-        if permissions.mode() & SOCKET_DIR_PERMISSION_BITS != SOCKET_DIR_MODE {
-            fs::set_permissions(socket_dir, std::fs::Permissions::from_mode(SOCKET_DIR_MODE))
-                .await?;
+        // TRUEOSFS access keys carry authority. Do not require or synthesize
+        // POSIX mode bits while their enforcement is bypassed on the dev rig.
+        #[cfg(not(target_os = "trueos"))]
+        {
+            let permissions = metadata.permissions();
+            // The SSH-over-UDS control socket is reachable by path, so the
+            // rendezvous directory must be owner-traversable while denying
+            // group/other access; exact 0700 fixes insecure modes and unusable
+            // owner-only modes like 0600.
+            if permissions.mode() & SOCKET_DIR_PERMISSION_BITS != SOCKET_DIR_MODE {
+                fs::set_permissions(socket_dir, std::fs::Permissions::from_mode(SOCKET_DIR_MODE))
+                    .await?;
+            }
         }
 
         Ok(())
@@ -175,6 +186,22 @@ mod platform {
     }
 
     pub(super) async fn is_stale_socket_path(socket_path: &Path) -> IoResult<bool> {
+        // TRUEOS Tokio metadata currently exposes only file/directory kinds.
+        // Keep the socket check on the Unix metadata API, rather than treating
+        // arbitrary existing files as sockets eligible for removal.
+        #[cfg(target_os = "trueos")]
+        {
+            let socket_path = socket_path.to_path_buf();
+            return tokio::task::spawn_blocking(move || {
+                Ok(std::fs::symlink_metadata(socket_path)?
+                    .file_type()
+                    .is_socket())
+            })
+            .await
+            .map_err(io::Error::other)?;
+        }
+
+        #[cfg(not(target_os = "trueos"))]
         Ok(fs::symlink_metadata(socket_path)
             .await?
             .file_type()

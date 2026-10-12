@@ -108,6 +108,8 @@ pub struct StdioServerTransport {
 enum StdioServerTransportInner {
     Local(LocalStdioTransport),
     Executor(ExecutorProcessTransport),
+    #[cfg(any(target_os = "trueos", test))]
+    Vmx(crate::vmx_stdio_transport::VmxStdioTransport),
 }
 
 impl Transport<RoleClient> for StdioServerTransport {
@@ -123,6 +125,8 @@ impl Transport<RoleClient> for StdioServerTransport {
         match &mut self.inner {
             StdioServerTransportInner::Local(transport) => transport.send(item).boxed(),
             StdioServerTransportInner::Executor(transport) => transport.send(item).boxed(),
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerTransportInner::Vmx(transport) => transport.send(item).boxed(),
         }
     }
 
@@ -133,6 +137,8 @@ impl Transport<RoleClient> for StdioServerTransport {
         match &mut self.inner {
             StdioServerTransportInner::Local(transport) => transport.receive().boxed(),
             StdioServerTransportInner::Executor(transport) => transport.receive().boxed(),
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerTransportInner::Vmx(transport) => transport.receive().boxed(),
         }
     }
 
@@ -141,6 +147,8 @@ impl Transport<RoleClient> for StdioServerTransport {
         match &mut self.inner {
             StdioServerTransportInner::Local(transport) => transport.close().await,
             StdioServerTransportInner::Executor(transport) => transport.close().await,
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerTransportInner::Vmx(transport) => transport.close().await,
         }
     }
 }
@@ -250,6 +258,8 @@ struct StdioServerProcessHandleInner {
 
 enum StdioServerProcessKind {
     Local(Option<LocalProcessTerminator>),
+    #[cfg(any(target_os = "trueos", test))]
+    Vmx(crate::vmx_stdio_transport::VmxProcess),
     Executor(Arc<dyn ExecProcess>),
 }
 
@@ -260,6 +270,60 @@ mod private {
 impl private::Sealed for LocalStdioServerLauncher {}
 
 impl LocalStdioServerLauncher {
+    #[cfg(target_os = "trueos")]
+    fn launch_server(
+        command: StdioServerCommand,
+        fallback_cwd: PathBuf,
+    ) -> io::Result<StdioServerTransport> {
+        Self::launch_vmx_server(command, fallback_cwd)
+    }
+
+    #[cfg(any(target_os = "trueos", test))]
+    fn launch_vmx_server(
+        command: StdioServerCommand,
+        fallback_cwd: PathBuf,
+    ) -> io::Result<StdioServerTransport> {
+        let env =
+            create_env_for_mcp_server(command.env, &command.env_vars).map_err(io::Error::other)?;
+        let text = |value: &std::ffi::OsStr| {
+            value.to_str().map(str::to_owned).ok_or_else(|| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "VMX launch requires UTF-8 command, arguments and environment",
+                )
+            })
+        };
+        let program = text(&command.program)?;
+        let args = command
+            .args
+            .iter()
+            .map(|value| text(value))
+            .collect::<io::Result<Vec<_>>>()?;
+        let env = env
+            .iter()
+            .map(|(key, value)| Ok((text(key)?, text(value)?)))
+            .collect::<io::Result<HashMap<_, _>>>()?;
+        let cwd = command.cwd.unwrap_or(text(fallback_cwd.as_os_str())?);
+        let request = serde_json::to_vec(
+            &serde_json::json!({ "program": program, "args": args, "env": env, "cwd": cwd }),
+        )
+        .map_err(io::Error::other)?;
+        let transport = crate::vmx_stdio_transport::VmxStdioTransport::spawn(&request)?;
+        let process = StdioServerProcessHandle {
+            inner: Arc::new(StdioServerProcessHandleInner {
+                program_name: program,
+                kind: StdioServerProcessKind::Vmx(transport.process()),
+                terminated: AtomicBool::new(false),
+                stderr_reader: None,
+            }),
+        };
+        Ok(StdioServerTransport {
+            inner: StdioServerTransportInner::Vmx(transport),
+            process,
+        })
+    }
+
+    #[cfg(not(target_os = "trueos"))]
     fn launch_server(
         command: StdioServerCommand,
         fallback_cwd: PathBuf,
@@ -492,6 +556,8 @@ impl StdioServerProcessHandle {
                 Ok(())
             }
             StdioServerProcessKind::Local(None) => Ok(()),
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerProcessKind::Vmx(process) => process.terminate(),
             StdioServerProcessKind::Executor(process) => match process.terminate().await {
                 Ok(()) => Ok(()),
                 Err(error) => {
@@ -518,6 +584,10 @@ impl Drop for StdioServerProcessHandleInner {
                 terminator.terminate();
             }
             StdioServerProcessKind::Local(None) => {}
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerProcessKind::Vmx(process) => {
+                let _ = process.terminate();
+            }
             StdioServerProcessKind::Executor(process) => {
                 let process = Arc::clone(process);
                 let program_name = self.program_name.clone();

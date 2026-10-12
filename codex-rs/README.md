@@ -45,6 +45,27 @@ The defaults apply to other Codex sessions using the same user config unless
 overridden. The exact `externalSandbox` policy is available through app-server
 requests, rather than the CLI sandbox setting.
 
+## Local MCP servers on TRUEOS
+
+The TRUEOS local MCP launcher starts the configured Blueprint in a fresh VMX
+Hull through the hypervisor child API. A bare `command` names an app.db archive
+(with `.bp` appended when omitted); a path selects a Blueprint archive through
+the caller's filesystem access. Arguments and environment values are UTF-8.
+The working directory is resolved within the caller's filesystem scope.
+Kernel-owned `TRUEOS_*` environment values are not inherited from the request.
+
+The server uses ordinary stdin/stdout for newline-delimited MCP JSON. The kernel
+routes those bytes through the generation-bound child channel; stderr and runtime
+logs remain console output. Messages are streamed across bounded communication
+pages with backpressure. Closing or dropping the client terminates its owned VM.
+The launch metadata must fit one hypervisor communication page. Executables must
+be TRUEOS Blueprints; this does not introduce Unix executable emulation.
+
+This requires a kernel with `trueos_cabi_blueprint_child_spawn_program_v1` and
+`trueos_cabi_blueprint_child_read_v1`, plus the matching Blueprint SDK. Rebuilding
+Codex alone does not update the running kernel. Linux/macOS/Windows retain their
+existing local process launcher; HTTP and remote-executor MCP paths are unchanged.
+
 ## Optional integrations in this checkout
 
 This checkout disables these integrations by default. ChatGPT and OpenAI API

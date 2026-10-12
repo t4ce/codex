@@ -637,6 +637,8 @@ inherits = "test"
 opt-level = 0
 
 [patch.crates-io]
+rama-dns = { path = "../../TRUEOS-Blueprints/vendor/rama-dns-0.3.0-alpha.4-trueos" }
+httpdate = { path = "../../TRUEOS-Blueprints/vendor/httpdate-1.0.3" }
 rustls-rustcrypto = { path = "../../TRUEOS-Blueprints/vendor/rustls-rustcrypto-0.0.2-alpha" }
 rama-tls-rustls = { path = "../../TRUEOS-Blueprints/vendor/rama-tls-rustls-0.3.0-alpha.4-rustcrypto" }
 # Uncomment to debug local changes.
