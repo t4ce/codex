@@ -30,8 +30,7 @@ impl RetryAfter {
         let delay = if !value.is_empty() && value.bytes().all(|byte| byte.is_ascii_digit()) {
             Duration::from_secs(value.parse().ok()?)
         } else {
-            httpdate::parse_http_date(value)
-                .ok()?
+            SystemTime::from(value.parse::<httpdate::HttpDate>().ok()?)
                 .duration_since(now)
                 .unwrap_or_default()
         };

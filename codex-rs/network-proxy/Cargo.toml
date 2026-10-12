@@ -45,6 +45,8 @@ url = { workspace = true }
 rama-core = { version = "=0.3.0-alpha.4" }
 # Stable rama-error 0.3.0 moved OpaqueError; this alpha stack needs its original API.
 rama-error = { version = "=0.3.0-alpha.4" }
+rama-macros = { version = "=0.3.0-alpha.4" }
+rama-utils = { version = "=0.3.0-alpha.4" }
 rama-http = { version = "=0.3.0-alpha.4" }
 rama-http-backend = { version = "=0.3.0-alpha.4", features = ["tls"] }
 rama-net = { version = "=0.3.0-alpha.4", features = ["http", "tls"] }
