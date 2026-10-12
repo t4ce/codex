@@ -688,7 +688,7 @@ mod worker {
                             stats.metadata_read_failures.saturating_add(1);
                         if stats.metadata_read_failures <= MAX_METADATA_WARNINGS_PER_RUN {
                             let metadata = tokio::fs::metadata(&path).await.ok();
-                            let file_size_bytes = metadata.as_ref().map(std::fs::Metadata::len);
+                            let file_size_bytes = metadata.as_ref().map(|metadata| metadata.len());
                             let mtime_age_seconds = metadata
                                 .and_then(|metadata| metadata.modified().ok())
                                 .and_then(|modified| modified.elapsed().ok())
