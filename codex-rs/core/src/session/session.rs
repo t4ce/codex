@@ -1206,8 +1206,12 @@ impl Session {
         ));
 
         // Join all independent futures.
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_persistence_mcp_begin", "fresh thread startup");
         let (thread_persistence_result, state_db_ctx, (auth, mcp_projection)) =
             tokio::join!(thread_persistence_fut, state_db_fut, auth_and_mcp_fut);
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_persistence_mcp_done", "fresh thread startup");
 
         let (live_thread, mut live_thread_init, resume_context) = thread_persistence_result
             .map_err(|e| {
@@ -1465,7 +1469,11 @@ impl Session {
             ));
             turn_environments.update_selections(environment_selections);
             session_configuration.environments = turn_environments.selections();
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_environments_begin", "fresh thread startup");
             let resolved_environments = turn_environments.snapshot().await;
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_environments_done", "fresh thread startup");
             let agents_md_manager = Arc::new(AgentsMdManager::new(instructions));
             let plugin_skill_warmup = warm_plugins_and_skills_for_session_init(
                 Arc::clone(&config),
@@ -1491,11 +1499,15 @@ impl Session {
                 "session_init.thread_name_lookup",
                 otel.name = "session_init.thread_name_lookup",
             ));
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_extensions_begin", "fresh thread startup");
             let (instruction_refresh, plugin_skill_errors, thread_name) = tokio::join!(
                 agents_md_manager.refresh(config.as_ref(), &resolved_environments),
                 plugin_skill_warmup,
                 thread_name_lookup,
             );
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_extensions_done", "fresh thread startup");
             let (agents_md_result, instruction_warnings) = instruction_refresh;
             // TODO(anp): Present AGENTS.md discovery errors more clearly to the user.
             agents_md_result?;
@@ -1924,6 +1936,8 @@ impl Session {
             } else {
                 mcp_projection
             };
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_mcp_runtime_begin", "fresh thread startup");
             sess.install_initial_mcp_runtime(
                 &session_configuration,
                 latest_auth,
@@ -1932,13 +1946,19 @@ impl Session {
                 mcp_runtime_cwd,
             )
             .await?;
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_mcp_runtime_done", "fresh thread startup");
             sess.start_mcp_prewarm_worker(mcp_prewarm_rx, mcp_auth_changes);
             sess.follow_inherited_environment_configurations(
                 &inherited_environments,
                 &session_configuration.environments,
             );
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_prewarm_schedule_begin", "fresh thread startup");
             sess.schedule_startup_prewarm(super::startup_prewarm::PrewarmInput::Base)
                 .await;
+            #[cfg(target_os = "trueos")]
+            tracing::info!(target: "codex_startup", phase = "core_prewarm_schedule_done", "fresh thread startup");
             let session_start_source = match &initial_history {
                 InitialHistory::Forked(_) if forked_from_id.is_some() => {
                     codex_hooks::SessionStartSource::Fork

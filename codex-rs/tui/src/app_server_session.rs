@@ -1819,6 +1819,8 @@ pub(crate) async fn start_thread_with_request_handle(
     launch_choices: StartupLaunchChoices,
 ) -> Result<AppServerStartedThread> {
     let request_id = RequestId::String(format!("startup-thread-start-{}", Uuid::new_v4()));
+    #[cfg(target_os = "trueos")]
+    tracing::info!(target: "codex_startup", ?request_id, phase = "thread_start_prepare", "fresh thread startup");
     let mut params = thread_start_params_from_config(
         &config,
         thread_params_mode,
@@ -1829,15 +1831,21 @@ pub(crate) async fn start_thread_with_request_handle(
     launch_choices.configure(&mut params);
     params.daybreak_enabled = (config.daybreak_enabled && !config.ephemeral).then_some(true);
     thread_tool_transport.configure(&mut params);
+    #[cfg(target_os = "trueos")]
+    tracing::info!(target: "codex_startup", ?request_id, phase = "thread_start_rpc_begin", "fresh thread startup");
     let (response, _history_support, task_tools_available) =
         request_thread_start_with_history_fallback(&request_handle, request_id, params)
             .await
             .map_err(|err| {
                 bootstrap_request_error("thread/start failed during TUI bootstrap", err)
             })?;
+    #[cfg(target_os = "trueos")]
+    tracing::info!(target: "codex_startup", phase = "thread_start_rpc_done", "fresh thread startup");
     let mut started =
         started_thread_from_start_response(response, local_settings, &config, thread_params_mode)
             .await?;
+    #[cfg(target_os = "trueos")]
+    tracing::info!(target: "codex_startup", phase = "thread_start_hydrate_done", "fresh thread startup");
     started.task_tools_available = task_tools_available;
     Ok(started)
 }

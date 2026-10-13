@@ -649,6 +649,8 @@ impl Session {
         } else {
             instructions
         };
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_rules_begin", "fresh thread startup");
         let exec_policy = if isolation == codex_extension_api::SessionIsolation::Isolated {
             let managed_policy = config
                 .config_layer_stack
@@ -668,6 +670,8 @@ impl Session {
             {
                 let codex_home = config.codex_home.clone();
                 let policy_path = default_policy_path(codex_home.as_path());
+                #[cfg(target_os = "trueos")]
+                tracing::info!(target: "codex_startup", phase = "core_rule_migration_begin", "fresh thread startup");
                 if let Err(err) = prefix_rule_migration(
                     codex_home.as_path(),
                     policy_path.as_path(),
@@ -677,6 +681,8 @@ impl Session {
                 {
                     tracing::warn!(error = %err, "failed to run prefix rule migration");
                 }
+                #[cfg(target_os = "trueos")]
+                tracing::info!(target: "codex_startup", phase = "core_rule_migration_done", "fresh thread startup");
             }
             Arc::new(
                 ExecPolicyManager::load(&config.config_layer_stack)
@@ -684,6 +690,8 @@ impl Session {
                     .map_err(|err| CodexErr::Fatal(format!("failed to load rules: {err}")))?,
             )
         };
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_rules_done", "fresh thread startup");
 
         let mut config = Arc::new(config);
         let refresh_strategy = if session_source.is_non_root_agent() {
@@ -691,6 +699,8 @@ impl Session {
         } else {
             codex_models_manager::manager::RefreshStrategy::OnlineIfUncached
         };
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_model_catalog_begin", "fresh thread startup");
         if config.model.is_none()
             || !matches!(
                 refresh_strategy,
@@ -709,6 +719,8 @@ impl Session {
                 config.http_client_factory(),
             )
             .await;
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", phase = "core_model_catalog_done", "fresh thread startup");
         if model.trim().is_empty() {
             return Err(CodexErr::InvalidRequest(
                 "No models are available. Set `model` explicitly or check your model catalog configuration.".to_string(),

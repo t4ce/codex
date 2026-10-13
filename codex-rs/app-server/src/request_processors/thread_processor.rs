@@ -1349,11 +1349,15 @@ impl ThreadRequestProcessor {
         initial_config_warnings: Arc<Vec<ConfigWarningNotification>>,
     ) -> Result<(), JSONRPCErrorError> {
         let thread_start_started_at = std::time::Instant::now();
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_config_begin", "fresh thread startup");
         let requested_cwd = typesafe_overrides.cwd.clone();
         let mut config = config_manager
             .load_with_overrides(config_overrides.clone(), typesafe_overrides.clone())
             .await
             .map_err(|err| config_load_error(&err))?;
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_config_done", "fresh thread startup");
         if config.ephemeral && daybreak_enabled.is_some() {
             return Err(invalid_request(
                 "daybreakEnabled is not supported for ephemeral threads",
@@ -1480,6 +1484,8 @@ impl ThreadRequestProcessor {
             thread_extension_init.insert(selected_capability_roots);
         }
         let mut start_options = StartThreadOptions::new(config);
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_metadata_begin", "fresh thread startup");
         let reserved_thread_id = if start_options.config.ephemeral {
             None
         } else {
@@ -1495,6 +1501,8 @@ impl ThreadRequestProcessor {
             )
             .await?
         };
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_metadata_done", "fresh thread startup");
         let thread_id = reserved_thread_id
             .unwrap_or_else(|| listener_task_context.thread_manager.reserve_thread_id());
         start_options.reserved_thread_id = Some(thread_id);
@@ -1505,6 +1513,8 @@ impl ThreadRequestProcessor {
             .try_add_connection_to_thread(thread_id, request_id.connection_id)
             .await;
         let create_thread_started_at = std::time::Instant::now();
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_create_begin", "fresh thread startup");
         let new_thread = listener_task_context
             .thread_manager
             .start_thread(StartThreadOptions {
@@ -1531,6 +1541,8 @@ impl ThreadRequestProcessor {
                 thread_start.dynamic_tool_count = dynamic_tool_count,
             ))
             .await;
+        #[cfg(target_os = "trueos")]
+        tracing::info!(target: "codex_startup", ?request_id, phase = "server_thread_create_done", "fresh thread startup");
         let NewThread {
             thread_id,
             thread,
