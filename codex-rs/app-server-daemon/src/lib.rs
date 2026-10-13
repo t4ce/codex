@@ -1022,7 +1022,7 @@ impl Daemon {
         DaemonSettings::load(&self.settings_file).await
     }
 
-    async fn acquire_operation_lock(&self) -> Result<tokio::fs::File> {
+    async fn acquire_operation_lock(&self) -> Result<DaemonLockFile> {
         let operation_lock = self.open_operation_lock_file().await?;
         let deadline = tokio::time::Instant::now() + OPERATION_LOCK_TIMEOUT;
         while !try_lock_file(&operation_lock)? {
@@ -1037,7 +1037,7 @@ impl Daemon {
         Ok(operation_lock)
     }
 
-    async fn open_operation_lock_file(&self) -> Result<tokio::fs::File> {
+    async fn open_operation_lock_file(&self) -> Result<DaemonLockFile> {
         if let Some(parent) = self.operation_lock_file.parent() {
             #[cfg(unix)]
             if let Some(home) = parent.parent() {
@@ -1052,11 +1052,7 @@ impl Daemon {
                     )
                 })?;
         }
-        tokio::fs::OpenOptions::new()
-            .create(true)
-            .truncate(false)
-            .write(true)
-            .open(&self.operation_lock_file)
+        open_daemon_lock_file(&self.operation_lock_file)
             .await
             .with_context(|| {
                 format!(
@@ -1138,8 +1134,40 @@ fn restart_decision(
     }
 }
 
+// Lock ownership needs a real descriptor; TRUEOS Tokio snapshot files do not
+// have one. Keep the native file alive until the daemon operation completes.
+#[cfg(target_os = "trueos")]
+type DaemonLockFile = std::fs::File;
+#[cfg(not(target_os = "trueos"))]
+type DaemonLockFile = tokio::fs::File;
+
+async fn open_daemon_lock_file(path: &Path) -> std::io::Result<DaemonLockFile> {
+    #[cfg(target_os = "trueos")]
+    {
+        let path = path.to_path_buf();
+        tokio::task::spawn_blocking(move || {
+            std::fs::OpenOptions::new()
+                .create(true)
+                .truncate(false)
+                .write(true)
+                .open(path)
+        })
+        .await
+        .map_err(|error| std::io::Error::other(format!("lock file open task failed: {error}")))?
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        tokio::fs::OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .write(true)
+            .open(path)
+            .await
+    }
+}
+
 #[cfg(unix)]
-fn try_lock_file(file: &tokio::fs::File) -> Result<bool> {
+fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
     use std::os::fd::AsRawFd;
 
     let result = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
@@ -1155,7 +1183,7 @@ fn try_lock_file(file: &tokio::fs::File) -> Result<bool> {
 }
 
 #[cfg(not(any(unix, windows)))]
-fn try_lock_file(_file: &tokio::fs::File) -> Result<bool> {
+fn try_lock_file(_file: &DaemonLockFile) -> Result<bool> {
     Ok(true)
 }
 

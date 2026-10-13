@@ -1,3 +1,5 @@
+//! TRUEOS_SOCKET_PATH[daemon-client]: connects to the app-server control socket.
+//! This path addresses a socket endpoint, not a regular file to read.
 use std::path::Path;
 use std::time::Duration;
 

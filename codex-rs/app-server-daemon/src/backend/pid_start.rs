@@ -111,7 +111,7 @@ impl PidBackend {
             .args(self.command_args().iter().map(std::borrow::Cow::as_ref))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .stderr(Stdio::from(stderr_log.into_std().await));
+            .stderr(Stdio::from(stderr_log));
         // Older or pinned managed binaries may predate this optional startup flag.
         let managed_app_server =
             matches!(self.command_kind, super::PidCommandKind::AppServer { .. });

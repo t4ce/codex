@@ -176,6 +176,7 @@ pub(crate) fn fetch_ide_context(
 }
 
 #[cfg(unix)]
+// TRUEOS_SOCKET_PATH[ide-context]: primary and legacy paths address IDE IPC sockets.
 fn primary_ipc_socket_path(codex_home: &Path) -> PathBuf {
     codex_home.join("ipc").join("ipc.sock")
 }

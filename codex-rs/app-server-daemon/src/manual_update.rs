@@ -1,3 +1,5 @@
+//! TRUEOS_SOCKET_PATH[updater-client]: manual-update requests connect to a
+//! socket endpoint addressed by a path, not a regular file.
 //! Forwards manual requests to the updater and reports its install and restart result.
 
 use anyhow::Context;

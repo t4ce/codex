@@ -1148,7 +1148,39 @@ fn reject_sandbox_context(sandbox: Option<&FileSystemSandboxContext>) -> io::Res
     Ok(())
 }
 
-fn file_metadata(metadata: std::fs::Metadata, is_symlink: bool) -> FileMetadata {
+trait MetadataView {
+    fn is_dir(&self) -> bool;
+    fn is_file(&self) -> bool;
+    fn len(&self) -> u64;
+    fn created(&self) -> std::io::Result<std::time::SystemTime>;
+    fn modified(&self) -> std::io::Result<std::time::SystemTime>;
+}
+macro_rules! metadata_view {
+    ($ty:ty) => {
+        impl MetadataView for $ty {
+            fn is_dir(&self) -> bool {
+                <$ty>::is_dir(self)
+            }
+            fn is_file(&self) -> bool {
+                <$ty>::is_file(self)
+            }
+            fn len(&self) -> u64 {
+                <$ty>::len(self)
+            }
+            fn created(&self) -> std::io::Result<std::time::SystemTime> {
+                <$ty>::created(self)
+            }
+            fn modified(&self) -> std::io::Result<std::time::SystemTime> {
+                <$ty>::modified(self)
+            }
+        }
+    };
+}
+metadata_view!(std::fs::Metadata);
+#[cfg(target_os = "trueos")]
+metadata_view!(tokio::fs::Metadata);
+
+fn file_metadata(metadata: impl MetadataView, is_symlink: bool) -> FileMetadata {
     FileMetadata {
         is_directory: metadata.is_dir(),
         is_file: metadata.is_file(),

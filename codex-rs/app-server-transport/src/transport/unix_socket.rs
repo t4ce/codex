@@ -1,3 +1,6 @@
+//! TRUEOS_SOCKET_PATH[app-server-control]: the bound path is a socket node;
+//! its advertised Unix path is a symlink, and its startup lock is a regular file.
+//! See docs/trueos-socket-paths.md before adding filesystem/vfile integration.
 //! Control socket startup, guarded rendezvous paths, and WebSocket acceptance.
 
 use std::fs::OpenOptions;
@@ -99,7 +102,7 @@ pub async fn start_control_socket_acceptor(
     {
         startup_lock.remove_on_drop = true;
     }
-    let socket_guard = ControlSocketFileGuard {
+    let socket_guard = ControlSocketPathGuard {
         socket_path,
         #[cfg(unix)]
         rendezvous_path,
@@ -134,7 +137,7 @@ async fn run_control_socket_acceptor(
     mut listener: UnixListener,
     transport_event_tx: mpsc::Sender<TransportEvent>,
     shutdown_token: CancellationToken,
-    socket_guard: ControlSocketFileGuard,
+    socket_guard: ControlSocketPathGuard,
     daemon_shutdown_access: DaemonShutdownAccess,
 ) {
     let _socket_guard = socket_guard;
@@ -445,7 +448,7 @@ async fn set_control_socket_permissions(_socket_path: &Path) -> IoResult<()> {
     Ok(())
 }
 
-struct ControlSocketFileGuard {
+struct ControlSocketPathGuard {
     socket_path: AbsolutePathBuf,
     #[cfg(unix)]
     rendezvous_path: AbsolutePathBuf,
@@ -456,7 +459,7 @@ struct ControlSocketFileGuard {
     _directory_guard: std::os::windows::io::OwnedHandle,
 }
 
-impl Drop for ControlSocketFileGuard {
+impl Drop for ControlSocketPathGuard {
     fn drop(&mut self) {
         #[cfg(unix)]
         if std::fs::read_link(self.rendezvous_path.as_path())

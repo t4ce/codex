@@ -1,3 +1,5 @@
+//! TRUEOS_SOCKET_PATH[uds]: bind/connect paths name socket endpoints.
+//! Track their filesystem assumptions in docs/trueos-socket-paths.md.
 //! Cross-platform async Unix domain socket helpers.
 
 #[cfg(unix)]

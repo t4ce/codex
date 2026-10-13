@@ -3,9 +3,12 @@
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+#[cfg(not(target_os = "trueos"))]
 use std::fs::File;
 use std::future::Future;
 use std::io;
+#[cfg(target_os = "trueos")]
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
@@ -56,7 +59,11 @@ impl FileHandleManager {
                 format!("at most {MAX_OPEN_FILES} file handles may be open per connection"),
             )
         })?;
-        let file = Arc::new(open_file.await?.into_std().await);
+        let file = open_file.await?.into_std().await;
+        #[cfg(target_os = "trueos")]
+        let file = Arc::new(Mutex::new(Box::new(file) as Box<dyn TrueosFileIo>));
+        #[cfg(not(target_os = "trueos"))]
+        let file = Arc::new(file);
         let mut handles = self.lock_handles();
         let Entry::Vacant(entry) = handles.entry(handle_id.clone()) else {
             return Err(io::Error::new(
@@ -116,21 +123,29 @@ impl FileHandleManager {
             })? as u64;
         let file = self.get(handle_id)?;
         tokio::task::spawn_blocking(move || {
+            #[cfg(target_os = "trueos")]
+            let mut file = file
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
             let mut position = offset;
             while position < end {
                 let written = (position - offset) as usize;
-                #[cfg(unix)]
+                #[cfg(all(unix, not(target_os = "trueos")))]
                 let result = std::os::unix::fs::FileExt::write_at(
                     file.as_ref(),
                     &bytes[written..],
                     position,
                 );
-                #[cfg(windows)]
+                #[cfg(all(windows, not(target_os = "trueos")))]
                 let result = std::os::windows::fs::FileExt::seek_write(
                     file.as_ref(),
                     &bytes[written..],
                     position,
                 );
+                #[cfg(target_os = "trueos")]
+                let result = file
+                    .seek(SeekFrom::Start(position))
+                    .and_then(|_| file.write(&bytes[written..]));
                 match result {
                     Ok(0) => {
                         return Err(io::Error::new(
@@ -151,7 +166,7 @@ impl FileHandleManager {
         })?
     }
 
-    fn get(&self, handle_id: &str) -> io::Result<Arc<File>> {
+    fn get(&self, handle_id: &str) -> io::Result<Arc<ManagedFile>> {
         self.lock_handles()
             .get(handle_id)
             .map(|entry| Arc::clone(&entry.file))
@@ -174,11 +189,49 @@ impl FileHandleManager {
 }
 
 struct FileHandleEntry {
-    file: Arc<File>,
+    file: Arc<ManagedFile>,
     // Closing an entry releases capacity even if a read or write still holds the file.
     _permit: OwnedSemaphorePermit,
 }
 
+#[cfg(target_os = "trueos")]
+trait TrueosFileIo: Read + Write + Seek + Send {}
+#[cfg(target_os = "trueos")]
+impl<T: Read + Write + Seek + Send> TrueosFileIo for T {}
+
+#[cfg(target_os = "trueos")]
+type ManagedFile = Mutex<Box<dyn TrueosFileIo>>;
+#[cfg(not(target_os = "trueos"))]
+type ManagedFile = File;
+
+#[cfg(target_os = "trueos")]
+fn read_block_at(file: &ManagedFile, offset: u64, len: usize) -> io::Result<FileReadBlock> {
+    let mut file = file
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let mut bytes = vec![0; len];
+    file.seek(SeekFrom::Start(offset))?;
+    let mut bytes_read = 0;
+    while bytes_read < len {
+        let read_offset = offset.checked_add(bytes_read as u64).ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "file read offset overflowed")
+        })?;
+        file.seek(SeekFrom::Start(read_offset))?;
+        match file.read(&mut bytes[bytes_read..]) {
+            Ok(0) => break,
+            Ok(read) => bytes_read += read,
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => {}
+            Err(error) => return Err(error),
+        }
+    }
+    bytes.truncate(bytes_read);
+    Ok(FileReadBlock {
+        eof: bytes_read < len,
+        bytes,
+    })
+}
+
+#[cfg(not(target_os = "trueos"))]
 fn read_block_at(file: &File, offset: u64, len: usize) -> io::Result<FileReadBlock> {
     let mut bytes = vec![0; len];
     let mut bytes_read = 0;
@@ -200,12 +253,12 @@ fn read_block_at(file: &File, offset: u64, len: usize) -> io::Result<FileReadBlo
     })
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn read_file_at(file: &File, bytes: &mut [u8], offset: u64) -> io::Result<usize> {
     std::os::unix::fs::FileExt::read_at(file, bytes, offset)
 }
 
-#[cfg(windows)]
+#[cfg(all(windows, not(target_os = "trueos")))]
 fn read_file_at(file: &File, bytes: &mut [u8], offset: u64) -> io::Result<usize> {
     std::os::windows::fs::FileExt::seek_read(file, bytes, offset)
 }

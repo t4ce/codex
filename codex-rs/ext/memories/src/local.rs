@@ -1,6 +1,10 @@
+#[cfg(not(target_os = "trueos"))]
+use std::fs::Metadata;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
+#[cfg(target_os = "trueos")]
+use tokio::fs::Metadata;
 
 use crate::backend::AddAdHocMemoryNoteRequest;
 use crate::backend::AddAdHocMemoryNoteResponse;
@@ -81,9 +85,7 @@ impl LocalMemoriesBackend {
         Ok(scoped_path)
     }
 
-    async fn metadata_or_none(
-        path: &Path,
-    ) -> Result<Option<std::fs::Metadata>, MemoriesBackendError> {
+    async fn metadata_or_none(path: &Path) -> Result<Option<Metadata>, MemoriesBackendError> {
         match tokio::fs::symlink_metadata(path).await {
             Ok(metadata) => Ok(Some(metadata)),
             Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),

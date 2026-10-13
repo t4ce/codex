@@ -15,8 +15,9 @@ use crate::fs_sandbox::io_error;
 use crate::fs_sandbox::read_helper_response;
 #[cfg(windows)]
 use crate::fs_sandbox::reap_helper_after_response;
+#[cfg(not(target_os = "trueos"))]
 use crate::fs_sandbox::spawn_command;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use crate::fs_sandbox::wait_for_helper_output;
 use crate::protocol::FsOpenMode;
 use crate::rpc::internal_error;
@@ -45,7 +46,7 @@ fn open_response(response: &[u8]) -> Result<FsHelperOpenResponse, JSONRPCErrorEr
 }
 
 // Unix passes the opened fd over the helper's stdin socket.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn open_platform(
     command: SandboxExecRequest,
     request: Vec<u8>,
@@ -66,6 +67,29 @@ async fn open_platform(
     open_response(&output.stdout)?;
     let descriptor = receive_file_descriptor(&receiver).map_err(io_error)?;
     Ok(tokio::fs::File::from_std(std::fs::File::from(descriptor)))
+}
+
+// TRUEOS has no SCM_RIGHTS transport between process descriptor tables.
+// Keep sandbox requests explicit rather than reopening outside the helper.
+#[cfg(target_os = "trueos")]
+async fn open_platform(
+    _command: SandboxExecRequest,
+    _request: Vec<u8>,
+) -> Result<tokio::fs::File, JSONRPCErrorError> {
+    Err(io_error(descriptor_transfer_unsupported()))
+}
+
+#[cfg(target_os = "trueos")]
+fn descriptor_transfer_unsupported() -> io::Error {
+    io::Error::new(
+        io::ErrorKind::Unsupported,
+        "TRUEOS does not support sandbox-helper file descriptor transfer",
+    )
+}
+
+#[cfg(target_os = "trueos")]
+pub(crate) fn transfer_file(_file: &tokio::fs::File) -> io::Result<()> {
+    Err(descriptor_transfer_unsupported())
 }
 
 // Windows duplicates the helper's handle before letting it exit.
@@ -102,7 +126,7 @@ async fn open_platform(
 }
 
 // SCM_RIGHTS is Unix-only.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub(crate) fn transfer_file(file: &tokio::fs::File) -> io::Result<()> {
     use rustix::net::SendAncillaryBuffer;
     use rustix::net::SendAncillaryMessage;
@@ -131,7 +155,7 @@ pub(crate) fn transfer_file(file: &tokio::fs::File) -> io::Result<()> {
 }
 
 // File-descriptor passing is only available on Unix.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn receive_file_descriptor(
     socket: &std::os::unix::net::UnixStream,
 ) -> io::Result<std::os::fd::OwnedFd> {

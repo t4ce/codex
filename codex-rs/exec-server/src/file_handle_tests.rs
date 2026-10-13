@@ -132,3 +132,42 @@ async fn concurrent_opens_reject_duplicate_ids_without_replacing_the_file() -> R
     );
     Ok(())
 }
+
+/// Sharing a handle must keep concurrent reads and writes at their requested offsets.
+#[tokio::test]
+async fn concurrent_operations_keep_independent_offsets() -> Result<()> {
+    let mut file = tempfile::tempfile()?;
+    file.write_all(b"0123456789")?;
+    let manager = FileHandleManager::default();
+    manager
+        .open("file".to_string(), ready(Ok(File::from_std(file))))
+        .await?;
+    let (first, last) = tokio::join!(
+        manager.read_block("file", 0, 4),
+        manager.read_block("file", 6, 8),
+    );
+    assert_eq!(first?.bytes, b"0123");
+    let last = last?;
+    assert_eq!(last.bytes, b"6789");
+    assert!(last.eof);
+    let (first, last) = tokio::join!(
+        manager.write_block("file", 1, b"AB".to_vec()),
+        manager.write_block("file", 7, b"XY".to_vec()),
+    );
+    first?;
+    last?;
+    assert_eq!(
+        manager.read_block("file", 0, 10).await?.bytes,
+        b"0AB3456XY9"
+    );
+    assert_eq!(
+        manager
+            .write_block("file", u64::MAX, vec![0])
+            .await
+            .unwrap_err()
+            .kind(),
+        io::ErrorKind::InvalidInput,
+    );
+    manager.close_all();
+    Ok(())
+}

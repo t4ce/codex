@@ -779,6 +779,7 @@ async fn connect_websocket_endpoint(
     Ok((websocket_url, stream))
 }
 
+// TRUEOS_SOCKET_PATH[remote-client]: this path names the app-server socket endpoint.
 async fn connect_unix_socket_endpoint(
     socket_path: AbsolutePathBuf,
     peer_policy: SocketPeerPolicy,

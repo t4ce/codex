@@ -358,7 +358,9 @@ fn parse_retry_after(headers: &HeaderMap, received_at: OffsetDateTime) -> Option
         let seconds = i64::try_from(seconds).ok()?;
         received_at.checked_add(time::Duration::seconds(seconds))?
     } else {
-        OffsetDateTime::from(httpdate::parse_http_date(retry_after).ok()?)
+        OffsetDateTime::from(std::time::SystemTime::from(
+            retry_after.parse::<httpdate::HttpDate>().ok()?,
+        ))
     };
     (retry_at >= received_at).then_some(retry_at)
 }

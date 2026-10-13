@@ -326,7 +326,19 @@ async fn ensure_owner_only_permissions(_file: &File) -> Result<()> {
 
 async fn history_metadata_for_file(path: &Path) -> (u64, usize) {
     let log_id = match fs::metadata(path).await {
-        Ok(metadata) => log_identity(&metadata).unwrap_or(0),
+        Ok(metadata) => {
+            #[cfg(target_os = "trueos")]
+            {
+                metadata
+                    .file_id()
+                    .and_then(|id| trueos_log_identity(u64::from(metadata.root_id()), id))
+                    .unwrap_or(0)
+            }
+            #[cfg(not(target_os = "trueos"))]
+            {
+                log_identity(&metadata).unwrap_or(0)
+            }
+        }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return (0, 0),
         Err(_) => return (0, 0),
     };
@@ -422,10 +434,30 @@ fn lookup_history_entry(path: &Path, log_id: u64, offset: usize) -> Option<Histo
     None
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn log_identity(metadata: &std::fs::Metadata) -> Option<u64> {
     use std::os::unix::fs::MetadataExt;
     Some(metadata.ino())
+}
+
+#[cfg(target_os = "trueos")]
+fn trueos_log_identity(root: u64, file_id: u64) -> Option<u64> {
+    if file_id == 0 {
+        return None;
+    }
+    let hash = root
+        .to_le_bytes()
+        .into_iter()
+        .chain(file_id.to_le_bytes())
+        .fold(14695981039346656037u64, |h, b| {
+            (h ^ u64::from(b)).wrapping_mul(1099511628211)
+        });
+    Some(if hash == 0 { 1 } else { hash })
+}
+#[cfg(target_os = "trueos")]
+fn log_identity(metadata: &std::fs::Metadata) -> Option<u64> {
+    use std::os::unix::fs::MetadataExt;
+    trueos_log_identity(metadata.dev(), metadata.ino())
 }
 
 #[cfg(windows)]

@@ -35,7 +35,7 @@ codex-utils-rustls-provider = { workspace = true }
 codex-websocket-auth = { workspace = true }
 futures = { workspace = true }
 gethostname = { workspace = true }
-httpdate = { workspace = true }
+httpdate = { workspace = true, features = ["std-system-time"] }
 owo-colors = { workspace = true, features = ["supports-colors"] }
 rand = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

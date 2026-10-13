@@ -1,3 +1,5 @@
+//! TRUEOS_SOCKET_PATH[stdio-relay]: socket_path addresses a socket endpoint
+//! used to relay stdin/stdout; inventory: docs/trueos-socket-paths.md.
 #![deny(clippy::print_stdout)]
 
 use std::io;

@@ -11,7 +11,9 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use crate::DaemonLockFile;
 use crate::managed_install::ExecutableIdentity;
+use crate::open_daemon_lock_file;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::bail;
@@ -329,12 +331,8 @@ impl PidBackend {
         Ok(state)
     }
 
-    async fn acquire_reservation_lock(&self) -> Result<fs::File> {
-        let reservation_lock = fs::OpenOptions::new()
-            .create(true)
-            .truncate(false)
-            .write(true)
-            .open(&self.lock_file)
+    async fn acquire_reservation_lock(&self) -> Result<DaemonLockFile> {
+        let reservation_lock = open_daemon_lock_file(&self.lock_file)
             .await
             .with_context(|| {
                 format!("failed to open pid lock file {}", self.lock_file.display())
@@ -353,24 +351,21 @@ impl PidBackend {
     }
 
     #[cfg(any(unix, windows))]
-    async fn open_stderr_log(&self) -> Result<fs::File> {
+    async fn open_stderr_log(&self) -> Result<std::fs::File> {
         let stderr_log_file = stderr_log_file_for_pid_file(&self.pid_file);
         super::stderr_log::preserve(&stderr_log_file).await;
-        let result = async {
-            fs::OpenOptions::new()
+        let path = stderr_log_file.clone();
+        let result = tokio::task::spawn_blocking(move || {
+            std::fs::OpenOptions::new()
                 .create(true)
                 .truncate(true)
                 .write(true)
-                .open(&stderr_log_file)
-                .await?;
-            // The updater predecessor can still write after a Windows handoff
-            // truncates this file. Append handles prevent stale offsets and gaps.
-            fs::OpenOptions::new()
-                .append(true)
-                .open(&stderr_log_file)
-                .await
-        }
-        .await;
+                .open(&path)?;
+            // Keep an actual append descriptor for child stderr redirection.
+            std::fs::OpenOptions::new().append(true).open(&path)
+        })
+        .await
+        .map_err(|error| std::io::Error::other(format!("stderr log open task failed: {error}")))?;
         result.with_context(|| {
             format!(
                 "failed to open stderr log for pid-managed app server {}",
@@ -642,7 +637,7 @@ enum EmptyPidReservation {
 }
 
 #[cfg(unix)]
-fn try_lock_file(file: &fs::File) -> Result<bool> {
+fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
     use std::os::fd::AsRawFd;
 
     let result = unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | libc::LOCK_NB) };
@@ -658,19 +653,13 @@ fn try_lock_file(file: &fs::File) -> Result<bool> {
 }
 
 #[cfg(not(any(unix, windows)))]
-fn try_lock_file(_file: &fs::File) -> Result<bool> {
+fn try_lock_file(_file: &DaemonLockFile) -> Result<bool> {
     bail!("pid-managed app-server startup is unsupported on this platform")
 }
 
 #[cfg(any(unix, windows))]
 async fn reservation_lock_is_active(path: &Path) -> Result<bool> {
-    let file = match fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(false)
-        .open(path)
-        .await
-    {
+    let file = match open_daemon_lock_file(path).await {
         Ok(file) => file,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
             return Ok(false);
@@ -693,13 +682,7 @@ async fn inspect_empty_pid_reservation(
     pid_path: &Path,
     lock_path: &Path,
 ) -> Result<EmptyPidReservation> {
-    let file = match fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .truncate(false)
-        .open(lock_path)
-        .await
-    {
+    let file = match open_daemon_lock_file(lock_path).await {
         Ok(file) => file,
         Err(err) => {
             return Err(err).with_context(|| {

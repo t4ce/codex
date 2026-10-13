@@ -1,3 +1,5 @@
+//! TRUEOS_SOCKET_PATH[updater-listener]: the updater binds a pathname socket
+//! for manual-update requests; inventory: docs/trueos-socket-paths.md.
 //! Owns scheduled and manual installs, daemon restarts, and updater replacement.
 
 use std::collections::VecDeque;

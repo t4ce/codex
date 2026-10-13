@@ -40,21 +40,27 @@ pub(crate) fn open_sync(path: &Path, mode: FsOpenMode) -> io::Result<std::fs::Fi
 
 /// Reads a regular UTF-8 file without following a symlink at its final path component.
 pub async fn read_sensitive_file_to_string(path: &Path) -> io::Result<String> {
-    let mut options = std::fs::OpenOptions::new();
-    options.read(true);
-    configure_open(&mut options);
+    let open_path = path.to_path_buf();
+    let std_file = tokio::task::spawn_blocking(move || {
+        let mut options = std::fs::OpenOptions::new();
+        options.read(true);
+        configure_open(&mut options);
 
-    #[cfg(unix)]
-    options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
+        #[cfg(unix)]
+        options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
 
-    #[cfg(windows)]
-    {
-        use windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT;
+        #[cfg(windows)]
+        {
+            use windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT;
 
-        options.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT);
-    }
+            options.custom_flags(FILE_FLAG_OPEN_REPARSE_POINT);
+        }
 
-    let mut file = tokio::fs::OpenOptions::from(options).open(path).await?;
+        options.open(open_path)
+    })
+    .await
+    .map_err(|error| io::Error::other(format!("filesystem task failed: {error}")))??;
+    let mut file = tokio::fs::File::from_std(std_file);
     let metadata = file.metadata().await?;
     if !is_disk_file(&file) || !metadata.is_file() || metadata.file_type().is_symlink() {
         return Err(io::Error::new(

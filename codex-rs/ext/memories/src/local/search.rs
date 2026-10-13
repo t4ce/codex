@@ -9,6 +9,7 @@ use crate::backend::SearchMemoriesRequest;
 use crate::backend::SearchMemoriesResponse;
 
 use super::LocalMemoriesBackend;
+use super::Metadata;
 use super::path::display_relative_path;
 use super::path::is_hidden_path;
 use super::path::read_sorted_dir_entries;
@@ -91,7 +92,7 @@ pub(super) async fn search(
 async fn search_entries(
     root: &Path,
     current: &Path,
-    current_metadata: &std::fs::Metadata,
+    current_metadata: &Metadata,
     matcher: &SearchMatcher,
     context_lines: usize,
     matches: &mut Vec<MemorySearchMatch>,

@@ -1,9 +1,14 @@
+#[cfg(not(target_os = "trueos"))]
 use std::fs::FileType;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
+#[cfg(target_os = "trueos")]
+use tokio::fs::FileType;
 
 use crate::backend::MemoriesBackendError;
+
+use super::Metadata;
 
 /// Returns lexically sorted paths and their cached, non-symlink-following file types.
 ///
@@ -29,10 +34,7 @@ pub(super) async fn read_sorted_dir_entries(
     Ok(entries)
 }
 
-pub(super) fn reject_symlink(
-    path: &str,
-    metadata: &std::fs::Metadata,
-) -> Result<(), MemoriesBackendError> {
+pub(super) fn reject_symlink(path: &str, metadata: &Metadata) -> Result<(), MemoriesBackendError> {
     if metadata.file_type().is_symlink() {
         return Err(MemoriesBackendError::invalid_path(
             path,
