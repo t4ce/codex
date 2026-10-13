@@ -617,6 +617,8 @@ fn probe_windows_default_colors() {
 fn set_panic_hook() {
     let hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
+        #[cfg(target_os = "trueos")]
+        eprintln!("[codex-startup] panic before terminal restore: {panic_info}");
         let _ = restore_after_exit(); // ignore any errors as we are already failing
         hook(panic_info);
     }));

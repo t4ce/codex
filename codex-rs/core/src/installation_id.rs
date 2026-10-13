@@ -29,6 +29,17 @@ pub async fn resolve_installation_id(codex_home: &AbsolutePathBuf) -> Result<Str
         }
 
         let mut file = options.open(&path)?;
+        #[cfg(target_os = "trueos")]
+        if let Err(error) = file.lock() {
+            if error.kind() != std::io::ErrorKind::Unsupported {
+                return Err(error);
+            }
+            // This identifier is for telemetry, not authentication. Avoid an
+            // unlocked shared-file write when the platform has no file locks.
+            tracing::warn!("file locking unavailable; using a session installation ID");
+            return Ok(Uuid::new_v4().to_string());
+        }
+        #[cfg(not(target_os = "trueos"))]
         file.lock()?;
 
         #[cfg(unix)]

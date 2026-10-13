@@ -341,6 +341,7 @@ pub(super) async fn run_main_inner(
     )?;
     // The pre-paint bootstrap used these same local/remote config inputs. Reuse it here;
     // implicit daemon discovery above changes transport, not the client configuration cwd.
+    codex_arg0::startup_timing::mark("screen_reader_begin");
     let screen_reader_result = if !loader_overrides.ignore_user_config {
         startup_draft
             .run_until(screen_reader::initialize(
@@ -350,6 +351,7 @@ pub(super) async fn run_main_inner(
     } else {
         Ok(())
     };
+    codex_arg0::startup_timing::mark("screen_reader_done");
     codex_arg0::startup_timing::mark("cloud_config_begin");
     let cloud_config_bundle = startup_draft
         .run_until(cloud_config_bundle_for_app_server_target(
@@ -476,6 +478,7 @@ pub(super) async fn run_main_inner(
         config.cwd.as_path(),
     );
 
+    codex_arg0::startup_timing::mark("cloud_auth_storage_begin");
     let mut cloud_config_bundle = if workload_identity_selected {
         cloud_config_bundle
     } else {
@@ -488,6 +491,7 @@ pub(super) async fn run_main_inner(
             ))
             .await??
     };
+    codex_arg0::startup_timing::mark("cloud_auth_storage_done");
     let managed_worktree = if cli.shared.worktree {
         let (destination, bundle, worktree) = startup_draft
             .run_until(worktree_startup::prepare(

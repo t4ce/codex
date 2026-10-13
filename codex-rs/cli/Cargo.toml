@@ -6,6 +6,13 @@ license.workspace = true
 build = "build.rs"
 default-run = "codex"
 
+# Blueprint packing builds this package as a standalone workspace, so this
+# override applies there; normal Codex workspace builds use the root profiles.
+[profile.release]
+opt-level = 1
+incremental = true
+codegen-units = 8
+
 [[bin]]
 name = "codex"
 path = "src/main.rs"

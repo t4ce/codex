@@ -1,3 +1,13 @@
+> yes, the codex compiles to platform
+>
+> ->  50MB caliber bin thats now in buckshot of 5MB hobbykernel
+>
+> call me if you need a brain implant ;) joking, but i do need a job and i do this 24/7 anyway
+>
+> ++ i'm not that old ++ this just some leet dev try to get hired
+
+---
+
 <p align="center"><strong>Codex CLI</strong> is a coding agent from OpenAI that runs locally on your computer.
 <p align="center">
   <img src="https://github.com/openai/codex/blob/main/.github/codex-cli-splash.png" alt="Codex CLI splash" width="80%" />

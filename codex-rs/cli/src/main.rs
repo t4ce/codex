@@ -1030,14 +1030,19 @@ fn stage_str(stage: Stage) -> &'static str {
 }
 
 fn main() -> anyhow::Result<()> {
+    #[cfg(target_os = "trueos")]
+    eprintln!("[codex-startup] main entered");
     codex_arg0::startup_timing::mark("process_main");
     codex_build_info::initialize!();
     let remote_control_disabled = codex_app_server::take_remote_control_disabled_env();
-    arg0_dispatch_or_else(move |arg0_paths: Arg0DispatchPaths| async move {
+    let result = arg0_dispatch_or_else(move |arg0_paths: Arg0DispatchPaths| async move {
         // Keep the CLI dispatcher off the runtime's stack while the TUI rebuilds a thread.
         Box::pin(cli_main(arg0_paths, remote_control_disabled)).await?;
         Ok(())
-    })
+    });
+    #[cfg(target_os = "trueos")]
+    eprintln!("[codex-startup] main returned: {result:?}");
+    result
 }
 
 async fn cli_main(
@@ -1052,6 +1057,11 @@ async fn cli_main(
         mut interactive,
         subcommand,
     } = MultitoolCli::parse();
+    #[cfg(target_os = "trueos")]
+    if subcommand.is_none() && remote.remote.is_none() {
+        // A bare Blueprint launch uses the embedded server, not an installed daemon package.
+        interactive.no_daemon = true;
+    }
     // Retain the launch target through TUI exit, even if a launcher changes selection.
     let daemon_cli_executable = arg0_paths
         .codex_self_exe

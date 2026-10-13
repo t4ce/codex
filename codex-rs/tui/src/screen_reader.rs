@@ -17,6 +17,15 @@ use toml_edit::value;
 const DETECTION_TIMEOUT: Duration = Duration::from_millis(/*millis*/ 450);
 static ANIMATION_DEFAULT: OnceLock<MotionMode> = OnceLock::new();
 
+#[cfg(target_os = "trueos")]
+pub(crate) async fn initialize(_stack: &ConfigLayerStack) -> anyhow::Result<()> {
+    // TRUEOS has no host screen-reader probe. Keep the session default without
+    // attempting an unnecessary config-file rewrite during terminal startup.
+    let _ = ANIMATION_DEFAULT.set(MotionMode::Animated);
+    Ok(())
+}
+
+#[cfg(not(target_os = "trueos"))]
 pub(crate) async fn initialize(stack: &ConfigLayerStack) -> anyhow::Result<()> {
     let (animation_default, result) = initialize_with_probe(stack, detect()).await;
     let _ = ANIMATION_DEFAULT.set(animation_default);
