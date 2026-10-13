@@ -7,10 +7,10 @@
 use std::sync::Arc;
 
 use crate::http_client_selector::HttpClientSelector;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::RequestBuilder;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RequestBuilder;
+use codex_transport::http::RouteAwareClientPool;
 use http::Method;
 
 pub(super) struct StartupSyncHttpClient(Arc<dyn HttpClientSelector>);

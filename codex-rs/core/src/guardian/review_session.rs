@@ -81,7 +81,7 @@ use codex_protocol::turn_input::TurnInputRequest;
 use codex_protocol::turn_input::TurnInputSubmission;
 use codex_thread_store::PersistContext;
 use codex_tools::normalize_output_image_detail;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use super::ApprovalRequestReasons;
 use super::GUARDIAN_REVIEWER_NAME;

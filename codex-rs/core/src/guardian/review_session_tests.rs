@@ -241,7 +241,7 @@ async fn test_review_params() -> GuardianReviewSessionParams {
             environment_id: codex_exec_server::LOCAL_ENVIRONMENT_ID.to_string(),
             command: vec!["git".to_string(), "status".to_string()],
             cwd: cwd.clone().into(),
-            guardian_cwd: codex_utils_path_uri::LegacyAppPathString::from_abs_path(&cwd),
+            guardian_cwd: codex_utils_paths::path_uri::LegacyAppPathString::from_abs_path(&cwd),
             sandbox_permissions: crate::sandboxing::SandboxPermissions::UseDefault,
             additional_permissions: None,
             justification: Some("Inspect repo state.".to_string()),

@@ -24,7 +24,7 @@ use codex_app_server_protocol::RequestId;
 use codex_app_server_protocol::ServerNotification;
 use codex_app_server_protocol::ServerNotificationEnvelope;
 #[cfg(unix)]
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 #[cfg(unix)]
 use serde_json::json;

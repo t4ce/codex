@@ -118,7 +118,7 @@ fn start_windows_reader(
     use std::process::Stdio;
 
     let _guard = runtime.enter();
-    let executable = codex_utils_path::system_executable("powershell.exe")
+    let executable = codex_utils_paths::path::system_executable("powershell.exe")
         .ok_or("Windows clipboard reader is unavailable")?;
     let mut command = tokio::process::Command::new(executable);
     // Length-framed UTF-8 preserves every newline and whitespace, including empty text.

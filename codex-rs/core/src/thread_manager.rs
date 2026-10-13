@@ -109,7 +109,7 @@ use codex_thread_store::ThreadMetadataPatch;
 use codex_thread_store::ThreadStore;
 use codex_thread_store::ThreadStoreError;
 use codex_thread_store::UpdateThreadMetadataParams;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_git_discovery::GitRootDiscovery;
 use futures::StreamExt;
 use futures::future::BoxFuture;
@@ -929,7 +929,7 @@ impl ThreadManager {
     pub async fn list_models(
         &self,
         refresh_strategy: RefreshStrategy,
-        http_client_factory: codex_http_client::HttpClientFactory,
+        http_client_factory: codex_transport::http::HttpClientFactory,
     ) -> Vec<ModelPreset> {
         self.state
             .models_manager

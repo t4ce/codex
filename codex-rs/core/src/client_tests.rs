@@ -18,13 +18,13 @@ use crate::responses_metadata::MCP_ATTRIBUTION_CLIENT_METADATA_KEY;
 use crate::test_support::TestCodexResponsesRequestKind;
 use crate::test_support::responses_metadata as test_responses_metadata;
 use base64::Engine;
-use codex_api::AgentIdentityTelemetry;
-use codex_api::ApiError;
-use codex_api::ResponseEvent;
-use codex_api::TransportError;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::ApiError;
+use codex_transport::api::ResponseEvent;
+use codex_transport::api::TransportError;
 use codex_history::HistoryInitialization;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::auth::AgentIdentityAuthPolicy;
@@ -146,7 +146,7 @@ fn test_model_provider() -> SharedModelProvider {
 
 #[tokio::test]
 async fn workspace_routed_http_rejects_redirects_without_a_routing_header() {
-    use codex_client::HttpTransport;
+    use codex_transport::client::HttpTransport;
     use codex_login::WorkspaceRouting;
     use codex_login::WorkspaceRoutingRequest;
     use codex_login::WorkspaceRoutingResolver;
@@ -274,7 +274,7 @@ impl ModelProvider for SetupRefreshProvider {
 
     fn api_provider(
         &self,
-    ) -> ModelProviderFuture<'_, codex_protocol::error::Result<codex_api::Provider>> {
+    ) -> ModelProviderFuture<'_, codex_protocol::error::Result<codex_transport::api::Provider>> {
         Box::pin(async move {
             self.setup_calls.fetch_add(1, Ordering::SeqCst);
             let manager = self.inner.auth_manager().expect("auth manager");
@@ -657,9 +657,9 @@ async fn responses_request_includes_internal_metadata_for_provider_grant_or_firs
                 include_internal,
                 responses_lite,
             );
-            let ws_request = codex_api::ResponseCreateWsRequest {
+            let ws_request = codex_transport::api::ResponseCreateWsRequest {
                 client_metadata: Some(ws_client_metadata),
-                ..codex_api::ResponseCreateWsRequest::from(&request)
+                ..codex_transport::api::ResponseCreateWsRequest::from(&request)
             };
             let ws_request = serde_json::to_value(ws_request)?;
             assert_eq!(ws_request["input"], expected_wire_input);
@@ -2201,7 +2201,7 @@ async fn intercepted_output_reaches_trace_and_websocket_bookkeeping() -> anyhow:
         .await?;
     drop(tx_event);
     let (mut stream, last_response) = super::map_response_stream(
-        codex_api::ResponseStream {
+        codex_transport::api::ResponseStream {
             rx_event,
             upstream_request_id: None,
             interrupt: None,

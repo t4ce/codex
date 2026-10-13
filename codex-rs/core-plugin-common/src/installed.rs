@@ -1,6 +1,6 @@
 //! Read-only installed-version selection and persisted installation identity.
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use semver::Version;
 use serde::Deserialize;
 use serde::Serialize;

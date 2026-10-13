@@ -1,7 +1,7 @@
 use codex_config::HooksFile;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::AGENT_PLUGIN_MANIFEST_RELATIVE_PATH;
 use codex_utils_plugins::find_plugin_manifest_path;
 use serde::Deserialize;
@@ -673,8 +673,8 @@ mod tests {
     use codex_plugin::manifest::PluginManifestPaths;
     use codex_protocol::capabilities::CapabilityRootLocation;
     use codex_protocol::capabilities::SelectedCapabilityRoot;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use std::fs;
     use std::path::Path;

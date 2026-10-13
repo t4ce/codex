@@ -10,7 +10,7 @@ use codex_config::test_support::CloudConfigBundleFixture;
 use codex_core::config::ConfigBuilder;
 use codex_core::config::ConfigOverrides;
 use codex_feedback::CodexFeedback;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_models_manager::manager::ModelsEndpointClient;
 use codex_models_manager::manager::ModelsEndpointFuture;
 use codex_models_manager::manager::ModelsEndpointResponse;

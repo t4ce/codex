@@ -89,7 +89,7 @@ use codex_sandboxing::SandboxCommand;
 use codex_shell_command::is_dangerous_command::DangerousCommandPlatform;
 use codex_tools::ToolName;
 use codex_utils_output_truncation::approx_tokens_from_byte_count;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 const UNIFIED_EXEC_ENV: [(&str, &str); 10] = [
     ("NO_COLOR", "1"),

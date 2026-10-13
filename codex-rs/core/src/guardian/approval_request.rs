@@ -4,8 +4,8 @@ use codex_protocol::approvals::GuardianCommandSource;
 use codex_protocol::approvals::NetworkApprovalProtocol;
 use codex_protocol::models::AdditionalPermissionProfile;
 use codex_protocol::request_permissions::RequestPermissionProfile;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Serialize;
 use serde_json::Value;
 

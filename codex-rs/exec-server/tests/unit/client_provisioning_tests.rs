@@ -19,7 +19,7 @@ async fn caller_after_ready_retries_an_unpublished_provisioning_failure(reconnec
                 identity: NoiseChannelIdentity::generate().expect("Noise identity"),
             },
         })),
-        HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+        HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
     );
     let (failed_tx, failed_rx) = oneshot::channel();
     let (publish_tx, publish_rx) = oneshot::channel();

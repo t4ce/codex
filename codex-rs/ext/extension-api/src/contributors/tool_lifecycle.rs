@@ -11,7 +11,7 @@ use codex_protocol::mcp::CallToolResult;
 use codex_tools::ToolCallSource;
 use codex_tools::ToolName;
 use codex_tools::ToolPayload;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::ConversationHistorySnapshot;
 use crate::ExtensionData;

@@ -8,8 +8,8 @@
 //! API provider construction applies the process-wide managed residency policy also
 //! used by default HTTP headers.
 
-use codex_client::Provider as ApiProvider;
-use codex_client::RetryConfig as ApiRetryConfig;
+use codex_transport::client::Provider as ApiProvider;
+use codex_transport::client::RetryConfig as ApiRetryConfig;
 use codex_protocol::auth::AuthMode;
 use codex_protocol::config_types::ModelProviderAuthInfo;
 use codex_protocol::error::CodexErr;

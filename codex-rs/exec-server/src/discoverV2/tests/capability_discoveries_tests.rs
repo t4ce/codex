@@ -14,7 +14,7 @@ use crate::discover_v2::capability_locations::tests::MANIFEST;
 use crate::discover_v2::capability_locations::tests::request;
 use crate::discover_v2::capability_locations::tests::write;
 use crate::discover_v2::capability_manager::CapabilityManager;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 const SKILL: &str =
     "---\nname: deploy\ndescription: Deploy the service.\n---\nPRIVATE_INSTRUCTION_BODY_SENTINEL\n";

@@ -61,8 +61,8 @@ use codex_skills_extension::provider::SkillListQuery;
 use codex_skills_extension::provider::SkillProvider;
 use codex_skills_extension::provider::SkillReadContext;
 use codex_skills_extension::provider::SkillReadRequest;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 
 const SKILL_CONTENTS: &str =

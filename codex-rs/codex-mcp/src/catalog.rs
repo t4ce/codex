@@ -10,7 +10,7 @@ use codex_config::McpServerIdpOAuthConfig;
 use codex_config::McpServerTransportConfig;
 use codex_config::RequirementSource;
 use codex_protocol::mcp_policy::EnvironmentMcpPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::CODEX_APPS_MCP_SERVER_NAME;
 use crate::McpProtocolMode;

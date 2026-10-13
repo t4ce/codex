@@ -4,22 +4,22 @@
 
 use std::sync::Arc;
 
-use codex_api::AuthError;
-use codex_api::AuthProvider;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_aws_auth::AwsAuthConfig;
 use codex_aws_auth::AwsAuthContext;
 use codex_aws_auth::AwsAuthError;
 use codex_aws_auth::AwsRequestToSign;
-use codex_http_client::Request;
-use codex_http_client::RequestBody;
-use codex_http_client::RequestCompression;
+use codex_transport::http::Request;
+use codex_transport::http::RequestBody;
+use codex_transport::http::RequestCompression;
 use http::HeaderMap;
 
 /// Creates a SigV4 provider, preferring an explicit profile over the default credential chain.
 pub(super) async fn aws_sigv4_auth_provider(
     mut config: AwsAuthConfig,
-    http_client_factory: codex_http_client::HttpClientFactory,
+    http_client_factory: codex_transport::http::HttpClientFactory,
 ) -> Result<SharedAuthProvider, AwsAuthError> {
     config.profile = config
         .profile
@@ -45,7 +45,7 @@ struct AwsSigV4AuthProvider {
 impl AuthProvider for AwsSigV4AuthProvider {
     fn add_auth_headers(&self, _headers: &mut HeaderMap) {}
 
-    fn apply_auth(&self, mut request: Request) -> codex_api::AuthProviderFuture<'_> {
+    fn apply_auth(&self, mut request: Request) -> codex_transport::api::AuthProviderFuture<'_> {
         Box::pin(async move {
             let prepared = request.prepare_body_for_send().map_err(AuthError::Build)?;
             let signed = self

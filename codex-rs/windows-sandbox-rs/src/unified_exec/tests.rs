@@ -13,7 +13,7 @@ use base64::Engine;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use codex_protocol::config_types::WindowsSandboxLevel;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_pty::ProcessDriver;
 use codex_utils_pty::ProcessSignal;
 use codex_windows_sandbox_test_support::WindowsSandboxAccountTestGuard;

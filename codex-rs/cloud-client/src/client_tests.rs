@@ -1,7 +1,7 @@
 //! Exercises native HTTP/2 framing, metadata, trailers and cancellation with synthetic data.
 use super::*;
 use bytes::Bytes;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::OutboundProxyPolicy;
 use http_body_util::StreamBody;
 use hyper::body::Frame;
 use hyper::service::service_fn;
@@ -278,8 +278,8 @@ fn rejects_unsafe_origins_and_redacts_credentials() {
 #[test]
 fn loopback_http_rejects_managed_and_endpoint_restricted_policies() {
     for policy in [
-        codex_http_client::NetworkPolicyController::default().policy(),
-        codex_http_client::NetworkPolicy::unmanaged().restrict_to_endpoints(Default::default()),
+        codex_transport::http::NetworkPolicyController::default().policy(),
+        codex_transport::http::NetworkPolicy::unmanaged().restrict_to_endpoints(Default::default()),
     ] {
         let factory = HttpClientFactory::new(OutboundProxyPolicy::RespectSystemProxy)
             .with_network_policy(policy);
@@ -329,7 +329,7 @@ async fn https_advertises_h2_in_tls_client_hello() {
 async fn https_enforces_unmanaged_endpoint_restrictions_before_connecting() {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let factory = HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault).with_network_policy(
-        codex_http_client::NetworkPolicy::unmanaged().restrict_to_endpoints(Default::default()),
+        codex_transport::http::NetworkPolicy::unmanaged().restrict_to_endpoints(Default::default()),
     );
     let client = Client::new(
         &factory,

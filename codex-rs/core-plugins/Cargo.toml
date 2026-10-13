@@ -23,7 +23,7 @@ codex-core-plugin-common = { workspace = true }
 codex-exec-server = { workspace = true }
 codex-git-utils = { workspace = true }
 codex-hooks = { workspace = true }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 codex-login = { workspace = true }
 codex-mcp = { workspace = true }
 codex-model-provider = { workspace = true }
@@ -33,9 +33,7 @@ codex-protocol = { workspace = true }
 codex-skills = { workspace = true }
 codex-shell-command = { workspace = true }
 codex-tools = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-plugins = { workspace = true }
 chrono = { workspace = true }
 dirs = { workspace = true }

@@ -3,9 +3,9 @@ use crate::model_catalog::ModelCatalog;
 use codex_config::ConfigPathContext;
 use codex_core::config::permission_profile_catalog;
 use codex_hooks::HookListEntryHandler;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use futures::StreamExt;
 
 #[derive(Clone)]

@@ -18,7 +18,7 @@ use codex_app_server_protocol::TurnStartParams;
 use codex_app_server_protocol::UserInput;
 use codex_app_server_protocol::WarningNotification;
 use codex_exec_server::CreateDirectoryOptions;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::responses;
 use core_test_support::skip_if_remote;
 use core_test_support::skip_if_target_windows;

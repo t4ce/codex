@@ -31,7 +31,7 @@ use std::sync::Weak;
 use codex_network_proxy::NetworkProxy;
 use codex_protocol::models::AdditionalPermissionProfile;
 use codex_utils_output_truncation::TruncationPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use rand::Rng;
 use rand::rng;
 use tokio::sync::Mutex;

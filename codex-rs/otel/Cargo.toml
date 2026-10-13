@@ -18,13 +18,12 @@ external-reporting = ["dep:opentelemetry-otlp", "dep:opentelemetry-http", "reqwe
 
 [dependencies]
 bytes = { workspace = true }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 opentelemetry-http = { version = "0.31.0", optional = true }
 chrono = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-stream-parser = { workspace = true }
+codex-utils-paths = { workspace = true }
+codex-utils-text = { workspace = true }
 codex-utils-string = { workspace = true }
-codex-api = { workspace = true }
 codex-protocol = { workspace = true }
 eventsource-stream = { workspace = true }
 gethostname = { workspace = true }

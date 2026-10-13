@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
-use codex_api::AuthError;
-use codex_api::AuthProvider;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_aws_auth::AwsAccessKeys;
 use codex_aws_auth::AwsAuthContext;
 use codex_aws_auth::AwsAuthError;
 use codex_aws_auth::AwsRequestToSign;
-use codex_http_client::Request;
-use codex_http_client::RequestBody;
-use codex_http_client::RequestCompression;
+use codex_transport::http::Request;
+use codex_transport::http::RequestBody;
+use codex_transport::http::RequestCompression;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider_info::ModelProviderAwsAuthInfo;
@@ -95,7 +95,7 @@ pub(super) async fn resolve_auth_method(
     managed_auth: Option<&CodexAuth>,
     aws: &ModelProviderAwsAuthInfo,
     endpoint: BedrockEndpoint,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<BedrockAuthMethod> {
     match source {
         BedrockAuthSource::CommandBearerToken => Err(CodexErr::Fatal(
@@ -200,7 +200,7 @@ pub(super) async fn resolve_provider_auth(
     managed_auth: Option<&CodexAuth>,
     aws: &ModelProviderAwsAuthInfo,
     endpoint: BedrockEndpoint,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SharedAuthProvider> {
     match resolve_auth_method(source, managed_auth, aws, endpoint, http_client_factory).await? {
         BedrockAuthMethod::ManagedBearerToken { token, .. }
@@ -220,7 +220,7 @@ pub(super) async fn resolve_region(
     managed_auth: Option<&CodexAuth>,
     aws: &ModelProviderAwsAuthInfo,
     endpoint: BedrockEndpoint,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<String> {
     if source == BedrockAuthSource::CommandBearerToken {
         let config = match endpoint {
@@ -344,7 +344,7 @@ impl BedrockSigV4AuthProvider {
 impl AuthProvider for BedrockSigV4AuthProvider {
     fn add_auth_headers(&self, _headers: &mut HeaderMap) {}
 
-    fn apply_auth(&self, request: Request) -> codex_api::AuthProviderFuture<'_> {
+    fn apply_auth(&self, request: Request) -> codex_transport::api::AuthProviderFuture<'_> {
         Box::pin(BedrockSigV4AuthProvider::apply_auth(self, request))
     }
 }
@@ -353,7 +353,7 @@ impl AuthProvider for BedrockSigV4AuthProvider {
 mod tests {
     use std::num::NonZeroU64;
 
-    use codex_api::AuthProvider;
+    use codex_transport::api::AuthProvider;
     use codex_login::auth::BedrockAccessKeysAuth;
     use codex_login::auth::BedrockApiKeyAuth;
     use codex_model_provider_info::AwsCredentialExportConfig;

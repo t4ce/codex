@@ -15,7 +15,7 @@ workspace = true
 [dependencies]
 anyhow = { workspace = true }
 codex-exec-server = { workspace = true }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 futures = { workspace = true }
 prost = "0.14.3"
 serde_json = { workspace = true }

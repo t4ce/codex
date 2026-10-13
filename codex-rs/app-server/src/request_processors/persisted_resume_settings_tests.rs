@@ -13,7 +13,7 @@ use codex_protocol::protocol::ThreadSettingsAppliedEvent;
 use codex_protocol::protocol::ThreadSettingsSnapshot;
 use codex_protocol::protocol::TurnContextItem;
 use codex_rollout::RolloutItem;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 
 fn cwd() -> AbsolutePathBuf {

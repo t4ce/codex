@@ -31,7 +31,7 @@ use codex_protocol::openai_models::ReasoningEffort;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::SubAgentSource;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use serde_json::json;

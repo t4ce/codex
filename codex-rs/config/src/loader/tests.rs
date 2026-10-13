@@ -13,7 +13,7 @@ use codex_file_system::RemoveOptions;
 use codex_file_system::WalkOptions;
 use codex_file_system::WalkOutcome;
 use codex_file_system::WriteFileOptions;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
 use tempfile::tempdir;

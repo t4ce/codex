@@ -11,7 +11,7 @@ use codex_protocol::config_types::ServiceTier;
 use codex_protocol::models::BaseInstructionsProvenance;
 use codex_protocol::openai_models::ReasoningEffort;
 use codex_skills_extension::HostSkillsService;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use std::fs;
 use std::path::PathBuf;

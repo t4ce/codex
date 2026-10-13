@@ -1,9 +1,9 @@
 //! Verifies MCP argument handling and managed networking in standalone commands.
 
 use clap::Parser;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpError;
-use codex_http_client::NetworkPolicyDenied;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpError;
+use codex_transport::http::NetworkPolicyDenied;
 use pretty_assertions::assert_eq;
 use std::path::PathBuf;
 use std::time::Duration;

@@ -368,7 +368,7 @@ mod agent {
         claim: Claim,
         new_watermark: i64,
         selected_outputs: Vec<codex_state::Stage1Output>,
-        memory_root: codex_utils_absolute_path::AbsolutePathBuf,
+        memory_root: codex_utils_paths::absolute_path::AbsolutePathBuf,
         version: MemoryVersion,
         agent: SpawnedConsolidationAgent,
         phase_two_e2e_timer: Option<codex_otel::Timer>,

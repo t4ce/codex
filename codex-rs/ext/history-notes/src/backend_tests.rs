@@ -1,5 +1,5 @@
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthHeaders;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;

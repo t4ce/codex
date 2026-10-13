@@ -223,7 +223,7 @@ fn persisted_web_and_image_activity_preserves_full_details() {
     ].into_iter().map(|item| serde_json::from_value::<ThreadItem>(item).expect("valid thread item"));
     let cells = crate::thread_transcript::thread_items_to_transcript_cells(
         /*thread_id*/ None,
-        &codex_utils_absolute_path::AbsolutePathBuf::current_dir().expect("cwd"),
+        &codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir().expect("cwd"),
         items,
         crate::thread_transcript::RawReasoningVisibility::Hidden,
         /*config*/ None,

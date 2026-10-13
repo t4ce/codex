@@ -7,8 +7,8 @@ use codex_plugin::PluginResourceLocator;
 use codex_plugin::ResolvedPlugin;
 use codex_plugin::ResolvedPluginLocation;
 use codex_plugin::manifest::PluginManifestMcpServers;
-use codex_utils_path_uri::PathUri;
-use codex_utils_path_uri::PathUriParseError;
+use codex_utils_paths::path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUriParseError;
 use std::io;
 use thiserror::Error;
 

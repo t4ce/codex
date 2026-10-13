@@ -1035,7 +1035,7 @@ async fn send_track_events_request(
     auth: &CodexAuth,
     destination: &AnalyticsEventsDestination,
     events: Vec<TrackEventRequest>,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
     product_sku: Option<&str>,
 ) {
     if events.is_empty() {
@@ -1057,7 +1057,7 @@ async fn send_track_events_request(
     let client = match codex_login::default_client::create_client_for_route_async(
         http_client_factory.clone(),
         url.clone(),
-        codex_http_client::ClientRouteClass::Api,
+        codex_transport::http::ClientRouteClass::Api,
         codex_login::default_client::ClientRedirectPolicy::Default,
     )
     .await

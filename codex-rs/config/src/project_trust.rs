@@ -2,8 +2,8 @@
 
 use crate::config_toml::ConfigToml;
 use crate::config_toml::ProjectConfig;
-use codex_utils_path::normalize_for_path_comparison;
-use codex_utils_path_uri::PathConvention;
+use codex_utils_paths::path::normalize_for_path_comparison;
+use codex_utils_paths::path_uri::PathConvention;
 use std::path::Path;
 
 /// Original and executor-normalized canonical spellings of one native path.

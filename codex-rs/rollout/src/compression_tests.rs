@@ -1,4 +1,4 @@
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use std::fs;
 use std::fs::FileTimes;
 #[cfg(unix)]

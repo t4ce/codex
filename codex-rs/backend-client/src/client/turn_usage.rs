@@ -104,8 +104,8 @@ mod tests {
     use super::ApiKeyTurnCost;
     use super::ApiKeyTurnCostStatus;
     use super::Client;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::CodexAuth;
     use http::HeaderMap;
     use http::HeaderValue;

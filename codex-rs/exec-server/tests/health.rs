@@ -20,7 +20,7 @@ async fn exec_server_serves_readyz_alongside_websocket_endpoint() -> anyhow::Res
         .strip_prefix("ws://")
         .expect("websocket URL should use ws://");
 
-    let client = codex_http_client::HttpClientBuilder::new().build_direct()?;
+    let client = codex_transport::http::HttpClientBuilder::new().build_direct()?;
     let response = client
         .get(format!("http://{http_base_url}/readyz"))
         .send()

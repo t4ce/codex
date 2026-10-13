@@ -9,8 +9,8 @@ use std::time::Duration;
 
 use arc_swap::ArcSwapOption;
 use codex_config::ScopedSkillsConfig;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
 use codex_protocol::shell_environment::CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
@@ -1247,9 +1247,9 @@ mod tests {
     use crate::environment_provider::EnvironmentProviderEntry;
     use crate::environment_provider::EnvironmentProviderSnapshot;
     use codex_config::ScopedSkillsConfig;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
-    use codex_utils_path_uri::PathUri;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use tokio::net::TcpListener;
     use tokio::time::timeout;
@@ -2018,11 +2018,11 @@ mod tests {
     #[tokio::test]
     async fn test_environment_rejects_sandboxed_filesystem_without_runtime_paths() {
         let environment = Environment::default_for_tests();
-        let path = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+        let path = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
             std::env::current_exe().expect("current exe").as_path(),
         )
         .expect("absolute current exe");
-        let path = codex_utils_path_uri::PathUri::from_abs_path(&path);
+        let path = codex_utils_paths::path_uri::PathUri::from_abs_path(&path);
         let sandbox = crate::FileSystemSandboxContext::from_permission_profile(
             codex_protocol::models::PermissionProfile::from_runtime_permissions(
                 &codex_protocol::permissions::FileSystemSandboxPolicy::restricted(Vec::new()),

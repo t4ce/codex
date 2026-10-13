@@ -51,7 +51,6 @@ members = [
     "guardian-context",
     "hooks",
     "history",
-    "http-client",
     "secrets",
     "exec",
     "file-system",
@@ -111,41 +110,29 @@ members = [
     "tools",
     "v8-poc",
     "websocket-auth",
-    "websocket-client",
     "windows-sandbox-rs/tests/support",
     "windows-sandbox-service",
     "worktree",
     "workload-identity",
-    "utils/absolute-path",
     "utils/audio",
-    "utils/path-uri",
     "utils/cargo-bin",
     "git-utils",
     "utils/cache",
     "utils/git-discovery",
     "utils/image",
     "utils/json-to-toml",
-    "utils/home-dir",
     "utils/process",
     "utils/pty",
     "utils/readiness",
     "utils/redacted-string",
-    "utils/rustls-provider",
     "utils/string",
     "utils/cli",
-    "utils/elapsed",
     "utils/sandbox-summary",
     "utils/sleep-inhibitor",
     "utils/approval-presets",
     "utils/oss",
     "utils/output-truncation",
-    "utils/path-utils",
     "utils/plugins",
-    "utils/fuzzy-match",
-    "utils/stream-parser",
-    "utils/template",
-    "codex-client",
-    "codex-api",
     "state",
     "terminal-detection",
     "test-binary-support",
@@ -155,6 +142,10 @@ members = [
     "codex-experimental-api-macros",
     "plugin",
     "model-provider",
+    "transport",
+    "network-foundation",
+    "utils/text",
+    "utils/paths",
 ]
 resolver = "2"
 
@@ -168,6 +159,10 @@ edition = "2024"
 license = "Apache-2.0"
 
 [workspace.dependencies]
+codex-utils-text = { path = "utils/text" }
+codex-utils-paths = { path = "utils/paths" }
+codex-transport = { path = "transport" }
+codex-network-foundation = { path = "network-foundation" }
 # Internal
 codex-realtime-webrtc = { path = "realtime-webrtc" }
 app_test_support = { path = "app-server/tests/common" }
@@ -176,7 +171,6 @@ codex-agent-graph-store = { path = "agent-graph-store" }
 codex-agent-identity = { path = "agent-identity" }
 codex-agent-roles = { path = "agent-roles" }
 codex-ansi-escape = { path = "ansi-escape" }
-codex-api = { path = "codex-api" }
 codex-attachment-store = { path = "attachment-store" }
 codex-aws-auth = { path = "aws-auth" }
 codex-app-server = { path = "app-server" }
@@ -192,7 +186,6 @@ codex-async-utils = { path = "async-utils" }
 codex-backend-client = { path = "backend-client" }
 codex-build-info = { path = "build-info" }
 codex-chatgpt = { path = "chatgpt" }
-codex-client = { path = "codex-client" }
 codex-collaboration-mode-templates = { path = "collaboration-mode-templates" }
 codex-cloud-config = { path = "cloud-config" }
 codex-cloud-tasks-client = { path = "cloud-tasks-client" }
@@ -201,9 +194,7 @@ codex-code-mode = { path = "code-mode" }
 codex-code-mode-protocol = { path = "code-mode-protocol" }
 codex-code-mode-runtime = { path = "code-mode-runtime" }
 codex-home = { path = "codex-home" }
-codex-http-client = { path = "http-client" }
 codex-websocket-auth = { path = "websocket-auth" }
-codex-websocket-client = { path = "websocket-client" }
 codex-config = { path = "config" }
 codex-connectors = { path = "connectors" }
 codex-agent-extension = { path = "ext/agent" }
@@ -285,33 +276,24 @@ codex-tools = { path = "tools" }
 codex-tcp-tunnel = { path = "tcp-tunnel" }
 codex-tui = { path = "tui", default-features = false }
 codex-uds = { path = "uds" }
-codex-utils-absolute-path = { path = "utils/absolute-path" }
 codex-utils-approval-presets = { path = "utils/approval-presets" }
 codex-utils-audio = { path = "utils/audio" }
 codex-utils-cache = { path = "utils/cache" }
 codex-utils-cargo-bin = { path = "utils/cargo-bin" }
 codex-utils-cli = { path = "utils/cli" }
-codex-utils-elapsed = { path = "utils/elapsed" }
-codex-utils-fuzzy-match = { path = "utils/fuzzy-match" }
 codex-utils-git-discovery = { path = "utils/git-discovery" }
-codex-utils-home-dir = { path = "utils/home-dir" }
 codex-utils-image = { path = "utils/image" }
 codex-utils-json-to-toml = { path = "utils/json-to-toml" }
 codex-utils-oss = { path = "utils/oss" }
 codex-utils-output-truncation = { path = "utils/output-truncation" }
-codex-utils-path = { path = "utils/path-utils" }
-codex-utils-path-uri = { path = "utils/path-uri" }
 codex-utils-plugins = { path = "utils/plugins" }
 codex-utils-process = { path = "utils/process" }
 codex-utils-pty = { path = "utils/pty" }
 codex-utils-redacted-string = { path = "utils/redacted-string" }
-codex-utils-rustls-provider = { path = "utils/rustls-provider" }
 codex-utils-sandbox-summary = { path = "utils/sandbox-summary" }
 codex-worktree = { path = "worktree" }
 codex-utils-sleep-inhibitor = { path = "utils/sleep-inhibitor" }
-codex-utils-stream-parser = { path = "utils/stream-parser" }
 codex-utils-string = { path = "utils/string" }
-codex-utils-template = { path = "utils/template" }
 codex-user-verification = { path = "user-verification" }
 codex-v8-poc = { path = "v8-poc" }
 codex-workload-identity = { path = "workload-identity" }

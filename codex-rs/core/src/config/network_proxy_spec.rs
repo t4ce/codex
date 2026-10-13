@@ -22,7 +22,7 @@ use codex_network_proxy::managed_proxy_ports;
 use codex_network_proxy::normalize_host;
 use codex_network_proxy::validate_policy_against_constraints;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_path_uri::Platform;
+use codex_utils_paths::path_uri::Platform;
 use std::collections::HashSet;
 use std::sync::Arc;
 

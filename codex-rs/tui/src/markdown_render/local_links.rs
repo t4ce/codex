@@ -5,7 +5,7 @@
 //! relative to the session working directory when possible. This module only formats destinations;
 //! it does not resolve files or infer execution-host paths from the frontend filesystem.
 
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_string::normalize_markdown_hash_location_suffix;
 use regex_lite::Regex;
 use std::path::Path;

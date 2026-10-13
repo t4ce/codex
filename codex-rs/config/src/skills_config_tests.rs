@@ -3,9 +3,9 @@ use crate::ConfigLayerEntry;
 use crate::ConfigLayerSource;
 use crate::ConfigLayerStack;
 use crate::ConfigRequirementsToml;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::test_support::PathBufExt;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 

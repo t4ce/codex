@@ -4,7 +4,7 @@ use aws_config::BehaviorVersion;
 use aws_config::SdkConfig;
 use aws_credential_types::provider::SharedCredentialsProvider;
 use aws_types::region::Region;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 
 use crate::AwsAuthConfig;
 use crate::AwsAuthError;

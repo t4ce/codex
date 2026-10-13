@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use tokio::io;
 use uuid::Uuid;
 

@@ -2,7 +2,7 @@
 //! Export futures are revocable, including HTTP exporters driven from SDK worker threads.
 
 use bytes::Bytes;
-use codex_http_client::NetworkPolicy;
+use codex_transport::http::NetworkPolicy;
 use opentelemetry_http::HttpError;
 use opentelemetry_sdk::Resource;
 use opentelemetry_sdk::error::OTelSdkError;
@@ -24,7 +24,7 @@ pub(crate) struct PolicyExporter<E> {
     pub(crate) policy: NetworkPolicy,
 }
 
-fn denied(error: codex_http_client::NetworkPolicyDenied) -> OTelSdkError {
+fn denied(error: codex_transport::http::NetworkPolicyDenied) -> OTelSdkError {
     OTelSdkError::InternalFailure(error.to_string())
 }
 
@@ -79,7 +79,7 @@ impl<E: PushMetricExporter> PushMetricExporter for PolicyExporter<E> {
 /// Keeps blocking SDK worker threads from performing uncancellable HTTP I/O.
 #[derive(Debug)]
 pub(crate) struct RuntimeHttpClient {
-    pub(crate) client: codex_http_client::HttpClient,
+    pub(crate) client: codex_transport::http::HttpClient,
     pub(crate) timeout: Duration,
     pub(crate) runtime: tokio::runtime::Handle,
 }

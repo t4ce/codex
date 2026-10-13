@@ -31,7 +31,7 @@ use codex_tui::AppExitInfo;
 use codex_tui::Cli as TuiCli;
 use codex_tui::ExitReason;
 use codex_tui::UpdateAction;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use codex_utils_cli::ProfileV2Name;
 use codex_utils_cli::SharedCliOptions;
@@ -2371,7 +2371,7 @@ async fn print_app_server_daemon_output(command: AppServerLifecycleCommand) -> a
 
 fn updater_http_client_factory(
     config: anyhow::Result<codex_core::config::Config>,
-) -> anyhow::Result<codex_http_client::HttpClientFactory> {
+) -> anyhow::Result<codex_transport::http::HttpClientFactory> {
     let mut config = config?;
     codex_app_server::in_process::EmbeddedNetworkPolicy::default().activate(&mut config);
     Ok(config.http_client_factory())
@@ -2816,7 +2816,7 @@ mod tests {
             updater_http_client_factory(Ok(config))
                 .expect("updater configuration")
                 .outbound_proxy_policy(),
-            codex_http_client::OutboundProxyPolicy::RespectSystemProxy
+            codex_transport::http::OutboundProxyPolicy::RespectSystemProxy
         );
     }
 
@@ -2861,7 +2861,7 @@ enabled = true
                     .network_policy()
                     .acquire(&format!("https://{host}/").parse().expect("URL"))
                     .err(),
-                Some(codex_http_client::NetworkPolicyDenied::Destination)
+                Some(codex_transport::http::NetworkPolicyDenied::Destination)
             );
         }
         assert!(

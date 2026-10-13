@@ -1,6 +1,6 @@
 #![allow(warnings, clippy::all)]
 
-use codex_utils_path as path_utils;
+use codex_utils_paths::path as path_utils;
 use std::cmp::Reverse;
 use std::ffi::OsStr;
 use std::fmt;

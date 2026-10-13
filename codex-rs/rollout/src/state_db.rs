@@ -15,7 +15,7 @@ use codex_protocol::protocol::ThreadHistoryMode;
 pub use codex_state::LogEntry;
 use codex_state::SqliteConfig;
 use codex_state::ThreadMetadataBuilder;
-use codex_utils_path::normalize_for_path_comparison;
+use codex_utils_paths::path::normalize_for_path_comparison;
 use serde_json::Value;
 use std::path::Path;
 use std::path::PathBuf;

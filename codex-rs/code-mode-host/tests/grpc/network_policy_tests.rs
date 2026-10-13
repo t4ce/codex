@@ -1,9 +1,9 @@
 //! Destination admission and account revocation cover the gRPC request lifetime.
 
-use codex_http_client::DestinationPolicy;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::NetworkPolicyController;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::DestinationPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::NetworkPolicyController;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 
 use super::*;

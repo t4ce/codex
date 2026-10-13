@@ -37,7 +37,7 @@ use codex_protocol::config_types::ModeKind;
 use codex_protocol::config_types::SERVICE_TIER_DEFAULT_REQUEST_VALUE;
 use codex_protocol::config_types::Settings;
 use codex_protocol::openai_models::ReasoningEffort;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use serde_json::Value;

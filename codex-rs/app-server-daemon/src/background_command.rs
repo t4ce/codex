@@ -16,7 +16,7 @@ pub(crate) fn set_working_directory(command: &mut Command, state_dir: &Path) -> 
     if let Ok(value) = std::env::var("CODEX_HOME")
         && !value.is_empty()
     {
-        let home = codex_utils_home_dir::find_codex_home()?;
+        let home = codex_utils_paths::home_dir::find_codex_home()?;
         // Remove parent components without discarding a valid configured symlink alias.
         let absolute = std::path::absolute(value)?;
         let alias = home.join(&absolute);

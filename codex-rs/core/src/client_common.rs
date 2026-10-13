@@ -1,4 +1,4 @@
-pub use codex_api::ResponseEvent;
+pub use codex_transport::api::ResponseEvent;
 use codex_protocol::error::Result;
 use codex_protocol::models::BaseInstructions;
 use codex_protocol::models::ContentItem;

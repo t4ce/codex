@@ -13,7 +13,7 @@ use codex_protocol::ThreadId;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
 use codex_protocol::config_types::ShellEnvironmentPolicyInherit;
 use codex_shell_command::shell_detect::DetectedShell;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -1271,7 +1271,7 @@ mod tests {
     use codex_protocol::permissions::FileSystemSpecialPath;
     use codex_protocol::permissions::NetworkSandboxPolicy;
     use codex_protocol::sandbox::SandboxOverride;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
 

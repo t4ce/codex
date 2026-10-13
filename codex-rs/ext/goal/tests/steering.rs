@@ -12,7 +12,7 @@ use codex_protocol::models::ContentItem;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::ThreadGoal;
 use codex_protocol::protocol::ThreadGoalStatus;
-use codex_utils_template::Template;
+use codex_utils_text::template::Template;
 use pretty_assertions::assert_eq;
 
 #[test]

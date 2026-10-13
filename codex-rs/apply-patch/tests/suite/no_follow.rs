@@ -4,7 +4,7 @@ use codex_apply_patch::apply_patch_with_options;
 use codex_apply_patch::parse_patch;
 use codex_apply_patch::verify_apply_patch_args;
 use codex_exec_server::LOCAL_FS;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use std::fs;
 use std::os::unix::fs::symlink;

@@ -3,14 +3,14 @@ use std::sync::Mutex;
 
 use anyhow::Context;
 use anyhow::Result;
-use codex_api::AuthProvider;
+use codex_transport::api::AuthProvider;
 use codex_exec_server::ExecServerClient;
 use codex_exec_server::NoiseChannelIdentity;
 use codex_exec_server::NoiseRendezvousConnectArgs;
 use codex_exec_server::NoiseRendezvousConnectBundle;
 use codex_exec_server::RemoteEnvironmentConfig;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use http::HeaderMap;
 use http::HeaderValue;
 use tokio::net::TcpListener;
@@ -46,7 +46,7 @@ impl AuthProvider for StaticRegistryAuthProvider {
     }
 }
 
-pub(crate) fn static_registry_auth_provider() -> codex_api::SharedAuthProvider {
+pub(crate) fn static_registry_auth_provider() -> codex_transport::api::SharedAuthProvider {
     Arc::new(StaticRegistryAuthProvider)
 }
 

@@ -45,7 +45,7 @@ use crate::tools::ToolInfo;
 use anyhow::Result;
 use anyhow::anyhow;
 use async_channel::Sender;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_async_utils::CancelErr;
 use codex_async_utils::OrCancelExt;
 use codex_config::McpServerAuth;
@@ -1246,7 +1246,7 @@ pub(crate) async fn make_rmcp_client(
                 )) as Arc<dyn StdioServerLauncher>
             };
 
-            let cwd = cwd.map(codex_utils_path_uri::LegacyAppPathString::into_string);
+            let cwd = cwd.map(codex_utils_paths::path_uri::LegacyAppPathString::into_string);
             RmcpClient::new_stdio_client_with_protocol_mode(
                 command_os,
                 args_os,

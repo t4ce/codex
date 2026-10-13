@@ -5,7 +5,7 @@ use super::log_retry;
 use crate::realtime_history::RealtimeHistoryState;
 use crate::session::step_context::StepContext;
 use crate::session::tests::make_session_and_context;
-use codex_http_client::RetryAfter;
+use codex_transport::http::RetryAfter;
 use codex_protocol::error::CodexErr;
 use std::sync::Arc;
 use std::time::Duration;

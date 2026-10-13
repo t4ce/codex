@@ -7,7 +7,7 @@ use codex_protocol::protocol::Product;
 use codex_protocol::protocol::SkillScope;
 use codex_skills::LoadedSkillRoot;
 use codex_skills::SkillRootSnapshots;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::PluginSkillRoot;
 use codex_utils_plugins::migrated_command_skills_root;
 use futures::FutureExt;

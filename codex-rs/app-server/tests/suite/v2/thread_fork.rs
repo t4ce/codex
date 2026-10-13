@@ -82,7 +82,7 @@ use codex_rollout::append_rollout_item_to_path;
 use codex_rollout::append_thread_name;
 use codex_rollout::read_session_meta_line;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::responses;
 use pretty_assertions::assert_eq;
 use serde_json::Value;

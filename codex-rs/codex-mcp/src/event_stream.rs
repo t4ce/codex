@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use anyhow::bail;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_config::types::AuthKeyringBackendKind;
 use codex_config::types::OAuthCredentialsStoreMode;
 use codex_exec_server::Environment;

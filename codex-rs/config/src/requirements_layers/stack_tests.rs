@@ -9,7 +9,7 @@ use crate::ConfigRequirementsWithSources;
 use crate::RequirementSource;
 use crate::Sourced;
 use codex_protocol::protocol::AskForApproval;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use std::cell::Cell;
 use std::collections::BTreeMap;

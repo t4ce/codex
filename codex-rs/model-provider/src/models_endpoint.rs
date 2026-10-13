@@ -5,17 +5,17 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
-use codex_api::AgentIdentityTelemetry;
-use codex_api::ModelsClient;
-use codex_api::RequestTelemetry;
-use codex_api::ReqwestTransport;
-use codex_api::TransportError;
-use codex_api::auth_header_telemetry;
-use codex_api::map_api_error;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::ModelsClient;
+use codex_transport::api::RequestTelemetry;
+use codex_transport::api::ReqwestTransport;
+use codex_transport::api::TransportError;
+use codex_transport::api::auth_header_telemetry;
+use codex_transport::api::map_api_error;
 use codex_feedback::FeedbackRequestTags;
 use codex_feedback::emit_feedback_request_tags_with_auth_env;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthEnvTelemetry;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
@@ -165,7 +165,7 @@ impl OpenAiModelsEndpoint {
                 .await
                 .map_err(|mut error| {
                     if self.provider_info.model_catalog_url.is_some()
-                        && let codex_api::ApiError::Transport(TransportError::Http {
+                        && let codex_transport::api::ApiError::Transport(TransportError::Http {
                             url,
                             headers,
                             body,
@@ -401,7 +401,7 @@ mod tests {
     use std::sync::Mutex;
 
     use super::*;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::default_client::RESIDENCY_HEADER_NAME;
     use codex_login::default_client::ResidencyRequirement;
     use codex_login::default_client::create_client;

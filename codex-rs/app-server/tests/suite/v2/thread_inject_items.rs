@@ -30,7 +30,7 @@ use codex_protocol::models::ResponseItem;
 use codex_rollout::InitialHistory;
 use codex_rollout::RolloutItem;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::responses;
 use core_test_support::responses::strip_response_item_id;
 use core_test_support::responses::strip_response_item_ids_from_json;

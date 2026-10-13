@@ -6,7 +6,7 @@ use codex_git_utils::get_git_repo_root;
 use codex_plugin::PluginId;
 use codex_plugin::PluginIdError;
 use codex_protocol::protocol::Product;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 use serde_json::Map as JsonMap;
 use serde_json::Value as JsonValue;

@@ -5,7 +5,7 @@ use crate::thread_transcript::RawReasoningVisibility;
 use crate::thread_transcript::thread_items_to_transcript_cells;
 use codex_app_server_protocol::CommandAction;
 use codex_app_server_protocol::McpToolCallResult;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

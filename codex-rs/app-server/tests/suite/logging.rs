@@ -30,7 +30,7 @@ use codex_features::Feature;
 use codex_state::LogQuery;
 use codex_state::SqliteConfig;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::responses;
 use core_test_support::skip_if_no_network;
 use core_test_support::skip_if_wine_exec;

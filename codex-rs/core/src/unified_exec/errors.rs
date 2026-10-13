@@ -1,5 +1,5 @@
 use codex_protocol::exec_output::ExecToolCallOutput;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::num::NonZeroUsize;
 use thiserror::Error;
 

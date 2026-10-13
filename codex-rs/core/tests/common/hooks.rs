@@ -4,7 +4,7 @@ use codex_config::TomlValue;
 use codex_core::config::Config;
 use codex_features::Feature;
 use codex_hooks::HookListEntry;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 pub fn trust_discovered_hooks(config: &mut Config) {
     config

@@ -18,7 +18,7 @@ use codex_extension_api::ExtensionWarning;
 use codex_extension_api::TurnStartAdmission;
 use codex_goal_extension::GoalExtensionConfig;
 use codex_goal_extension::GoalService;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_protocol::ThreadId;
 use codex_protocol::protocol::Event;

@@ -2,7 +2,7 @@
 use super::*;
 use codex_state::SqliteConfig;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use tracing_subscriber::prelude::*;
 

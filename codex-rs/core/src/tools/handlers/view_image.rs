@@ -281,8 +281,8 @@ mod tests {
     use codex_protocol::permissions::FileSystemSandboxEntry;
     use codex_protocol::permissions::FileSystemSandboxPolicy;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use core_test_support::TempDirExt;
     use image::ImageBuffer;
     use image::ImageFormat;

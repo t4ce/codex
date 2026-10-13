@@ -34,8 +34,8 @@ fn credits_preserve_precision_and_order_signed_decimal_strings() {
 
 #[tokio::test]
 async fn task_queries_validate_request_groups_and_response_ownership() {
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use wiremock::Mock;
     use wiremock::MockServer;
     use wiremock::ResponseTemplate;

@@ -11,7 +11,7 @@ use codex_protocol::permissions::FileSystemPath;
 use codex_protocol::permissions::FileSystemSandboxEntry;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_sandboxing::SandboxType;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::sync::Arc;

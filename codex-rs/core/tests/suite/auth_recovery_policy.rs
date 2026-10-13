@@ -4,10 +4,10 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use codex_core::TurnInputRequest;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::NetworkPolicyController;
-use codex_http_client::NetworkPolicyDenied;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::NetworkPolicyController;
+use codex_transport::http::NetworkPolicyDenied;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthCredentialsStoreMode;
 use codex_login::AuthKeyringBackendKind;
 use codex_login::AuthManager;

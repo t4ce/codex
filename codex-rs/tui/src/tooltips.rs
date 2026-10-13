@@ -177,9 +177,9 @@ pub(crate) mod announcement {
     use crate::version::CODEX_CLI_VERSION;
     use chrono::NaiveDate;
     use chrono::Utc;
-    use codex_http_client::ClientRouteClass;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::RouteAwareClientPool;
+    use codex_transport::http::ClientRouteClass;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::RouteAwareClientPool;
     use codex_protocol::account::PlanType;
     use regex_lite::Regex;
     use serde::Deserialize;

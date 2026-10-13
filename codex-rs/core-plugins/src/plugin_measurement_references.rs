@@ -9,7 +9,7 @@ use crate::remote_bundle::install_remote_plugin_bundle;
 use crate::script_attribution::PluginMeasurementTarget;
 use codex_login::CodexAuth;
 use codex_plugin::PluginId;
-use codex_utils_path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathConvention;
 use std::sync::Arc;
 use tempfile::TempDir;
 use tokio::sync::Mutex;

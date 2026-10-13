@@ -13,10 +13,10 @@ pub use types::Event;
 pub use types::ResumeRequest;
 pub use types::RpcStatus;
 
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientBuilder;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientBuilder;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RouteAwareClientPool;
 use futures::StreamExt;
 use futures::stream::BoxStream;
 use http_body_util::BodyExt;

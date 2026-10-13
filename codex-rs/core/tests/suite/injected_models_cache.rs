@@ -9,7 +9,7 @@ use std::sync::atomic::Ordering;
 use anyhow::Result;
 use base64::Engine;
 use chrono::Utc;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider::create_model_provider;

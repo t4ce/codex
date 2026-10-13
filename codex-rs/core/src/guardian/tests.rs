@@ -62,8 +62,8 @@ use codex_protocol::protocol::EventMsg;
 use codex_protocol::protocol::GuardianAssessmentStatus;
 use codex_protocol::protocol::ReviewDecision;
 use codex_protocol::protocol::TurnCompleteEvent;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::PathBufExt;
 use core_test_support::TempDirExt;
 use core_test_support::context_snapshot;
@@ -1566,10 +1566,10 @@ fn guardian_write_stdin_preserves_input_and_foreign_cwd(
     Ok(())
 }
 
-#[test_case::test_case(codex_utils_path_uri::PathConvention::Windows, r"C:\workspace"; "windows")]
-#[test_case::test_case(codex_utils_path_uri::PathConvention::Posix, "/C:/workspace"; "posix")]
+#[test_case::test_case(codex_utils_paths::path_uri::PathConvention::Windows, r"C:\workspace"; "windows")]
+#[test_case::test_case(codex_utils_paths::path_uri::PathConvention::Posix, "/C:/workspace"; "posix")]
 fn guardian_exec_command_uses_executor_cwd_convention(
-    cwd_convention: codex_utils_path_uri::PathConvention,
+    cwd_convention: codex_utils_paths::path_uri::PathConvention,
     expected_cwd: &str,
 ) -> serde_json::Result<()> {
     let cwd = PathUri::parse("file:///C:/workspace").expect("valid executor cwd");

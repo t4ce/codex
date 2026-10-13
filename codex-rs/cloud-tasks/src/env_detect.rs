@@ -1,5 +1,5 @@
 use codex_git_utils::SanitizedGitUrl;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::RouteAwareClientPool;
 use http::StatusCode;
 use http::header::CONTENT_TYPE;
 use http::header::HeaderMap;

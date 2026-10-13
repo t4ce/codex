@@ -89,7 +89,7 @@ async fn non_utf8_cwd_preserves_approval_routing(
     use std::os::unix::ffi::OsStringExt;
 
     struct Contributor {
-        cwd: codex_utils_path_uri::LegacyAppPathString,
+        cwd: codex_utils_paths::path_uri::LegacyAppPathString,
         decision: ApprovalDecision,
     }
 
@@ -111,7 +111,7 @@ async fn non_utf8_cwd_preserves_approval_routing(
     let (mut session, turn, events) = make_session_and_context_with_rx().await;
     let mut extensions = codex_extension_api::ExtensionRegistryBuilder::new();
     extensions.approval_review_contributor(Arc::new(Contributor {
-        cwd: codex_utils_path_uri::LegacyAppPathString::from_path_uri(&cwd, PathConvention::Posix)?,
+        cwd: codex_utils_paths::path_uri::LegacyAppPathString::from_path_uri(&cwd, PathConvention::Posix)?,
         decision,
     }));
     Arc::get_mut(&mut session)
@@ -159,7 +159,7 @@ async fn non_utf8_cwd_preserves_approval_routing(
                 else {
                     panic!("expected a command approval prompt");
                 };
-                assert_eq!(request.cwd, codex_utils_path_uri::LegacyAppPathString::from(cwd));
+                assert_eq!(request.cwd, codex_utils_paths::path_uri::LegacyAppPathString::from(cwd));
                 assert_eq!(request.command, vec!["npm", "install"]);
                 session.notify_approval(&request.call_id, ReviewDecision::Approved).await;
             }

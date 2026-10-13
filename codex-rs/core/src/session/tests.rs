@@ -55,10 +55,10 @@ use core_test_support::test_codex::TurnInputRequest as ExternalTurnInputRequest;
 
 use codex_features::Feature;
 use codex_file_system::FileSystemSandboxContext;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RouteAwareClientPool;
 use codex_login::CodexAuth;
 use codex_login::auth::AgentIdentityAuthPolicy;
 use codex_model_provider::create_model_provider;
@@ -105,7 +105,7 @@ use codex_protocol::turn_input::TurnInputMode;
 use codex_protocol::turn_input::TurnInputRequest;
 use codex_protocol::turn_input::TurnInputSubmission;
 use codex_tools::ToolSpec;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::collections::BTreeMap;
 use tracing::Span;
 
@@ -1879,7 +1879,7 @@ async fn reload_user_config_layer_updates_base_and_selected_profile_layers() {
         config
             .config_layer_stack
             .get_user_config_file()
-            .map(codex_utils_absolute_path::AbsolutePathBuf::as_path),
+            .map(codex_utils_paths::absolute_path::AbsolutePathBuf::as_path),
         Some(profile_config_path.as_path())
     );
     let effective_user_config = config
@@ -5568,7 +5568,7 @@ async fn session_configuration_apply_permission_profile_accepts_direct_write_roo
     session_configuration.legacy_fallback_cwd = cwd.path().abs();
     let external_write_dir = tempfile::tempdir().expect("create external write root");
     let external_write_path = AbsolutePathBuf::from_absolute_path(
-        codex_utils_absolute_path::canonicalize_preserving_symlinks(external_write_dir.path())
+        codex_utils_paths::absolute_path::canonicalize_preserving_symlinks(external_write_dir.path())
             .expect("canonical temp dir"),
     )
     .expect("canonical temp dir should be absolute");
@@ -8414,7 +8414,7 @@ async fn primary_environment_uses_first_turn_environment() {
         .clone();
     #[allow(deprecated)]
     let second_cwd = turn_context.cwd.join("second");
-    let second_cwd_uri = codex_utils_path_uri::PathUri::from_abs_path(&second_cwd);
+    let second_cwd_uri = codex_utils_paths::path_uri::PathUri::from_abs_path(&second_cwd);
     let first_environment_config = first_environment.config().clone();
     turn_context
         .initial_environments
@@ -13372,7 +13372,7 @@ async fn session_start_hooks_only_load_from_trusted_project_layers() -> std::io:
         config_layer_stack: Some(config.config_layer_stack.clone()),
         ..codex_hooks::HooksConfig::default()
     });
-    let expected_source_path = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+    let expected_source_path = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
         nested_dot_codex.join("hooks.json"),
     )?;
     assert_eq!(

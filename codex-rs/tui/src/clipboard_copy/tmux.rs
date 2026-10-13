@@ -13,9 +13,9 @@ use std::path::Path;
 /// paste buffer, and forward the contents to the outer terminal clipboard when
 /// possible without relying on DCS passthrough.
 pub(super) fn copy(text: &str) -> Result<(), String> {
-    let executable = codex_utils_path::system_executable("tmux")
+    let executable = codex_utils_paths::path::system_executable("tmux")
         .ok_or_else(|| "tmux is unavailable in the system PATH".to_string())?;
-    let path = codex_utils_path::system_path()
+    let path = codex_utils_paths::path::system_path()
         .map_err(|error| format!("failed to resolve system PATH: {error}"))?;
     let pane = std::env::var("TMUX_PANE")
         .map_err(|_| "tmux clipboard forwarding is unavailable: no current pane".to_string())?;

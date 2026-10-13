@@ -4,8 +4,8 @@ use codex_protocol::permissions::FileSystemSandboxPolicyContext;
 use codex_protocol::permissions::FileSystemSpecialPath;
 use codex_protocol::protocol::NetworkAccess;
 use codex_protocol::protocol::SandboxPolicy;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 
 pub fn summarize_sandbox_policy(sandbox_policy: &SandboxPolicy) -> String {
     match sandbox_policy {
@@ -154,8 +154,8 @@ mod tests {
     use codex_protocol::permissions::FileSystemSandboxEntry;
     use codex_protocol::permissions::FileSystemSandboxPolicy;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::LegacyAppPathString;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::LegacyAppPathString;
     use pretty_assertions::assert_eq;
 
     #[test]

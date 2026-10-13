@@ -84,7 +84,7 @@ use codex_rollout::RolloutRecorder;
 use codex_rollout::append_rollout_item_to_path;
 use codex_state::PINNED_THREAD_SECTION_ID;
 use codex_state::PINNED_THREAD_SECTION_NAME;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use core_test_support::responses;
 use futures::poll;
 use pretty_assertions::assert_eq;

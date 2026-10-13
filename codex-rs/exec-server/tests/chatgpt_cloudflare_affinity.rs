@@ -158,7 +158,7 @@ async fn exec_server_replays_only_chatgpt_cloudflare_cookies() -> anyhow::Result
 
 impl TlsInterceptingProxy {
     fn start(expected_requests: usize) -> anyhow::Result<Self> {
-        codex_utils_rustls_provider::ensure_rustls_crypto_provider();
+        codex_network_foundation::ensure_rustls_crypto_provider();
         let material = generate_tls_material()?;
         let listener = TcpListener::bind(("127.0.0.1", 0))?;
         let address = listener.local_addr()?;

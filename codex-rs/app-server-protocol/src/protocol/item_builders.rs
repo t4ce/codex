@@ -38,7 +38,7 @@ use codex_protocol::review_format::render_review_output_text;
 use codex_secrets::redact_secrets;
 use codex_shell_command::parse_command::parse_command;
 use codex_shell_command::parse_command::shlex_join;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use tracing::warn;

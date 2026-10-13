@@ -2,8 +2,8 @@
 
 use std::time::Duration;
 
-use codex_api::ApiError;
-use codex_api::TransportError;
+use codex_transport::api::ApiError;
+use codex_transport::api::TransportError;
 use codex_core::context::GuardianContextMode;
 use codex_extension_api::ExtensionMetrics;
 

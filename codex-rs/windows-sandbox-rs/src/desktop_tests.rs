@@ -10,7 +10,7 @@ use crate::spawn_prep::prepare_legacy_session_security;
 use anyhow::Result;
 use codex_protocol::models::PermissionProfile;
 use codex_protocol::permissions::NetworkSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use rand::Rng;
 use rand::SeedableRng;

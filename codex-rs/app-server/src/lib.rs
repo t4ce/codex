@@ -11,7 +11,7 @@ use codex_core::config::UnsupportedUntrustedApprovalPolicyError;
 use codex_core::resolve_installation_id;
 use codex_login::AuthManager;
 #[cfg(debug_assertions)]
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -1569,7 +1569,7 @@ mod tests {
     #[cfg(debug_assertions)]
     use codex_config::LoaderOverrides;
     #[cfg(debug_assertions)]
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
 
     #[test]

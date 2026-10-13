@@ -1127,7 +1127,7 @@ mod tests {
     use codex_app_server_client::RemoteAppServerEndpoint;
     use codex_arg0::Arg0DispatchPaths;
     use codex_cloud_config::cloud_config_bundle_loader_for_storage;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use std::sync::Arc;
     use tempfile::TempDir;

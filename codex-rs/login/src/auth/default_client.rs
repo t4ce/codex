@@ -4,15 +4,15 @@
 //! Use [`crate::default_client`] or [`codex_login::default_client`] from other crates in this
 //! workspace.
 
-use codex_http_client::BuildRouteAwareHttpClientError;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientBuilder;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-pub use codex_http_client::RequestBuilder as CodexRequestBuilder;
-use codex_http_client::ReqwestTransport;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::BuildRouteAwareHttpClientError;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientBuilder;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+pub use codex_transport::http::RequestBuilder as CodexRequestBuilder;
+use codex_transport::http::ReqwestTransport;
+use codex_transport::http::RouteAwareClientPool;
 use codex_terminal_detection::user_agent;
 use http::HeaderMap;
 use http::HeaderValue;
@@ -275,7 +275,7 @@ fn create_client_for_route_with_builder(
     builder: HttpClientBuilder,
 ) -> Result<HttpClient, BuildRouteAwareHttpClientError> {
     if http_client_factory.network_policy().is_managed() {
-        let mut pool = codex_http_client::RouteAwareClientPool::with_builder(
+        let mut pool = codex_transport::http::RouteAwareClientPool::with_builder(
             http_client_factory.clone(),
             route_class,
             builder,

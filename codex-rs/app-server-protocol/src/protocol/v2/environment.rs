@@ -1,8 +1,8 @@
 use crate::JsonSchema;
 use crate::TS;
 use codex_protocol::protocol::TurnEnvironmentSelection;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_redacted_string::RedactedString;
 use serde::Deserialize;
 use serde::Serialize;

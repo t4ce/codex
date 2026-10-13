@@ -1,4 +1,4 @@
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -62,11 +62,11 @@ async fn sqlite_sink_filters_noisy_targets_without_dropping_useful_diagnostics()
         target: "codex_rmcp_client::oauth",
         "retained-codex-rmcp-client-info"
     );
-    tracing::trace!(target: "codex_http_client::transport", "dropped-request-body");
-    tracing::debug!(target: "codex_http_client::transport", "retained-request-diagnostic");
-    tracing::trace!(target: "codex_api::sse", "dropped-sse-parent");
-    tracing::trace!(target: "codex_api::sse::responses", "dropped-sse-payload");
-    tracing::debug!(target: "codex_api::sse::responses", "retained-sse-diagnostic");
+    tracing::trace!(target: "codex_transport::http::transport", "dropped-request-body");
+    tracing::debug!(target: "codex_transport::http::transport", "retained-request-diagnostic");
+    tracing::trace!(target: "codex_transport::api::sse", "dropped-sse-parent");
+    tracing::trace!(target: "codex_transport::api::sse::responses", "dropped-sse-payload");
+    tracing::debug!(target: "codex_transport::api::sse::responses", "retained-sse-diagnostic");
     tracing::trace!(target: "codex_state", "retained-trace");
     tracing::trace!(
         target: "codex_tui::streaming::controller",
@@ -89,7 +89,7 @@ async fn sqlite_sink_filters_noisy_targets_without_dropping_useful_diagnostics()
         "retained-commit-tick-trace"
     );
     tracing::trace!(
-        target: "codex_api::responses_websocket_timing",
+        target: "codex_transport::api::responses_websocket_timing",
         payload = "complete timing payload",
         "dropped-websocket-timing"
     );
@@ -145,12 +145,12 @@ async fn sqlite_sink_filters_noisy_targets_without_dropping_useful_diagnostics()
             ),
             (
                 "DEBUG",
-                "codex_http_client::transport",
+                "codex_transport::http::transport",
                 Some("retained-request-diagnostic")
             ),
             (
                 "DEBUG",
-                "codex_api::sse::responses",
+                "codex_transport::api::sse::responses",
                 Some("retained-sse-diagnostic")
             ),
             ("TRACE", "codex_state", Some("retained-trace")),

@@ -6,7 +6,7 @@ use codex_exec_server::ExecutorFileSystem;
 use codex_exec_server::FileSystemEnvironmentAccessor;
 use codex_exec_server::LOCAL_FS;
 use codex_skills::EnvironmentSkillMetadata;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 

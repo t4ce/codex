@@ -14,7 +14,7 @@ use crate::legacy_core::config::Config;
 use crate::tui::Tui;
 use codex_config::types::ResumeCwdMode;
 use codex_protocol::ThreadId;
-use codex_utils_path as path_utils;
+use codex_utils_paths::path as path_utils;
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ResolveCwdOutcome {

@@ -2,8 +2,8 @@
 
 use std::fmt;
 
-use codex_http_client::HttpError;
-use codex_http_client::HttpResponse;
+use codex_transport::http::HttpError;
+use codex_transport::http::HttpResponse;
 use http::StatusCode;
 use serde_json::Value;
 

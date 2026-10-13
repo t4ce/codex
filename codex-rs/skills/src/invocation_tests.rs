@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::test_support::PathBufExt;
-use codex_utils_absolute_path::test_support::test_path_buf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
+use codex_utils_paths::absolute_path::test_support::test_path_buf;
 use pretty_assertions::assert_eq;
 
 use super::*;

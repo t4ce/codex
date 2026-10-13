@@ -173,7 +173,7 @@ impl ChatWidget {
                     GuardianAssessmentAction::ApplyPatch { files, .. } => {
                         let files = files
                             .iter()
-                            .map(codex_utils_path_uri::LegacyAppPathString::render_for_ui)
+                            .map(codex_utils_paths::path_uri::LegacyAppPathString::render_for_ui)
                             .collect::<Vec<_>>();
                         history_cell::new_guardian_timed_out_patch_request(files)
                     }
@@ -223,7 +223,7 @@ impl ChatWidget {
                 GuardianAssessmentAction::ApplyPatch { files, .. } => {
                     let files = files
                         .iter()
-                        .map(codex_utils_path_uri::LegacyAppPathString::render_for_ui)
+                        .map(codex_utils_paths::path_uri::LegacyAppPathString::render_for_ui)
                         .collect::<Vec<_>>();
                     history_cell::new_guardian_denied_patch_request(files)
                 }

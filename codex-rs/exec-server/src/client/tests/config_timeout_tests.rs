@@ -15,7 +15,7 @@ use crate::protocol::INITIALIZED_METHOD;
 use crate::protocol::InitializeResponse;
 use codex_exec_server_protocol::JSONRPCMessage;
 use codex_exec_server_protocol::JSONRPCResponse;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tokio::io::AsyncBufReadExt;
 use tokio::io::BufReader;

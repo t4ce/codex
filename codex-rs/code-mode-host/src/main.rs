@@ -90,8 +90,8 @@ async fn main() -> anyhow::Result<()> {
 
 fn build_trace_provider(endpoint: &str) -> anyhow::Result<OtelProvider> {
     OtelProvider::try_new(&OtelSettings {
-        http_client_factory: codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        http_client_factory: codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         environment: "code-mode-host".to_string(),
         service_name: "codex-code-mode-host".to_string(),

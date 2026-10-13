@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use bytes::Bytes;
-use codex_http_client::HttpClientFactory;
-use codex_websocket_client::WebSocketConnector;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::websocket::WebSocketConnector;
 use futures::Sink;
 use futures::SinkExt;
 use futures::StreamExt;

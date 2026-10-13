@@ -3,7 +3,7 @@
 
 use crate::Client;
 use crate::RequestError;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::AuthManagerConfig;
 use codex_login::CodexAuth;

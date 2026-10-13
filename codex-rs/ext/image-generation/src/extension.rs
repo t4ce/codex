@@ -11,11 +11,11 @@ use codex_extension_api::ThreadStartInput;
 use codex_extension_api::ToolCall;
 use codex_extension_api::ToolContributor;
 use codex_extension_api::ToolExecutor;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_model_provider::create_model_provider;
 use codex_model_provider_info::ModelProviderInfo;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 use crate::backend::CodexImagesBackend;
 use crate::tool::ImageGenerationTool;

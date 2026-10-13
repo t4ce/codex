@@ -108,7 +108,7 @@ pub(super) async fn exercise(
     repository: &Path,
 ) -> color_eyre::Result<()> {
     let mut config = config.clone();
-    config.cwd = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+    config.cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
         dunce::canonicalize(repository)?,
     )?;
     config
@@ -145,7 +145,7 @@ pub(super) async fn exercise(
     server.thread_tool_transport().configure_mcp(&mut overrides);
     let overrides = overrides.unwrap();
     let mcp = &overrides["mcp_servers.codex_worktrees"];
-    let client = codex_http_client::HttpClientBuilder::new().build_direct()?;
+    let client = codex_transport::http::HttpClientBuilder::new().build_direct()?;
     tokio::time::timeout(Duration::from_secs(/*secs*/ 20), async {
         loop {
             let response = client.post(mcp["url"].as_str().unwrap())

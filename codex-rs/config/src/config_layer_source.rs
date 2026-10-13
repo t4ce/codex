@@ -1,4 +1,4 @@
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde_json::Value as JsonValue;
 
 /// Provenance for one layer in the effective Codex configuration.

@@ -11,10 +11,10 @@ mod runtime_catalog;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use codex_api::ApiError;
-use codex_api::Provider;
-use codex_api::SharedAuthProvider;
-use codex_api::TransportError;
+use codex_transport::api::ApiError;
+use codex_transport::api::Provider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::api::TransportError;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider_info::AMAZON_BEDROCK_GPT_5_6_LUNA_MODEL_ID;
@@ -63,7 +63,7 @@ pub(super) enum BedrockEndpoint {
 /// Runtime provider for Amazon Bedrock's OpenAI-compatible endpoints.
 #[derive(Clone, Debug)]
 pub(crate) struct AmazonBedrockModelProvider {
-    http_client_factory: codex_http_client::HttpClientFactory,
+    http_client_factory: codex_transport::http::HttpClientFactory,
     pub(crate) info: ModelProviderInfo,
     aws: ModelProviderAwsAuthInfo,
     endpoint: BedrockEndpoint,
@@ -116,8 +116,8 @@ impl AmazonBedrockModelProvider {
                     .with_network_policy(manager.application_network_policy())
             })
             .unwrap_or_else(|| {
-                codex_http_client::HttpClientFactory::new(
-                    codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+                codex_transport::http::HttpClientFactory::new(
+                    codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
                 )
             });
         let auth_manager = auth_manager_for_provider(auth_manager, &provider_info);

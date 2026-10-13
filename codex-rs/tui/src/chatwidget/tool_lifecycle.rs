@@ -5,7 +5,7 @@
 
 use super::*;
 use crate::thread_transcript::tools::McpHistory;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 
 impl ChatWidget {
     pub(super) fn on_patch_apply_begin(&mut self, changes: HashMap<PathBuf, FileChange>) {

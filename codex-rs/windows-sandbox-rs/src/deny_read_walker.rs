@@ -8,7 +8,7 @@
 
 use super::push_absolute_path;
 use codex_protocol::permissions::ReadDenyMatcher;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashSet;
 use std::fs::FileType;
 use std::io;

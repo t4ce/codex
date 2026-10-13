@@ -1,6 +1,6 @@
 use codex_exec_server_protocol::JSONRPCErrorError;
 use codex_sandboxing::SandboxExecRequest;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use tokio::io;
 
 use crate::fs_helper::FsHelperOpenParams;

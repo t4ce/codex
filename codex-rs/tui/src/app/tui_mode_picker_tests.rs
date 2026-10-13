@@ -5,7 +5,7 @@ use crate::app_event::AppEvent;
 use crate::chatwidget::tests::helpers::render_bottom_popup;
 use crate::legacy_core::config::ConfigBuilder;
 use codex_config::LoaderOverrides;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use crossterm::event::KeyCode;
 use pretty_assertions::assert_eq;
 

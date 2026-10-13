@@ -1,5 +1,5 @@
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 
 use super::PreparedEnvironmentManager;

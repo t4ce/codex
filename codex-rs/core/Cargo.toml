@@ -27,12 +27,11 @@ chrono = { workspace = true, features = ["serde"] }
 codex-analytics = { workspace = true }
 codex-agent-graph-store = { workspace = true }
 codex-agent-roles = { workspace = true }
-codex-api = { workspace = true }
+codex-transport = { workspace = true }
 codex-app-server-protocol = { workspace = true }
 codex-apply-patch = { workspace = true }
 codex-async-utils = { workspace = true }
 codex-attachment-store = { workspace = true }
-codex-client = { workspace = true }
 codex-code-mode = { workspace = true }
 codex-connectors = { workspace = true }
 codex-context-fragments = { workspace = true }
@@ -57,7 +56,6 @@ codex-guardian-context = { workspace = true }
 codex-guardian-reviewer = { workspace = true }
 codex-history = { workspace = true }
 codex-hooks = { workspace = true }
-codex-http-client = { workspace = true }
 codex-install-context = { workspace = true }
 codex-network-proxy = { workspace = true }
 codex-otel = { workspace = true }
@@ -78,19 +76,16 @@ codex-agent-message-board-client = { workspace = true }
 codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
 codex-tools = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-audio = { workspace = true, optional = true }
 codex-utils-cache = { workspace = true }
 codex-utils-git-discovery = { workspace = true }
 codex-utils-image = { workspace = true }
-codex-utils-home-dir = { workspace = true }
 codex-utils-output-truncation = { workspace = true }
-codex-utils-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
 codex-utils-plugins = { workspace = true }
 codex-utils-pty = { workspace = true }
 codex-utils-string = { workspace = true }
-codex-utils-stream-parser = { workspace = true }
+codex-utils-text = { workspace = true }
 codex-windows-sandbox = { package = "codex-windows-sandbox", path = "../windows-sandbox-rs" }
 dirs = { workspace = true }
 dunce = { workspace = true }

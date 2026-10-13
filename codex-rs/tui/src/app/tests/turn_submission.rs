@@ -400,7 +400,7 @@ async fn unsupported_legacy_permissions_are_shown_without_exiting() -> Result<()
     app.chat_widget
         .handle_thread_session(test_thread_session(thread_id, app.config.cwd.to_path_buf()));
 
-    let extra_root = codex_utils_absolute_path::AbsolutePathBuf::resolve_path_against_base(
+    let extra_root = codex_utils_paths::absolute_path::AbsolutePathBuf::resolve_path_against_base(
         "extra",
         app.config.cwd.as_path(),
     );

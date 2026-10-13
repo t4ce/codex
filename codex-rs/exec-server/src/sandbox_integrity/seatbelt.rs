@@ -5,7 +5,7 @@ use super::dependencies::codex_executable;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_sandboxing::SandboxExecRequest;
 use codex_sandboxing::SandboxType;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::io;
 use std::path::PathBuf;
 

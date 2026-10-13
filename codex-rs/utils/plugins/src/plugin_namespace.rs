@@ -5,7 +5,7 @@ use codex_exec_server::EnvironmentAccessExt;
 use codex_exec_server::GetMetadataOptions;
 use codex_exec_server::ReadFileOptions;
 use codex_exec_server_protocol::DISCOVERABLE_PLUGIN_MANIFEST_PATHS;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -126,8 +126,8 @@ mod tests {
     use super::plugin_namespace_for_root_uri;
     use codex_exec_server::FileSystemEnvironmentAccessor;
     use codex_exec_server::LOCAL_FS;
-    use codex_utils_absolute_path::test_support::PathBufExt;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::test_support::PathBufExt;
+    use codex_utils_paths::path_uri::PathUri;
     use std::fs;
     use tempfile::tempdir;
 

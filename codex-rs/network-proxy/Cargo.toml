@@ -21,10 +21,8 @@ anyhow = { workspace = true }
 base64 = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-home-dir = { workspace = true }
-codex-utils-path-uri = { workspace = true }
-codex-utils-rustls-provider = { workspace = true }
+codex-utils-paths = { workspace = true }
+codex-network-foundation = { workspace = true }
 globset = { workspace = true }
 opentelemetry = { workspace = true }
 rand = { workspace = true }

@@ -4,10 +4,10 @@ use std::sync::atomic::Ordering;
 use std::time::Duration;
 use std::time::Instant;
 
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientBuilder;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientBuilder;
+use codex_transport::http::HttpClientFactory;
 use serde::Deserialize;
 use tokio::sync::Mutex;
 use url::Host;
@@ -26,7 +26,7 @@ const TRANSIENT_FAILURE_RETRY_DELAY: Duration = Duration::from_secs(30);
 
 /// Exchanges assertions and retains only the current short-lived access token in memory.
 pub struct WorkloadIdentityExchange {
-    network_policy: codex_http_client::NetworkPolicy,
+    network_policy: codex_transport::http::NetworkPolicy,
     client: HttpClient,
     completed_attempts: AtomicU64,
     config: WorkloadIdentityConfig,

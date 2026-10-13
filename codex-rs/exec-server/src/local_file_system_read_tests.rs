@@ -5,7 +5,7 @@ use super::CancellableReader;
 use super::MAX_READ_FILE_BYTES;
 use crate::ReadFileOptions;
 use crate::local_file_system::LOCAL_FS;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use test_case::test_case;

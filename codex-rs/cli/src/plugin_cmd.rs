@@ -33,7 +33,7 @@ use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_plugin::PluginId;
 use codex_plugin::validate_plugin_segment;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use serde::Serialize;
 use std::collections::HashMap;

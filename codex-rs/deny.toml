@@ -233,11 +233,15 @@ deny = [
         "webrtc",
         "zbus",
     ], reason = "first-party traits must use native async trait methods with explicit Send bounds" },
-    # Migration ratchet: `codex-http-client` is the intended reqwest owner. Remove each temporary
+    # Migration ratchet: `codex-transport` owns reqwest execution. Remove each temporary
     # wrapper when that crate's direct reqwest dependency is migrated to the shared abstraction.
     { crate = "reqwest", wrappers = [
         # Intended owner.
-        "codex-http-client",
+        "codex-transport",
+        # Canonical reqwest error/source identity shared by protocol and transport.
+        "codex-network-foundation",
+        # Error conversion fixtures only; protocol never executes HTTP requests.
+        "codex-protocol",
         # Intentional exception: gRPC uses reqwest directly as tonic's HTTP/2 transport.
         "codex-code-mode",
         # Intentional exception: this standalone, privileged Responses API proxy owns its blocking
@@ -253,7 +257,7 @@ deny = [
         "rmcp",
         "sentry",
         "webrtc-sys-build",
-    ], reason = "new direct reqwest dependencies must use codex-http-client; temporary wrappers track migration debt" },
+    ], reason = "new direct reqwest dependencies must use codex-transport; temporary wrappers track migration debt" },
 ]
 
 # List of features to allow/deny

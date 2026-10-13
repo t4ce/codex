@@ -10,7 +10,7 @@ use codex_skills::EnvironmentSkillMetadata;
 use codex_skills::SkillDependencies;
 use codex_skills::SkillPolicy;
 use codex_skills::SkillToolDependency;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 

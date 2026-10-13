@@ -2,7 +2,7 @@
 
 use crate::ConfigLayerSource;
 use crate::ConfigLayerStack;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 /// Returns the opted-in home without consulting project config or rereading config files.
 pub fn allowed_symlinked_codex_home(

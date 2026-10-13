@@ -22,7 +22,7 @@ pub use transport::ExecServerListenUrlParseError;
 
 use crate::ExecServerRuntimeOptions;
 use crate::ExecServerTelemetry;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_websocket_auth::WebsocketAuthSettings;
 
 pub async fn run_main(
@@ -68,8 +68,8 @@ pub async fn run_main_with_telemetry(
 
 #[cfg(test)]
 mod tests {
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use opentelemetry::trace::TracerProvider as _;
     use opentelemetry_sdk::trace::InMemorySpanExporter;
     use opentelemetry_sdk::trace::SdkTracerProvider;

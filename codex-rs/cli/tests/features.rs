@@ -7,7 +7,7 @@ use app_test_support::write_chatgpt_auth;
 use codex_config::ConfigLoadOptions;
 use codex_config::types::AuthCredentialsStoreMode;
 use codex_core::config::load_config_toml_with_layer_stack;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use predicates::str::contains;
 use pretty_assertions::assert_eq;
 use serde_json::json;

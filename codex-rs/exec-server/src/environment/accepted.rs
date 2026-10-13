@@ -11,7 +11,7 @@ use crate::ExecServerError;
 use crate::client::LazyRemoteExecServerClient;
 use axum::extract::ws::WebSocket;
 use codex_config::ScopedSkillsConfig;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 
 impl EnvironmentManager {
     /// Builds a manager around a WebSocket already accepted and authenticated by its host.

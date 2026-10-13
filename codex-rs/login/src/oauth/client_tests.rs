@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 
 use base64::Engine;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientBuilder;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientBuilder;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::StatusCode;
@@ -250,16 +250,16 @@ fn decode_form(body: &[u8]) -> Value {
 async fn success_body_revocation_preserves_the_policy_error() {
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let endpoint = format!("http://{}", listener.local_addr().unwrap());
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     controller.publish(
         controller.policy().revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
-    let http = codex_http_client::HttpClientFactory::new(
-        codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+    let http = codex_transport::http::HttpClientFactory::new(
+        codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
     )
     .with_network_policy(controller.policy())
-    .build_client(&endpoint, codex_http_client::ClientRouteClass::Auth)
+    .build_client(&endpoint, codex_transport::http::ClientRouteClass::Auth)
     .unwrap();
     let server = async {
         let (mut stream, _) = listener.accept().await.unwrap();
@@ -277,7 +277,7 @@ async fn success_body_revocation_preserves_the_policy_error() {
         tokio::time::sleep(Duration::from_millis(/*millis*/ 50)).await;
         controller.publish(
             controller.policy().revision(),
-            codex_http_client::DestinationPolicy::Restricted {
+            codex_transport::http::DestinationPolicy::Restricted {
                 allowed_hosts: Default::default(),
             },
         );
@@ -296,8 +296,8 @@ async fn success_body_revocation_preserves_the_policy_error() {
     .unwrap();
     assert!(matches!(
         result,
-        Err(OAuthError::Transport(codex_http_client::HttpError::Policy(
-            codex_http_client::NetworkPolicyDenied::Revoked
+        Err(OAuthError::Transport(codex_transport::http::HttpError::Policy(
+            codex_transport::http::NetworkPolicyDenied::Revoked
         )))
     ));
 }

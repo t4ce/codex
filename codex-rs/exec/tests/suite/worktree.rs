@@ -2,7 +2,7 @@
 //! Observe ownership at the first model request, before the process can finish.
 
 use anyhow::Context;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_worktree::CreateWorktree;
 use codex_worktree::WorktreeManager;
 use codex_worktree::WorktreeSettings;

@@ -1,8 +1,8 @@
 //! Executor-specific absolute socket path validation, independent of the controller OS.
 //! Socket support and native path normalization remain executor runtime concerns.
 
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::Platform;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::Platform;
 
 pub(crate) fn socket_path_is_absolute(platform: Platform, path: &str) -> bool {
     // Core also accepts Unix-style absolute paths on Windows, for portability.

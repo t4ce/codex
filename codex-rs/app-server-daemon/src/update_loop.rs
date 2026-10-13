@@ -13,9 +13,9 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RouteAwareClientPool;
 use futures::FutureExt;
 #[cfg(unix)]
 use std::os::unix::process::CommandExt;

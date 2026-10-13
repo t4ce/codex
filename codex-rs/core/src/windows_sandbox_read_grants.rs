@@ -1,7 +1,7 @@
 use crate::windows_sandbox::run_setup_refresh_with_extra_read_roots;
 use anyhow::Result;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;

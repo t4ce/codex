@@ -13,7 +13,7 @@ use codex_file_system::ExecutorFileSystem;
 use codex_file_system::FileSystemSandboxContext;
 use codex_file_system::WalkEntryKind;
 use codex_file_system::WalkOptions;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use futures::StreamExt;
 use serde::Deserialize;
 use serde_json::Value;

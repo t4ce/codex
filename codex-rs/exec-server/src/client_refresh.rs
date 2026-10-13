@@ -126,7 +126,7 @@ impl LazyRemoteExecServerClient {
             .await
             .map_err(|_| {
                 ExecServerError::EnvironmentRegistryRequest(
-                    codex_http_client::RouteAwareRequestError::Timeout,
+                    codex_transport::http::RouteAwareRequestError::Timeout,
                 )
             })??;
             let executor_public_key = bundle.executor_public_key.clone();

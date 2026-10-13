@@ -10,8 +10,8 @@ use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::protocol::Product;
 use codex_protocol::protocol::SkillScope;
 use codex_skills::EnvironmentSkillMetadata;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use futures::StreamExt;
 
 use crate::catalog::SkillAuthority;

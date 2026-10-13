@@ -40,7 +40,7 @@ use codex_protocol::protocol::FileSystemSpecialPath;
 use codex_protocol::protocol::WritableRoot;
 use codex_sandboxing::find_executable_in_search_paths;
 use codex_sandboxing::find_pre_sandbox_executable_in_path;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use globset::GlobBuilder;
 use globset::GlobSet;
 use globset::GlobSetBuilder;
@@ -1580,7 +1580,7 @@ mod tests {
     use codex_protocol::protocol::FileSystemSandboxEntry;
     use codex_protocol::protocol::FileSystemSandboxPolicy;
     use codex_protocol::protocol::FileSystemSpecialPath;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use tempfile::TempDir;
 

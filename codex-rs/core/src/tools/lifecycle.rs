@@ -10,7 +10,7 @@ use codex_extension_api::ToolStartInput;
 use codex_file_system::ExecutorFileSystem;
 use codex_protocol::mcp::CallToolResult;
 use codex_tools::ToolName;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::guardian::tool_permission_context;
 use crate::session::session::Session;

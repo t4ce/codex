@@ -23,7 +23,7 @@ pub(super) fn decisions_sampler(
     use super::decisions::DecisionsError;
     use super::decisions::DecisionsSampler;
     use super::decisions::URL;
-    use codex_http_client::ClientRouteClass;
+    use codex_transport::http::ClientRouteClass;
     let result = decisions_api_key(
         &input.config.model_provider_id,
         input.config.model_provider.base_url.as_deref(),

@@ -1,6 +1,6 @@
 //! Live completion, cross-window edits and rebuildable-metadata isolation.
 use codex_protocol::ThreadId;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 
 use super::*;

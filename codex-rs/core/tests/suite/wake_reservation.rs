@@ -13,7 +13,7 @@ use codex_extension_api::TurnLifecycleContributor;
 use codex_extension_api::TurnStartInput;
 use codex_extension_api::TurnStopInput;
 use codex_extension_items::sleep::SleepItem;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_models_manager::ModelsManagerConfig;
 use codex_models_manager::bundled_models_response;

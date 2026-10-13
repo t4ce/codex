@@ -16,7 +16,7 @@ use axum::response::IntoResponse;
 use axum::response::Response;
 use axum::routing::any;
 use axum::routing::get;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_websocket_auth::WebsocketAuthPolicy;
 use codex_websocket_auth::WebsocketAuthSettings;
 use codex_websocket_auth::authorize_upgrade;

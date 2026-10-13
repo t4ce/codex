@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 use codex_features::Feature;
-use codex_http_client::cache_system_proxy_route_for_test;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use codex_login::CodexAuth;
 use codex_models_manager::bundled_models_response;
 use codex_protocol::protocol::CodexResponseHandoffMode;

@@ -5,7 +5,7 @@ use chrono::DateTime;
 use chrono::Duration as ChronoDuration;
 use chrono::TimeZone;
 use chrono::Utc;
-use codex_http_client::HttpResponse;
+use reqwest::Response as HttpResponse;
 use http::Response as RawHttpResponse;
 use http::StatusCode;
 use pretty_assertions::assert_eq;
@@ -277,6 +277,7 @@ fn to_error_event_handles_response_stream_failed() {
         .unwrap();
     let mut source = HttpResponse::from(response)
         .error_for_status_ref()
+        .map_err(HttpError::from)
         .unwrap_err();
     *source.url_mut().unwrap() = "http://example.com".parse().unwrap();
     let err = CodexErr::ResponseStreamFailed(ResponseStreamFailed {

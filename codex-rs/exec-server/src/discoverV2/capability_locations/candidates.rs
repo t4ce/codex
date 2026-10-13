@@ -7,7 +7,7 @@ use super::discover_cached_plugins;
 use crate::LocalFileSystem;
 use codex_file_system::ExecutorFileSystem;
 use codex_file_watcher::WatchPath;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::io;
 
 const MAX_LOCATION_WARNINGS: usize = 64;

@@ -5,7 +5,7 @@ use crate::marketplace::validate_marketplace_root;
 use codex_config::CONFIG_TOML_FILE;
 use codex_config::MarketplaceConfigUpdate;
 use codex_config::record_user_marketplace;
-use codex_utils_path::paths_match_after_normalization;
+use codex_utils_paths::path::paths_match_after_normalization;
 use std::fs;
 use std::io::ErrorKind;
 use std::path::Path;
@@ -282,7 +282,7 @@ mod tests {
         );
         let canonical = source.path().canonicalize().unwrap();
         let legacy =
-            codex_utils_absolute_path::normalize_windows_device_path(&canonical.to_string_lossy())
+            codex_utils_paths::absolute_path::normalize_windows_device_path(&canonical.to_string_lossy())
                 .unwrap();
         for spelling in [
             canonical.to_string_lossy().into_owned(),

@@ -92,7 +92,7 @@ fn backup_folder(backups: &[RuntimeDbBackup]) -> Option<&Path> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use std::path::PathBuf;
     use tempfile::TempDir;

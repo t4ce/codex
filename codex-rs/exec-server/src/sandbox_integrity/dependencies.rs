@@ -1,6 +1,6 @@
 //! Shared inventory entries and filesystem facts, independent of any checker.
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::fs;
 use std::io;
 use std::path::PathBuf;

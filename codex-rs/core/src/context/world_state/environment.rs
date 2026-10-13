@@ -12,7 +12,7 @@ use crate::session::turn_context::TurnContext;
 use crate::shell::ShellType;
 use codex_features::Feature;
 use codex_protocol::models::ContentItemKind;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::BTreeMap;

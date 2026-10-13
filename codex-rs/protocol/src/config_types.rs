@@ -1,4 +1,4 @@
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_redacted_string::RedactedString;
 use schemars::JsonSchema;
 use schemars::r#gen::SchemaGenerator;

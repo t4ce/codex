@@ -5,8 +5,8 @@
 //! helper mode because sandboxed process requests re-exec this binary.
 
 use codex_exec_server::ExecServerRuntimeOptions;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use std::ffi::OsStr;
 
 const CODEX_LINUX_SANDBOX_EXE_ENV_VAR: &str = "CODEX_TEST_LINUX_SANDBOX_EXE";

@@ -1,7 +1,7 @@
 use super::*;
 use base64::Engine;
-use codex_http_client::DestinationPolicy;
-use codex_http_client::NetworkPolicyController;
+use codex_transport::http::DestinationPolicy;
+use codex_transport::http::NetworkPolicyController;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 
@@ -114,7 +114,7 @@ async fn captured_credentials_are_revoked_if_account_changes_before_client_const
     let client = crate::default_client::create_client_for_route_async(
         factory,
         "https://example.com/".to_string(),
-        codex_http_client::ClientRouteClass::Api,
+        codex_transport::http::ClientRouteClass::Api,
         crate::default_client::ClientRedirectPolicy::Default,
     )
     .await
@@ -126,8 +126,8 @@ async fn captured_credentials_are_revoked_if_account_changes_before_client_const
             .bearer_auth(auth.get_token().unwrap())
             .send()
             .await,
-        Err(codex_http_client::RouteAwareRequestError::Policy(
-            codex_http_client::NetworkPolicyDenied::Revoked
+        Err(codex_transport::http::RouteAwareRequestError::Policy(
+            codex_transport::http::NetworkPolicyDenied::Revoked
         ))
     ));
 }

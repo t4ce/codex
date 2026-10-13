@@ -9,7 +9,7 @@ use super::sampler::LunaSamplingRequest;
 use codex_context_fragments::RenderedFragment;
 use codex_guardian_context::TrustedTool;
 use codex_history::ResponseItemEnvelope;
-use codex_http_client::HttpClient;
+use codex_transport::http::HttpClient;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ImageReference;
 use codex_protocol::models::ResponseItem;

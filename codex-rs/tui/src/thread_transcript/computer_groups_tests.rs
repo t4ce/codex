@@ -7,7 +7,7 @@ use crate::thread_transcript::thread_items_to_transcript_cells;
 use codex_app_server_protocol::ThreadItem;
 use codex_app_server_protocol::TurnItemsView;
 use codex_app_server_protocol::TurnStatus;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 
 fn computer(id: &str) -> ThreadItem {

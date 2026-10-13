@@ -13,7 +13,7 @@ use anyhow::Result;
 use anyhow::bail;
 use codex_protocol::config_types::WindowsSandboxLevel;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_pty::SpawnedProcess;
 use std::collections::HashMap;
 use std::path::Path;

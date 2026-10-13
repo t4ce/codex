@@ -23,7 +23,7 @@ use codex_extension_api::LoadInstructionsFuture;
 use codex_extension_api::LoadedUserInstructions;
 use codex_extension_api::ThreadInstructionsProvider;
 use codex_extension_api::UserInstructionsProvider;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_models_manager::ModelsManagerConfig;
 use codex_models_manager::bundled_models_response;
@@ -167,7 +167,7 @@ async fn next_step_waits_for_environment_publication_before_capturing() {
     let ActivationFixture { session, turn, .. } = activation_fixture(activation_models()).await;
     let next_cwd = turn.config.cwd.join("next-step-environment");
     std::fs::create_dir_all(&next_cwd).expect("create next workspace");
-    let next_cwd = codex_utils_path_uri::PathUri::from_abs_path(&next_cwd);
+    let next_cwd = codex_utils_paths::path_uri::PathUri::from_abs_path(&next_cwd);
     let mut selections = session.services.turn_environments.selections();
     let primary = selections.first_mut().expect("initial environment");
     assert_ne!(primary.cwd, next_cwd);

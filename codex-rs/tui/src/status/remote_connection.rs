@@ -173,7 +173,7 @@ pub(crate) fn sanitized_websocket_url(raw: &str) -> Option<Url> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
 
     #[test]

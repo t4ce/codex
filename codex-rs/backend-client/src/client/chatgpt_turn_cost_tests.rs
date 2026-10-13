@@ -1,8 +1,8 @@
 //! Exercises both authenticated SiWC routes and preserves nullable/omitted estimate fields.
 
 use super::*;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::CodexAuth;
 use pretty_assertions::assert_eq;
 use wiremock::Mock;

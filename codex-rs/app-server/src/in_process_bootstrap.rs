@@ -12,8 +12,8 @@ use std::sync::Arc;
 /// Policy shared by transports created before and owned by the embedded app-server.
 #[derive(Clone, Default)]
 pub struct EmbeddedNetworkPolicy {
-    pub(crate) effective: codex_http_client::NetworkPolicyController,
-    pub(crate) local: codex_http_client::NetworkPolicyController,
+    pub(crate) effective: codex_transport::http::NetworkPolicyController,
+    pub(crate) local: codex_transport::http::NetworkPolicyController,
 }
 
 impl EmbeddedNetworkPolicy {
@@ -43,8 +43,8 @@ impl EmbeddedNetworkPolicy {
     /// Attaches the live application policy before an environment can start connecting.
     pub fn bind(
         &self,
-        factory: codex_http_client::HttpClientFactory,
-    ) -> codex_http_client::HttpClientFactory {
+        factory: codex_transport::http::HttpClientFactory,
+    ) -> codex_transport::http::HttpClientFactory {
         factory.with_network_policy(self.effective.policy())
     }
 

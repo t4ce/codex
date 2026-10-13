@@ -46,7 +46,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use unicode_segmentation::UnicodeSegmentation;
 
 /// Replacement for a tab character in rendered diff content.

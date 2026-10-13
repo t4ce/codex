@@ -370,8 +370,8 @@ mod option_duration_secs {
 #[cfg(test)]
 mod tests {
     use crate::EnvironmentManager;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use pretty_assertions::assert_eq;
     use tempfile::tempdir;
 

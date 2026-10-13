@@ -1,7 +1,7 @@
 use crate::script_attribution::normalized_relative_script_path;
 use codex_plugin::PluginId;
 use codex_protocol::items::is_safe_plugin_relative_path;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;

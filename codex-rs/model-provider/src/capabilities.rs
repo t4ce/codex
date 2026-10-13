@@ -1,6 +1,6 @@
 //! Provider capability defaults and resolution of custom provider overrides.
 
-use codex_api::is_azure_responses_provider;
+use codex_transport::api::is_azure_responses_provider;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::RemoteCompactionSupport;
 

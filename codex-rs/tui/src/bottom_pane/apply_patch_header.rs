@@ -4,7 +4,7 @@ use super::approval_overlay::ApplyPatchApprovalRequest;
 use crate::diff_model::FileChange;
 use crate::render::renderable::Renderable;
 use crate::terminal_hyperlinks::HyperlinkText;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 

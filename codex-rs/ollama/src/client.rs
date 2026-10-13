@@ -13,12 +13,12 @@ use crate::pull::PullProgressReporter;
 use crate::url::base_url_to_host_root;
 use crate::url::is_openai_compatible_base_url;
 use codex_core::config::Config;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 #[cfg(test)]
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::RouteAwareClientPool;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RouteAwareClientPool;
+use codex_transport::http::RouteAwareRequestError;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::OLLAMA_OSS_PROVIDER_ID;
 #[cfg(test)]
@@ -480,7 +480,7 @@ mod tests {
         let proxy = wiremock::MockServer::start().await;
         let base_url = "http://ollama-proxy.invalid";
         let request_url = format!("{base_url}/api/tags");
-        codex_http_client::cache_system_proxy_route_for_test(&request_url, proxy.uri());
+        codex_transport::http::cache_system_proxy_route_for_test(&request_url, proxy.uri());
 
         wiremock::Mock::given(wiremock::matchers::method("GET"))
             .and(wiremock::matchers::path("/api/tags"))

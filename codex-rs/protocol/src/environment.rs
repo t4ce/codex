@@ -12,8 +12,8 @@ use crate::protocol::AskForApproval;
 use crate::sandbox::SandboxType;
 use codex_execpolicy::RequirementsExecPolicy;
 use codex_network_proxy::EnvironmentNetworkPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 
 /// An environment requested by a caller, before attaching the receiving thread's roots.
 ///

@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use codex_code_mode_protocol::grpc::code_mode_host_client::CodeModeHostClient;
 use codex_code_mode_protocol::host::MAX_FRAME_BYTES;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 use http_body_util::BodyExt;
 use tonic::Status;
 use tonic::body::Body;
@@ -92,10 +92,10 @@ impl SharedTransport {
             let origin: Uri = endpoint
                 .parse()
                 .map_err(|error| format!("invalid gRPC code-mode host origin: {error}"))?;
-            let client = codex_http_client::RouteAwareClientPool::with_builder(
+            let client = codex_transport::http::RouteAwareClientPool::with_builder(
                 bound_factory.clone(),
                 ClientRouteClass::Other,
-                codex_http_client::HttpClientBuilder::new()
+                codex_transport::http::HttpClientBuilder::new()
                     .without_request_logging()
                     .http2_prior_knowledge()
                     .without_redirects(),
@@ -115,7 +115,7 @@ impl SharedTransport {
                             // headers arrive. Keep these distinct from RPC errors.
                             let mut status = if matches!(
                                 &error,
-                                codex_http_client::HttpError::Request(error)
+                                codex_transport::http::HttpError::Request(error)
                                     if error.is_connect() || error.is_request()
                             ) {
                                 Status::unavailable(error.to_string())

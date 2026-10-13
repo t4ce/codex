@@ -1,6 +1,6 @@
 //! Shared findings for policy-based containment integrity checks.
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 /// A containment dependency and the effective write grants responsible for a finding.
 #[derive(Clone, Debug, PartialEq, Eq)]

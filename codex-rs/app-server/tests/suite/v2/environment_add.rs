@@ -98,7 +98,7 @@ async fn selected_environment_emits_connection_lifecycle_notifications() -> Resu
 
     let environment = TurnEnvironmentParams {
         environment_id: "remote-a".to_string(),
-        cwd: codex_utils_absolute_path::AbsolutePathBuf::try_from(codex_home.path().to_path_buf())?
+        cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(codex_home.path().to_path_buf())?
             .into(),
         runtime_workspace_roots: None,
     };

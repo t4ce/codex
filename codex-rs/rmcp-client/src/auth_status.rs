@@ -315,8 +315,8 @@ mod tests {
     use codex_exec_server::HttpRequestResponse;
     use codex_exec_server::HttpResponseBodyStream;
     use codex_exec_server::RouteAwareHttpClient;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use futures::future::BoxFuture;
     use pretty_assertions::assert_eq;
     use serial_test::serial;

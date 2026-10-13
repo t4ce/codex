@@ -1,4 +1,4 @@
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::io::ErrorKind;

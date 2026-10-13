@@ -1,5 +1,5 @@
 use codex_config::config_toml::ConfigToml;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
 use serde::Deserialize;
 use std::collections::BTreeSet;
 use std::path::Path;

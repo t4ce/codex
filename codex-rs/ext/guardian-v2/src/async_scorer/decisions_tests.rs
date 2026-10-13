@@ -3,7 +3,7 @@ use codex_context_fragments::AnnotatedContent;
 use codex_context_fragments::ContextualUserFragment;
 use codex_guardian_context::TrustedTool;
 use codex_guardian_context::TrustedToolSource;
-use codex_http_client::HttpClientBuilder;
+use codex_transport::http::HttpClientBuilder;
 use codex_protocol::models::ContentItemKind;
 use pretty_assertions::assert_eq;
 use wiremock::Mock;

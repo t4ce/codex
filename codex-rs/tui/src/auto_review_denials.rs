@@ -86,8 +86,8 @@ pub(crate) fn action_summary(action: &GuardianAssessmentAction) -> String {
 #[cfg(test)]
 mod tests {
     use codex_protocol::approvals::GuardianCommandSource;
-    use codex_utils_absolute_path::test_support::PathBufExt;
-    use codex_utils_absolute_path::test_support::test_path_buf;
+    use codex_utils_paths::absolute_path::test_support::PathBufExt;
+    use codex_utils_paths::absolute_path::test_support::test_path_buf;
     use pretty_assertions::assert_eq;
 
     use super::*;

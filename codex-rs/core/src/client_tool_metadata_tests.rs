@@ -1,7 +1,7 @@
 use super::*;
-use codex_api::ResponseCreateWsRequest;
-use codex_api::ResponsesApiRequest;
-use codex_api::ResponsesWsRequest;
+use codex_transport::api::ResponseCreateWsRequest;
+use codex_transport::api::ResponsesApiRequest;
+use codex_transport::api::ResponsesWsRequest;
 use codex_protocol::models::ExecutedToolCall;
 use codex_protocol::models::FunctionCallOutputPayload;
 use codex_protocol::models::ResponseInputItem;

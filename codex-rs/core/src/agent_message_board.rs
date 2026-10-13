@@ -22,7 +22,7 @@ use codex_agent_message_board_extension::PostPreview;
 use codex_extension_api::ExtensionRegistryBuilder;
 use codex_extension_api::ThreadStartInput;
 use codex_features::Feature;
-use codex_http_client::ClientRouteClass;
+use codex_transport::http::ClientRouteClass;
 use codex_protocol::AgentPath;
 use codex_protocol::SessionId;
 use codex_protocol::ThreadId;

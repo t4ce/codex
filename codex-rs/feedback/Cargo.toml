@@ -8,7 +8,7 @@ license.workspace = true
 default = []
 external-reporting = [
     "dep:bytes",
-    "dep:codex-http-client",
+    "dep:codex-transport",
     "dep:flate2",
     "dep:http",
     "dep:httpdate",
@@ -22,7 +22,7 @@ workspace = true
 [dependencies]
 anyhow = { workspace = true }
 bytes = { workspace = true, optional = true }
-codex-http-client = { workspace = true, optional = true }
+codex-transport = { workspace = true, optional = true }
 codex-login = { workspace = true }
 codex-protocol = { workspace = true }
 codex-rollout = { workspace = true }

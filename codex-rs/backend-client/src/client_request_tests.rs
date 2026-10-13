@@ -6,9 +6,9 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::Duration;
 
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::cache_system_proxy_route_for_test;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use pretty_assertions::assert_eq;
 use wiremock::Mock;
 use wiremock::MockServer;
@@ -21,7 +21,7 @@ use super::*;
 
 #[tokio::test]
 async fn client_preserves_supplied_factory_and_typed_policy_denial() {
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let client = Client::new(
         "https://example.test",
         HttpClientFactory::new(OutboundProxyPolicy::RespectSystemProxy)
@@ -309,7 +309,7 @@ async fn bootstrap_gets_preserve_network_policy_with_fallback_enabled() {
             proxy.uri(),
         );
     }
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let client = Client::new(
         issuer.uri(),
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault)

@@ -19,7 +19,7 @@ mod success_page;
 pub use callback_params::LoginCallbackResult;
 pub use callback_params::LoginOnboardingEntrypoint;
 pub use codex_config::types::AuthCredentialsStoreMode;
-pub use codex_http_client::BuildCustomCaTransportError as BuildLoginHttpClientError;
+pub use codex_transport::http::BuildCustomCaTransportError as BuildLoginHttpClientError;
 pub use device_code_auth::DeviceCode;
 pub use device_code_auth::complete_device_code_login;
 pub use device_code_auth::request_device_code;

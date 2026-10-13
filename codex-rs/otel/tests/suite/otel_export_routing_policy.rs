@@ -1,4 +1,4 @@
-use codex_api::AgentIdentityTelemetry;
+use codex_transport::api::AgentIdentityTelemetry;
 use codex_otel::AuthEnvTelemetryMetadata;
 use codex_otel::OtelProvider;
 use codex_otel::SessionTelemetry;

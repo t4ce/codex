@@ -20,7 +20,7 @@ use crate::compose_requirements;
 use crate::default_project_root_markers;
 use crate::merge_toml_values;
 use codex_file_system::ExecutorFileSystem;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::Path;

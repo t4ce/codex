@@ -21,7 +21,7 @@ use codex_app_server_protocol::ThreadTurnsListParams;
 use codex_app_server_protocol::ThreadTurnsListResponse;
 use codex_app_server_protocol::TurnItemsView;
 use codex_protocol::ThreadId;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use color_eyre::eyre::Result;
 
 // Bound recovery to recent messages when item paging is unavailable.

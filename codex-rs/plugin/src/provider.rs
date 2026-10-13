@@ -1,7 +1,7 @@
 //! Authority-bound plugin descriptors and resource locations.
 
 use crate::manifest::PluginManifest;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use thiserror::Error;
 
 /// A plugin resource paired with the environment that owns its filesystem.

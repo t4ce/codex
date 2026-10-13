@@ -1,5 +1,5 @@
-use codex_http_client::HttpClientFactory;
-use codex_http_client::NetworkPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::NetworkPolicy;
 
 /// Auth-layer adapter around client-owned proxy policy.
 ///

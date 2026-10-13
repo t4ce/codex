@@ -1,7 +1,7 @@
 //! Restores compacted retained evidence and checks complete synchronous requests.
 //! Restored records are budgeted and persisted before sampling, including continuations.
 
-use codex_api::ResponsesApiRequest;
+use codex_transport::api::ResponsesApiRequest;
 use codex_context_fragments::set_annotated_content;
 use codex_guardian_context::HistoryTruncation;
 use codex_guardian_context::REQUEST_TOKENS_BOUNDARIES;

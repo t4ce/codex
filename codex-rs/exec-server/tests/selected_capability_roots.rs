@@ -8,7 +8,7 @@ use std::sync::Arc;
 use codex_exec_server_test_support::environment_manager_without_environments;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use common::exec_server::exec_server;
 use pretty_assertions::assert_eq;
 

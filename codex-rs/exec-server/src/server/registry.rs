@@ -1,6 +1,6 @@
 use codex_file_system::FileSystemSandboxContext;
 use codex_file_system::WireFileSystemSandboxContext;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use opentelemetry::trace::TraceContextExt;
 use std::sync::Arc;
 

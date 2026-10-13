@@ -5,7 +5,7 @@ use super::dependencies::codex_and_launcher_dependencies;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_sandboxing::SandboxExecRequest;
 use codex_sandboxing::SandboxType;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::io;
 
 pub(super) const SANDBOX_TYPE: SandboxType = SandboxType::WindowsMxc;

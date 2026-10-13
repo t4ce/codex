@@ -6,7 +6,7 @@ use codex_config::types::ApprovalsReviewer;
 use codex_config::types::FeedbackConfigToml;
 use codex_features::FeatureToml;
 use codex_login::default_client::RESIDENCY_HEADER_NAME;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashMap;
 use std::path::Path;
 

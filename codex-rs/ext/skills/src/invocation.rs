@@ -6,8 +6,8 @@ use codex_extension_api::ExtensionData;
 use codex_skills::ImplicitSkillAccess;
 use codex_skills::detect_implicit_skill_invocation_for_command;
 use codex_skills::implicit_skill_accesses_for_command;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::HostSkillsSnapshot;
 use crate::catalog::SkillSourceKind;

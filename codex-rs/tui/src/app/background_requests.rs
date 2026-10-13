@@ -30,7 +30,7 @@ use codex_app_server_protocol::RequestId;
 use crate::hooks_rpc::fetch_hooks_list;
 use crate::hooks_rpc::write_hook_trust;
 use crate::hooks_rpc::write_hook_trusts;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 pub(super) const THREAD_USAGE_FETCH_TIMEOUT: std::time::Duration =
     std::time::Duration::from_secs(/*secs*/ 65);
@@ -1361,7 +1361,7 @@ mod tests {
     use codex_app_server_protocol::ThreadUsage;
     use codex_config::types::AuthCredentialsStoreMode;
     use codex_protocol::mcp::Tool;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
 
     #[tokio::test]

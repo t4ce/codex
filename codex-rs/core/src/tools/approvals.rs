@@ -38,9 +38,9 @@ use codex_protocol::protocol::NetworkPolicyRuleAction;
 use codex_protocol::protocol::ReviewDecision;
 use codex_protocol::request_permissions::RequestPermissionProfile;
 use codex_tools::ToolName;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -276,7 +276,7 @@ impl ApprovalAction {
                 id,
                 environment_id,
                 command,
-                guardian_cwd: codex_utils_path_uri::LegacyAppPathString::from_path_uri(
+                guardian_cwd: codex_utils_paths::path_uri::LegacyAppPathString::from_path_uri(
                     &cwd,
                     exec_command_cwd_convention.ok_or_else(|| {
                         std::io::Error::other("missing exec command cwd convention")

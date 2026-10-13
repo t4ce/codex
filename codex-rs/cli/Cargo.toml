@@ -96,7 +96,7 @@ codex-app-server-protocol = { workspace = true }
 codex-app-server-test-client = { workspace = true }
 codex-arg0 = { workspace = true }
 codex-build-info = { workspace = true }
-codex-api = { workspace = true }
+codex-transport = { workspace = true }
 codex-aws-auth = { workspace = true, optional = true }
 codex-chatgpt = { workspace = true }
 codex-cloud-config = { workspace = true }
@@ -107,7 +107,6 @@ codex-core = { workspace = true }
 codex-core-plugins = { workspace = true }
 codex-history = { workspace = true }
 codex-home = { workspace = true }
-codex-http-client = { workspace = true }
 codex-exec = { workspace = true }
 codex-exec-server = { workspace = true }
 codex-execpolicy = { workspace = true }
@@ -135,9 +134,7 @@ codex-stdio-to-uds = { workspace = true }
 codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
 codex-tui = { path = "../tui", default-features = false }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-redacted-string = { workspace = true }
 codex-websocket-auth = { workspace = true }
 crossterm = { version = "0.29.0", features = ["event-stream"] }

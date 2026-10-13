@@ -1,12 +1,12 @@
 use std::time::Instant;
 
-use codex_api::AuthError;
-use codex_api::AuthProvider;
-use codex_http_client::NetworkPolicy;
-use codex_http_client::NetworkPolicyDenied;
-use codex_http_client::Request;
-use codex_websocket_client::WebSocketConnection;
-use codex_websocket_client::WebSocketConnector;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::http::NetworkPolicy;
+use codex_transport::http::NetworkPolicyDenied;
+use codex_transport::http::Request;
+use codex_transport::websocket::WebSocketConnection;
+use codex_transport::websocket::WebSocketConnector;
 use http::Method;
 use http::StatusCode;
 use serde::Deserialize;
@@ -252,7 +252,7 @@ fn is_policy_recoverable(
 async fn connect_direct(
     url: &str,
     auth_provider: &dyn AuthProvider,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<WebSocketConnection, ExecServerError> {
     let mut request =
         url.into_client_request()

@@ -1,7 +1,7 @@
-use codex_api::ImageBackground;
-use codex_api::ImageEditRequest;
-use codex_api::ImageGenerationRequest;
-use codex_api::ImageQuality;
+use codex_transport::api::ImageBackground;
+use codex_transport::api::ImageEditRequest;
+use codex_transport::api::ImageGenerationRequest;
+use codex_transport::api::ImageQuality;
 use codex_extension_api::ToolOutput;
 use codex_extension_api::ToolPayload;
 use codex_extension_api::ToolSpec;
@@ -15,7 +15,7 @@ use codex_protocol::models::ImageReference;
 use codex_protocol::models::ResponseInputItem;
 use codex_protocol::models::ResponseItem;
 use codex_tools::ResponsesApiNamespaceTool;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 
 use super::GeneratedImageOutput;

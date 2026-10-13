@@ -157,7 +157,7 @@ mod tests {
     use super::StateRuntime;
     use super::test_support::unique_temp_dir;
     use crate::migrations::STATE_MIGRATOR;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use sqlx::migrate::Migrator;
     use std::borrow::Cow;

@@ -9,7 +9,7 @@ use codex_config::ConfigLayerSource;
 
 async fn build_config_on_runtime_worker(
     builder: ConfigBuilder,
-    application_network_policy: codex_http_client::NetworkPolicy,
+    application_network_policy: codex_transport::http::NetworkPolicy,
     error_context: String,
 ) -> Result<Config> {
     // Tokio stores the task output inline even when it boxes the future. Keep the large
@@ -1802,11 +1802,11 @@ enabled = false
     #[tokio::test]
     async fn new_session_and_config_rebuilds_keep_the_live_application_network_policy() -> Result<()>
     {
-        use codex_http_client::ClientRouteClass;
-        use codex_http_client::DestinationPolicy;
-        use codex_http_client::HttpError;
-        use codex_http_client::NetworkPolicyController;
-        use codex_http_client::NetworkPolicyDenied;
+        use codex_transport::http::ClientRouteClass;
+        use codex_transport::http::DestinationPolicy;
+        use codex_transport::http::HttpError;
+        use codex_transport::http::NetworkPolicyController;
+        use codex_transport::http::NetworkPolicyDenied;
         use wiremock::Mock;
         use wiremock::MockServer;
         use wiremock::ResponseTemplate;

@@ -4,8 +4,8 @@ use codex_skills::SkillDependencies;
 use codex_skills::SkillInterface;
 use codex_skills::SkillMetadata;
 use codex_skills::SkillToolDependency;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 
 use crate::catalog::SkillAuthority;

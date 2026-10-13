@@ -2,9 +2,9 @@ use super::*;
 use crate::git_policy::REPOSITORY_LOCAL_GIT_ENVIRONMENT_VARIABLES;
 use crate::test_support::RecordingHttpClientSelector;
 use crate::test_support::recorded_http_client_urls;
-use codex_http_client::DestinationPolicy::Restricted;
-use codex_http_client::NetworkPolicyDenied::Destination;
-use codex_http_client::RouteAwareRequestError::Policy;
+use codex_transport::http::DestinationPolicy::Restricted;
+use codex_transport::http::NetworkPolicyDenied::Destination;
+use codex_transport::http::RouteAwareRequestError::Policy;
 use pretty_assertions::assert_eq;
 use std::ffi::OsStr;
 use std::io::Write;
@@ -188,7 +188,7 @@ async fn backup_archive_routes_metadata_and_backend_supplied_download_urls() {
         .expect("backup archive download should succeed");
 
     assert_eq!(body, b"archive");
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     let allowed_hosts = Default::default();
     controller.publish(policy.revision(), Restricted { allowed_hosts });

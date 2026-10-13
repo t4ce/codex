@@ -7,8 +7,8 @@ use crate::width::display_width;
 use chrono::DateTime;
 use chrono::Local;
 use codex_protocol::account::PlanType;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use std::path::Path;
 
 fn normalize_agents_display_path(path: &Path) -> String {
@@ -184,7 +184,7 @@ pub(crate) fn format_reset_timestamp(
 mod tests {
     use super::*;
     use crate::legacy_core::config::ConfigBuilder;
-    use codex_utils_absolute_path::test_support::PathBufExt;
+    use codex_utils_paths::absolute_path::test_support::PathBufExt;
     use pretty_assertions::assert_eq;
     use tempfile::TempDir;
 

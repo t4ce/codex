@@ -20,7 +20,7 @@ use codex_protocol::protocol::ThreadHistoryMode;
 use codex_protocol::protocol::ThreadMemoryMode;
 use codex_rollout::RolloutItem;
 use codex_rollout::into_persisted_rollout_items;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 use crate::AppendThreadItemsParams;
 use crate::ArchiveThreadParams;
@@ -70,7 +70,7 @@ mod tests {
     #[tokio::test]
     async fn deletion_cleans_associated_sqlite_and_shared_memory()
     -> Result<(), Box<dyn std::error::Error>> {
-        use codex_utils_absolute_path::test_support::PathExt;
+        use codex_utils_paths::absolute_path::test_support::PathExt;
         use pretty_assertions::assert_eq;
 
         let home = tempfile::TempDir::new()?;

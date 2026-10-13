@@ -12,7 +12,7 @@ use codex_config::types::AuthCredentialsStoreMode;
 use codex_core::config::load_config_toml_with_layer_stack;
 use codex_core::config::load_global_mcp_servers;
 use codex_core_plugins::installed_marketplaces::marketplace_install_root;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;

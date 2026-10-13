@@ -48,11 +48,11 @@ async fn existing_call_uses_selected_endpoint_and_runtime_auth(
     let configured_endpoint = start_websocket_server(events.clone()).await;
     let call_endpoint = start_websocket_server(events).await;
     let configured_base_url = configured_endpoint.uri().to_string();
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     controller.publish(
         policy.revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -130,7 +130,7 @@ async fn existing_call_uses_selected_endpoint_and_runtime_auth(
     if matches!(selection, EndpointSelection::Revoked) {
         controller.publish(
             controller.policy().revision(),
-            codex_http_client::DestinationPolicy::Restricted {
+            codex_transport::http::DestinationPolicy::Restricted {
                 allowed_hosts: Default::default(),
             },
         );
@@ -146,7 +146,7 @@ async fn existing_call_uses_selected_endpoint_and_runtime_auth(
         // Recovery must not revive a sideband whose denial was reported as terminal.
         controller.publish(
             controller.policy().revision(),
-            codex_http_client::DestinationPolicy::Unrestricted,
+            codex_transport::http::DestinationPolicy::Unrestricted,
         );
         assert!(
             !selected

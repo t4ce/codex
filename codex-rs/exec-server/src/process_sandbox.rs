@@ -34,8 +34,8 @@ use codex_sandboxing::windows_sandbox_uses_elevated_backend;
 use codex_sandboxing::with_managed_mitm_ca_readable_root;
 #[cfg(windows)]
 use codex_shell_command::shell_detect::fallback_powershell_shell_for_windows_sandbox;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 
 #[cfg(unix)]
 use crate::CODEX_ARG0_EXEC_HELPER_ARG1;
@@ -376,7 +376,7 @@ async fn prepare_managed_network(
         };
     let mut state = NetworkProxyState::from_remote_launch_config(
         network_proxy,
-        codex_utils_path_uri::Platform::native(),
+        codex_utils_paths::path_uri::Platform::native(),
     )
     .map_err(|err| invalid_params(format!("invalid network proxy config: {err}")))?;
     state.set_proxy_private_ips_via_upstream(proxy_private_ips_via_upstream);

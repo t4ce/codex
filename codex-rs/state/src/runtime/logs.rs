@@ -516,7 +516,7 @@ mod tests {
     use crate::LogQuery;
     use crate::migrations::LOGS_MIGRATOR;
     use chrono::Utc;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use sqlx::SqlitePool;
     use sqlx::migrate::Migrator;

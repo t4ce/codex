@@ -12,7 +12,7 @@ use codex_skills::SkillParseError;
 use codex_skills::SkillPolicy;
 use codex_skills::SkillToolDependency;
 use codex_skills::resolve_skill_interface;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 
 use super::MAX_DEPENDENCY_COMMAND_LEN;

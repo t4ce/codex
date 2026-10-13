@@ -110,7 +110,7 @@ impl MetricReader for SharedManualReader {
 
 #[derive(Debug)]
 pub(super) struct MetricsClientInner {
-    pub(super) network_policy: codex_http_client::NetworkPolicy,
+    pub(super) network_policy: codex_transport::http::NetworkPolicy,
     meter_provider: SdkMeterProvider,
     meter: Meter,
     counters: Mutex<HashMap<InstrumentKey, Counter<u64>>>,
@@ -630,7 +630,7 @@ fn otlp_metrics_temporality(exporter: &OtelExporter, preference: Option<&str>) -
 fn build_otlp_metric_exporter(
     exporter: OtelExporter,
     temporality: Temporality,
-    factory: &codex_http_client::HttpClientFactory,
+    factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<opentelemetry_otlp::MetricExporter> {
     match exporter {
         OtelExporter::None => Err(MetricsError::ExporterDisabled),

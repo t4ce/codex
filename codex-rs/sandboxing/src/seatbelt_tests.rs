@@ -33,7 +33,7 @@ use codex_protocol::permissions::FileSystemSpecialPath;
 use codex_protocol::permissions::NetworkSandboxPolicy;
 use codex_protocol::permissions::PROTECTED_METADATA_PATH_NAMES;
 use codex_protocol::protocol::SandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use std::ffi::CStr;
 use std::ffi::OsStr;
@@ -944,7 +944,7 @@ async fn prepared_managed_network_context_takes_precedence_over_live_proxy_socke
     let state = build_config_state(
         network_config,
         NetworkProxyConstraints::default(),
-        codex_utils_path_uri::Platform::native(),
+        codex_utils_paths::path_uri::Platform::native(),
     )?;
     let network_proxy = NetworkProxy::builder()
         .state(Arc::new(NetworkProxyState::with_reloader(
@@ -1652,7 +1652,7 @@ async fn create_seatbelt_args_merges_proxy_and_explicit_unix_socket_paths() -> a
     let state = build_config_state(
         network_config,
         NetworkProxyConstraints::default(),
-        codex_utils_path_uri::Platform::native(),
+        codex_utils_paths::path_uri::Platform::native(),
     )?;
     let network_proxy = NetworkProxy::builder()
         .state(Arc::new(NetworkProxyState::with_reloader(

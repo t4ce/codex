@@ -1,6 +1,6 @@
 use codex_protocol::protocol::SkillScope;
 use codex_skills::SkillDependencies;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::sync::Arc;
 
 /// Source authority that owns a skill package and must be used to read it.

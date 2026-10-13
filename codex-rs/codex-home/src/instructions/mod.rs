@@ -7,7 +7,7 @@ use codex_extension_api::Instructions;
 use codex_extension_api::LoadInstructionsFuture;
 use codex_extension_api::LoadedUserInstructions;
 use codex_extension_api::UserInstructionsProvider;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 const DEFAULT_AGENTS_MD_FILENAME: &str = "AGENTS.md";
 const LOCAL_AGENTS_MD_FILENAME: &str = "AGENTS.override.md";

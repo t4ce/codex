@@ -7,7 +7,7 @@ use super::import_command_sources;
 use super::supported_command_sources;
 use super::unique_command_sources;
 use crate::manifest::load_plugin_command_paths;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_plugins::migrated_command_skills_root;
 use std::fs;
 use std::io;

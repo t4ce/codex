@@ -7,7 +7,7 @@ use super::*;
 
 impl ChatWidget {
     pub(super) fn open_theme_picker(&mut self) {
-        let codex_home = codex_utils_home_dir::find_codex_home().ok();
+        let codex_home = codex_utils_paths::home_dir::find_codex_home().ok();
         let params = crate::theme_picker::build_theme_picker_params(
             self.local_settings.tui.theme.as_deref(),
             codex_home.as_deref(),

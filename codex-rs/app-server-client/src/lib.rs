@@ -61,7 +61,7 @@ pub use codex_exec_server::EnvironmentManager;
 pub use codex_exec_server::ExecServerRuntimeOptions;
 use codex_feedback::CodexFeedback;
 use codex_protocol::protocol::SessionSource;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::de::DeserializeOwned;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
@@ -855,7 +855,7 @@ mod tests {
     use codex_core::init_state_db;
     use codex_protocol::config_types::Personality;
     use codex_uds::UnixListener;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use futures::SinkExt;
     use futures::StreamExt;
     use futures::poll;

@@ -1815,8 +1815,8 @@ mod tests {
     use codex_protocol::protocol::WebSearchBeginEvent;
     use codex_protocol::protocol::WebSearchEndEvent;
     use codex_rollout::CompactedItem;
-    use codex_utils_absolute_path::test_support::PathBufExt;
-    use codex_utils_absolute_path::test_support::test_path_buf;
+    use codex_utils_paths::absolute_path::test_support::PathBufExt;
+    use codex_utils_paths::absolute_path::test_support::test_path_buf;
     use pretty_assertions::assert_eq;
     use std::path::PathBuf;
     use std::time::Duration;

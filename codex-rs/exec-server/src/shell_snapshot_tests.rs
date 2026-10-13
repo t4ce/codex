@@ -51,7 +51,7 @@ async fn snapshot_failure_retries_are_bounded_and_single_flight(
             "-lc".to_string(),
             "true".to_string(),
         ],
-        cwd: codex_utils_path_uri::PathUri::from_host_native_path(home.path())?,
+        cwd: codex_utils_paths::path_uri::PathUri::from_host_native_path(home.path())?,
         env: HashMap::from([
             (
                 "HOME".to_string(),

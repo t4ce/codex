@@ -252,7 +252,7 @@ where
         .send()
         .await
         .map_err(|err| {
-            if matches!(err, codex_http_client::HttpError::Policy(_)) {
+            if matches!(err, codex_transport::http::HttpError::Policy(_)) {
                 return super::auth::request_error(err);
             }
             let timed_out = err.is_timeout();
@@ -267,7 +267,7 @@ where
     let status = response.status();
     let retry_at = retry_after_with_jitter(&headers, OffsetDateTime::now_utc());
     let body = response.bytes().await.map_err(|err| {
-        if matches!(err, codex_http_client::HttpError::Policy(_))
+        if matches!(err, codex_transport::http::HttpError::Policy(_))
             && !(retry_at.is_some() && (status.as_u16() == 429 || status.is_server_error()))
         {
             return super::auth::request_error(err);

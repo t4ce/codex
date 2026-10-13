@@ -2,7 +2,7 @@ use crate::installed_marketplaces::marketplace_install_root;
 use crate::marketplace_policy::validate_marketplace_name_for_add;
 use crate::marketplace_policy::validate_marketplace_source_for_add;
 use codex_config::ConfigRequirements;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;

@@ -11,7 +11,7 @@ use codex_config::McpServerToolConfig;
 use codex_config::McpServerTransportConfig;
 use codex_protocol::mcp_policy::EnvironmentMcpPolicy;
 use codex_protocol::mcp_policy::PluginMcpRequirements;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 
 use crate::CODEX_APPS_MCP_SERVER_NAME;

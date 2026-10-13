@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 const GENERATED_IMAGE_ARTIFACTS_DIR: &str = "generated_images";
 const MAX_IMAGE_GENERATION_OUTPUT_HINT_BYTES: usize = 1024;

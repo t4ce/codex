@@ -13,7 +13,7 @@ use codex_protocol::protocol::FileSystemSandboxPolicy;
 #[cfg(test)]
 use codex_protocol::protocol::NetworkSandboxPolicy;
 #[cfg(test)]
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 #[cfg(test)]

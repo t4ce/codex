@@ -15,9 +15,9 @@ use codex_exec_server_protocol::CAPABILITY_ROOTS_DISCOVER_METHOD;
 use codex_exec_server_protocol::CapabilityRootDiscoverRequest;
 use codex_exec_server_protocol::CapabilityRootsDiscoverParams;
 use codex_file_system::FileSystemSandboxContext;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::cache_system_proxy_route_for_test;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
 use codex_protocol::models::PermissionProfile;
@@ -25,7 +25,7 @@ use codex_protocol::permissions::FileSystemAccessMode;
 use codex_protocol::permissions::FileSystemSandboxEntry;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_protocol::permissions::NetworkSandboxPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use common::exec_server::exec_server;
 use futures::SinkExt;
 use futures::StreamExt;
@@ -458,7 +458,7 @@ async fn capability_discovery_retries_after_executor_reconnects() -> anyhow::Res
 async fn capability_discovery_retries_after_application_network_policy_recovers()
 -> anyhow::Result<()> {
     let server = exec_server().await?;
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     let manager = Arc::new(EnvironmentManager::without_environments(
         HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault)
@@ -486,7 +486,7 @@ async fn capability_discovery_retries_after_application_network_policy_recovers(
 
     controller.publish(
         policy.revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
     let recovered = timeout(
         Duration::from_secs(/*secs*/ 10),

@@ -10,7 +10,7 @@ use codex_protocol::permissions::FileSystemSandboxEntry;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_protocol::permissions::FileSystemSandboxPolicyContext;
 use codex_protocol::permissions::FileSystemSpecialPath;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tokio::process::Command;
 
@@ -237,7 +237,7 @@ extends = ":read-only"
         .build()
         .await
         .unwrap();
-    let user_home = codex_utils_absolute_path::AbsolutePathBufGuard::home_directory().unwrap();
+    let user_home = codex_utils_paths::absolute_path::AbsolutePathBufGuard::home_directory().unwrap();
     let path = PathUri::from_host_native_path(user_home.join("doctor-provenance")).unwrap();
     assert_eq!(
         source(&config, &path),

@@ -3,7 +3,7 @@ use anyhow::Context as _;
 use anyhow::Result;
 use anyhow::anyhow;
 use base64::Engine as _;
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::home_dir::find_codex_home;
 use rama_net::tls::ApplicationProtocol;
 use rama_tls_rustls::dep::pki_types::CertificateDer;
 use rama_tls_rustls::dep::pki_types::PrivateKeyDer;
@@ -922,7 +922,7 @@ fn open_create_new_with_mode(path: &Path, _mode: u32) -> Result<File> {
 mod tests {
     use super::*;
 
-    use codex_utils_rustls_provider::ensure_rustls_crypto_provider;
+    use codex_network_foundation::ensure_rustls_crypto_provider;
     use pretty_assertions::assert_eq;
     use tempfile::tempdir;
 

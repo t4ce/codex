@@ -1,7 +1,7 @@
 //! Executor capability inventory; callers apply identity and enablement.
 
 use codex_file_system::FileSystemSandboxContext;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde::Serialize;
 use std::fmt;

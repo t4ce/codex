@@ -807,7 +807,7 @@ impl ConfigEditsBuilder {
         let config_path = config
             .config_layer_stack
             .get_user_config_file()
-            .map(codex_utils_absolute_path::AbsolutePathBuf::to_path_buf)
+            .map(codex_utils_paths::absolute_path::AbsolutePathBuf::to_path_buf)
             .unwrap_or_else(|| config.codex_home.join(CONFIG_TOML_FILE).to_path_buf());
         Self::for_config_path(&config_path)
     }

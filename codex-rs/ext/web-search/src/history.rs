@@ -1,4 +1,4 @@
-use codex_api::SearchInput;
+use codex_transport::api::SearchInput;
 use codex_core::parse_turn_item;
 use codex_protocol::items::TurnItem;
 use codex_protocol::models::ContentItem;
@@ -88,7 +88,7 @@ fn push_visible_message(messages: &mut Vec<ResponseItem>, item: &ResponseItem) {
 
 #[cfg(test)]
 mod tests {
-    use codex_api::SearchInput;
+    use codex_transport::api::SearchInput;
     use codex_protocol::ResponseItemId;
     use codex_protocol::models::ContentItem;
     use codex_protocol::models::ImageReference;

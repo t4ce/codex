@@ -37,7 +37,7 @@ use backend::BackendPaths;
 use codex_app_server_protocol::RemoteControlConnectionStatus;
 use codex_app_server_protocol::RemoteControlPairingStartResponse;
 use codex_app_server_transport::app_server_control_socket_path;
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::home_dir::find_codex_home;
 use managed_install::managed_codex_bin;
 #[cfg(any(unix, windows))]
 use managed_install::managed_codex_version;
@@ -278,7 +278,7 @@ pub async fn set_remote_control(mode: RemoteControlMode) -> Result<RemoteControl
 }
 
 pub async fn run_pid_update_loop(
-    http_client_factory: codex_http_client::HttpClientFactory,
+    http_client_factory: codex_transport::http::HttpClientFactory,
     restore_release: Option<String>,
 ) -> Result<()> {
     ensure_supported_platform()?;
@@ -288,7 +288,7 @@ pub async fn run_pid_update_loop(
 }
 
 pub async fn update(
-    http_client_factory: codex_http_client::HttpClientFactory,
+    http_client_factory: codex_transport::http::HttpClientFactory,
 ) -> Result<UpdateOutput> {
     ensure_supported_platform()?;
     #[cfg(windows)]

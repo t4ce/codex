@@ -44,7 +44,7 @@ use codex_features::Feature;
 use codex_protocol::mcp::OPENAI_STANDARD_FORM_INPUT_EXTENSION_ID;
 use codex_protocol::protocol::SessionSource as CoreSessionSource;
 use codex_protocol::protocol::ThreadSource as CoreThreadSource;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_pty::DEFAULT_OUTPUT_BYTES_CAP;
 use core_test_support::responses;
 use futures::SinkExt;
@@ -833,7 +833,7 @@ async fn mcp_server_elicitation_survives_environment_runtime_refresh() -> Result
             approval_policy: Some(codex_app_server_protocol::AskForApproval::UnlessTrusted),
             environments: Some(vec![TurnEnvironmentParams {
                 environment_id: LATE_ENVIRONMENT_ID.to_string(),
-                cwd: codex_utils_absolute_path::AbsolutePathBuf::try_from(
+                cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(
                     capability_root.path().to_path_buf(),
                 )?
                 .into(),

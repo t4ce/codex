@@ -4,11 +4,11 @@ use std::sync::atomic::Ordering;
 
 use codex_agent_identity::AgentIdentityKey;
 use codex_agent_identity::authorization_header_for_agent_task;
-use codex_api::AgentIdentityTelemetry;
-use codex_api::AuthError;
-use codex_api::AuthHeadersFuture;
-use codex_api::AuthProvider;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthHeadersFuture;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_login::AuthHeaders;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;

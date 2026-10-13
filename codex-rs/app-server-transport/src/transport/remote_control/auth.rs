@@ -3,7 +3,7 @@
 
 use axum::http::HeaderMap;
 use axum::http::HeaderValue;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_login::AuthManager;
 use codex_login::UnauthorizedRecovery;
 use std::io;
@@ -17,7 +17,7 @@ use tracing::warn;
 pub(super) struct RemoteControlAuth {
     manager: Arc<AuthManager>,
     pub(super) owner: crate::ConnectionAuth,
-    pub(super) network_policy: codex_http_client::NetworkPolicy,
+    pub(super) network_policy: codex_transport::http::NetworkPolicy,
 }
 
 pub(super) struct RemoteControlRecovery {
@@ -64,7 +64,7 @@ impl RemoteControlAuth {
 pub(super) const REMOTE_CONTROL_ACCOUNT_ID_HEADER: &str = "chatgpt-account-id";
 
 pub(super) struct RemoteControlConnectionAuth {
-    pub(super) http_client_factory: codex_http_client::HttpClientFactory,
+    pub(super) http_client_factory: codex_transport::http::HttpClientFactory,
     pub(super) auth_provider: SharedAuthProvider,
     pub(super) account_id: String,
 }
@@ -143,13 +143,13 @@ async fn load_auth_manager(
 }
 
 pub(super) async fn request_client(
-    factory: &codex_http_client::HttpClientFactory,
+    factory: &codex_transport::http::HttpClientFactory,
     endpoint: &str,
-) -> io::Result<codex_http_client::HttpClient> {
+) -> io::Result<codex_transport::http::HttpClient> {
     codex_login::default_client::create_client_for_route_without_request_logging_async(
         factory.clone(),
         endpoint.to_string(),
-        codex_http_client::ClientRouteClass::Api,
+        codex_transport::http::ClientRouteClass::Api,
     )
     .await
 }
@@ -158,16 +158,16 @@ pub(super) fn is_policy_denial(error: &io::Error) -> bool {
     let Some(cause) = error.get_ref() else {
         return false;
     };
-    cause.is::<codex_http_client::NetworkPolicyDenied>()
+    cause.is::<codex_transport::http::NetworkPolicyDenied>()
 }
 
 pub(super) fn is_auth_error(error: &io::Error) -> bool {
     error.kind() == ErrorKind::PermissionDenied && !is_policy_denial(error)
 }
 
-pub(super) fn request_error(error: codex_http_client::HttpError) -> io::Error {
+pub(super) fn request_error(error: codex_transport::http::HttpError) -> io::Error {
     match error {
-        codex_http_client::HttpError::Policy(denied) => {
+        codex_transport::http::HttpError::Policy(denied) => {
             io::Error::new(ErrorKind::PermissionDenied, denied)
         }
         error => io::Error::other(error),
@@ -230,7 +230,7 @@ pub(super) fn mark_recovery_auth_change_seen(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codex_api::AuthProvider;
+    use codex_transport::api::AuthProvider;
     use pretty_assertions::assert_eq;
 
     #[derive(Debug)]
@@ -256,8 +256,8 @@ mod tests {
         provider_account_ids: Vec<&'static str>,
     ) -> RemoteControlConnectionAuth {
         RemoteControlConnectionAuth {
-            http_client_factory: codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            http_client_factory: codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             auth_provider: Arc::new(TestAuthProvider {
                 account_ids: provider_account_ids,

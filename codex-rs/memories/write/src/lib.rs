@@ -18,7 +18,7 @@ mod start;
 mod storage;
 pub mod workspace;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::path::Path;
 use std::path::PathBuf;
 

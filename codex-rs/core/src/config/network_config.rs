@@ -16,7 +16,7 @@ use codex_features::FeaturesToml;
 use codex_network_proxy::EnvironmentNetworkPolicy;
 use codex_network_proxy::NetworkProxyConfig;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_path_uri::Platform;
+use codex_utils_paths::path_uri::Platform;
 
 use super::NetworkProxySpec;
 use super::permissions::apply_network_proxy_feature_config;

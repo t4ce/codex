@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 
 use crate::HostSkillsSnapshot;
 

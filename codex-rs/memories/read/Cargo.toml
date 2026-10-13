@@ -15,7 +15,7 @@ workspace = true
 [dependencies]
 codex-protocol = { workspace = true }
 codex-shell-command = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }

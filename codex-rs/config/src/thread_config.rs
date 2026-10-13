@@ -5,7 +5,7 @@ use std::pin::Pin;
 
 use crate::ConfigLayerSource;
 use codex_model_provider_info::ModelProviderInfo;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use thiserror::Error;
 use toml::Value as TomlValue;
 

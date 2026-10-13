@@ -3,11 +3,11 @@
 use std::sync::Arc;
 
 use crate::auth::ResolvedProviderAuth;
-use codex_api::AuthError;
-use codex_api::AuthHeadersFuture;
-use codex_api::AuthProvider;
-use codex_api::AuthProviderFuture;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthHeadersFuture;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::AuthProviderFuture;
+use codex_transport::api::SharedAuthProvider;
 use codex_login::GatewayAuthError;
 use codex_login::GatewayAuthManager;
 use codex_model_provider_info::GatewayOAuthConfig;
@@ -119,7 +119,7 @@ impl AuthProvider for CombinedAuth {
         })
     }
 
-    fn apply_auth(&self, request: codex_http_client::Request) -> AuthProviderFuture<'_> {
+    fn apply_auth(&self, request: codex_transport::http::Request) -> AuthProviderFuture<'_> {
         Box::pin(async move {
             let mut request = self.primary.apply_auth(request).await?;
             if request.headers.contains_key(&self.name) {

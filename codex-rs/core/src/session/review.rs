@@ -111,7 +111,7 @@ pub(super) async fn spawn_review_thread(
                     .config
                     .effective_local_windows_sandbox_type(),
                 parent_turn_context.windows_sandbox_level,
-                &codex_utils_path_uri::PathUri::from_abs_path(&parent_turn_context.cwd),
+                &codex_utils_paths::path_uri::PathUri::from_abs_path(&parent_turn_context.cwd),
             )
         });
     let turn_metadata_state = Arc::new(TurnMetadataState::new(

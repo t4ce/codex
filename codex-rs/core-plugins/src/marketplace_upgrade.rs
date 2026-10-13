@@ -17,7 +17,7 @@ use codex_config::ConfigLayerStack;
 use codex_config::types::MarketplaceConfig;
 use codex_config::types::MarketplaceSourceType;
 use codex_plugin::validate_plugin_segment;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;

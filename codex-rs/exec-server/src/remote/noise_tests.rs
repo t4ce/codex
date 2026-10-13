@@ -4,11 +4,11 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use anyhow::Result;
-use codex_api::AuthProvider;
-use codex_api::SharedAuthProvider;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::cache_system_proxy_route_for_test;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use http::HeaderMap;
 use http::HeaderValue;
 use tokio::io::AsyncReadExt;
@@ -57,7 +57,7 @@ async fn registry_requests_do_not_log_sensitive_urls_or_response_headers() -> Re
             .with_writer(move || RegistryLogWriter(Arc::clone(&writer_buffer)))
             .with_filter(
                 tracing_subscriber::filter::Targets::new()
-                    .with_target("codex_http_client", tracing::Level::TRACE)
+                    .with_target("codex_transport::http", tracing::Level::TRACE)
                     .with_target("codex_exec_server", tracing::Level::TRACE),
             ),
     );

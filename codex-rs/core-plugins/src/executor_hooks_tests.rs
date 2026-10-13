@@ -10,7 +10,7 @@ use codex_exec_server::ExecutorCapabilityDiscoverySnapshot;
 use codex_plugin::ExecutorPluginHookSource;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

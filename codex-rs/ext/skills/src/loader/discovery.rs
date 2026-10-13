@@ -4,7 +4,7 @@ use std::io;
 use codex_exec_server::EnvironmentAccess;
 use codex_exec_server::WalkEntryKind;
 use codex_exec_server::WalkOptions;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::DISCOVERABLE_PLUGIN_MANIFEST_PATHS;
 use codex_utils_plugins::SkillDiscoveryMode;
 

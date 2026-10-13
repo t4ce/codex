@@ -53,7 +53,7 @@ use codex_protocol::protocol::WarningEvent;
 use codex_rollout::state_db;
 use codex_thread_store::PersistContext;
 use codex_thread_store::ReadThreadParams;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde_json::Map;
 use serde_json::Value;
 use tokio::sync::Mutex;
@@ -1098,8 +1098,8 @@ mod tests {
     use crate::session::tests::make_session_and_context_with_rx;
     use codex_protocol::protocol::HookCompletedEvent;
     use codex_protocol::protocol::HookRunSummary;
-    use codex_utils_absolute_path::test_support::PathBufExt;
-    use codex_utils_absolute_path::test_support::test_path_buf;
+    use codex_utils_paths::absolute_path::test_support::PathBufExt;
+    use codex_utils_paths::absolute_path::test_support::test_path_buf;
 
     #[test]
     fn additional_context_messages_stay_separate_and_ordered() {

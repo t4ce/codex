@@ -1,7 +1,7 @@
 use codex_exec_server::ShellInfo;
 use codex_shell_command::shell_detect::DetectedShell;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde::Serialize;
 use std::path::PathBuf;

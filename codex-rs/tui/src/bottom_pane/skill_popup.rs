@@ -14,7 +14,7 @@ use super::scroll_state::ScrollState;
 use super::selection_popup_common::GenericDisplayRow;
 use crate::key_hint;
 use crate::text_formatting::truncate_text;
-use codex_utils_fuzzy_match::fuzzy_match;
+use codex_utils_text::fuzzy_match::fuzzy_match;
 
 #[derive(Clone, Debug)]
 pub(crate) struct MentionItem {

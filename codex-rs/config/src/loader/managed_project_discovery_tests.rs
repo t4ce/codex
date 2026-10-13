@@ -8,7 +8,7 @@ use crate::loader::local::load_local_config_layers_with_overrides;
 use crate::loader::project_trust_key;
 use crate::loader::tests::TestFileSystem;
 use crate::merge_toml_values;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use std::path::PathBuf;
 use tempfile::TempDir;

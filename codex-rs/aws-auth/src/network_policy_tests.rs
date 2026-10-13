@@ -3,8 +3,8 @@
 use super::AwsAuthError::Policy;
 use super::*;
 use aws_config::provider_config::ProviderConfig;
-use codex_http_client::DestinationPolicy;
-use codex_http_client::NetworkPolicyDenied::Revoked;
+use codex_transport::http::DestinationPolicy;
+use codex_transport::http::NetworkPolicyDenied::Revoked;
 use pretty_assertions::assert_eq;
 use std::error::Error;
 use tokio::io::AsyncReadExt;
@@ -14,10 +14,10 @@ use tokio::time::timeout;
 #[tokio::test]
 async fn real_imds_credentials_stop_after_policy_revocation() -> Result<(), Box<dyn Error>> {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
-    let factory = codex_http_client::HttpClientFactory::new(
-        codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+    let factory = codex_transport::http::HttpClientFactory::new(
+        codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
     )
     .with_network_policy(policy.clone().for_current_account());
     let http_client = crate::transport::http_client(factory);
@@ -98,7 +98,7 @@ async fn real_imds_credentials_stop_after_policy_revocation() -> Result<(), Box<
     assert!(
         matches!(
             &denied,
-            Err(Policy(codex_http_client::NetworkPolicyDenied::Destination))
+            Err(Policy(codex_transport::http::NetworkPolicyDenied::Destination))
         ),
         "{denied:?}"
     );
@@ -116,9 +116,9 @@ async fn real_imds_credentials_stop_after_policy_revocation() -> Result<(), Box<
 #[tokio::test]
 async fn allowlisted_static_keys_send_sigv4_and_denied_destination_sends_nothing()
 -> Result<(), Box<dyn Error>> {
-    codex_utils_rustls_provider::ensure_rustls_crypto_provider();
+    codex_network_foundation::ensure_rustls_crypto_provider();
     let certificate = rcgen::generate_simple_self_signed(vec!["127.0.0.1".to_string()])?;
-    let trust = codex_http_client::HttpClientTlsConfig::default()
+    let trust = codex_transport::http::HttpClientTlsConfig::default()
         .with_root_certificate_pem(certificate.cert.pem().as_bytes())?;
     let tls = tokio_rustls::TlsAcceptor::from(Arc::new(
         rustls::ServerConfig::builder()
@@ -130,7 +130,7 @@ async fn allowlisted_static_keys_send_sigv4_and_denied_destination_sends_nothing
     ));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
     let url = format!("https://{}/v1/responses", listener.local_addr()?);
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     controller.publish(
         policy.revision(),
@@ -138,8 +138,8 @@ async fn allowlisted_static_keys_send_sigv4_and_denied_destination_sends_nothing
             allowed_hosts: ["127.0.0.1".to_string()].into(),
         },
     );
-    let factory = codex_http_client::HttpClientFactory::new(
-        codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+    let factory = codex_transport::http::HttpClientFactory::new(
+        codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
     )
     .with_network_policy(policy.for_current_account());
     let context = AwsAuthContext::load_with_access_keys(
@@ -161,9 +161,9 @@ async fn allowlisted_static_keys_send_sigv4_and_denied_destination_sends_nothing
         ..super::tests::test_request()
     };
     let signed = context.sign(request.clone()).await?;
-    let client = codex_http_client::HttpClientBuilder::new().build_with_tls(
+    let client = codex_transport::http::HttpClientBuilder::new().build_with_tls(
         &factory,
-        codex_http_client::ClientRouteClass::Api,
+        codex_transport::http::ClientRouteClass::Api,
         trust,
     );
     let server = async {
@@ -196,7 +196,7 @@ async fn allowlisted_static_keys_send_sigv4_and_denied_destination_sends_nothing
     );
     assert!(matches!(
         context.sign(request).await,
-        Err(Policy(codex_http_client::NetworkPolicyDenied::Destination))
+        Err(Policy(codex_transport::http::NetworkPolicyDenied::Destination))
     ));
     assert!(
         timeout(
@@ -409,7 +409,7 @@ async fn sdk_default_credentials_keep_endpoint_modes_from_environment_and_profil
 fn sdk_profile_probe() -> Result<(), Box<dyn Error>> {
     let case = std::env::var("CODEX_AWS_PROFILE_PROBE_CASE")?;
     tokio::runtime::Runtime::new()?.block_on(async {
-        let controller = codex_http_client::NetworkPolicyController::default();
+        let controller = codex_transport::http::NetworkPolicyController::default();
         let policy = controller.policy();
         let destination = if case.starts_with("unrestricted") {
             DestinationPolicy::Unrestricted
@@ -423,8 +423,8 @@ fn sdk_profile_probe() -> Result<(), Box<dyn Error>> {
             DestinationPolicy::Restricted { allowed_hosts }
         };
         controller.publish(policy.revision(), destination);
-        let factory = codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        let factory = codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         )
         .with_network_policy(policy.for_current_account());
         let config = AwsAuthConfig {
@@ -447,7 +447,7 @@ fn sdk_profile_probe() -> Result<(), Box<dyn Error>> {
             assert!(
                 matches!(
                     signed,
-                    Err(Policy(codex_http_client::NetworkPolicyDenied::Destination))
+                    Err(Policy(codex_transport::http::NetworkPolicyDenied::Destination))
                 ),
                 "{signed:?}"
             );

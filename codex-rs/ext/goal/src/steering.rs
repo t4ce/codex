@@ -4,7 +4,7 @@ use codex_core::context::InternalModelContextFragment;
 use codex_prompts::without_update_plan_instructions;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::ThreadGoal;
-use codex_utils_template::Template;
+use codex_utils_text::template::Template;
 use std::sync::LazyLock;
 
 static CONTINUATION_PROMPT_TEMPLATE: LazyLock<Template> = LazyLock::new(|| {

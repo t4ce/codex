@@ -78,8 +78,8 @@ use codex_features::NetworkProxyConfigToml;
 use codex_features::SleepToolMode;
 use codex_features::TokenBudgetConfigToml;
 use codex_git_utils::resolve_root_git_project_for_trust;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthManagerConfig;
 use codex_login::AuthRouteConfig;
 use codex_mcp::DEFAULT_OPTIONAL_MCP_STARTUP_GRACE;
@@ -130,10 +130,10 @@ use codex_protocol::protocol::SandboxPolicy;
 use codex_rmcp_client::McpOAuthRefreshMode;
 use codex_sandboxing::SandboxType;
 pub use codex_thread_store::ExtraConfig;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use http::HeaderValue;
 use rmcp::model::ElicitationCapability;
 use rmcp::model::FormElicitationCapability;
@@ -620,7 +620,7 @@ pub enum ThreadStoreConfig {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Config {
     /// App-server-owned destination policy; other runtimes remain unmanaged.
-    pub application_network_policy: codex_http_client::NetworkPolicy,
+    pub application_network_policy: codex_transport::http::NetworkPolicy,
     /// Auth bootstrap routing installed by the app-server configuration owner.
     pub application_auth_route_config: Option<AuthRouteConfig>,
     /// Provenance for how this [`Config`] was derived (merged layers + enforced
@@ -4249,7 +4249,7 @@ impl Config {
             .filter(|Sourced { value, .. }| !value.deny_read.is_empty())
             .map(|Sourced { value, .. }| -> std::io::Result<_> {
                 let mut policy = FileSystemSandboxPolicy::restricted(Vec::new());
-                value.apply_to_policy(&mut policy, codex_utils_path_uri::PathConvention::native())?;
+                value.apply_to_policy(&mut policy, codex_utils_paths::path_uri::PathConvention::native())?;
                 Ok(Arc::new(policy))
             })
             .transpose()?;
@@ -5053,7 +5053,7 @@ fn normalize_guardian_policy_config(value: Option<&str>) -> Option<String> {
 /// - If `CODEX_HOME` is not set, this function does not verify that the
 ///   directory exists.
 pub fn find_codex_home() -> std::io::Result<AbsolutePathBuf> {
-    codex_utils_home_dir::find_codex_home()
+    codex_utils_paths::home_dir::find_codex_home()
 }
 
 /// Returns the path to the folder where Codex logs are stored. Does not verify

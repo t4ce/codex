@@ -13,9 +13,9 @@
 
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
-use codex_api::HostedFileUploadContext;
-use codex_api::OPENAI_FILE_UPLOAD_LIMIT_BYTES;
-use codex_api::upload_openai_file;
+use codex_transport::api::HostedFileUploadContext;
+use codex_transport::api::OPENAI_FILE_UPLOAD_LIMIT_BYTES;
+use codex_transport::api::upload_openai_file;
 use codex_exec_server::GetMetadataOptions;
 use codex_login::CodexAuth;
 use codex_protocol::permissions::FileSystemAccessMode;
@@ -279,8 +279,8 @@ mod tests {
     use crate::environment_selection::TurnEnvironmentState;
     use crate::session::tests::make_session_and_context;
     use crate::session::turn_context::TurnContext;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use std::path::Path;
     use std::sync::Arc;

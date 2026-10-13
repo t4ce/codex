@@ -1463,7 +1463,7 @@ async fn local_daemon_registers_approval_gated_mcp_tools_for_both_start_paths_sc
     let mcp_url = starts[0]["config"]["mcp_servers.codex_tui"]["url"]
         .as_str()
         .expect("MCP server URL");
-    let unauthorized = codex_http_client::HttpClientBuilder::new()
+    let unauthorized = codex_transport::http::HttpClientBuilder::new()
         .build_direct()?
         .post(mcp_url)
         .send()
@@ -1519,7 +1519,7 @@ async fn local_daemon_registers_approval_gated_mcp_tools_for_both_start_paths_sc
         starts[0]["config"]["mcp_servers.codex_tui"]["http_headers"]["Authorization"]
             .as_str()
             .expect("MCP bearer token");
-    let client = codex_http_client::HttpClientBuilder::new().build_direct()?;
+    let client = codex_transport::http::HttpClientBuilder::new().build_direct()?;
     let call_tool = |id: u32, tool: &'static str, arguments: serde_json::Value| {
         client
             .post(mcp_url)
@@ -4432,7 +4432,7 @@ async fn changing_directory_preserves_project_trust_permissions_history_and_hook
     assert!(copied.contains("saved history") || base.is_some_and(|h| h.thread_id == original));
     assert_eq!(app.config.cwd, trusted.clone().abs());
     let configured = app.primary_session_configured.as_ref().expect("session");
-    let source = codex_utils_path_uri::PathUri::from_abs_path(&agents.abs());
+    let source = codex_utils_paths::path_uri::PathUri::from_abs_path(&agents.abs());
     assert!(configured.instruction_source_paths.contains(&source));
     assert_eq!(configured.approvals_reviewer, ApprovalsReviewer::AutoReview);
     let (cwd, result) = (current.clone(), Err("stale skills".into()));

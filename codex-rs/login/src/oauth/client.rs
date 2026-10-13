@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use codex_http_client::HttpClient;
+use codex_transport::http::HttpClient;
 use serde::de::DeserializeOwned;
 
 use crate::oauth::ErrorBodyLimit;
@@ -120,7 +120,7 @@ impl<'a> OAuthClient<'a> {
             )));
         }
         response.json().await.map_err(|error| match error {
-            error @ codex_http_client::HttpError::Policy(_) => OAuthError::Transport(error),
+            error @ codex_transport::http::HttpError::Policy(_) => OAuthError::Transport(error),
             _ => OAuthError::InvalidResponse,
         })
     }

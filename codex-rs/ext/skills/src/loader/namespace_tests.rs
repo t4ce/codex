@@ -9,8 +9,8 @@ use codex_exec_server::LOCAL_FS;
 #[cfg(unix)]
 use codex_protocol::protocol::SkillScope;
 #[cfg(unix)]
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 

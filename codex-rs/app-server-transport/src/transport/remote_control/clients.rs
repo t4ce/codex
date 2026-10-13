@@ -223,7 +223,7 @@ async fn send_client_management_request_once(
         .send()
         .await
         .map_err(|error| match error {
-            codex_http_client::HttpError::Policy(_) => super::auth::request_error(error),
+            codex_transport::http::HttpError::Policy(_) => super::auth::request_error(error),
             error => io::Error::other(format!("failed to {action}: {error}")),
         })?;
     let headers = response.headers().clone();

@@ -15,18 +15,16 @@ axum = { workspace = true, default-features = false, features = [
     "tokio",
 ] }
 base64 = { workspace = true }
-codex-api = { workspace = true }
+codex-transport = { workspace = true }
 codex-config = { workspace = true }
 codex-exec-server = { workspace = true }
-codex-http-client = { workspace = true }
 codex-keyring-store = { workspace = true }
 codex-network-proxy = { workspace = true }
 codex-otel = { workspace = true }
 codex-protocol = { workspace = true }
 codex-secrets = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-pty = { workspace = true }
-codex-utils-home-dir = { workspace = true }
 bytes = { workspace = true }
 futures = { workspace = true, default-features = false, features = ["std"] }
 http = { workspace = true }
@@ -71,7 +69,7 @@ which = { workspace = true }
 [dev-dependencies]
 trueos = { workspace = true }
 opentelemetry_sdk = { workspace = true, features = ["testing"] }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 codex-utils-cargo-bin = { workspace = true }
 pretty_assertions = { workspace = true }
 serial_test = { workspace = true }

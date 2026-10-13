@@ -10,8 +10,8 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use codex_core::config::Config;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::RouteAwareClientPool;
 use codex_install_context::InstallContext;
 use codex_install_context::InstallMethod;
 use http::Method;
@@ -501,8 +501,8 @@ mod tests {
 
     #[tokio::test]
     async fn version_http_probe_decodes_json_and_rejects_invalid_responses() {
-        use codex_http_client::HttpClientFactory;
-        use codex_http_client::OutboundProxyPolicy;
+        use codex_transport::http::HttpClientFactory;
+        use codex_transport::http::OutboundProxyPolicy;
         use wiremock::Mock;
         use wiremock::MockServer;
         use wiremock::ResponseTemplate;

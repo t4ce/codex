@@ -43,7 +43,7 @@ pub enum MetricsExporter {
 
 #[derive(Clone, Debug)]
 pub struct MetricsConfig {
-    pub(crate) http_client_factory: codex_http_client::HttpClientFactory,
+    pub(crate) http_client_factory: codex_transport::http::HttpClientFactory,
     pub(crate) environment: String,
     pub(crate) service_name: String,
     pub(crate) service_version: String,
@@ -57,7 +57,7 @@ pub struct MetricsConfig {
 impl MetricsConfig {
     pub fn with_http_client_factory(
         mut self,
-        factory: codex_http_client::HttpClientFactory,
+        factory: codex_transport::http::HttpClientFactory,
     ) -> Self {
         self.http_client_factory = factory;
         self
@@ -75,8 +75,8 @@ impl MetricsConfig {
             &[]
         };
         Self {
-            http_client_factory: codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            http_client_factory: codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             environment: environment.into(),
             service_name: service_name.into(),
@@ -97,8 +97,8 @@ impl MetricsConfig {
         exporter: InMemoryMetricExporter,
     ) -> Self {
         Self {
-            http_client_factory: codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            http_client_factory: codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             environment: environment.into(),
             service_name: service_name.into(),

@@ -136,7 +136,7 @@ pub(super) fn metadata_from_discovery(
 
 fn parse_mcp_servers(
     selected_root: &SelectedCapabilityRoot,
-    plugin_root: &codex_utils_path_uri::PathUri,
+    plugin_root: &codex_utils_paths::path_uri::PathUri,
     contents: &str,
     environment_id: &str,
 ) -> Vec<(String, codex_config::McpServerConfig)> {

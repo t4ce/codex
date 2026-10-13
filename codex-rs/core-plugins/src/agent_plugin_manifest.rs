@@ -7,7 +7,7 @@ use super::compatibility_json_error;
 use super::parse_legacy_plugin_manifest_uri;
 use super::resolve_openai_onboarding_skill;
 use super::resolve_raw_plugin_manifest;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::AGENT_PLUGIN_SCHEMA_PREFIX;
 use codex_utils_plugins::AGENT_PLUGIN_SCHEMA_URI;
 use codex_utils_plugins::SUPPORTED_AGENT_PLUGIN_SCHEMA_URIS;

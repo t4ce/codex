@@ -6,8 +6,8 @@ use codex_exec_server::HttpClient;
 use codex_exec_server::HttpRedirectPolicy;
 use codex_exec_server::HttpRequestParams;
 use codex_exec_server::RouteAwareHttpClient;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use tokio::io::AsyncBufReadExt;
 use tokio::io::AsyncWriteExt;
@@ -27,7 +27,7 @@ async fn delegated_http_success_logs_do_not_expose_sensitive_request_or_response
             .with_writer(move || TestLogWriter(Arc::clone(&writer_buffer)))
             .with_filter(
                 tracing_subscriber::filter::Targets::new()
-                    .with_target("codex_http_client", tracing::Level::TRACE)
+                    .with_target("codex_transport::http", tracing::Level::TRACE)
                     .with_target("codex_exec_server", tracing::Level::TRACE),
             ),
     );
@@ -119,7 +119,7 @@ async fn delegated_http_failure_warning_redacts_request_url() -> anyhow::Result<
             .with_writer(move || TestLogWriter(Arc::clone(&writer_buffer)))
             .with_filter(
                 tracing_subscriber::filter::Targets::new()
-                    .with_target("codex_http_client", tracing::Level::TRACE)
+                    .with_target("codex_transport::http", tracing::Level::TRACE)
                     .with_target("codex_exec_server", tracing::Level::TRACE),
             ),
     );

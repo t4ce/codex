@@ -786,7 +786,7 @@ fn enum_to_string<T: serde::Serialize>(value: &T) -> String {
 }
 
 fn normalize_cwd(cwd: PathBuf) -> PathBuf {
-    codex_utils_path::normalize_for_path_comparison(cwd.as_path()).unwrap_or(cwd)
+    codex_utils_paths::path::normalize_for_path_comparison(cwd.as_path()).unwrap_or(cwd)
 }
 
 async fn apply_thread_git_info_patch(
@@ -942,7 +942,7 @@ mod tests {
     use codex_protocol::models::PermissionProfile;
     use codex_protocol::openai_models::ReasoningEffort;
     use codex_protocol::protocol::ThreadHistoryMode;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use futures::FutureExt;
     use pretty_assertions::assert_eq;
     use serde_json::Value;
@@ -2259,7 +2259,7 @@ mod tests {
         let child = workspace.join("child");
         std::fs::create_dir_all(child.as_path()).expect("create workspace");
         let unnormalized_cwd = child.join("..");
-        let normalized_cwd = codex_utils_path::normalize_for_path_comparison(workspace.as_path())
+        let normalized_cwd = codex_utils_paths::path::normalize_for_path_comparison(workspace.as_path())
             .expect("normalize cwd");
 
         store

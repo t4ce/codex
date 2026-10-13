@@ -128,7 +128,7 @@ impl GuardianReviewContext {
         Self {
             parent_response_id: turn
                 .extension_data
-                .get::<codex_api::ResponseId>()
+                .get::<codex_transport::api::ResponseId>()
                 .map(|id| id.0.clone()),
             environments: environments.clone(),
             project_instructions: None,
@@ -157,7 +157,7 @@ impl From<&Arc<StepContext>> for GuardianReviewContext {
             parent_response_id: step
                 .turn
                 .extension_data
-                .get::<codex_api::ResponseId>()
+                .get::<codex_transport::api::ResponseId>()
                 .map(|id| id.0.clone()),
             turn: Arc::clone(&step.turn),
             environments: step.environments.clone(),
@@ -177,7 +177,7 @@ impl From<Arc<TurnContext>> for GuardianReviewContext {
         Self {
             parent_response_id: turn
                 .extension_data
-                .get::<codex_api::ResponseId>()
+                .get::<codex_transport::api::ResponseId>()
                 .map(|id| id.0.clone()),
             environments: turn.initial_environments.clone(),
             project_instructions: None,

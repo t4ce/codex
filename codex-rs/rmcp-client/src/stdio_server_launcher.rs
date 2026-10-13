@@ -37,8 +37,8 @@ use codex_exec_server::ExecEnvPolicy;
 use codex_exec_server::ExecParams;
 use codex_exec_server::ExecProcess;
 use codex_protocol::config_types::ShellEnvironmentPolicyInherit;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_pty::Command;
 #[cfg(unix)]
 use codex_utils_pty::DescriptorPolicy;

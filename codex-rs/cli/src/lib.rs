@@ -4,7 +4,7 @@ pub(crate) mod login;
 
 use clap::Args;
 use clap::Parser;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use codex_utils_cli::ProfileV2Name;
 use std::path::PathBuf;

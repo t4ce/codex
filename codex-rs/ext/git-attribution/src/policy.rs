@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use codex_backend_client::Client as BackendClient;
 use codex_extension_api::ExtensionData;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use tokio::time::timeout;
 

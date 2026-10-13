@@ -1,4 +1,4 @@
-use codex_http_client::HttpClient;
+use codex_transport::http::HttpClient;
 use codex_protocol::account::PlanType as AccountPlanType;
 use codex_protocol::auth::PlanType as InternalPlanType;
 use serde::Deserialize;

@@ -37,7 +37,7 @@ use codex_protocol::error::AgentErrorContext;
 use codex_protocol::intersect_effective_permission_profiles;
 use codex_protocol::protocol::EnvironmentConfigState;
 use codex_thread_store::PersistContext;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use futures::StreamExt;
 use futures::stream;
 use std::time::Instant;

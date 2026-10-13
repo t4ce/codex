@@ -1,7 +1,7 @@
 use crate::policy_transforms::should_require_platform_sandbox;
 use codex_protocol::models::PermissionProfile;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::ffi::CString;
 use std::io::ErrorKind;
 use std::io::Read;

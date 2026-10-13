@@ -5,11 +5,11 @@ use super::RealtimeWebrtcSidebandInputTask;
 use super::flush_realtime_transcript_tail;
 use super::report_realtime_transport_loss;
 use super::run_realtime_input_task;
-use codex_api::ApiError;
-use codex_api::RealtimeEvent;
-use codex_api::RealtimeEventParser;
-use codex_api::RealtimeTranscriptState;
-use codex_api::map_api_error;
+use codex_transport::api::ApiError;
+use codex_transport::api::RealtimeEvent;
+use codex_transport::api::RealtimeEventParser;
+use codex_transport::api::RealtimeTranscriptState;
+use codex_transport::api::map_api_error;
 use codex_login::default_client::default_headers;
 use http::StatusCode;
 use std::sync::atomic::Ordering;
@@ -146,7 +146,7 @@ pub(super) fn spawn_webrtc_sideband_input_task(
             if event_parser != RealtimeEventParser::FramelessBidi
                 || matches!(
                     &err,
-                    ApiError::Transport(codex_client::TransportError::Policy(_))
+                    ApiError::Transport(codex_transport::client::TransportError::Policy(_))
                 )
             {
                 report_realtime_transport_loss(&events_tx, err).await;

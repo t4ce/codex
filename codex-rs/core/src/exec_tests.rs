@@ -276,7 +276,7 @@ async fn exec_full_buffer_capture_ignores_expiration() -> Result<()> {
     let output = exec(
         ExecParams {
             command,
-            cwd: codex_utils_absolute_path::AbsolutePathBuf::current_dir()?,
+            cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?,
             expiration: 1.into(),
             capture_policy: ExecCapturePolicy::FullBuffer,
             env,
@@ -312,7 +312,7 @@ async fn exec_full_buffer_capture_keeps_io_drain_timeout_when_descendant_holds_p
                     "-c".to_string(),
                     "printf hello; sleep 30 &".to_string(),
                 ],
-                cwd: codex_utils_absolute_path::AbsolutePathBuf::current_dir()?,
+                cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?,
                 expiration: 1.into(),
                 capture_policy: ExecCapturePolicy::FullBuffer,
                 env: std::env::vars().collect(),
@@ -498,7 +498,7 @@ async fn process_exec_tool_call_preserves_full_buffer_capture_policy(
         format!("sleep 0.05; head -c {byte_count} /dev/zero | tr '\\0' 'a'"),
     ];
 
-    let cwd = codex_utils_absolute_path::AbsolutePathBuf::current_dir()?;
+    let cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?;
     let permission_profile = PermissionProfile::Disabled;
     let output = process_exec_tool_call(
         ExecParams {
@@ -648,7 +648,7 @@ fn windows_restricted_token_allows_workspace_write_profiles() {
 #[test]
 fn windows_elevated_allows_split_restricted_read_policies() {
     let temp_dir = tempfile::TempDir::new().expect("tempdir");
-    let docs = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+    let docs = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
         temp_dir.path().join("docs"),
     )
     .expect("absolute docs");
@@ -692,7 +692,7 @@ fn windows_restricted_token_rejects_split_only_filesystem_policies() {
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
                 .expect("absolute docs")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Read,
@@ -732,7 +732,7 @@ fn windows_restricted_token_rejects_root_write_read_only_carveouts() {
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
                 .expect("absolute docs")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Read,
@@ -874,7 +874,7 @@ fn windows_elevated_supports_split_restricted_read_roots() {
     let expected_docs = dunce::canonicalize(&docs).expect("canonical docs");
     let file_system_policy = FileSystemSandboxPolicy::restricted(vec![
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
                 .expect("absolute docs")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Read,
@@ -928,7 +928,7 @@ fn windows_elevated_supports_split_write_read_carveouts() {
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
                 .expect("absolute docs")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Read,
@@ -954,7 +954,7 @@ fn windows_elevated_supports_split_write_read_carveouts() {
             write_roots_override: None,
             additional_deny_read_paths: vec![],
             additional_deny_write_paths: vec![
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(expected_docs)
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(expected_docs)
                     .expect("absolute docs"),
             ],
         }))
@@ -1033,7 +1033,7 @@ fn windows_elevated_supports_unreadable_split_carveouts() {
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&blocked)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&blocked)
                 .expect("absolute blocked")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Deny,
@@ -1058,13 +1058,13 @@ fn windows_elevated_supports_unreadable_split_carveouts() {
             read_roots_include_platform_defaults: false,
             write_roots_override: None,
             additional_deny_read_paths: vec![
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
                     expected_blocked.clone(),
                 )
                 .expect("absolute blocked"),
             ],
             additional_deny_write_paths: vec![
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(expected_blocked)
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(expected_blocked)
                     .expect("absolute blocked"),
             ],
         }))
@@ -1120,7 +1120,7 @@ fn windows_elevated_supports_unreadable_globs() {
             read_roots_include_platform_defaults: false,
             write_roots_override: None,
             additional_deny_read_paths: vec![
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(secret)
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(secret)
                     .expect("absolute secret"),
             ],
             additional_deny_write_paths: vec![],
@@ -1152,14 +1152,14 @@ fn windows_elevated_rejects_reopened_writable_descendants() {
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&docs)
                 .expect("absolute docs")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Read,
             missing_path_behavior: None,
         },
         codex_protocol::permissions::FileSystemSandboxEntry {
-            path: codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&nested)
+            path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&nested)
                 .expect("absolute nested")
                 .into(),
             access: codex_protocol::permissions::FileSystemAccessMode::Write,
@@ -1395,7 +1395,7 @@ async fn kill_child_process_group_kills_grandchildren_on_timeout() -> Result<()>
         "-c".to_string(),
         "sleep 60 & echo $!; sleep 60".to_string(),
     ];
-    let cwd = codex_utils_absolute_path::AbsolutePathBuf::current_dir()?;
+    let cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?;
     let env: HashMap<String, String> = std::env::vars().collect();
     let params = ExecParams {
         command,
@@ -1448,7 +1448,7 @@ async fn kill_child_process_group_kills_grandchildren_on_timeout() -> Result<()>
 #[tokio::test]
 async fn process_exec_tool_call_respects_cancellation_token() -> Result<()> {
     let command = long_running_command();
-    let cwd = codex_utils_absolute_path::AbsolutePathBuf::current_dir()?;
+    let cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?;
     let env: HashMap<String, String> = std::env::vars().collect();
     let cancel_token = CancellationToken::new();
     let cancel_tx = cancel_token.clone();
@@ -1510,7 +1510,7 @@ printf ready > "$READY_MARKER"
 while :; do sleep 1; done"#
             .to_string(),
     ];
-    let cwd = codex_utils_absolute_path::AbsolutePathBuf::current_dir()?;
+    let cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir()?;
     let mut env: HashMap<String, String> = std::env::vars().collect();
     env.insert(
         "READY_MARKER".to_string(),

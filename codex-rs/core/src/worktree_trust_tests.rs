@@ -5,9 +5,9 @@ use super::write_linked_worktree_metadata;
 use codex_exec_server::LOCAL_FS;
 use codex_git_utils::resolve_root_git_project_uri_for_trust;
 #[cfg(unix)]
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path::normalize_for_path_comparison;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path::normalize_for_path_comparison;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::PathBufExt;
 use pretty_assertions::assert_eq;
 use std::fs;

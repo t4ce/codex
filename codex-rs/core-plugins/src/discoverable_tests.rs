@@ -24,7 +24,7 @@ use codex_config::CONFIG_TOML_FILE;
 use codex_login::CodexAuth;
 use codex_protocol::auth::AuthMode;
 use codex_protocol::protocol::Product;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::HashSet;

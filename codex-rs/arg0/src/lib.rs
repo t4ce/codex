@@ -13,7 +13,7 @@ use codex_exec_server::CODEX_ARG0_EXEC_HELPER_ARG1;
 use codex_exec_server::CODEX_FS_HELPER_ARG1;
 use codex_install_context::InstallContext;
 use codex_sandboxing::landlock::CODEX_LINUX_SANDBOX_ARG0;
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::home_dir::find_codex_home;
 #[cfg(target_os = "windows")]
 use codex_windows_sandbox::CODEX_WINDOWS_SANDBOX_ARG1;
 #[cfg(unix)]
@@ -97,7 +97,7 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
             Some(patch_arg) => {
                 let mut stdout = std::io::stdout();
                 let mut stderr = std::io::stderr();
-                let cwd = match codex_utils_absolute_path::AbsolutePathBuf::current_dir() {
+                let cwd = match codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir() {
                     Ok(cwd) => cwd,
                     Err(_) => std::process::exit(1),
                 };
@@ -518,7 +518,7 @@ mod tests {
     use codex_install_context::CodexPackageLayout;
     use codex_install_context::InstallContext;
     use codex_install_context::InstallMethod;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use std::fs;
     use std::fs::File;

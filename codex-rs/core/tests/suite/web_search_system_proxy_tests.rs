@@ -4,7 +4,7 @@ use anyhow::Result;
 use codex_core::config::Config;
 use codex_extension_api::ExtensionRegistryBuilder;
 use codex_features::Feature;
-use codex_http_client::cache_system_proxy_route_for_test;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use codex_login::CodexAuth;
 use codex_models_manager::bundled_models_response;
 use codex_protocol::config_types::WebSearchMode;

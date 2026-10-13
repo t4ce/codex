@@ -40,7 +40,7 @@ impl WorkloadIdentityConfig {
 #[derive(Clone, Debug, Error)]
 pub enum WorkloadIdentityError {
     #[error(transparent)]
-    Policy(#[from] codex_http_client::NetworkPolicyDenied),
+    Policy(#[from] codex_transport::http::NetworkPolicyDenied),
     #[error("the workload identity federation rule ID must not be empty")]
     InvalidFederationRuleId,
     #[error("the workload identity assertion file path must be absolute")]

@@ -25,8 +25,8 @@ use codex_exec_server::Environment;
 use codex_exec_server::ExecServerClient;
 use codex_exec_server::HttpClient;
 use codex_exec_server::RemoteExecServerConnectArgs;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_rmcp_client::ElicitationAction;
 use codex_rmcp_client::ElicitationResponse;
 use codex_rmcp_client::RmcpClient;
@@ -185,8 +185,8 @@ pub(crate) async fn call_echo_tool(
         .await
 }
 
-fn control_client() -> anyhow::Result<codex_http_client::HttpClient> {
-    Ok(codex_http_client::HttpClientBuilder::new().build_direct()?)
+fn control_client() -> anyhow::Result<codex_transport::http::HttpClient> {
+    Ok(codex_transport::http::HttpClientBuilder::new().build_direct()?)
 }
 
 pub(crate) async fn arm_session_post_failure(

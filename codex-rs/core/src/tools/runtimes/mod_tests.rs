@@ -24,8 +24,8 @@ use codex_protocol::models::PermissionProfile;
 use codex_protocol::sandbox::SandboxOverride;
 use codex_sandboxing::SandboxManager;
 use codex_sandboxing::SandboxType;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::PathBufExt;
 use pretty_assertions::assert_eq;
 use std::os::unix::fs::PermissionsExt;
@@ -80,7 +80,7 @@ async fn test_network_proxy_with_config(
     let state = codex_network_proxy::build_config_state(
         config,
         NetworkProxyConstraints::default(),
-        codex_utils_path_uri::Platform::native(),
+        codex_utils_paths::path_uri::Platform::native(),
     )?;
     NetworkProxy::builder()
         .state(Arc::new(NetworkProxyState::with_reloader(

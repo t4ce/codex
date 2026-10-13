@@ -39,7 +39,7 @@ use codex_login::token_data::parse_chatgpt_jwt_claims;
 use codex_protocol::auth::AuthMode;
 use codex_state::RemoteControlEnrollmentRecord;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use futures::SinkExt;
 use futures::StreamExt;
 use gethostname::gethostname;

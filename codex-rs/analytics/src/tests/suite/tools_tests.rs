@@ -50,8 +50,8 @@ use codex_app_server_protocol::ThreadItem;
 use codex_app_server_protocol::TurnStatus as AppServerTurnStatus;
 use codex_protocol::protocol::ThreadSource;
 use codex_protocol::sandbox::SandboxType;
-use codex_utils_absolute_path::test_support::PathBufExt;
-use codex_utils_absolute_path::test_support::test_path_buf;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
+use codex_utils_paths::absolute_path::test_support::test_path_buf;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

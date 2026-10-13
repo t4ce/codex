@@ -1,6 +1,6 @@
 use codex_exec_server::EnvironmentManager;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 
 pub mod relay;
 

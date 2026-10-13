@@ -20,7 +20,7 @@ use codex_config::types::Notice;
 use codex_config::types::Tui;
 use codex_terminal_detection::TerminalInfo;
 use codex_terminal_detection::TerminalName;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct LocalSettings {

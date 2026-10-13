@@ -1,6 +1,6 @@
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::RequestBuilder;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RequestBuilder;
+use codex_transport::http::RouteAwareClientPool;
 use http::Method;
 use std::fmt::Debug;
 

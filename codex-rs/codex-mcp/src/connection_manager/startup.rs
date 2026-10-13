@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use async_channel::Sender;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_config::McpServerAuth;
 use codex_config::McpServerConfig;
 use codex_config::McpServerTransportConfig;

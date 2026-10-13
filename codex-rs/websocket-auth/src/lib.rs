@@ -4,7 +4,7 @@
 use anyhow::Context;
 use clap::Args;
 use clap::ValueEnum;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use constant_time_eq::constant_time_eq_32;
 use http::HeaderMap;
 use http::StatusCode;

@@ -40,7 +40,7 @@ use codex_sandboxing::SandboxManager;
 use codex_sandboxing::SandboxTransformRequest;
 use codex_sandboxing::SandboxType;
 use codex_sandboxing::WindowsSandboxProxySettingsMode;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_windows_sandbox_test_support::WindowsSandboxAccountTestGuard;
 use core_test_support::PathExt;
 use core_test_support::responses::ev_assistant_message;

@@ -15,16 +15,16 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tracing::debug;
 use tracing::warn;
 
-use codex_api::AuthError;
-use codex_api::AuthProvider;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::Request;
-use codex_http_client::RequestCompression;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::Request;
+use codex_transport::http::RequestCompression;
 use codex_protocol::shell_environment::scrub_non_inheritable_env_vars;
-use codex_utils_rustls_provider::ensure_rustls_crypto_provider;
-use codex_websocket_client::WebSocketConnection;
-use codex_websocket_client::WebSocketConnector;
-use codex_websocket_client::WebSocketTlsMode;
+use codex_network_foundation::ensure_rustls_crypto_provider;
+use codex_transport::websocket::WebSocketConnection;
+use codex_transport::websocket::WebSocketConnector;
+use codex_transport::websocket::WebSocketTlsMode;
 use http::HeaderMap;
 
 use crate::ExecServerClient;
@@ -465,7 +465,7 @@ impl ExecServerClient {
             .await
             .unwrap_or_else(|_| {
                 Err(ExecServerError::EnvironmentRegistryRequest(
-                    codex_http_client::RouteAwareRequestError::Timeout,
+                    codex_transport::http::RouteAwareRequestError::Timeout,
                 ))
             })
         };

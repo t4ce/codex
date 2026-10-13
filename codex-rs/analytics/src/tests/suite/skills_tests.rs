@@ -11,7 +11,7 @@ use crate::reducer::normalize_path_for_skill_id;
 use crate::reducer::skill_id_for_local_skill;
 use crate::tests::support::TEST_PRODUCT_CLIENT_ID;
 use crate::tests::support::test_tracking_context;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::path::PathBuf;

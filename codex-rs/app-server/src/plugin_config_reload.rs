@@ -3,7 +3,7 @@
 
 use crate::config_manager::ConfigManager;
 use codex_core_plugins::ConfigLayerReload;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::sync::Arc;
 
 /// The config-loading path used to select marketplaces for startup tasks.

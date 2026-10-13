@@ -9,8 +9,8 @@ use codex_exec_server::LOCAL_FS;
 use codex_exec_server::ReadFileOptions;
 use codex_skills::SkillError;
 use codex_skills::SkillMetadata;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 
 #[derive(Debug, Clone, Default)]
 pub struct SkillLoadOutcome {

@@ -9,7 +9,7 @@ use codex_protocol::protocol::InternalSessionSource;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::SubAgentSource;
 use codex_state::ThreadStateAuditRow;
-use codex_utils_path::normalize_for_path_comparison;
+use codex_utils_paths::path::normalize_for_path_comparison;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -746,7 +746,7 @@ mod tests {
     use super::*;
     use codex_history::RolloutLine;
     use codex_protocol::ThreadId;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use tempfile::TempDir;
 

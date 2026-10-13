@@ -5,7 +5,7 @@ use codex_app_server_protocol::PluginAuthPolicy;
 use codex_app_server_protocol::PluginInstallPolicy;
 use codex_app_server_protocol::PluginInterface;
 use codex_login::CodexAuth;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -764,11 +764,11 @@ async fn revoked_success_body_is_a_request_error() {
         use tokio::io::AsyncWriteExt;
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let url = format!("http://{}/upload", listener.local_addr().unwrap());
-        let controller = codex_http_client::NetworkPolicyController::default();
+        let controller = codex_transport::http::NetworkPolicyController::default();
         let policy = controller.policy();
         controller.publish(
             policy.revision(),
-            codex_http_client::DestinationPolicy::Unrestricted,
+            codex_transport::http::DestinationPolicy::Unrestricted,
         );
         let config = RemotePluginServiceConfig::new(
             url.clone(),
@@ -789,7 +789,7 @@ async fn revoked_success_body_is_a_request_error() {
             tokio::time::sleep(std::time::Duration::from_millis(/*millis*/ 50)).await;
             controller.publish(
                 controller.policy().revision(),
-                codex_http_client::DestinationPolicy::Restricted {
+                codex_transport::http::DestinationPolicy::Restricted {
                     allowed_hosts: Default::default(),
                 },
             );
@@ -812,8 +812,8 @@ async fn revoked_success_body_is_a_request_error() {
             matches!(
                 result,
                 Err(RemotePluginCatalogError::Request {
-                    source: codex_http_client::RouteAwareRequestError::Policy(
-                        codex_http_client::NetworkPolicyDenied::Revoked
+                    source: codex_transport::http::RouteAwareRequestError::Policy(
+                        codex_transport::http::NetworkPolicyDenied::Revoked
                     ),
                     ..
                 })

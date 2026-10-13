@@ -8,10 +8,10 @@
 use std::time::Duration;
 
 use codex_exec_server_protocol::JSONRPCErrorError;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::RouteAwareClientPool;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RouteAwareClientPool;
+use codex_transport::http::RouteAwareRequestError;
 use codex_protocol::shell_environment::CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
 use codex_protocol::shell_environment::OPENAI_FEDERATION_RULE_ID_ENV_VAR;
 use codex_protocol::shell_environment::OPENAI_IDENTITY_TOKEN_FILE_ENV_VAR;
@@ -69,7 +69,7 @@ pub struct RouteAwareHttpClient {
 /// downstream body-delta forwarding.
 pub(crate) struct PendingRouteAwareHttpBodyStream {
     pub(crate) request_id: String,
-    pub(crate) response: codex_http_client::HttpResponse,
+    pub(crate) response: codex_transport::http::HttpResponse,
 }
 
 /// Validates `http/request` parameters and runs the actual HTTP call used

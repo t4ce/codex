@@ -72,7 +72,7 @@ use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::ThreadHistoryMode;
 use codex_protocol::protocol::ThreadSource;
 use codex_state::StateRuntime;
-use codex_utils_path as path_utils;
+use codex_utils_paths::path as path_utils;
 
 /// Writes canonical session rollout items to JSONL.
 ///

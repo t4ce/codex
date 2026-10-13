@@ -79,7 +79,7 @@ async fn search_matches_selected_rollout_across_path_spellings_and_compression()
         let home_paths = {
             let verbatim = std::fs::canonicalize(&home_paths[0]).expect("canonicalize home");
             let ordinary =
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&verbatim)
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&verbatim)
                     .expect("normalize home")
                     .into_path_buf();
             [ordinary, verbatim]

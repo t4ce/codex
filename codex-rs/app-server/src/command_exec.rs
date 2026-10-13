@@ -691,7 +691,7 @@ mod tests {
     use crate::error_code::INVALID_REQUEST_ERROR_CODE;
     use codex_protocol::config_types::WindowsSandboxLevel;
     use codex_protocol::models::PermissionProfile;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     #[cfg(not(target_os = "windows"))]
     use tokio::time::Duration;

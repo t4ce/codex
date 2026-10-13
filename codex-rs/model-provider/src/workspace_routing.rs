@@ -38,7 +38,7 @@ impl WorkspaceRoutingContext {
 
 /// Changes only the origin of requests to the selected ChatGPT backend.
 pub(crate) fn apply_workspace_routing(
-    provider: &mut codex_api::Provider,
+    provider: &mut codex_transport::api::Provider,
     routing: WorkspaceRouting,
 ) -> io::Result<()> {
     let base_url = &mut provider.base_url;
@@ -80,7 +80,7 @@ pub(crate) fn apply_workspace_routing(
 /// Workspace routes reject redirects even when their routing override supplies no header.
 #[derive(Debug)]
 pub struct ResolvedResponsesProvider {
-    pub provider: codex_api::Provider,
+    pub provider: codex_transport::api::Provider,
     pub redirect_policy: ClientRedirectPolicy,
 }
 
@@ -93,7 +93,7 @@ pub struct ResponsesConnectionKey {
 }
 
 impl ResponsesConnectionKey {
-    pub fn new(provider: &codex_api::Provider, auth_revision: Option<u64>) -> Self {
+    pub fn new(provider: &codex_transport::api::Provider, auth_revision: Option<u64>) -> Self {
         Self {
             base_url: provider.base_url.clone(),
             routing_header: provider.headers.get(ACCOUNT_ROUTING_HEADER).cloned(),

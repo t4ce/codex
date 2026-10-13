@@ -930,8 +930,8 @@ mod tests {
     use codex_login::CodexAuth;
     use codex_protocol::config_types::ForcedLoginMethod;
     use codex_protocol::openai_models::ReasoningEffort;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use std::collections::BTreeMap;
     use std::sync::Arc;

@@ -16,7 +16,7 @@ use codex_sandboxing::SandboxManager;
 use codex_sandboxing::SandboxType;
 use codex_sandboxing::policy_transforms::effective_file_system_sandbox_policy;
 use codex_sandboxing::policy_transforms::effective_network_sandbox_policy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::PathBufExt;
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
@@ -271,7 +271,7 @@ async fn file_system_sandbox_context_preserves_executor_workspace_permissions() 
     assert_eq!(sandbox.permissions, expected_permissions);
     assert_eq!(
         sandbox.cwd,
-        codex_utils_path_uri::PathUri::from_abs_path(&path)
+        codex_utils_paths::path_uri::PathUri::from_abs_path(&path)
     );
     assert_eq!(
         sandbox.windows_sandbox_selection,

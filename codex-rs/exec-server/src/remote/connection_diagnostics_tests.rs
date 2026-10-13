@@ -95,8 +95,8 @@ async fn websocket_rejection_preserves_status_and_sends_correlation_id() {
         &format!("ws://{}/", server.address()),
         request_id,
         &crate::ExecServerTelemetry::default(),
-        &codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        &codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
     )
     .await;

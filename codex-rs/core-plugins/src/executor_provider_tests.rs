@@ -27,7 +27,7 @@ use codex_exec_server_test_support::environment_manager_without_environments;
 use codex_plugin::ResolvedPlugin;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::DISCOVERABLE_PLUGIN_MANIFEST_PATHS;
 use pretty_assertions::assert_eq;
 use std::collections::HashSet;

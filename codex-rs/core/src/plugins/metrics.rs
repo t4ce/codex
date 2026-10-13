@@ -5,7 +5,7 @@ use codex_analytics::PluginMeasurementsInput;
 use codex_core_plugins::PluginMetricsSidecar;
 use codex_exec_server::Environment;
 use codex_protocol::items::ModelInvocationContext;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 /// Creates a metrics sidecar for one plugin command.
 pub(crate) async fn sidecar_for_command(

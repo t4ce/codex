@@ -1,7 +1,7 @@
 //! Preserve policy denials through terminal connection state and allow later policy recovery.
 
-use codex_http_client::NetworkPolicyDenied;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::http::NetworkPolicyDenied;
+use codex_transport::http::RouteAwareRequestError;
 
 use super::ExecServerError;
 
@@ -31,7 +31,7 @@ impl ExecServerError {
                 Some(*denial)
             }
             Self::WebSocketConnect { source, .. } => {
-                codex_websocket_client::network_policy_denial(source)
+                codex_transport::websocket::network_policy_denial(source)
             }
             Self::Spawn(_)
             | Self::WebSocketConnectTimeout { .. }

@@ -7,7 +7,7 @@ use super::finding::IntegrityFindingDetails;
 use super::policy::PreparedPolicy;
 use super::policy::prepare_policy;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::fs;
 use std::io;
 

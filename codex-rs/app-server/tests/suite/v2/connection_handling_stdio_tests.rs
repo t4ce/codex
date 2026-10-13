@@ -11,7 +11,7 @@ use codex_app_server_protocol::FsReadFileParams;
 use codex_app_server_protocol::FsWriteFileParams;
 use codex_app_server_protocol::JSONRPCMessage;
 use codex_app_server_protocol::SandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cargo_bin::cargo_bin;
 use core_test_support::skip_if_remote;
 use pretty_assertions::assert_eq;

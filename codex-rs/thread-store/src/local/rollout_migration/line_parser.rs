@@ -10,8 +10,8 @@
 
 use chrono::DateTime;
 use codex_rollout::RolloutLine;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathUri;
 use serde_json::Map;
 use serde_json::Value;
 

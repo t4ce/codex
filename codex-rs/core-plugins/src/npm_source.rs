@@ -1,5 +1,5 @@
 use crate::plugin_bundle_archive::unpack_plugin_bundle_tar_gz;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 use std::ffi::OsStr;
 use std::fs;

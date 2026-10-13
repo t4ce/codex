@@ -30,8 +30,8 @@ use crate::server::session_registry::SessionRegistry;
 use crate::telemetry::ConnectionTransport;
 use crate::telemetry::ExecServerTelemetry;
 use crate::telemetry::ExecutorRegistration;
-use codex_http_client::HttpClientFactory;
-use codex_utils_path_uri::PathUri;
+use codex_transport::http::HttpClientFactory;
+use codex_utils_paths::path_uri::PathUri;
 
 #[derive(Clone)]
 pub(crate) struct ConnectionProcessor {
@@ -50,8 +50,8 @@ impl ConnectionProcessor {
         Self::new_with_location_request(
             runtime_paths,
             ExecServerTelemetry::default(),
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             RequestDispatchMode::Inline,
             // Connection-only tests must not scan the real user home.
@@ -68,7 +68,7 @@ impl ConnectionProcessor {
         request_dispatch_mode: RequestDispatchMode,
     ) -> Self {
         let request =
-            codex_utils_home_dir::find_codex_home().map(|codex_home| CapabilityLocationRequest {
+            codex_utils_paths::home_dir::find_codex_home().map(|codex_home| CapabilityLocationRequest {
                 codex_home: PathUri::from_abs_path(&codex_home),
                 user_home: dirs::home_dir()
                     .and_then(|home| PathUri::from_host_native_path(home).ok()),
@@ -326,7 +326,7 @@ mod tests {
     use codex_exec_server_protocol::JSONRPCRequest;
     use codex_exec_server_protocol::JSONRPCResponse;
     use codex_exec_server_protocol::RequestId;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use serde::Serialize;
     use serde::de::DeserializeOwned;
@@ -388,8 +388,8 @@ mod tests {
         let mut processor = super::ConnectionProcessor::new_with_location_request(
             paths,
             crate::ExecServerTelemetry::default(),
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             crate::server::RequestDispatchMode::Inline,
             Ok(request.clone()),

@@ -16,7 +16,7 @@ use crate::format_config_layer_source;
 use crate::requirements_layers::strip_cloud_auth_requirements;
 use crate::types::Tui;
 use codex_features::is_known_feature_key;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
 use serde::de::DeserializeOwned;
 use std::any::TypeId;
 use std::collections::BTreeSet;

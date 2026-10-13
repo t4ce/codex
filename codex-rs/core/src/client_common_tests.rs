@@ -1,7 +1,7 @@
-use codex_api::OpenAiVerbosity;
-use codex_api::ResponsesApiRequest;
-use codex_api::TextControls;
-use codex_api::create_text_param_for_request;
+use codex_transport::api::OpenAiVerbosity;
+use codex_transport::api::ResponsesApiRequest;
+use codex_transport::api::TextControls;
+use codex_transport::api::create_text_param_for_request;
 use codex_models_manager::model_info::model_info_from_slug;
 use codex_protocol::config_types::ServiceTier;
 use codex_protocol::models::FunctionCallOutputPayload;

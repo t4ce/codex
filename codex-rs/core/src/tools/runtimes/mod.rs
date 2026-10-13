@@ -29,7 +29,7 @@ pub(crate) use codex_network_proxy::is_managed_proxy_env_var;
 pub(crate) use codex_network_proxy::strip_managed_proxy_env;
 use codex_protocol::shell_environment::is_non_inheritable_env_var;
 use codex_shell_command::shell_snapshot::posix_env_path_expansion_function;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashMap;
 use std::path::Path;
 

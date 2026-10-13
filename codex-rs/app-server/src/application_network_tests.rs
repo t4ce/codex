@@ -5,7 +5,7 @@ use anyhow::Result;
 use codex_config::CloudConfigBundleLoader;
 use codex_config::LoaderOverrides;
 use codex_config::test_support::CloudConfigBundleFixture;
-use codex_http_client::NetworkPolicyDenied;
+use codex_transport::http::NetworkPolicyDenied;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
@@ -19,7 +19,7 @@ use tokio::time::timeout;
 async fn embedded_transports_stay_blocked_until_the_same_policy_is_published() -> Result<()> {
     use crate::in_process::EmbeddedNetworkPolicy;
     use codex_core::config::ConfigBuilder;
-    use codex_http_client::ClientRouteClass;
+    use codex_transport::http::ClientRouteClass;
     use wiremock::Mock;
     use wiremock::MockServer;
     use wiremock::ResponseTemplate;

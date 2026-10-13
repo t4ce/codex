@@ -1,12 +1,12 @@
 use anyhow::Result;
-use codex_api::ApiError;
+use codex_transport::api::ApiError;
 use codex_context_fragments::RenderedFragment;
 use codex_core::cyber_access_program::ApiKeyCyberAccessPrograms;
 use codex_extension_api::ContextualUserFragment;
 use codex_extension_api::ExtensionMetrics;
 use codex_guardian_context::PreviousReviews;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AgentIdentityAuthPolicy;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;

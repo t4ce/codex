@@ -78,12 +78,12 @@ pub fn default_filter() -> Targets {
         .with_target("runtime::", LevelFilter::INFO)
         .with_target("tokio_graceful::guard", LevelFilter::DEBUG)
         .with_target("tokio_graceful::trigger", LevelFilter::DEBUG)
-        .with_target("codex_api::responses_websocket_timing", LevelFilter::OFF)
+        .with_target("codex_transport::api::responses_websocket_timing", LevelFilter::OFF)
         .with_target("codex_core::post_sampling_token_estimate", LevelFilter::OFF)
         // Full model request bodies and streamed response payloads overwhelm the
         // SQLite log database, but remain available to explicit TRACE subscribers.
-        .with_target("codex_http_client::transport", LevelFilter::DEBUG)
-        .with_target("codex_api::sse", LevelFilter::DEBUG)
+        .with_target("codex_transport::http::transport", LevelFilter::DEBUG)
+        .with_target("codex_transport::api::sse", LevelFilter::DEBUG)
         // Per-chunk streaming traces otherwise flood the bounded SQLite log queue.
         .with_target("codex_tui::streaming::controller", LevelFilter::DEBUG)
         .with_target("codex_tui::streaming::table_holdback", LevelFilter::DEBUG)
@@ -635,7 +635,7 @@ mod tests {
     use std::sync::Mutex;
     use std::sync::atomic::AtomicBool;
 
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use tracing_subscriber::filter::Targets;
     use tracing_subscriber::fmt::writer::MakeWriter;

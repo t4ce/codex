@@ -120,12 +120,12 @@ use codex_thread_store::PersistContext;
 use codex_tools::DiscoverableTool;
 use codex_tools::ToolName;
 use codex_tools::filter_request_plugin_install_discoverable_tools_for_client;
-use codex_utils_path_uri::PathUri;
-use codex_utils_stream_parser::AssistantTextChunk;
-use codex_utils_stream_parser::AssistantTextStreamParser;
-use codex_utils_stream_parser::ProposedPlanSegment;
-use codex_utils_stream_parser::extract_proposed_plan_text;
-use codex_utils_stream_parser::strip_citations;
+use codex_utils_paths::path_uri::PathUri;
+use codex_utils_text::stream_parser::AssistantTextChunk;
+use codex_utils_text::stream_parser::AssistantTextStreamParser;
+use codex_utils_text::stream_parser::ProposedPlanSegment;
+use codex_utils_text::stream_parser::extract_proposed_plan_text;
+use codex_utils_text::stream_parser::strip_citations;
 use futures::prelude::*;
 use futures::stream::FuturesOrdered;
 use tokio_util::sync::CancellationToken;
@@ -2675,7 +2675,7 @@ async fn try_run_sampling_request(
                 if let Some(response_id) = response_id {
                     turn_context
                         .extension_data
-                        .insert(codex_api::ResponseId(response_id));
+                        .insert(codex_transport::api::ResponseId(response_id));
                 }
             }
             ResponseEvent::OutputItemDone(mut item) => {

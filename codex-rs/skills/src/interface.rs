@@ -2,7 +2,7 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 
 use crate::SkillInterface;

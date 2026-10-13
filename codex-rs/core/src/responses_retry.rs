@@ -10,9 +10,9 @@ use crate::context::ContextualUserFragment;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
 use crate::session::turn_context::TurnContext;
-use codex_client::RetryOperation;
+use codex_transport::client::RetryOperation;
 use codex_features::Feature;
-use codex_http_client::RetryAfter;
+use codex_transport::http::RetryAfter;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::CodexErrorDetails;
 use codex_protocol::protocol::EventMsg;
@@ -109,7 +109,7 @@ pub(crate) async fn handle_response_stream_error(
         sess.notify_stream_error(turn_context, "Reconnecting... waiting for network", err)
             .await;
         retry_state.connection_retries = retry_state.connection_retries.saturating_add(1);
-        codex_client::record_retry!(retry_state.connection_retries, retry_delay, operation);
+        codex_transport::client::record_retry!(retry_state.connection_retries, retry_delay, operation);
         tokio::time::sleep(retry_delay).await;
         retry_state.connection_retry_delay = retry_delay
             .saturating_mul(2)
@@ -161,7 +161,7 @@ pub(crate) async fn handle_response_stream_error(
         let now = Instant::now();
         let retry_at = retry_after.map(RetryAfter::deadline).unwrap_or(now + delay);
         let delay = retry_at.saturating_duration_since(now);
-        codex_client::record_retry!(retry_count, delay, operation);
+        codex_transport::client::record_retry!(retry_count, delay, operation);
         tokio::time::sleep_until(retry_at).await;
         return Ok(());
     }

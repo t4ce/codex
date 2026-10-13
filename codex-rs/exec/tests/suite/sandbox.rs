@@ -2,9 +2,9 @@
 use codex_core::spawn::StdioPolicy;
 use codex_protocol::models::PermissionProfile;
 use codex_protocol::permissions::NetworkSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::test_support::PathBufExt;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
+use codex_utils_paths::path_uri::PathUri;
 use std::collections::HashMap;
 use std::future::Future;
 use std::io;

@@ -17,14 +17,14 @@ use codex_sandboxing::SandboxExecRequest;
 use codex_sandboxing::SandboxManager;
 use codex_sandboxing::SandboxTransformRequest;
 use codex_sandboxing::SandboxType;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-use codex_utils_absolute_path::canonicalize_preserving_symlinks;
+use codex_utils_paths::absolute_path::canonicalize_preserving_symlinks;
 #[cfg(any(windows, test))]
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 #[cfg(any(windows, test))]
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_pty::Child;
 use codex_utils_pty::ChildStdin;
 use codex_utils_pty::Command;
@@ -581,8 +581,8 @@ mod tests {
     use codex_protocol::permissions::FileSystemSandboxPolicy;
     use codex_protocol::permissions::FileSystemSpecialPath;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
 
     use crate::ExecServerRuntimeOptions;

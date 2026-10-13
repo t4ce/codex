@@ -1,6 +1,6 @@
 use codex_core::config::Config;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::RouteAwareClientPool;
 use codex_model_provider_info::LMSTUDIO_OSS_PROVIDER_ID;
 use std::io;
 use std::path::Path;
@@ -205,8 +205,8 @@ mod tests {
         connection_timeout: Duration,
     ) -> LMStudioClient {
         let client = RouteAwareClientPool::with_connect_timeout(
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             ClientRouteClass::Other,
             connection_timeout,

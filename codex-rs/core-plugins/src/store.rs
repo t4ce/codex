@@ -6,7 +6,7 @@ use crate::manifest::load_plugin_manifest;
 use crate::manifest::parse_plugin_manifest;
 use codex_plugin::PluginId;
 use codex_plugin::validate_plugin_segment;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_plugins::AgentPluginSchemaStatus;
 use codex_utils_plugins::agent_plugin_schema_status;
 use codex_utils_plugins::find_plugin_manifest_path;

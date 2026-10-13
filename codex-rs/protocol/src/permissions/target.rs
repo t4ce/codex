@@ -14,8 +14,8 @@ use super::ReadDenyMatcher;
 use super::deny_read_validator::DenyReadValidator;
 use super::deny_read_validator::has_context_read_denials;
 use super::file_system_root;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use std::collections::HashSet;
 
 const INVALID_PATH: &str = "managed filesystem denial cannot be materialized safely";

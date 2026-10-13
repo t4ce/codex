@@ -21,7 +21,7 @@ use codex_protocol::models::MessagePhase;
 use codex_protocol::protocol::EventMsg;
 use codex_rollout::RolloutItem;
 use codex_rollout::state_db::StateDbHandle;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -269,7 +269,7 @@ mod tests {
     use codex_protocol::config_types::CollaborationMode;
     use codex_protocol::config_types::ModeKind;
     use codex_protocol::config_types::Settings;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
 
     #[test]

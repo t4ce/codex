@@ -371,7 +371,7 @@ fn map_fs_error(err: io::Error) -> JSONRPCErrorError {
 mod tests {
     use codex_protocol::protocol::NetworkAccess;
     use codex_protocol::protocol::SandboxPolicy;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
 
     use super::*;

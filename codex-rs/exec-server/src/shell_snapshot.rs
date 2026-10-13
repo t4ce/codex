@@ -23,7 +23,7 @@ use codex_shell_command::shell_snapshot::CapturedSnapshot;
 use codex_shell_command::shell_snapshot::SnapshotCaptureOptions;
 use codex_shell_command::shell_snapshot::SnapshotStartup;
 use codex_shell_command::shell_snapshot::snapshot_source_capture_script;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use tokio::io::AsyncReadExt;
 use tokio::process::Command;
 use tokio::sync::Mutex;

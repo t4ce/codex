@@ -462,7 +462,7 @@ impl SpanProcessor for SpanAttributesProcessor {
 fn build_logger(
     resource: &Resource,
     exporter: &OtelExporter,
-    factory: &codex_http_client::HttpClientFactory,
+    factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SdkLoggerProvider, Box<dyn Error>> {
     let mut builder = SdkLoggerProvider::builder().with_resource(resource.clone());
 
@@ -547,7 +547,7 @@ fn build_tracer_provider(
     resource: &Resource,
     exporter: &OtelExporter,
     span_attributes: BTreeMap<String, String>,
-    factory: &codex_http_client::HttpClientFactory,
+    factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SdkTracerProvider, Box<dyn Error>> {
     let span_exporter = match crate::config::resolve_exporter(exporter) {
         OtelExporter::None => return Ok(tracer_provider_builder(resource, span_attributes).build()),
@@ -675,8 +675,8 @@ mod tests {
     use crate::metrics::TOOL_CALL_DURATION_METRIC;
     use crate::metrics::TURN_COST_MICROUSD_METRIC;
     use crate::metrics::TURN_TOKEN_USAGE_METRIC;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use opentelemetry_sdk::metrics::InMemoryMetricExporter;
     use pretty_assertions::assert_eq;
     use std::path::PathBuf;
@@ -757,11 +757,11 @@ mod tests {
             environment: "test".to_string(),
         });
         assert!(crate::metrics::global_statsig_settings().is_some());
-        let controller = codex_http_client::NetworkPolicyController::default();
+        let controller = codex_transport::http::NetworkPolicyController::default();
         let policy = controller.policy();
         controller.publish(
             policy.revision(),
-            codex_http_client::DestinationPolicy::Unrestricted,
+            codex_transport::http::DestinationPolicy::Unrestricted,
         );
         let cached = crate::metrics::global().expect("initial global metrics client");
 
@@ -875,7 +875,7 @@ mod tests {
 fn build_logger(
     resource: &Resource,
     _exporter: &OtelExporter,
-    _factory: &codex_http_client::HttpClientFactory,
+    _factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SdkLoggerProvider, Box<dyn Error>> {
     Ok(SdkLoggerProvider::builder()
         .with_resource(resource.clone())
@@ -887,7 +887,7 @@ fn build_tracer_provider(
     resource: &Resource,
     _exporter: &OtelExporter,
     attributes: BTreeMap<String, String>,
-    _factory: &codex_http_client::HttpClientFactory,
+    _factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SdkTracerProvider, Box<dyn Error>> {
     Ok(tracer_provider_builder(resource, attributes).build())
 }

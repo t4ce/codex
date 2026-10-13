@@ -8,11 +8,11 @@ use crate::store::PluginStore;
 use crate::store::PluginStoreError;
 use crate::store::error_context_sub_error_type;
 use crate::store::validate_plugin_version_segment;
-use codex_http_client::HttpResponse;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::http::HttpResponse;
+use codex_transport::http::RouteAwareRequestError;
 use codex_plugin::PluginId;
 use codex_plugin::PluginIdError;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_plugins::AGENT_PLUGIN_MANIFEST_RELATIVE_PATH;
 use codex_utils_plugins::AgentPluginSchemaStatus;
 use codex_utils_plugins::agent_plugin_schema_status;
@@ -107,7 +107,7 @@ pub enum RemotePluginBundleInstallError {
     DownloadBody {
         url: String,
         #[source]
-        source: codex_http_client::HttpError,
+        source: codex_transport::http::HttpError,
     },
 
     #[error("remote plugin bundle download from {url} exceeded maximum size of {max_bytes} bytes")]

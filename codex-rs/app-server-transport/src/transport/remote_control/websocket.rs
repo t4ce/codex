@@ -40,7 +40,7 @@ use base64::Engine;
 use codex_app_server_protocol::RemoteControlConnectionStatus;
 use codex_app_server_protocol::RemoteControlStatusChangedNotification;
 use codex_state::StateRuntime;
-use codex_utils_rustls_provider::ensure_rustls_crypto_provider;
+use codex_network_foundation::ensure_rustls_crypto_provider;
 use futures::SinkExt;
 use futures::StreamExt;
 use futures::stream::SplitSink;
@@ -296,7 +296,7 @@ struct RemoteControlEnrollmentAuthContext<'a, 'b> {
 }
 
 enum ConnectOutcome {
-    Connected(Box<codex_websocket_client::WebSocketConnection>),
+    Connected(Box<codex_transport::websocket::WebSocketConnection>),
     Disabled,
     Shutdown,
 }
@@ -867,7 +867,7 @@ impl RemoteControlWebsocket {
 
     async fn run_connection(
         &mut self,
-        websocket_connection: codex_websocket_client::WebSocketConnection,
+        websocket_connection: codex_transport::websocket::WebSocketConnection,
         shutdown_token: CancellationToken,
     ) -> ConnectionEndReason {
         if !self.auth_manager.owner.is_current() {
@@ -949,7 +949,7 @@ impl RemoteControlWebsocket {
         server_event_rx: Arc<Mutex<mpsc::Receiver<super::QueuedServerEnvelope>>>,
         used_rx: watch::Receiver<usize>,
         websocket_writer: SplitSink<
-            codex_websocket_client::WebSocketConnection,
+            codex_transport::websocket::WebSocketConnection,
             tungstenite::Message,
         >,
         ping_interval: std::time::Duration,
@@ -980,7 +980,7 @@ impl RemoteControlWebsocket {
         server_event_rx: Arc<Mutex<mpsc::Receiver<super::QueuedServerEnvelope>>>,
         mut used_rx: watch::Receiver<usize>,
         mut websocket_writer: SplitSink<
-            codex_websocket_client::WebSocketConnection,
+            codex_transport::websocket::WebSocketConnection,
             tungstenite::Message,
         >,
         ping_interval: std::time::Duration,
@@ -1112,7 +1112,7 @@ impl RemoteControlWebsocket {
     async fn run_websocket_reader(
         client_tracker: Arc<Mutex<ClientTracker>>,
         state: Arc<Mutex<WebsocketState>>,
-        websocket_reader: SplitStream<codex_websocket_client::WebSocketConnection>,
+        websocket_reader: SplitStream<codex_transport::websocket::WebSocketConnection>,
         pong_timeout: std::time::Duration,
         shutdown_token: CancellationToken,
     ) {
@@ -1138,7 +1138,7 @@ impl RemoteControlWebsocket {
     async fn run_websocket_reader_inner(
         client_tracker: Arc<Mutex<ClientTracker>>,
         state: Arc<Mutex<WebsocketState>>,
-        mut websocket_reader: SplitStream<codex_websocket_client::WebSocketConnection>,
+        mut websocket_reader: SplitStream<codex_transport::websocket::WebSocketConnection>,
         pong_timeout: std::time::Duration,
         shutdown_token: CancellationToken,
     ) -> io::Result<()> {
@@ -1381,7 +1381,7 @@ pub(super) async fn connect_remote_control_websocket(
     connect_options: RemoteControlConnectOptions<'_>,
     status_publisher: &RemoteControlStatusPublisher,
 ) -> io::Result<(
-    codex_websocket_client::WebSocketConnection,
+    codex_transport::websocket::WebSocketConnection,
     tungstenite::http::Response<()>,
 )> {
     ensure_rustls_crypto_provider();
@@ -1416,10 +1416,10 @@ pub(super) async fn connect_remote_control_websocket(
         tokio::time::timeout(REMOTE_CONTROL_WEBSOCKET_CONNECT_TIMEOUT, async {
             let factory = auth.http_client_factory.clone();
             let connector = tokio::task::spawn_blocking(move || {
-                codex_websocket_client::WebSocketConnector::new(&factory).or_else(|_| {
-                    codex_websocket_client::WebSocketConnector::new_with_tls_mode(
+                codex_transport::websocket::WebSocketConnector::new(&factory).or_else(|_| {
+                    codex_transport::websocket::WebSocketConnector::new_with_tls_mode(
                         &factory,
-                        codex_websocket_client::WebSocketTlsMode::TungsteniteDefault,
+                        codex_transport::websocket::WebSocketTlsMode::TungsteniteDefault,
                     )
                 })
             })
@@ -1446,7 +1446,7 @@ pub(super) async fn connect_remote_control_websocket(
     match websocket_connect_result {
         Ok((websocket_stream, response)) => Ok((websocket_stream, response.map(|_| ()))),
         Err(err) => {
-            if let Some(denied) = codex_websocket_client::network_policy_denial(&err) {
+            if let Some(denied) = codex_transport::websocket::network_policy_denial(&err) {
                 return Err(io::Error::new(ErrorKind::PermissionDenied, denied));
             }
             match &err {
@@ -1866,7 +1866,7 @@ mod tests {
     use codex_login::token_data::parse_chatgpt_jwt_claims;
     use codex_protocol::auth::AuthMode;
     use codex_state::StateRuntime;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use futures::StreamExt;
     use pretty_assertions::assert_eq;
     use std::sync::Arc;
@@ -3528,7 +3528,7 @@ mod tests {
     }
 
     async fn connected_websocket_pair() -> (
-        codex_websocket_client::WebSocketConnection,
+        codex_transport::websocket::WebSocketConnection,
         WebSocketStream<TcpStream>,
     ) {
         let listener = TcpListener::bind("127.0.0.1:0")
@@ -3536,9 +3536,9 @@ mod tests {
             .expect("listener should bind");
         let url = format!("ws://{}", listener.local_addr().expect("local address"));
         let connect_task = tokio::spawn(async move {
-            codex_websocket_client::WebSocketConnector::new(
-                &codex_http_client::HttpClientFactory::new(
-                    codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::websocket::WebSocketConnector::new(
+                &codex_transport::http::HttpClientFactory::new(
+                    codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
                 ),
             )
             .unwrap()

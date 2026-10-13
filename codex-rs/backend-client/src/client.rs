@@ -9,13 +9,13 @@ use crate::types::RateLimitStatusPayload;
 use crate::types::TokenUsageProfile;
 use crate::types::TurnAttemptsSiblingTurnsResponse;
 use anyhow::Result;
-use codex_api::SharedAuthProvider;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_http_client::RequestBuilder;
-use codex_http_client::RouteAwareClientPool;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RequestBuilder;
+use codex_transport::http::RouteAwareClientPool;
+use codex_transport::http::RouteAwareRequestError;
 use codex_login::CodexAuth;
 use codex_login::default_client::get_codex_user_agent;
 use codex_protocol::account::PlanType as AccountPlanType;
@@ -53,7 +53,7 @@ pub use thread_usage::ThreadUsageBreakdownGroup;
 
 #[derive(Debug)]
 pub enum RequestError {
-    Policy(codex_http_client::NetworkPolicyDenied),
+    Policy(codex_transport::http::NetworkPolicyDenied),
     UnexpectedStatus {
         method: String,
         url: String,
@@ -112,16 +112,16 @@ impl From<anyhow::Error> for RequestError {
     }
 }
 
-impl From<codex_http_client::HttpError> for RequestError {
-    fn from(error: codex_http_client::HttpError) -> Self {
+impl From<codex_transport::http::HttpError> for RequestError {
+    fn from(error: codex_transport::http::HttpError) -> Self {
         match error {
-            codex_http_client::HttpError::Policy(denied) => Self::Policy(denied),
-            error @ (codex_http_client::HttpError::Request(_)
-            | codex_http_client::HttpError::Route(_)
-            | codex_http_client::HttpError::Build(_)
-            | codex_http_client::HttpError::UnsupportedRedirectScheme(_)
-            | codex_http_client::HttpError::TooManyRedirects
-            | codex_http_client::HttpError::Timeout) => Self::Other(error.into()),
+            codex_transport::http::HttpError::Policy(denied) => Self::Policy(denied),
+            error @ (codex_transport::http::HttpError::Request(_)
+            | codex_transport::http::HttpError::Route(_)
+            | codex_transport::http::HttpError::Build(_)
+            | codex_transport::http::HttpError::UnsupportedRedirectScheme(_)
+            | codex_transport::http::HttpError::TooManyRedirects
+            | codex_transport::http::HttpError::Timeout) => Self::Other(error.into()),
         }
     }
 }
@@ -1126,9 +1126,9 @@ mod tests {
 
     #[test]
     fn add_credits_nudge_email_uses_expected_paths_and_bodies() {
-        let codex_client = test_client("https://example.test", PathStyle::CodexApi);
+        let codex_transport::client = test_client("https://example.test", PathStyle::CodexApi);
         assert_eq!(
-            codex_client.send_add_credits_nudge_email_url(),
+            codex_transport::client.send_add_credits_nudge_email_url(),
             "https://example.test/api/codex/accounts/send_add_credits_nudge_email"
         );
 
@@ -1156,9 +1156,9 @@ mod tests {
 
     #[test]
     fn token_usage_profile_uses_expected_paths() {
-        let codex_client = test_client("https://example.test", PathStyle::CodexApi);
+        let codex_transport::client = test_client("https://example.test", PathStyle::CodexApi);
         assert_eq!(
-            codex_client.token_usage_profile_url(),
+            codex_transport::client.token_usage_profile_url(),
             "https://example.test/api/codex/profiles/me"
         );
 
@@ -1171,9 +1171,9 @@ mod tests {
 
     #[test]
     fn workspace_messages_uses_expected_paths() {
-        let codex_client = test_client("https://example.test", PathStyle::CodexApi);
+        let codex_transport::client = test_client("https://example.test", PathStyle::CodexApi);
         assert_eq!(
-            codex_client.workspace_messages_url(),
+            codex_transport::client.workspace_messages_url(),
             "https://example.test/api/codex/workspace-messages"
         );
 
@@ -1204,14 +1204,14 @@ mod tests {
 
         let codex_response = Client::new(
             server.uri(),
-            HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+            HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
         )
         .get_user_settings()
         .await
         .unwrap();
         let chatgpt_response = Client::new(
             format!("{}/backend-api", server.uri()),
-            HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+            HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
         )
         .get_user_settings()
         .await
@@ -1251,7 +1251,7 @@ mod tests {
         let client = Client::from_auth(
             "https://chatgpt.com/backend-api",
             &auth,
-            HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+            HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
         );
         let headers = client.headers();
 
@@ -1272,7 +1272,7 @@ mod tests {
         Client {
             base_url: base_url.to_string(),
             http: RouteAwareClientPool::new(
-                HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+                HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
                 ClientRouteClass::Api,
             ),
             auth_provider: codex_model_provider::unauthenticated_auth_provider(),

@@ -51,7 +51,7 @@ use codex_app_server_protocol::TurnStatus;
 use codex_app_server_protocol::UserInput;
 use codex_features::Feature;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::load_default_config_for_test;
 use core_test_support::responses;
 use core_test_support::responses::WebSocketConnectionConfig;

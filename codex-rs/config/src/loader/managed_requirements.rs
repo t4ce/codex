@@ -16,7 +16,7 @@ use crate::config_requirements::ConfigRequirementsWithSources;
 use crate::state::ConfigLoadOptions;
 use crate::state::LoaderOverrides;
 use codex_file_system::ExecutorFileSystem;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::io;
 use std::path::Path;
 

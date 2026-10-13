@@ -1,10 +1,10 @@
 //! Path facts for configuration parsing. Native callers and callers resolving
 //! another platform use the same resolver after fact capture.
 
-use codex_utils_absolute_path::AbsolutePathBufGuard;
-use codex_utils_path_uri::LegacyAppPathStringError;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::path_uri::LegacyAppPathStringError;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 use std::cell::RefCell;
 
 /// The owning environment's path convention, base directory, and home for configuration.

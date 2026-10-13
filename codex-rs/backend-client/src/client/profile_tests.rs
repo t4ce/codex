@@ -13,8 +13,8 @@ async fn profile_keeps_missing_zero_and_future_invocations_distinct() {
     let server = MockServer::start().await;
     let client = Client::new(
         server.uri(),
-        codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
     );
     let empty = AccountProfile {

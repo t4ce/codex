@@ -73,9 +73,9 @@ use crate::token_data::parse_chatgpt_jwt_claims;
 use crate::token_data::parse_jwt_expiration;
 use codex_config::ManagedAuthPolicy;
 use codex_config::types::AuthCredentialsStoreMode;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_protocol::account::PlanType as AccountPlanType;
 use codex_protocol::auth::PlanType as InternalPlanType;
 use codex_protocol::auth::RefreshTokenFailedError;
@@ -224,7 +224,7 @@ pub enum RefreshTokenError {
     Transient(#[from] std::io::Error),
     /// Denied by application policy; neither retry nor cache as a credential failure.
     #[error(transparent)]
-    Policy(#[from] codex_http_client::NetworkPolicyDenied),
+    Policy(#[from] codex_transport::http::NetworkPolicyDenied),
 }
 
 /// Error returned when constructing an [`AuthManager`] from resolved configuration.
@@ -303,10 +303,10 @@ impl RefreshTokenError {
     }
 }
 
-impl From<codex_http_client::HttpError> for RefreshTokenError {
-    fn from(error: codex_http_client::HttpError) -> Self {
+impl From<codex_transport::http::HttpError> for RefreshTokenError {
+    fn from(error: codex_transport::http::HttpError) -> Self {
         match error {
-            codex_http_client::HttpError::Policy(denied) => Self::Policy(denied),
+            codex_transport::http::HttpError::Policy(denied) => Self::Policy(denied),
             error => Self::Transient(std::io::Error::other(error)),
         }
     }
@@ -1649,7 +1649,7 @@ async fn request_chatgpt_token_refresh(
     {
         Ok(response) => Ok(response),
         Err(OAuthError::Rejected(rejection)) => {
-            if let Some(codex_http_client::HttpError::Policy(denied)) = rejection.body_read_error {
+            if let Some(codex_transport::http::HttpError::Policy(denied)) = rejection.body_read_error {
                 return Err(denied.into());
             }
             let status = rejection.status;
@@ -2135,7 +2135,7 @@ fn default_agent_identity_authapi_base_url() -> Option<String> {
 
 impl AuthManager {
     /// Returns the application policy associated with this account owner.
-    pub fn application_network_policy(&self) -> codex_http_client::NetworkPolicy {
+    pub fn application_network_policy(&self) -> codex_transport::http::NetworkPolicy {
         self.auth_route_config.application_network_policy().clone()
     }
 

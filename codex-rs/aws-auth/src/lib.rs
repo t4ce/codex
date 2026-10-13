@@ -59,7 +59,7 @@ pub trait AwsCredentialsProvider: std::fmt::Debug + Send + Sync {
 }
 
 #[derive(Debug)]
-struct AwsCredentialsProviderAdapter<P>(Arc<P>, codex_http_client::NetworkPolicy);
+struct AwsCredentialsProviderAdapter<P>(Arc<P>, codex_transport::http::NetworkPolicy);
 
 #[derive(Debug, Error)]
 #[error("{0}")]
@@ -122,7 +122,7 @@ pub struct AwsSignedRequest {
 #[derive(Debug, Error)]
 pub enum AwsAuthError {
     #[error(transparent)]
-    Policy(#[from] codex_http_client::NetworkPolicyDenied),
+    Policy(#[from] codex_transport::http::NetworkPolicyDenied),
     #[error("AWS service name must not be empty")]
     EmptyService,
     #[error("AWS profile must be configured")]
@@ -154,7 +154,7 @@ pub enum AwsAuthError {
 /// Loaded AWS auth context that can sign outbound HTTP requests.
 #[derive(Clone)]
 pub struct AwsAuthContext {
-    network_policy: codex_http_client::NetworkPolicy,
+    network_policy: codex_transport::http::NetworkPolicy,
     credentials_provider: SharedCredentialsProvider,
     region: String,
     service: String,
@@ -172,7 +172,7 @@ impl std::fmt::Debug for AwsAuthContext {
 impl AwsAuthContext {
     pub async fn load(
         config: AwsAuthConfig,
-        factory: codex_http_client::HttpClientFactory,
+        factory: codex_transport::http::HttpClientFactory,
     ) -> Result<Self, AwsAuthError> {
         let sdk_config = config::load_sdk_config(&config, &factory).await?;
         Ok(Self {
@@ -186,7 +186,7 @@ impl AwsAuthContext {
     pub async fn load_with_access_keys(
         config: AwsAuthConfig,
         access_keys: AwsAccessKeys,
-        factory: codex_http_client::HttpClientFactory,
+        factory: codex_transport::http::HttpClientFactory,
     ) -> Result<Self, AwsAuthError> {
         if config.service.trim().is_empty() {
             return Err(AwsAuthError::EmptyService);
@@ -214,7 +214,7 @@ impl AwsAuthContext {
     pub async fn load_with_credentials_provider(
         config: AwsAuthConfig,
         provider: Arc<impl AwsCredentialsProvider + 'static>,
-        factory: codex_http_client::HttpClientFactory,
+        factory: codex_transport::http::HttpClientFactory,
     ) -> Result<Self, AwsAuthError> {
         let mut context = Self::load(config, factory).await?;
         context.credentials_provider = SharedCredentialsProvider::new(
@@ -225,7 +225,7 @@ impl AwsAuthContext {
 
     pub async fn load_profile(
         config: AwsAuthConfig,
-        factory: codex_http_client::HttpClientFactory,
+        factory: codex_transport::http::HttpClientFactory,
     ) -> Result<Self, AwsAuthError> {
         let profile = config.profile.clone().ok_or(AwsAuthError::MissingProfile)?;
         let mut context = Self::load(config, factory.clone()).await?;
@@ -264,7 +264,7 @@ impl AwsAuthContext {
                 let mut source: &(dyn std::error::Error + 'static) = &error;
                 loop {
                     if let Some(policy) =
-                        source.downcast_ref::<codex_http_client::NetworkPolicyDenied>()
+                        source.downcast_ref::<codex_transport::http::NetworkPolicyDenied>()
                     {
                         return AwsAuthError::Policy(*policy);
                     }
@@ -505,8 +505,8 @@ mod tests {
         };
         let err = AwsAuthContext::load(
             config,
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
         )
         .await
@@ -521,8 +521,8 @@ mod tests {
         };
         let err = AwsAuthContext::load_profile(
             config,
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
         )
         .await

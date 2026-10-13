@@ -2,12 +2,12 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
-use codex_api::AuthProvider;
-use codex_api::SharedAuthProvider;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::HttpResponse;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::HttpResponse;
+use codex_transport::http::RouteAwareClientPool;
 use futures::FutureExt;
 use http::HeaderMap;
 use http::HeaderName;
@@ -21,10 +21,10 @@ use tracing::debug;
 use tracing::info;
 use tracing::warn;
 
-use codex_utils_rustls_provider::ensure_rustls_crypto_provider;
-use codex_websocket_client::WebSocketConnection;
-use codex_websocket_client::WebSocketConnector;
-use codex_websocket_client::WebSocketTlsMode;
+use codex_network_foundation::ensure_rustls_crypto_provider;
+use codex_transport::websocket::WebSocketConnection;
+use codex_transport::websocket::WebSocketConnector;
+use codex_transport::websocket::WebSocketTlsMode;
 
 use crate::EnvironmentRegistryConnectRequest;
 use crate::EnvironmentRegistryConnectResponse;
@@ -97,7 +97,7 @@ impl EnvironmentRegistryClient {
             base_url,
             auth_provider,
             ExecServerTelemetry::default(),
-            HttpClientFactory::new(codex_http_client::OutboundProxyPolicy::ReqwestDefault),
+            HttpClientFactory::new(codex_transport::http::OutboundProxyPolicy::ReqwestDefault),
         )
     }
 
@@ -174,7 +174,7 @@ impl EnvironmentRegistryClient {
         .await
         .unwrap_or_else(|_| {
             Err(ExecServerError::EnvironmentRegistryRequest(
-                codex_http_client::RouteAwareRequestError::Timeout,
+                codex_transport::http::RouteAwareRequestError::Timeout,
             ))
         })?;
         let status = response.status();
@@ -191,7 +191,7 @@ impl EnvironmentRegistryClient {
                             environment_registry_http_error(status, "response body timed out")
                         }
                         _ => ExecServerError::EnvironmentRegistryRequest(
-                            codex_http_client::RouteAwareRequestError::Timeout,
+                            codex_transport::http::RouteAwareRequestError::Timeout,
                         ),
                     })
                 })?;
@@ -945,8 +945,8 @@ fn preview_error_body(body: &str) -> Option<String> {
 mod tests {
     use std::sync::Arc;
 
-    use codex_api::AuthProvider;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::api::AuthProvider;
+    use codex_transport::http::OutboundProxyPolicy;
     use http::HeaderMap;
     use http::HeaderValue;
     use opentelemetry::trace::TracerProvider as _;
@@ -974,7 +974,7 @@ mod tests {
     impl AuthProvider for StaticRegistryAuthProvider {
         fn add_auth_headers(&self, _headers: &mut HeaderMap) {}
 
-        fn resolve_auth_headers(&self) -> codex_api::AuthHeadersFuture<'_> {
+        fn resolve_auth_headers(&self) -> codex_transport::api::AuthHeadersFuture<'_> {
             Box::pin(async {
                 let mut headers = HeaderMap::new();
                 let _ = headers.insert(
@@ -1082,7 +1082,7 @@ mod tests {
 
         let bundle = config
             .into_connect_provider(HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ))
             .expect("Noise connect provider")
             .connect_bundle(harness_public_key)

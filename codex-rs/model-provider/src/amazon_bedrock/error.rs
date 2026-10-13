@@ -1,5 +1,5 @@
-use codex_api::ApiError;
-use codex_api::TransportError;
+use codex_transport::api::ApiError;
+use codex_transport::api::TransportError;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::CodexErrorDetails;
 use http::StatusCode;
@@ -19,7 +19,7 @@ pub(super) fn map_api_error(error: ApiError) -> CodexErr {
     {
         return CodexErr::InvalidRequest(message.clone());
     }
-    let error = codex_api::map_api_error(error);
+    let error = codex_transport::api::map_api_error(error);
     if let CodexErrorDetails::UnexpectedStatus(response) = error.details()
         && response.status == StatusCode::UNAUTHORIZED
         && response.body.contains("Signature expired:")

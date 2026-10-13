@@ -7,7 +7,7 @@ use codex_rollout::RolloutConfig;
 use codex_rollout::first_rollout_content_match_snippet;
 use codex_rollout::parse_cursor;
 use codex_rollout::search_rollout_matches;
-use codex_utils_absolute_path::normalize_windows_device_path;
+use codex_utils_paths::absolute_path::normalize_windows_device_path;
 
 use super::LocalThreadStore;
 use super::helpers::resolve_thread_names;

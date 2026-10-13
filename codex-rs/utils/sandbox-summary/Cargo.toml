@@ -9,10 +9,10 @@ workspace = true
 
 [dependencies]
 codex-protocol = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 
 [dev-dependencies]
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 pretty_assertions = { workspace = true }
 
 [lib]

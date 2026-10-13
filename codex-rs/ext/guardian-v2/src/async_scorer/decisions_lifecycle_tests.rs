@@ -1,7 +1,7 @@
 //! Decisions outcomes cannot affect the real baseline score/publication path.
 use super::*;
 use crate::async_scorer::decisions::DecisionsSampler;
-use codex_http_client::HttpClientBuilder;
+use codex_transport::http::HttpClientBuilder;
 use pretty_assertions::assert_eq;
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]

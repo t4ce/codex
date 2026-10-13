@@ -32,7 +32,7 @@ use codex_protocol::protocol::SessionSource;
 use codex_rollout::RolloutItem;
 use codex_rollout::RolloutLine;
 use codex_state::Phase2JobClaimOutcome;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use core_test_support::fs_wait;
 use core_test_support::hooks::trust_discovered_hooks;
 use core_test_support::responses::ResponseMock;

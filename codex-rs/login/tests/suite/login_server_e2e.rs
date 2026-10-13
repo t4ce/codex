@@ -9,7 +9,7 @@ use std::time::Duration;
 use anyhow::Result;
 use base64::Engine;
 use codex_config::types::AuthCredentialsStoreMode;
-use codex_http_client::HttpClientBuilder;
+use codex_transport::http::HttpClientBuilder;
 use codex_login::AuthKeyringBackendKind;
 use codex_login::LoginCallbackResult;
 use codex_login::LoginOnboardingEntrypoint;
@@ -123,15 +123,15 @@ async fn end_to_end_login_flow_persists_auth_json() -> Result<()> {
 
     // Run server in background
     let server_home = codex_home.clone();
-    let content = codex_http_client::NetworkPolicyController::default();
-    let local = codex_http_client::NetworkPolicyController::default();
+    let content = codex_transport::http::NetworkPolicyController::default();
+    let local = codex_transport::http::NetworkPolicyController::default();
     let local_policy = local.policy();
     local.publish(
         local_policy.revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
-    let factory = codex_http_client::HttpClientFactory::new(
-        codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+    let factory = codex_transport::http::HttpClientFactory::new(
+        codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
     );
     let routes = codex_login::AuthRouteConfig::from_http_client_factory(
         factory.clone().with_network_policy(content.policy()),

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use codex_protocol::protocol::ThreadHistoryMode;
 use codex_rollout::ARCHIVED_SESSIONS_SUBDIR;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use uuid::Uuid;
 
 use super::LocalThreadStoreConfig;

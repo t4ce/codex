@@ -1,7 +1,7 @@
 //! Authentication recovery preserves actionable status without changing the account scope.
 
 use super::*;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_login::ExternalAuth;
 use codex_login::ExternalAuthFuture;
 use codex_login::ExternalAuthRefreshContext;

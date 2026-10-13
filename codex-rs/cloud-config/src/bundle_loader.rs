@@ -3,7 +3,7 @@ use crate::backend::BundleClient;
 use crate::service::CLOUD_CONFIG_BUNDLE_TIMEOUT;
 use crate::service::CloudConfigBundleService;
 use codex_config::CloudConfigBundleLoader;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthConfig;
 use codex_login::AuthManager;
 use std::path::PathBuf;

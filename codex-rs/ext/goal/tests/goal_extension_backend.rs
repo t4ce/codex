@@ -1,7 +1,7 @@
 #![recursion_limit = "256"]
 #![allow(clippy::expect_used)]
 
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::PoisonError;

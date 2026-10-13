@@ -7,7 +7,7 @@ use crate::loader::find_project_root;
 use crate::loader::load_config_layers_state;
 use crate::loader::project_trust_key;
 use crate::loader::tests::TestFileSystem;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use toml::Value as TomlValue;

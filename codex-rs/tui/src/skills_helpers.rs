@@ -1,5 +1,5 @@
 use codex_app_server_protocol::SkillMetadata;
-use codex_utils_fuzzy_match::fuzzy_match;
+use codex_utils_text::fuzzy_match::fuzzy_match;
 
 pub(crate) fn skill_display_name(skill: &SkillMetadata) -> String {
     if let Some(display_name) = skill

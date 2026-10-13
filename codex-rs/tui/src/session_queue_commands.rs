@@ -12,7 +12,7 @@ use codex_app_server_protocol::ThreadQueueAddResponse;
 use codex_app_server_protocol::UserInput;
 use codex_app_server_protocol::experimental_required_message;
 use codex_protocol::ThreadId;
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::home_dir::find_codex_home;
 use color_eyre::Report;
 use color_eyre::eyre::Result;
 use color_eyre::eyre::WrapErr;

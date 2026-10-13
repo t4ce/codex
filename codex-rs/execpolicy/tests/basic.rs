@@ -19,7 +19,7 @@ use codex_execpolicy::PrefixRule;
 use codex_execpolicy::RuleMatch;
 use codex_execpolicy::RuleRef;
 use codex_execpolicy::blocking_append_allow_prefix_rule;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use tempfile::tempdir;
 

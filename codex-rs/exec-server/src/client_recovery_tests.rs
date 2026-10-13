@@ -57,7 +57,7 @@ fn recovery_retries_transient_registry_errors() {
 #[test]
 fn recovery_retries_registry_request_timeouts() {
     let error = ExecServerError::EnvironmentRegistryRequest(
-        codex_http_client::RouteAwareRequestError::Timeout,
+        codex_transport::http::RouteAwareRequestError::Timeout,
     );
 
     assert!(is_retryable_registry_error(&error));

@@ -8,7 +8,7 @@ use std::path::Path;
 
 use codex_protocol::shell_environment::OPENAI_FEDERATION_RULE_ID_ENV_VAR;
 use codex_protocol::shell_environment::OPENAI_IDENTITY_TOKEN_FILE_ENV_VAR;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 /// Recognize the single configuration override synthesized by the legacy `--search` flag.
 pub(super) fn has_only_search_config_override(cli_kv_overrides: &[(String, toml::Value)]) -> bool {

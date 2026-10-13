@@ -152,7 +152,7 @@ async fn worktree_start_and_fork(backend: &str) -> anyhow::Result<()> {
     let root = tempfile::Builder::new().tempdir_in("/tmp")?;
     #[cfg(not(unix))]
     let root = TempDir::new()?;
-    let root = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(root.path())?
+    let root = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(root.path())?
         .canonicalize()?
         .into_path_buf();
     let home = root.join("home");
@@ -743,7 +743,7 @@ trust_level = "trusted"
         if previous.is_empty() {
             // A legacy summary still says launcher A, but persisted turns use checkout B.
             let sqlite = codex_state::SqliteConfig::from_sqlite_home(
-                codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(&home)?,
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(&home)?,
             );
             let db = sqlite.open_read_write_pool(&sqlite.state_db_path()).await?;
             sqlx::query("UPDATE threads SET cwd = ? WHERE id = ?")

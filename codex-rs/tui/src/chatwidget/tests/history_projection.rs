@@ -249,7 +249,7 @@ async fn snapshot_formatter_reasoning_matches_compact_and_detailed_replay() {
 fn raw_reasoning_keeps_its_own_heading() {
     let projected = thread_items_to_transcript_cells(
         /*thread_id*/ None,
-        &codex_utils_absolute_path::AbsolutePathBuf::current_dir().unwrap(),
+        &codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir().unwrap(),
         [AppServerThreadItem::Reasoning {
             id: "raw".into(),
             summary: Vec::new(),

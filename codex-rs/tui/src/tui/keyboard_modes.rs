@@ -130,7 +130,7 @@ fn read_windows_vscode_detection() -> VscodeDetection {
     }
     read_windows_vscode_detection_with_timeout(
         || {
-            let executable = codex_utils_path::system_executable("cmd.exe")?;
+            let executable = codex_utils_paths::path::system_executable("cmd.exe")?;
             std::process::Command::new(executable)
                 .args(["/d", "/s", "/c", "set TERM_PROGRAM"])
                 .stdin(std::process::Stdio::null())

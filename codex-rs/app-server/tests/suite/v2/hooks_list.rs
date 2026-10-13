@@ -30,7 +30,7 @@ use codex_core_plugins::store::PluginStore;
 use codex_features::Feature;
 use codex_plugin::PluginId;
 use codex_protocol::config_types::TrustLevel;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use core_test_support::skip_if_host_windows;
 use core_test_support::skip_if_remote;
 use pretty_assertions::assert_eq;

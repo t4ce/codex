@@ -17,7 +17,7 @@ use codex_exec_server::NoiseRendezvousConnectBundle;
 use codex_exec_server::NoiseRendezvousConnectProvider;
 use codex_exec_server_test_support::environment_manager_without_environments;
 use codex_plugin::PluginLoadOutcome;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::SkillDiscoveryMode;
 use futures::FutureExt;
 use futures::future::BoxFuture;

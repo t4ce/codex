@@ -747,7 +747,7 @@ async fn startup_draft_waits_for_onboarding_before_accepting_input() {
     let codex_home = tempfile::tempdir().expect("create an existing custom Codex home");
     std::fs::write(codex_home.path().join("history.jsonl"), "")
         .expect("create existing startup history");
-    let system_config_path = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+    let system_config_path = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
         codex_home.path().join("system.toml"),
     )
     .expect("resolve missing system configuration");

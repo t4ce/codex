@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 
 use codex_exec_server_protocol::JSONRPCErrorError;
 use codex_exec_server_protocol::RequestId;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use opentelemetry::trace::SpanContext;
 use serde_json::to_value;
 use std::collections::HashSet;

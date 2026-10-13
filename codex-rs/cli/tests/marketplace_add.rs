@@ -1,7 +1,7 @@
 use anyhow::Result;
 use codex_config::CONFIG_TOML_FILE;
 use codex_core_plugins::installed_marketplaces::marketplace_install_root;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use predicates::str::contains;
 use pretty_assertions::assert_eq;
 use serde_json::json;

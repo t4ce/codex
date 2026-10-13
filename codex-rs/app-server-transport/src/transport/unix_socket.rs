@@ -12,7 +12,7 @@ use super::TransportEvent;
 use crate::transport::websocket::run_websocket_connection;
 use codex_uds::UnixListener;
 use codex_uds::UnixStream;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use futures::SinkExt;
 use futures::StreamExt;
 use tokio::sync::mpsc;

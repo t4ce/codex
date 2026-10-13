@@ -15,7 +15,7 @@ use codex_exec_server::FsReadFileParams;
 use codex_exec_server::FsWriteFileParams;
 use codex_exec_server::ProcessId;
 use codex_exec_server::ReadParams;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use relay_support::RelayTest;
 use relay_support::TEST_TIMEOUT;

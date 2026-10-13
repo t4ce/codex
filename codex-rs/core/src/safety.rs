@@ -7,7 +7,7 @@ use codex_protocol::permissions::FileSystemSandboxPolicyContext;
 use codex_protocol::permissions::LocalFileSystemPolicyMatcher;
 use codex_protocol::protocol::AskForApproval;
 use codex_sandboxing::get_platform_sandbox;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::io;
 
 const PATCH_REJECTED_OUTSIDE_PROJECT_REASON: &str =

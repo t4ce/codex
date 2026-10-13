@@ -5,7 +5,7 @@ use anyhow::Context;
 use anyhow::Result;
 use codex_protocol::config_types::WindowsSandboxLevel;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_pty::SpawnedProcess;
 use codex_utils_pty::TerminalSize;
 
@@ -58,7 +58,7 @@ pub async fn spawn_process(request: SpawnRequest<'_>) -> Result<SpawnedProcess> 
             let windows = request
                 .windows_sandbox
                 .context("missing Windows sandbox spawn request")?;
-            let codex_home = codex_utils_home_dir::find_codex_home()
+            let codex_home = codex_utils_paths::home_dir::find_codex_home()
                 .context("windows sandbox: failed to resolve codex_home")?;
             let empty_paths = &[];
             let overrides = windows.filesystem_overrides;

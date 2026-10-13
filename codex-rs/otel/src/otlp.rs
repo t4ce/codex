@@ -1,5 +1,5 @@
 use crate::config::OtelTlsConfig;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use http::Uri;
 use opentelemetry_otlp::OTEL_EXPORTER_OTLP_TIMEOUT;
 use opentelemetry_otlp::OTEL_EXPORTER_OTLP_TIMEOUT_DEFAULT;
@@ -144,11 +144,11 @@ fn build_http_client_inner(
 }
 
 pub(crate) fn build_async_http_client(
-    factory: &codex_http_client::HttpClientFactory,
+    factory: &codex_transport::http::HttpClientFactory,
     tls: Option<&OtelTlsConfig>,
     timeout_var: &str,
 ) -> Result<crate::network_policy::RuntimeHttpClient, Box<dyn Error>> {
-    let mut config = codex_http_client::HttpClientTlsConfig::default();
+    let mut config = codex_transport::http::HttpClientTlsConfig::default();
 
     if let Some(tls) = tls {
         if let Some(path) = tls.ca_certificate.as_ref() {
@@ -188,9 +188,9 @@ pub(crate) fn build_async_http_client(
     }
 
     Ok(crate::network_policy::RuntimeHttpClient {
-        client: codex_http_client::HttpClientBuilder::new()
+        client: codex_transport::http::HttpClientBuilder::new()
             .without_request_logging()
-            .build_with_tls(factory, codex_http_client::ClientRouteClass::Other, config),
+            .build_with_tls(factory, codex_transport::http::ClientRouteClass::Other, config),
         timeout: resolve_otlp_timeout(timeout_var),
         runtime: tokio::runtime::Handle::try_current()?,
     })

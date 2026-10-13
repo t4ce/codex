@@ -77,7 +77,7 @@ use codex_keyring_store::KeyringStore;
 use rmcp::transport::auth::AuthorizationManager;
 use tokio::sync::Mutex;
 
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::home_dir::find_codex_home;
 
 pub(crate) use self::credential_store::OAuthCredentialStore;
 pub use self::ema_identity::EmaCredentialLease;

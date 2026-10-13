@@ -1,5 +1,5 @@
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_otel::EXEC_SERVER_CLIENT_REQUEST_COUNT_METRIC;
 use codex_otel::MetricsClient;
 use codex_otel::MetricsConfig;

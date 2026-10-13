@@ -20,11 +20,11 @@ use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 #[cfg(feature = "external-reporting")]
-use codex_http_client::ClientRouteClass;
+use codex_transport::http::ClientRouteClass;
 #[cfg(feature = "external-reporting")]
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 #[cfg(feature = "external-reporting")]
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::RouteAwareClientPool;
 use codex_login::AuthEnvTelemetry;
 use codex_protocol::ThreadId;
 use codex_protocol::protocol::SessionSource;
@@ -273,13 +273,13 @@ impl CodexFeedback {
                     .with_default(Level::TRACE)
                     // Opted-in content belongs to the configured OTLP destination, not feedback.
                     .with_target("codex_otel.log_only", LevelFilter::OFF)
-                    .with_target("codex_http_client::transport", LevelFilter::DEBUG)
-                    .with_target("codex_api::sse", LevelFilter::DEBUG)
+                    .with_target("codex_transport::http::transport", LevelFilter::DEBUG)
+                    .with_target("codex_transport::api::sse", LevelFilter::DEBUG)
                     // `tracing-log` checks legacy log records against their original
                     // target before re-emitting them as `log`; tungstenite TRACE
                     // includes full websocket frames and authenticated handshakes.
                     .with_target("tungstenite", LevelFilter::DEBUG)
-                    .with_target("codex_api::responses_websocket_timing", LevelFilter::OFF)
+                    .with_target("codex_transport::api::responses_websocket_timing", LevelFilter::OFF)
                     .with_target("codex_core::post_sampling_token_estimate", LevelFilter::OFF),
             )
     }
@@ -757,7 +757,7 @@ impl FeedbackSnapshot {
                 .await
                 .map_err(|error| {
                     // Transport error strings can contain credential-bearing URLs.
-                    if let Some(cause) = error.downcast_ref::<codex_http_client::RouteAwareRequestError>() {
+                    if let Some(cause) = error.downcast_ref::<codex_transport::http::RouteAwareRequestError>() {
                         anyhow!(
                             "feedback transport failed: class={:?}, timeout={}, connect={}, request={}, body={}",
                             cause.failure_class(), cause.is_timeout(), cause.is_connect(), cause.is_request(), cause.is_body()
@@ -1057,7 +1057,7 @@ mod tests {
 
     use super::*;
     use crate::FeedbackDiagnostic;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::OutboundProxyPolicy;
     use flate2::Compression;
     use flate2::read::GzDecoder;
     use flate2::write::GzEncoder;
@@ -1096,17 +1096,17 @@ mod tests {
             .with(fb.logger_layer())
             .set_default();
 
-        tracing::trace!(target: "codex_api::responses_websocket_timing", payload = "secret");
+        tracing::trace!(target: "codex_transport::api::responses_websocket_timing", payload = "secret");
         tracing::event!(
             target: "codex_otel.log_only", tracing::Level::INFO,
             event.name = "codex.agent_response", response = "private-agent-response"
         );
         tracing::info!(target: "codex_otel.log_only", rationale = "private-guardian-rationale");
-        tracing::trace!(target: "codex_http_client::transport", "transport-trace");
-        tracing::trace!(target: "codex_api::sse", "sse-trace");
-        tracing::trace!(target: "codex_api::sse::responses", "nested-sse-trace");
-        tracing::debug!(target: "codex_http_client::transport", "transport-debug");
-        tracing::debug!(target: "codex_api::sse::responses", "sse-debug");
+        tracing::trace!(target: "codex_transport::http::transport", "transport-trace");
+        tracing::trace!(target: "codex_transport::api::sse", "sse-trace");
+        tracing::trace!(target: "codex_transport::api::sse::responses", "nested-sse-trace");
+        tracing::debug!(target: "codex_transport::http::transport", "transport-debug");
+        tracing::debug!(target: "codex_transport::api::sse::responses", "sse-debug");
         tracing::trace!(target: "codex_feedback_test", "unrelated-trace");
         log::trace!(target: "codex_feedback_test", "unrelated-log-trace");
         log::trace!(
@@ -1634,8 +1634,8 @@ mod tests {
 
         assert!(
             error
-                .downcast_ref::<codex_http_client::RouteAwareRequestError>()
-                .is_some_and(codex_http_client::RouteAwareRequestError::is_connect)
+                .downcast_ref::<codex_transport::http::RouteAwareRequestError>()
+                .is_some_and(codex_transport::http::RouteAwareRequestError::is_connect)
         );
     }
 

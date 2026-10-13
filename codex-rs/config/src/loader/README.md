@@ -58,7 +58,7 @@ use codex_config::LoaderOverrides;
 use codex_config::NoopThreadConfigLoader;
 use codex_config::loader::load_config_layers_state;
 use codex_exec_server::LOCAL_FS;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use toml::Value as TomlValue;
 
 let cli_overrides: Vec<(String, TomlValue)> = Vec::new();

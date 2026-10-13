@@ -361,7 +361,7 @@ mod tests {
     use codex_protocol::protocol::SessionSource;
     use codex_protocol::protocol::ThreadHistoryMode;
     use codex_state::PINNED_THREAD_SECTION_ID;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use std::fs;
     use tempfile::TempDir;

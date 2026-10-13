@@ -12,7 +12,7 @@ use codex_app_server_client::RemoteAppServerConnectArgs;
 #[cfg(windows)]
 use codex_app_server_client::RemoteAppServerEndpoint;
 #[cfg(windows)]
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 pub(crate) async fn connect(target: &AppServerTarget) -> color_eyre::Result<AppServerClient> {
     match target {

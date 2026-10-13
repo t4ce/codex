@@ -1,0 +1,100 @@
+[package]
+autobins = false
+autotests = false
+edition = { workspace = true }
+license = { workspace = true }
+name = "codex-transport"
+version = { workspace = true }
+
+[dependencies]
+async-channel = { workspace = true }
+base64 = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+codex-network-foundation = { workspace = true }
+codex-protocol = { workspace = true }
+eventsource-stream = { workspace = true }
+futures = { workspace = true }
+http = { workspace = true }
+http-body = "1.0.1"
+opentelemetry = { workspace = true }
+rand = { workspace = true }
+regex-lite = { workspace = true }
+reqwest = { workspace = true, features = ["json", "rustls", "stream"] }
+rustls = { workspace = true }
+rustls-native-certs = { workspace = true }
+rustls-pki-types = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+serde_urlencoded = "0.7"
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["fs", "macros", "net", "rt", "sync", "time"] }
+tokio-rustls = { workspace = true }
+tokio-tungstenite = { workspace = true }
+tokio-util = { workspace = true, features = ["codec", "io"] }
+tracing = { workspace = true }
+tracing-opentelemetry = { workspace = true }
+tungstenite = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
+zstd = { workspace = true }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+assert_matches = { workspace = true }
+codex-utils-cargo-bin = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+pretty_assertions = { workspace = true }
+rcgen = { workspace = true }
+rustls = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "test-util"] }
+tokio-test = { workspace = true }
+tracing-subscriber = { workspace = true }
+wiremock = { workspace = true }
+
+[lints]
+workspace = true
+
+[lib]
+doctest = false
+
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
+reqwest = { workspace = true, features = ["native-tls"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+system-configuration = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+rustls-platform-verifier = "0.7.0"
+windows-sys = { workspace = true, features = ["Win32_Foundation", "Win32_Networking_WinHttp"] }
+
+[[test]]
+name = "api_clients"
+path = "tests/api_clients.rs"
+
+[[test]]
+name = "api_models_integration"
+path = "tests/api_models_integration.rs"
+
+[[test]]
+name = "api_realtime_websocket_e2e"
+path = "tests/api_realtime_websocket_e2e.rs"
+
+[[test]]
+name = "api_realtime_websocket_tls"
+path = "tests/api_realtime_websocket_tls.rs"
+
+[[test]]
+name = "api_sse_end_to_end"
+path = "tests/api_sse_end_to_end.rs"
+
+[[test]]
+name = "http_ca_env"
+path = "tests/http_ca_env.rs"
+
+[[bin]]
+name = "custom_ca_probe"
+path = "src/bin/custom_ca_probe.rs"

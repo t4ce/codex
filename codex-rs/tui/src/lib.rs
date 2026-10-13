@@ -70,9 +70,9 @@ use codex_protocol::config_types::SandboxMode;
 use codex_rollout::StateDbHandle;
 use codex_rollout::state_db;
 use codex_state::log_db;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::canonicalize_existing_preserving_symlinks;
-use codex_utils_home_dir::find_codex_home;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::canonicalize_existing_preserving_symlinks;
+use codex_utils_paths::home_dir::find_codex_home;
 use codex_utils_oss::ensure_oss_provider_ready;
 use codex_utils_oss::get_default_model_for_oss_provider;
 use color_eyre::eyre::WrapErr;
@@ -358,7 +358,7 @@ impl AppServerTarget {
         &self,
         config: &Config,
         policy: &codex_app_server_client::EmbeddedNetworkPolicy,
-    ) -> codex_http_client::HttpClientFactory {
+    ) -> codex_transport::http::HttpClientFactory {
         let factory = config.http_client_factory();
         match self {
             Self::Embedded
@@ -2408,7 +2408,7 @@ pub(crate) mod tests {
     use codex_app_server_protocol::RequestId;
     use codex_app_server_protocol::ThreadStartParams;
     use codex_app_server_protocol::ThreadStartResponse;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use tempfile::TempDir;
 

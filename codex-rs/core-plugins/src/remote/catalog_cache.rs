@@ -144,7 +144,7 @@ pub(crate) fn write_cached_directory_plugins(
     }) else {
         return;
     };
-    let _ = codex_utils_path::write_atomically(&cache_path, &contents);
+    let _ = codex_utils_paths::path::write_atomically(&cache_path, &contents);
 }
 
 pub(crate) fn remove_cached_directory_plugins(

@@ -7,8 +7,8 @@ use super::ConfigManager;
 use codex_config::ApplicationRequirementsToml;
 use codex_config::CloudConfigBundleLoader;
 use codex_config::NetworkDomainPermissionToml;
-use codex_http_client::DestinationPolicy;
-use codex_http_client::NetworkPolicyDenied;
+use codex_transport::http::DestinationPolicy;
+use codex_transport::http::NetworkPolicyDenied;
 use std::io;
 use std::sync::Arc;
 
@@ -43,7 +43,7 @@ impl ConfigManager {
 
     async fn load_local_network_policy(
         &self,
-        application_revision: codex_http_client::NetworkPolicyRevision,
+        application_revision: codex_transport::http::NetworkPolicyRevision,
     ) -> io::Result<codex_config::loader::LocalApplicationRequirements> {
         let local_revision = self.local_network_policy.policy().revision();
         let result = async {
@@ -147,7 +147,7 @@ impl ConfigManager {
 
     fn fail_application_policy(
         &self,
-        revision: codex_http_client::NetworkPolicyRevision,
+        revision: codex_transport::http::NetworkPolicyRevision,
     ) -> io::Result<()> {
         let mut current = self
             .network_policy_snapshot

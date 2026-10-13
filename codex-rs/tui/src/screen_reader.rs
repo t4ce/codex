@@ -6,8 +6,8 @@
 
 use crate::motion::MotionMode;
 use codex_config::ConfigLayerStack;
-use codex_utils_path::resolve_symlink_write_paths;
-use codex_utils_path::write_atomically;
+use codex_utils_paths::path::resolve_symlink_write_paths;
+use codex_utils_paths::path::write_atomically;
 use std::path::Path;
 use std::sync::OnceLock;
 use std::time::Duration;

@@ -5,7 +5,7 @@ use crate::ConfigLayerEntry;
 use crate::ConfigLayerSource;
 use crate::ConfigLayerStack;
 use crate::format_config_layer_source;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
 use serde::de::DeserializeOwned;
 use serde_path_to_error::Path as SerdePath;
 use serde_path_to_error::Segment as SerdeSegment;

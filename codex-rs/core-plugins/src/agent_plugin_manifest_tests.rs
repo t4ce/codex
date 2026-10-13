@@ -1,7 +1,7 @@
 use super::PluginManifest;
 use super::PluginManifestMcpServers;
 use super::load_plugin_manifest;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_plugins::AGENT_PLUGIN_SCHEMA_URI;
 use pretty_assertions::assert_eq;
 use std::fs;

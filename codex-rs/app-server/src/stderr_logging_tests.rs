@@ -6,7 +6,7 @@ use crate::stderr_span_events;
 use anyhow::Context;
 use anyhow::Result;
 use codex_state::SqliteConfig;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use std::io::Read;
 use std::sync::Mutex;

@@ -102,7 +102,7 @@ use codex_protocol::protocol::MultiAgentVersion;
 use codex_protocol::protocol::NetworkAccess;
 use codex_protocol::protocol::RealtimeVoice;
 use codex_protocol::protocol::SandboxPolicy;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 use serde::Deserialize;
 use tempfile::tempdir;
 
@@ -2019,21 +2019,21 @@ respect_system_proxy = true
     assert!(config.respect_system_proxy);
     assert_eq!(
         config.http_client_factory().outbound_proxy_policy(),
-        codex_http_client::OutboundProxyPolicy::RespectSystemProxy
+        codex_transport::http::OutboundProxyPolicy::RespectSystemProxy
     );
     assert_eq!(
         config
             .auth_route_config()
             .http_client_factory()
             .outbound_proxy_policy(),
-        codex_http_client::OutboundProxyPolicy::RespectSystemProxy
+        codex_transport::http::OutboundProxyPolicy::RespectSystemProxy
     );
     assert_eq!(
         config.plugins_config_input().remote_plugin_service_config(),
         codex_core_plugins::remote::RemotePluginServiceConfig::new(
             config.chatgpt_base_url,
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::RespectSystemProxy,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::RespectSystemProxy,
             ),
             /*product_sku*/ None,
         )
@@ -2068,7 +2068,7 @@ respect_system_proxy = true
         resolve_bootstrap_auth_route_config(&configured, Some(&disabled))?
             .http_client_factory()
             .outbound_proxy_policy(),
-        codex_http_client::OutboundProxyPolicy::ReqwestDefault
+        codex_transport::http::OutboundProxyPolicy::ReqwestDefault
     );
     assert!(
         resolve_bootstrap_http_client_factory(&configured, Some(&disabled))?
@@ -2090,7 +2090,7 @@ respect_system_proxy = true
         resolve_bootstrap_auth_route_config(&configured, Some(&enabled))?
             .http_client_factory()
             .outbound_proxy_policy(),
-        codex_http_client::OutboundProxyPolicy::RespectSystemProxy
+        codex_transport::http::OutboundProxyPolicy::RespectSystemProxy
     );
     assert!(
         !resolve_bootstrap_http_client_factory(&configured, Some(&enabled))?
@@ -2109,27 +2109,27 @@ async fn system_proxy_fallback_config_matches_bootstrap() -> std::io::Result<()>
         (
             "",
             true,
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         (
             "respect_system_proxy = false",
             true,
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         (
             "system_proxy_fallback = false",
             false,
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         (
             "respect_system_proxy = true",
             false,
-            codex_http_client::OutboundProxyPolicy::RespectSystemProxy,
+            codex_transport::http::OutboundProxyPolicy::RespectSystemProxy,
         ),
         (
             "respect_system_proxy = true\nsystem_proxy_fallback = false",
             false,
-            codex_http_client::OutboundProxyPolicy::RespectSystemProxy,
+            codex_transport::http::OutboundProxyPolicy::RespectSystemProxy,
         ),
     ] {
         let codex_home = TempDir::new()?;

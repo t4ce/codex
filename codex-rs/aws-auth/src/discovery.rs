@@ -46,7 +46,7 @@ pub async fn discover_aws_profiles() -> Result<Vec<AwsProfile>, AwsAuthError> {
 pub async fn validate_aws_profile(
     profile: &str,
     region: &str,
-    factory: codex_http_client::HttpClientFactory,
+    factory: codex_transport::http::HttpClientFactory,
 ) -> Result<(), AwsAuthError> {
     profile_credentials_provider(profile, region, factory)
         .provide_credentials()
@@ -57,7 +57,7 @@ pub async fn validate_aws_profile(
 pub(crate) fn profile_credentials_provider(
     profile: &str,
     region: &str,
-    factory: codex_http_client::HttpClientFactory,
+    factory: codex_transport::http::HttpClientFactory,
 ) -> ProfileFileCredentialsProvider {
     let config = ProviderConfig::without_region()
         .with_region(Some(Region::new(region.to_string())))

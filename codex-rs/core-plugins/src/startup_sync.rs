@@ -7,8 +7,8 @@ use std::process::Stdio;
 use std::time::Duration;
 
 use self::http_client::StartupSyncHttpClient;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::RequestBuilder;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RequestBuilder;
 use codex_login::default_client::default_headers;
 use codex_otel::CURATED_PLUGINS_STARTUP_SYNC_FINAL_METRIC;
 use codex_otel::CURATED_PLUGINS_STARTUP_SYNC_METRIC;
@@ -79,7 +79,7 @@ pub fn sync_openai_plugins_repo(
     http_client_factory: HttpClientFactory,
 ) -> Result<String, String> {
     // Keep Git-only egress working without trusting workspace PATH entries.
-    let git_binary = codex_utils_path::system_executable("git");
+    let git_binary = codex_utils_paths::path::system_executable("git");
     // Apple's /usr/bin/git is an installer shim when developer tools are absent.
     // The resolver prefers the real CLT/Xcode executable when installed.
     #[cfg(target_os = "macos")]
@@ -669,7 +669,7 @@ fn git_command(git_binary: &Path) -> Result<Command, String> {
     command
         .env(
             "PATH",
-            codex_utils_path::system_path()
+            codex_utils_paths::path::system_path()
                 .map_err(|err| format!("failed to construct trusted Git PATH: {err}"))?,
         )
         .env_remove("GIT_EXEC_PATH")

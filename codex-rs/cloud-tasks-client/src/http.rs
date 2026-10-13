@@ -15,7 +15,7 @@ use crate::api::TaskText;
 use chrono::DateTime;
 use chrono::Utc;
 
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_backend_client as backend;
 use codex_backend_client::CodeTaskDetailsResponseExt;
 use codex_git_utils::ApplyGitRequest;
@@ -30,7 +30,7 @@ pub struct HttpClient {
 impl HttpClient {
     pub fn new(
         base_url: impl Into<String>,
-        http_client_factory: codex_http_client::HttpClientFactory,
+        http_client_factory: codex_transport::http::HttpClientFactory,
     ) -> Self {
         let base_url = base_url.into();
         let backend = backend::Client::new_without_redirects(base_url.clone(), http_client_factory);

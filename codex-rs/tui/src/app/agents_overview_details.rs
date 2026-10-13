@@ -15,7 +15,7 @@ use codex_app_server_protocol::ThreadActiveFlag;
 use codex_app_server_protocol::ThreadItem;
 use codex_app_server_protocol::ThreadStatus;
 use codex_protocol::ThreadId;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 use std::collections::HashMap;

@@ -4,7 +4,7 @@
 
 use codex_protocol::models::PermissionProfile;
 use codex_protocol::permissions::NetworkSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cargo_bin::cargo_bin;
 use codex_utils_cargo_bin::write_executable;
 use pretty_assertions::assert_eq;

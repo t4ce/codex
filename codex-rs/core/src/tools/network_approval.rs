@@ -32,7 +32,7 @@ use codex_protocol::protocol::ReviewDecision;
 use codex_protocol::protocol::WarningEvent;
 use codex_sandboxing::record_network_sandbox_violation;
 use codex_tools::ToolName;
-use codex_utils_path_uri::Platform;
+use codex_utils_paths::path_uri::Platform;
 use indexmap::IndexMap;
 use std::collections::HashMap;
 use std::collections::HashSet;

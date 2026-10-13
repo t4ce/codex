@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use codex_api::AllowedCaller;
-use codex_api::ApproximateLocation;
-use codex_api::ExternalWebAccess;
-use codex_api::ExternalWebAccessMode;
-use codex_api::LocationType;
-use codex_api::SearchContextSize;
-use codex_api::SearchFilters;
-use codex_api::SearchSettings;
+use codex_transport::api::AllowedCaller;
+use codex_transport::api::ApproximateLocation;
+use codex_transport::api::ExternalWebAccess;
+use codex_transport::api::ExternalWebAccessMode;
+use codex_transport::api::LocationType;
+use codex_transport::api::SearchContextSize;
+use codex_transport::api::SearchFilters;
+use codex_transport::api::SearchSettings;
 use codex_core::config::Config;
 use codex_extension_api::ConfigContributor;
 use codex_extension_api::ExtensionData;
@@ -17,7 +17,7 @@ use codex_extension_api::ThreadLifecycleContributor;
 use codex_extension_api::ThreadOriginator;
 use codex_extension_api::ThreadStartInput;
 use codex_extension_api::ToolContributor;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_model_provider::create_model_provider;
 use codex_model_provider_info::ModelProviderInfo;
@@ -161,8 +161,8 @@ mod tests {
     use codex_extension_api::ExtensionData;
     use codex_extension_api::ExtensionRegistryBuilder;
     use codex_extension_api::ToolName;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::CodexAuth;
     use codex_model_provider_info::ModelProviderInfo;
     use pretty_assertions::assert_eq;
@@ -174,8 +174,8 @@ mod tests {
     use super::install;
     use crate::tool::RUN_TOOL_NAME;
     use crate::tool::WEB_NAMESPACE;
-    use codex_api::ExternalWebAccess;
-    use codex_api::ExternalWebAccessMode;
+    use codex_transport::api::ExternalWebAccess;
+    use codex_transport::api::ExternalWebAccessMode;
     use codex_protocol::config_types::WebSearchMode;
 
     #[test]

@@ -31,9 +31,8 @@ codex-model-provider-info = { workspace = true }
 codex-models-manager = { workspace = true }
 codex-protocol = { workspace = true }
 codex-thread-store = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-cargo-bin = { workspace = true }
-codex-utils-path-uri = { workspace = true }
 ctor = { workspace = true }
 futures = { workspace = true }
 notify = { workspace = true }
@@ -53,5 +52,5 @@ shlex = { workspace = true }
 zstd = { workspace = true }
 
 [dev-dependencies]
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 pretty_assertions = { workspace = true }

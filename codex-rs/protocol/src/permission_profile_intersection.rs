@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::canonicalize_preserving_symlinks;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::canonicalize_preserving_symlinks;
 use thiserror::Error;
 
 use crate::models::PermissionProfile;

@@ -2,7 +2,7 @@ use super::*;
 use crate::migrations::QUEUE_MIGRATOR;
 use crate::runtime::test_support::test_thread_metadata;
 use crate::runtime::test_support::unique_temp_dir;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use sqlx::migrate::Migrator;
 use std::borrow::Cow;

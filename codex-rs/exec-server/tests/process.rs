@@ -19,7 +19,7 @@ use codex_exec_server_protocol::JSONRPCError;
 use codex_exec_server_protocol::JSONRPCMessage;
 use codex_exec_server_protocol::JSONRPCResponse;
 use codex_exec_server_protocol::ProcessSandboxType;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use common::exec_server::exec_server;
 use common::exec_server::exec_server_with_env;
 use pretty_assertions::assert_eq;

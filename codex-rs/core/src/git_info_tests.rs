@@ -25,9 +25,9 @@ use codex_git_utils::recent_commits;
 use codex_git_utils::resolve_root_git_project_uri_for_trust;
 // Existing trust fixtures check both entry points through this shared wrapper.
 use self::resolve_native_and_portable_trust_roots as resolve_root_git_project_for_trust;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path::normalize_for_path_comparison;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path::normalize_for_path_comparison;
+use codex_utils_paths::path_uri::PathUri;
 use core_test_support::PathBufExt;
 use core_test_support::PathExt;
 use core_test_support::skip_if_sandbox;

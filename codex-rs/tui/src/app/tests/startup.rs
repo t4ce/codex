@@ -59,7 +59,7 @@ async fn windows_sandbox_setup_uses_observed_thread_host() {
             ids.into_iter()
                 .map(|id| codex_app_server_protocol::ThreadEnvironment {
                     environment_id: id.to_string(),
-                    cwd: codex_utils_absolute_path::AbsolutePathBuf::try_from(std::env::temp_dir())
+                    cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(std::env::temp_dir())
                         .unwrap()
                         .into(),
                     runtime_workspace_roots: Vec::new(),

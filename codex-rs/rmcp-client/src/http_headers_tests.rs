@@ -204,8 +204,8 @@ async fn connection_headers_are_cached_and_origin_bound() {
     use axum::routing::get;
     use axum::routing::post;
     use codex_exec_server::RouteAwareHttpClient;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use std::sync::Arc;
     use tempfile::tempdir;
     use tokio::net::TcpListener;
@@ -305,8 +305,8 @@ async fn concurrent_rejected_posts_share_one_headers_refresh() {
     use axum::http::StatusCode;
     use axum::routing::post;
     use codex_exec_server::RouteAwareHttpClient;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use tempfile::tempdir;
     use tokio::net::TcpListener;
     use tokio::sync::Barrier;
@@ -403,8 +403,8 @@ async fn concurrent_rejected_posts_share_one_headers_refresh() {
 #[tokio::test]
 async fn helper_refresh_preserves_oauth_challenges_and_retries_at_most_once() {
     use codex_exec_server::RouteAwareHttpClient;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use tempfile::tempdir;
     use wiremock::Mock;
     use wiremock::MockServer;
@@ -507,8 +507,8 @@ async fn helper_refresh_preserves_oauth_challenges_and_retries_at_most_once() {
 #[tokio::test]
 async fn refresh_retry_rechecks_deadline_and_redirects() {
     use codex_exec_server::RouteAwareHttpClient;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
 
     let temp = tempfile::tempdir().expect("helper directory");
     let command = "if [ -e invoked ]; then printf '{\"Proxy-Authorization\":\"Bearer fresh\"}'; else touch invoked; printf '{}'; fi";

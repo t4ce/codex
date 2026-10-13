@@ -6,7 +6,7 @@ use codex_app_server_protocol::ServerNotification;
 use codex_app_server_protocol::ServerNotificationEnvelope;
 use codex_app_server_protocol::ThreadRealtimeStartedNotification;
 use codex_protocol::protocol::RealtimeConversationVersion;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use tokio::time::Duration;

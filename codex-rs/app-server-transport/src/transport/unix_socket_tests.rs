@@ -13,7 +13,7 @@ use codex_app_server_protocol::JSONRPCMessage;
 use codex_app_server_protocol::JSONRPCNotification;
 use codex_core::config::find_codex_home;
 use codex_uds::UnixStream;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use futures::SinkExt;
 use futures::StreamExt;
 use pretty_assertions::assert_eq;

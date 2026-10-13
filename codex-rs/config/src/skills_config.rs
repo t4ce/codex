@@ -5,8 +5,8 @@ use std::num::NonZeroUsize;
 
 use crate::ConfigLayerSource;
 use crate::ConfigLayerStack;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use serde::Serialize;

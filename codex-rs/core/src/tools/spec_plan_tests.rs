@@ -735,7 +735,7 @@ async fn reviewer_tool_policy_require_managed_secondary_environments() {
             );
         duplicate_primary_environment(&mut turn);
         let secondary_workspace_root =
-            codex_utils_path_uri::PathUri::from_abs_path(&turn.config.cwd.join("secondary"));
+            codex_utils_paths::path_uri::PathUri::from_abs_path(&turn.config.cwd.join("secondary"));
         let TurnEnvironmentState::Ready(secondary) = turn
             .initial_environments
             .environments

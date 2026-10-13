@@ -1,12 +1,12 @@
 use anyhow::Result;
-use codex_api::ApiError;
-use codex_api::map_api_error;
-use codex_client::RetryOn;
-use codex_client::RetryPolicy;
-use codex_client::run_with_retry;
-use codex_http_client::Request;
-use codex_http_client::RetryAfter;
-use codex_http_client::TransportError;
+use codex_transport::api::ApiError;
+use codex_transport::api::map_api_error;
+use codex_transport::client::RetryOn;
+use codex_transport::client::RetryPolicy;
+use codex_transport::client::run_with_retry;
+use codex_transport::http::Request;
+use codex_transport::http::RetryAfter;
+use codex_transport::http::TransportError;
 use codex_login::CodexAuth;
 use codex_models_manager::bundled_models_response;
 use codex_protocol::protocol::CodexErrorInfo;
@@ -135,7 +135,7 @@ where
     S: Subscriber,
 {
     fn on_event(&self, event: &Event<'_>, _context: Context<'_, S>) {
-        if event.metadata().target() == "codex_http_client::transport" {
+        if event.metadata().target() == "codex_transport::http::transport" {
             let mut visitor = RetryTelemetryVisitor::default();
             event.record(&mut visitor);
             if visitor.is_responses_request {

@@ -2,7 +2,7 @@
 
 use super::*;
 use crate::store::validate_plugin_version_segment;
-use codex_utils_path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathConvention;
 
 /// Fetches installation authorization and download metadata, but materializes no
 /// other installed plugins and never publishes to the shared plugin catalog.

@@ -1,6 +1,6 @@
 //! Forward explicit programs while leaving entitlement and model policy to the server.
 
-use codex_api::AccessPrograms;
+use codex_transport::api::AccessPrograms;
 use codex_features::Feature;
 use codex_login::CodexAuth;
 use codex_model_provider_info::OPENAI_PROVIDER_ID;

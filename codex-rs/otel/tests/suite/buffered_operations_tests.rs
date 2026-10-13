@@ -1,7 +1,7 @@
 //! Exercises global operation buffering across shutdown and rejected configuration changes.
 
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_otel::MetricsClient;
 use codex_otel::MetricsConfig;
 use codex_otel::OtelExporter;

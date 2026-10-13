@@ -42,7 +42,7 @@ use codex_tools::JsonSchema;
 use codex_tools::ToolName;
 use codex_tools::ToolSpec;
 use codex_utils_output_truncation::approx_token_count;
-use codex_utils_path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathConvention;
 use codex_utils_string::truncate_middle_chars;
 
 use super::super::shell_spec::CommandToolOptions;

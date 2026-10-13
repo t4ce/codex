@@ -26,8 +26,8 @@ use crate::noise_relay::stream_handler::NoiseStreamHandler;
 use crate::relay::HarnessKeyValidator;
 use crate::relay::run_multiplexed_environment;
 use crate::server::ConnectionProcessor;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 
 // These tests exercise real sockets, not keepalive deadlines. The shared unit-test
 // Pong timeout is only 100 ms and can expire during Noise handshakes under load.
@@ -386,7 +386,7 @@ async fn registration_renewal_recovers_the_session_and_running_process() -> Resu
                         "-c".to_owned(),
                         "IFS= read line; printf 'from-stdin:%s\\n' \"$line\"".to_owned(),
                     ],
-                    cwd: codex_utils_path_uri::PathUri::from_host_native_path(
+                    cwd: codex_utils_paths::path_uri::PathUri::from_host_native_path(
                         std::env::current_dir()?,
                     )?,
                     shell_snapshot: None,
@@ -989,7 +989,7 @@ async fn application_policy_registry_denial_does_not_poison_later_noise_startup(
         .expect(1)
         .mount(&registry)
         .await;
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     let factory = HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault)
         .with_network_policy(policy.clone());
@@ -1010,13 +1010,13 @@ async fn application_policy_registry_denial_does_not_poison_later_noise_startup(
     let error = client.get().await.err().unwrap();
     assert_eq!(
         error.application_network_policy_denial(),
-        Some(codex_http_client::NetworkPolicyDenied::Unavailable)
+        Some(codex_transport::http::NetworkPolicyDenied::Unavailable)
     );
     assert!(!crate::client::is_retryable_recovery_error(&error));
     assert!(registry.received_requests().await.unwrap().is_empty());
     controller.publish(
         policy.revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
     client.get().await?;
     Ok(())

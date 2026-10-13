@@ -1,4 +1,4 @@
-use codex_http_client::HttpClient;
+use codex_transport::http::HttpClient;
 use http::StatusCode;
 use serde::Deserialize;
 use serde::Serialize;

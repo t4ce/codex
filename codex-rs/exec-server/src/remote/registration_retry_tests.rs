@@ -5,8 +5,8 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
-use codex_api::AuthProvider;
-use codex_http_client::RouteAwareRequestError;
+use codex_transport::api::AuthProvider;
+use codex_transport::http::RouteAwareRequestError;
 use http::HeaderMap;
 use pretty_assertions::assert_eq;
 use tokio::io::AsyncBufReadExt;
@@ -45,7 +45,7 @@ struct RegistrationAuthProvider {
 impl AuthProvider for RegistrationAuthProvider {
     fn add_auth_headers(&self, _headers: &mut HeaderMap) {}
 
-    fn resolve_auth_headers(&self) -> codex_api::AuthHeadersFuture<'_> {
+    fn resolve_auth_headers(&self) -> codex_transport::api::AuthHeadersFuture<'_> {
         self.calls.fetch_add(1, Ordering::Relaxed);
         Box::pin(async { Ok(HeaderMap::new()) })
     }

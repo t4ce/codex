@@ -16,7 +16,7 @@ use std::time::Duration;
 use std::time::Instant;
 
 use bytes::Bytes;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_exec_server::ExecServerError;
 use codex_exec_server::HttpClient;
 use codex_exec_server::HttpHeader;

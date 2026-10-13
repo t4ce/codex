@@ -4,10 +4,10 @@ use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use codex_api::ApiError;
-use codex_api::Provider;
-use codex_api::SharedAuthProvider;
-use codex_api::TransportError;
+use codex_transport::api::ApiError;
+use codex_transport::api::Provider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::api::TransportError;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::GatewayAuthManager;
@@ -125,7 +125,7 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
             || url::Url::parse(&provider.base_url).ok().is_some_and(|url| {
                 url.scheme() == "https"
                     && url.host_str().is_some_and(|host| {
-                        host == "api.openai.com" || codex_http_client::is_allowed_chatgpt_host(host)
+                        host == "api.openai.com" || codex_transport::http::is_allowed_chatgpt_host(host)
                     })
             })
     }
@@ -206,7 +206,7 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
 
     /// Maps an API client error into the provider's user-facing error representation.
     fn map_api_error(&self, error: ApiError) -> CodexErr {
-        codex_api::map_api_error(error)
+        codex_transport::api::map_api_error(error)
     }
 
     /// Returns provider configuration adapted for the API client.
@@ -594,8 +594,8 @@ mod tests {
     #[cfg(feature = "bedrock")]
     use std::task::Waker;
 
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::auth::AgentIdentityAuthPolicy;
     use codex_login::auth::BedrockApiKeyAuth;
     #[cfg(feature = "bedrock")]

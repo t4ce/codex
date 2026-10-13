@@ -22,8 +22,7 @@ codex-protocol = { workspace = true }
 codex-rollout = { workspace = true }
 codex-secrets = { workspace = true }
 codex-shell-command = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-redacted-string = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

@@ -116,7 +116,7 @@ mod tests {
                     },
                     FileSystemSandboxEntry {
                         path: FileSystemPath::Path {
-                            path: codex_utils_absolute_path::AbsolutePathBuf::try_from(
+                            path: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(
                                 "/tmp/writable",
                             )
                             .expect("absolute path")

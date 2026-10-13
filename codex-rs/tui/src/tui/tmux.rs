@@ -37,10 +37,10 @@ pub(super) fn options() -> Options {
     if std::env::var_os("TMUX").is_none() && pane.is_none() {
         return Options::default();
     }
-    let Some(executable) = codex_utils_path::system_executable("tmux") else {
+    let Some(executable) = codex_utils_paths::path::system_executable("tmux") else {
         return Options::default();
     };
-    let Ok(path) = codex_utils_path::system_path() else {
+    let Ok(path) = codex_utils_paths::path::system_path() else {
         return Options::default();
     };
     if PROBE_IN_FLIGHT.swap(true, Ordering::AcqRel) {

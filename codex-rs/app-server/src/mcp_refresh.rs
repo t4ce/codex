@@ -186,7 +186,7 @@ mod tests {
     use codex_login::AuthManager;
     use codex_login::CodexAuth;
     use codex_protocol::protocol::SessionSource;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use std::collections::HashMap;

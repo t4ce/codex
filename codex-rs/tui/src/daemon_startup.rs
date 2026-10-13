@@ -30,7 +30,7 @@ pub fn uses_wsl_drvfs(codex_home: &std::path::Path) -> bool {
     {
         use std::os::fd::AsRawFd;
 
-        if !codex_utils_path::is_wsl() && std::env::var_os("WSL_INTEROP").is_none() {
+        if !codex_utils_paths::path::is_wsl() && std::env::var_os("WSL_INTEROP").is_none() {
             return false;
         }
         let Some(directory) = codex_home

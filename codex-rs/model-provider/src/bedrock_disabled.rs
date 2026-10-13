@@ -3,8 +3,8 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use codex_api::Provider;
-use codex_api::SharedAuthProvider;
+use codex_transport::api::Provider;
+use codex_transport::api::SharedAuthProvider;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider_info::ModelProviderInfo;

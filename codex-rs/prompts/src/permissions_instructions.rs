@@ -21,7 +21,7 @@ use codex_protocol::permissions::FileSystemSandboxPolicyContext;
 use codex_protocol::protocol::AskForApproval;
 use codex_protocol::protocol::GranularApprovalConfig;
 use codex_protocol::protocol::NetworkAccess;
-use codex_utils_template::Template;
+use codex_utils_text::template::Template;
 use std::collections::HashSet;
 use std::path::Path;
 use std::sync::LazyLock;

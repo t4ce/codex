@@ -18,8 +18,8 @@ use codex_protocol::permissions::FileSystemSandboxEntry;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_protocol::permissions::FileSystemSpecialPath;
 use codex_protocol::permissions::NetworkSandboxPolicy;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 use dunce::canonicalize;
 use pretty_assertions::assert_eq;
 use std::collections::HashMap;
@@ -551,7 +551,7 @@ async fn linux_unix_socket_grant_uses_effective_managed_policy() -> anyhow::Resu
             ..Default::default()
         },
         NetworkProxyConstraints::default(),
-        codex_utils_path_uri::Platform::native(),
+        codex_utils_paths::path_uri::Platform::native(),
     )?;
     let network = NetworkProxy::builder()
         .state(Arc::new(NetworkProxyState::with_reloader(

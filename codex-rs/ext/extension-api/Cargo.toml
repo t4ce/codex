@@ -14,7 +14,7 @@ doctest = false
 workspace = true
 
 [dependencies]
-codex-api = { workspace = true }
+codex-transport = { workspace = true }
 futures = { workspace = true }
 codex-guardian-context = { workspace = true }
 codex-history = { workspace = true }
@@ -25,8 +25,7 @@ codex-file-system = { workspace = true }
 codex-mcp = { workspace = true }
 codex-protocol = { workspace = true }
 codex-tools = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
+codex-utils-paths = { workspace = true }
 serde_json = { workspace = true }
 
 [dev-dependencies]

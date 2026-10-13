@@ -10,7 +10,7 @@ use codex_protocol::models::MessagePhase;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::SubAgentSource;
-use codex_utils_stream_parser::strip_citations;
+use codex_utils_text::stream_parser::strip_citations;
 use codex_utils_string::take_bytes_at_char_boundary;
 use std::collections::HashSet;
 use std::sync::Mutex;

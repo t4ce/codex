@@ -1,5 +1,5 @@
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
@@ -51,7 +51,7 @@ mod windows_impl {
     use crate::setup::effective_write_roots_for_permissions;
     use crate::token::LocalSid;
     use anyhow::Result;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use std::fs::File;
     use std::path::Path;
     use std::path::PathBuf;

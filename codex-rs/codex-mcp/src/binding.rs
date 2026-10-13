@@ -11,7 +11,7 @@ use anyhow::Result;
 use codex_config::AppToolApproval;
 use codex_protocol::mcp::CallToolResult;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use rmcp::model::ListResourceTemplatesResult;
 use rmcp::model::ListResourcesResult;
 use rmcp::model::PaginatedRequestParams;

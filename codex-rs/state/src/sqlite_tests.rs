@@ -1,7 +1,7 @@
 //! Regression coverage for SQLite initialization under competing database locks.
 
 use super::SqliteConfig;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use sqlx::sqlite::SqliteAutoVacuum;
 use sqlx::sqlite::SqliteConnectOptions;

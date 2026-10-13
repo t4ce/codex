@@ -19,8 +19,8 @@ async fn test_provider() -> AwsSigV4AuthProvider {
             secret_access_key: "test-secret-key".to_string(),
             session_token: Some("test-session-token".to_string()),
         },
-        codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
     )
     .await
@@ -94,8 +94,8 @@ async fn invalid_signing_configuration_is_rejected() {
     };
     let error = aws_sigv4_auth_provider(
         config,
-        codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
     )
     .await

@@ -3,7 +3,7 @@ use codex_protocol::MemoryVersion;
 use codex_protocol::openai_models::ModelInfo;
 use codex_utils_output_truncation::TruncationPolicy;
 use codex_utils_output_truncation::truncate_text;
-use codex_utils_template::Template;
+use codex_utils_text::template::Template;
 use std::path::Path;
 use std::sync::LazyLock;
 use tracing::warn;

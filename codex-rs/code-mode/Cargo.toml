@@ -14,7 +14,7 @@ workspace = true
 
 [dependencies]
 codex-code-mode-protocol = { workspace = true }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 codex-install-context = { workspace = true }
 codex-otel = { workspace = true }
 codex-protocol = { workspace = true }

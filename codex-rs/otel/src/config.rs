@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -52,7 +52,7 @@ pub fn validate_span_attributes(attributes: &BTreeMap<String, String>) -> std::i
 
 #[derive(Clone, Debug)]
 pub struct OtelSettings {
-    pub http_client_factory: codex_http_client::HttpClientFactory,
+    pub http_client_factory: codex_transport::http::HttpClientFactory,
     pub environment: String,
     pub service_name: String,
     pub service_version: String,

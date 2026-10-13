@@ -65,7 +65,7 @@ pub(super) async fn bedrock_mantle_runtime_base_url(
     source: BedrockAuthSource,
     managed_auth: Option<&CodexAuth>,
     aws: &ModelProviderAwsAuthInfo,
-    http_client_factory: &codex_http_client::HttpClientFactory,
+    http_client_factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<String> {
     let region = resolve_region(
         source,

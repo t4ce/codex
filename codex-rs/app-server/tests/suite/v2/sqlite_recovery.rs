@@ -6,7 +6,7 @@ use codex_app_server_protocol::ConfigWarningNotification;
 use codex_app_server_protocol::ThreadStartParams;
 use codex_state::SqliteConfig;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use std::time::Duration;
 use tempfile::TempDir;

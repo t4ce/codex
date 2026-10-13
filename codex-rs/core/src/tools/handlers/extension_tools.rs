@@ -232,9 +232,9 @@ mod tests {
     use codex_protocol::protocol::ImageGenerationEndEvent;
     use codex_tools::ExtensionTurnItem;
     use codex_tools::ToolCallSource as ExtensionToolCallSource;
-    use codex_utils_absolute_path::test_support::PathExt;
-    use codex_utils_absolute_path::test_support::test_path_buf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::test_path_buf;
+    use codex_utils_paths::path_uri::PathUri;
     use core_test_support::responses::strip_response_item_id;
     use core_test_support::responses::strip_response_item_ids;
     use pretty_assertions::assert_eq;

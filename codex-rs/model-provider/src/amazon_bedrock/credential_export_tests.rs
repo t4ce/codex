@@ -277,7 +277,7 @@ async fn credential_export_reuses_cache_and_coalesces_refreshes() -> io::Result<
     );
     let exporter = Arc::new(exporter);
     provider.credential_export = Some(exporter.clone());
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let policy = controller.policy();
     provider.http_client_factory = provider
         .http_client_factory
@@ -285,7 +285,7 @@ async fn credential_export_reuses_cache_and_coalesces_refreshes() -> io::Result<
         .with_network_policy(policy.clone());
     controller.publish(
         policy.revision(),
-        codex_http_client::DestinationPolicy::Restricted {
+        codex_transport::http::DestinationPolicy::Restricted {
             allowed_hosts: Default::default(),
         },
     );
@@ -306,7 +306,7 @@ async fn credential_export_reuses_cache_and_coalesces_refreshes() -> io::Result<
     );
     controller.publish(
         policy.revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
     {
         let first = provider.recover_from_unauthorized();

@@ -4,7 +4,7 @@ use super::*;
 use crate::discover_v2::capability_locations::tests::request;
 use crate::discover_v2::capability_locations::tests::write;
 use codex_protocol::protocol::SandboxPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 
 async fn setup() -> anyhow::Result<(

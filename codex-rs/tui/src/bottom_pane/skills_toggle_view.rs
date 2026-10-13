@@ -24,7 +24,7 @@ use crate::render::renderable::ColumnRenderable;
 use crate::render::renderable::Renderable;
 use crate::skills_helpers::match_skill;
 use crate::style::user_message_style;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use super::CancellationEvent;
 use super::bottom_pane_view::BottomPaneView;

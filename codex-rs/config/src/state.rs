@@ -13,7 +13,7 @@ use crate::ConfigLayerMetadata;
 use crate::ConfigLayerSource;
 use crate::ProfileV2Name;
 use crate::shell_environment_policy::validate_shell_environment_policy_filter_config;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::path::Path;

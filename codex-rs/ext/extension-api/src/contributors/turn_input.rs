@@ -1,6 +1,6 @@
 use codex_file_system::EnvironmentAccess;
 use codex_protocol::user_input::UserInput;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::fmt;
 
 /// Host-owned turn environment summary visible to turn-input contributors.

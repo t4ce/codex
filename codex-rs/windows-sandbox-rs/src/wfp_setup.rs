@@ -47,8 +47,8 @@ fn build_wfp_metrics_provider(
     // Statsig environment in the elevation payload. Other exporters are
     // intentionally omitted from this helper path.
     OtelProvider::try_new(&OtelSettings {
-        http_client_factory: codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        http_client_factory: codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         environment: otel.environment.clone(),
         service_name: WFP_SETUP_SERVICE_NAME.to_string(),

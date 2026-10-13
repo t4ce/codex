@@ -1,7 +1,7 @@
 use codex_protocol::permissions::FileSystemSandboxPolicyContext;
 use codex_protocol::request_permissions::RequestPermissionsArgs;
 use codex_sandboxing::policy_transforms::normalize_additional_permissions_with_context;
-use codex_utils_path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::LegacyAppPathString;
 use serde_json::Value;
 
 use crate::function_tool::FunctionCallError;

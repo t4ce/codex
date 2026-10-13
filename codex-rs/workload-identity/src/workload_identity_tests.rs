@@ -4,8 +4,8 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use tempfile::TempDir;
 use url::Url;
@@ -374,7 +374,7 @@ async fn managed_exchange_denies_before_reading_assertion_or_sending() {
     let server = MockServer::start().await;
     let (_home, assertion_path) = assertion_file("assertion");
     std::fs::remove_file(&assertion_path).unwrap();
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     let exchange = WorkloadIdentityExchange::new(
         WorkloadIdentityConfig::new(
             "rule".into(),
@@ -390,20 +390,20 @@ async fn managed_exchange_denies_before_reading_assertion_or_sending() {
     assert!(matches!(
         exchange.resolve().await,
         Err(WorkloadIdentityError::Policy(
-            codex_http_client::NetworkPolicyDenied::Unavailable
+            codex_transport::http::NetworkPolicyDenied::Unavailable
         ))
     ));
     assert!(server.received_requests().await.unwrap().is_empty());
     controller.publish(
         controller.policy().revision(),
-        codex_http_client::DestinationPolicy::Restricted {
+        codex_transport::http::DestinationPolicy::Restricted {
             allowed_hosts: Default::default(),
         },
     );
     assert!(matches!(
         exchange.resolve().await,
         Err(WorkloadIdentityError::Policy(
-            codex_http_client::NetworkPolicyDenied::Destination
+            codex_transport::http::NetworkPolicyDenied::Destination
         ))
     ));
     assert!(server.received_requests().await.unwrap().is_empty());
@@ -420,10 +420,10 @@ async fn managed_exchange_revokes_an_active_token_response() {
         .mount(&server)
         .await;
     let (_home, assertion_path) = assertion_file("assertion");
-    let controller = codex_http_client::NetworkPolicyController::default();
+    let controller = codex_transport::http::NetworkPolicyController::default();
     controller.publish(
         controller.policy().revision(),
-        codex_http_client::DestinationPolicy::Unrestricted,
+        codex_transport::http::DestinationPolicy::Unrestricted,
     );
     let exchange = WorkloadIdentityExchange::new(
         WorkloadIdentityConfig::new(
@@ -443,7 +443,7 @@ async fn managed_exchange_revokes_an_active_token_response() {
         }
         controller.publish(
             controller.policy().revision(),
-            codex_http_client::DestinationPolicy::Restricted {
+            codex_transport::http::DestinationPolicy::Restricted {
                 allowed_hosts: Default::default(),
             },
         );
@@ -456,7 +456,7 @@ async fn managed_exchange_revokes_an_active_token_response() {
     assert!(matches!(
         result,
         Err(WorkloadIdentityError::Policy(
-            codex_http_client::NetworkPolicyDenied::Revoked
+            codex_transport::http::NetworkPolicyDenied::Revoked
         ))
     ));
 }

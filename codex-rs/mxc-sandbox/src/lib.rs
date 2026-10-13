@@ -108,10 +108,10 @@ pub use codex_windows_sandbox::GLOB_SCAN_PROGRAM;
 pub fn prepare_file_system_policy(
     policy: codex_protocol::permissions::FileSystemSandboxPolicy,
     env: &HashMap<String, String>,
-    policy_cwd: &codex_utils_absolute_path::AbsolutePathBuf,
+    policy_cwd: &codex_utils_paths::absolute_path::AbsolutePathBuf,
     command_cwd: &Path,
 ) -> Result<codex_protocol::permissions::FileSystemSandboxPolicy> {
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::path_uri::PathUri;
 
     let env_entries = env
         .iter()

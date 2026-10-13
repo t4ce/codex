@@ -4,7 +4,7 @@ use codex_config::ConfigLayerSource;
 use codex_config::LoaderOverrides;
 use codex_protocol::config_types::TrustLevel;
 use codex_protocol::openai_models::ReasoningEffort;
-use codex_utils_absolute_path::test_support::PathBufExt;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
 use pretty_assertions::assert_eq;
 
 async fn test_config() -> (tempfile::TempDir, Config) {

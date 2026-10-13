@@ -5,7 +5,7 @@ use super::LoadedPluginManifest;
 use super::PluginManifestFormat;
 use super::UriPluginManifest;
 use super::parse_resolved_plugin_manifest;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::AGENT_PLUGIN_MANIFEST_RELATIVE_PATH;
 use codex_utils_plugins::find_plugin_manifest_path;
 use sha2::Digest;

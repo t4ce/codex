@@ -27,8 +27,8 @@ use codex_extension_api::ToolLifecycleFuture;
 use codex_extension_api::ToolStartInput;
 use codex_features::CurrentTimeSource;
 use codex_features::Feature;
-use codex_http_client::DestinationPolicy;
-use codex_http_client::NetworkPolicyController;
+use codex_transport::http::DestinationPolicy;
+use codex_transport::http::NetworkPolicyController;
 use codex_login::CodexAuth;
 use codex_mcp::CODEX_APPS_MCP_SERVER_NAME;
 use codex_mcp::codex_apps_mcp_server_config;
@@ -4845,7 +4845,7 @@ impl ToolLifecycleContributor for ResponseIdObserver {
                     input.tool_name.name.clone(),
                     input
                         .turn_store
-                        .get::<codex_api::ResponseId>()
+                        .get::<codex_transport::api::ResponseId>()
                         .map(|id| id.0.clone()),
                 ));
                 if input.tool_name.name == "wait" {

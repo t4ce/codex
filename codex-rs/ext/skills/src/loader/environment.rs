@@ -12,7 +12,7 @@ use codex_skills::ParsedSkillFrontmatter;
 use codex_skills::SkillDependencies;
 use codex_skills::SkillPolicy;
 use codex_skills::parse_skill_frontmatter_metadata;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_plugins::SkillDiscoveryMode;
 use futures::StreamExt;
 

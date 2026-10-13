@@ -2,8 +2,8 @@ use std::fs;
 use std::io::ErrorKind;
 use std::path::Path;
 
-use codex_utils_path::resolve_symlink_write_paths;
-use codex_utils_path::write_atomically;
+use codex_utils_paths::path::resolve_symlink_write_paths;
+use codex_utils_paths::path::write_atomically;
 use tokio::task;
 use toml_edit::DocumentMut;
 use toml_edit::Item as TomlItem;

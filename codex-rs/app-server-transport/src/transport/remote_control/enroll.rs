@@ -11,7 +11,7 @@ use axum::http::HeaderMap;
 use axum::http::StatusCode;
 use codex_app_server_protocol::RemoteControlPairingStartResponse;
 use codex_app_server_protocol::RemoteControlPairingStatusResponse;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_state::RemoteControlEnrollmentRecord;
 use codex_state::StateRuntime;
 use std::io;
@@ -77,7 +77,7 @@ impl RemoteControlEnrollment {
         let status = response.status();
         let retry_at = retry_after_with_jitter(&headers, OffsetDateTime::now_utc());
         let body = response.bytes().await.map_err(|err| {
-            if matches!(err, codex_http_client::HttpError::Policy(_))
+            if matches!(err, codex_transport::http::HttpError::Policy(_))
                 && !(retry_at.is_some() && matches!(status.as_u16(), 429 | 503))
             {
                 return super::auth::request_error(err);
@@ -185,7 +185,7 @@ impl RemoteControlEnrollment {
         let status = response.status();
         let retry_at = retry_after_with_jitter(&headers, OffsetDateTime::now_utc());
         let body = response.bytes().await.map_err(|err| {
-            if matches!(err, codex_http_client::HttpError::Policy(_))
+            if matches!(err, codex_transport::http::HttpError::Policy(_))
                 && !(retry_at.is_some() && matches!(status.as_u16(), 429 | 503))
             {
                 return super::auth::request_error(err);
@@ -480,7 +480,7 @@ mod tests {
     use crate::transport::remote_control::protocol::normalize_remote_control_url;
     use crate::transport::remote_control::server_api::enroll_remote_control_server;
     use codex_state::StateRuntime;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use serde_json::json;
     use std::sync::Arc;
@@ -718,8 +718,8 @@ mod tests {
         let err = enroll_remote_control_server(
             &remote_control_target,
             &RemoteControlConnectionAuth {
-                http_client_factory: codex_http_client::HttpClientFactory::new(
-                    codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+                http_client_factory: codex_transport::http::HttpClientFactory::new(
+                    codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
                 ),
                 auth_provider: codex_model_provider::unauthenticated_auth_provider(),
                 account_id: "account_id".to_string(),

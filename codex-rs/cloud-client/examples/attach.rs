@@ -2,8 +2,8 @@
 use codex_cloud_client::Client;
 use codex_cloud_client::Credentials;
 use codex_cloud_client::ResumeRequest;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use futures::StreamExt;
 
 #[tokio::main]

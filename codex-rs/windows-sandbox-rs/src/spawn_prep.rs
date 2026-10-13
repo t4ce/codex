@@ -33,7 +33,7 @@ use crate::workspace_acl::protect_workspace_codex_dir;
 use anyhow::Context;
 use anyhow::Result;
 use codex_protocol::models::PermissionProfile;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::collections::HashMap;
 use std::ffi::c_void;
 use std::path::Path;
@@ -458,7 +458,7 @@ mod tests {
     use crate::resolved_permissions::ResolvedWindowsSandboxPermissions;
     use codex_protocol::models::PermissionProfile;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
     use std::path::Path;

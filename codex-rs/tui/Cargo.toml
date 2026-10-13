@@ -52,7 +52,7 @@ codex-features = { workspace = true }
 codex-feedback = { workspace = true }
 codex-file-search = { workspace = true }
 codex-git-utils = { workspace = true }
-codex-http-client = { workspace = true }
+codex-transport = { workspace = true }
 codex-login = { workspace = true }
 codex-mermaid = { workspace = true }
 codex-message-history = { workspace = true }
@@ -72,14 +72,10 @@ codex-terminal-detection = { workspace = true }
 codex-worktree = { workspace = true }
 codex-utils-approval-presets = { workspace = true }
 codex-uds = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-cli = { workspace = true }
-codex-utils-elapsed = { workspace = true }
-codex-utils-fuzzy-match = { workspace = true }
-codex-utils-home-dir = { workspace = true }
+codex-utils-text = { workspace = true }
 codex-utils-oss = { workspace = true }
-codex-utils-path = { workspace = true }
-codex-utils-path-uri = { workspace = true }
 codex-utils-plugins = { workspace = true }
 codex-utils-sandbox-summary = { workspace = true }
 codex-utils-sleep-inhibitor = { workspace = true }

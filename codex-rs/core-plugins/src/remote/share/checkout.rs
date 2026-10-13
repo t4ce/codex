@@ -9,7 +9,7 @@ use codex_app_server_protocol::PluginInstallPolicy;
 use codex_login::CodexAuth;
 use codex_plugin::PluginId;
 use codex_plugin::validate_plugin_segment;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use serde_json::Value as JsonValue;
 use serde_json::json;
 use std::collections::BTreeMap;

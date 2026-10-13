@@ -40,7 +40,7 @@ use codex_protocol::protocol::EventMsg;
 use codex_protocol::protocol::TurnEnvironmentSelection;
 use codex_rmcp_client::ElicitationResponse;
 use codex_rmcp_client::with_http_headers_helper;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use rmcp::model::ReadResourceRequestParams;
 use rmcp::model::ReadResourceResult;
 use rmcp::model::RequestId;
@@ -973,7 +973,7 @@ mod tests {
     use codex_config::McpServerTransportConfig;
     use codex_exec_server::EnvironmentManager;
     use codex_exec_server_test_support::environment_manager_without_environments;
-    use codex_utils_path_uri::LegacyAppPathString;
+    use codex_utils_paths::path_uri::LegacyAppPathString;
     use pretty_assertions::assert_eq;
     use serde_json::Value;
 

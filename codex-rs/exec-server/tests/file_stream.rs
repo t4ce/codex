@@ -15,9 +15,9 @@ use codex_exec_server::FsReadBlockResponse;
 use codex_exec_server::FsWriteBlockParams;
 use codex_exec_server::ReadFileOptions;
 use codex_exec_server::RemoteExecServerConnectArgs;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_utils_paths::path_uri::PathUri;
 use futures::TryStreamExt;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
@@ -609,7 +609,7 @@ async fn writable_open_obeys_sandbox_write_permissions() -> Result<()> {
     use codex_protocol::permissions::FileSystemSandboxPolicy;
     use codex_protocol::permissions::FileSystemSpecialPath;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
     let server = exec_server().await?;
     let client = ExecServerClient::connect_websocket(RemoteExecServerConnectArgs::new(
@@ -692,7 +692,7 @@ fn read_only_sandbox(path: std::path::PathBuf) -> codex_exec_server::FileSystemS
     use codex_protocol::permissions::FileSystemSandboxEntry;
     use codex_protocol::permissions::FileSystemSandboxPolicy;
     use codex_protocol::permissions::NetworkSandboxPolicy;
-    use codex_utils_absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
     let path = AbsolutePathBuf::from_absolute_path(&path)
         .unwrap_or_else(|err| panic!("sandbox path should be absolute: {err}"));

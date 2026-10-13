@@ -41,9 +41,9 @@ use codex_file_system::FileSystemSandboxContext;
 use codex_sandboxing::policy_transforms::materialize_additional_permissions_with_context;
 use codex_sandboxing::policy_transforms::merge_permission_profiles;
 use codex_sandboxing::policy_transforms::normalize_additional_permissions_with_context;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_absolute_path::AbsolutePathBufGuard;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBufGuard;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde_json::Map;
 use serde_json::Value;
@@ -413,8 +413,8 @@ mod tests {
     use codex_protocol::protocol::GranularApprovalConfig;
     use codex_sandboxing::policy_transforms::intersect_permission_profiles_with_context;
     use codex_sandboxing::policy_transforms::merge_permission_profiles;
-    use codex_utils_absolute_path::AbsolutePathBuf;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::absolute_path::AbsolutePathBuf;
+    use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use tempfile::tempdir;
 

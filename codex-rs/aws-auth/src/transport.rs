@@ -17,12 +17,12 @@ use aws_smithy_runtime_api::client::orchestrator::HttpResponse;
 use aws_smithy_runtime_api::client::result::ConnectorError;
 use aws_smithy_types::body::SdkBody;
 use bytes::Bytes;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientBuilder;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::HttpError;
-use codex_http_client::RouteAwareClientPool;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientBuilder;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::HttpError;
+use codex_transport::http::RouteAwareClientPool;
 use http_body_util::BodyExt;
 
 pub(crate) fn http_client(factory: HttpClientFactory) -> SharedHttpClient {

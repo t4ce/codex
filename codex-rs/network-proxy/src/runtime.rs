@@ -23,7 +23,7 @@ use crate::state::build_config_state;
 use crate::state::validate_policy_against_constraints;
 use anyhow::Context;
 use anyhow::Result;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use opentelemetry::trace::SpanContext;
 use serde::Deserialize;
 use serde::Serialize;

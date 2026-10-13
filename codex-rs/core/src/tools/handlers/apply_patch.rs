@@ -56,7 +56,7 @@ use codex_sandboxing::policy_transforms::normalize_additional_permissions;
 use codex_sandboxing::policy_transforms::normalize_additional_permissions_with_context;
 use codex_tools::ToolName;
 use codex_tools::ToolSpec;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 const APPLY_PATCH_ARGUMENT_DIFF_BUFFER_INTERVAL: Duration = Duration::from_millis(500);
 

@@ -3,7 +3,7 @@
 use super::super::parse_legacy_plugin_manifest_uri;
 use super::super::parse_resolved_plugin_manifest;
 use super::ManifestCache;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use std::cell::Cell;
 use std::sync::Mutex;

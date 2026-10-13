@@ -13,7 +13,7 @@ use crate::exec_util::argv_to_cstrings;
 use crate::exec_util::make_files_inheritable;
 use codex_protocol::permissions::FileSystemSandboxPolicy;
 use codex_sandboxing::find_system_bwrap_in_path;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum BubblewrapLauncher {

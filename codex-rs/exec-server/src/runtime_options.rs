@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 use codex_sandboxing::LinuxSandboxPidNamespace;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 /// Paths and sandbox settings initialized when creating an executor.
 #[derive(Clone, Debug, Eq, PartialEq)]

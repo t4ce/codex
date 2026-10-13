@@ -7,7 +7,7 @@
 use serde::Serialize;
 use std::time::Duration;
 
-use codex_http_client::HttpClient;
+use codex_transport::http::HttpClient;
 use codex_protocol::auth::AuthMode;
 
 use super::manager::REFRESH_TOKEN_URL_OVERRIDE_ENV_VAR;
@@ -155,9 +155,9 @@ fn derive_revoke_token_endpoint(refresh_endpoint: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codex_http_client::ClientRouteClass;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
+    use codex_transport::http::ClientRouteClass;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use core_test_support::skip_if_no_network;
     use wiremock::Mock;
     use wiremock::MockServer;
@@ -200,7 +200,7 @@ mod tests {
 
         let reqwest_error = error
             .get_ref()
-            .and_then(|error| error.downcast_ref::<codex_http_client::HttpError>())
+            .and_then(|error| error.downcast_ref::<codex_transport::http::HttpError>())
             .expect("timeout error should preserve HTTP client error");
         assert!(reqwest_error.is_timeout());
     }

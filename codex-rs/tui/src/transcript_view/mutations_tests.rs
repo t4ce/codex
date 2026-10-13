@@ -390,7 +390,7 @@ fn folding_a_reasoning_only_page_retains_its_find_and_copy_revision() {
     let project = |items: &[ThreadItem]| {
         thread_items_to_transcript_cells(
             /*thread_id*/ None,
-            &codex_utils_absolute_path::AbsolutePathBuf::current_dir().unwrap(),
+            &codex_utils_paths::absolute_path::AbsolutePathBuf::current_dir().unwrap(),
             items.iter().cloned(),
             RawReasoningVisibility::Hidden,
             /*config*/ None,

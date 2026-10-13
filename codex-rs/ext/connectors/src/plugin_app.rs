@@ -3,7 +3,7 @@ use codex_core_plugins::ResolvedExecutorPlugin;
 use codex_file_system::ReadFileOptions;
 use codex_plugin::AppDeclaration;
 use codex_plugin::PluginResourceLocator;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::io;
 use thiserror::Error;
 

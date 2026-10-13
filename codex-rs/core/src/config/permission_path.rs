@@ -4,10 +4,10 @@
 use std::io;
 
 use codex_config::ConfigPathContext;
-use codex_utils_absolute_path::normalize_windows_device_path;
-use codex_utils_path_uri::LegacyAppPathString;
-use codex_utils_path_uri::PathConvention;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::normalize_windows_device_path;
+use codex_utils_paths::path_uri::LegacyAppPathString;
+use codex_utils_paths::path_uri::PathConvention;
+use codex_utils_paths::path_uri::PathUri;
 
 pub(super) fn contains_glob(path: &str, context: &ConfigPathContext) -> io::Result<bool> {
     Ok(contains_glob_chars_for_platform(

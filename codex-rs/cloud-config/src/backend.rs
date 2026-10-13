@@ -6,7 +6,7 @@ use codex_config::CloudConfigFragment;
 use codex_config::CloudConfigTomlBundle;
 use codex_config::CloudRequirementsFragment;
 use codex_config::CloudRequirementsTomlBundle;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 use codex_login::CodexAuth;
 use std::future::Future;
 
@@ -25,7 +25,7 @@ impl RetryableFailureKind {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum BundleRequestError {
-    Policy(codex_http_client::NetworkPolicyDenied),
+    Policy(codex_transport::http::NetworkPolicyDenied),
     Retryable(RetryableFailureKind),
     Unauthorized {
         status_code: Option<u16>,

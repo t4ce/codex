@@ -2,7 +2,7 @@ use super::*;
 #[cfg(target_os = "windows")]
 use anyhow::Context as _;
 use codex_protocol::sandbox::SandboxType;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 #[derive(Clone)]
 pub(crate) struct WindowsSandboxRequestProcessor {

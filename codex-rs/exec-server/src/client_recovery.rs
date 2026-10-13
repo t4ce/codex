@@ -889,7 +889,7 @@ pub(crate) fn is_retryable_registry_error(error: &ExecServerError) -> bool {
                 || error.is_body()
                 || matches!(
                     error,
-                    codex_http_client::RouteAwareRequestError::Request(error)
+                    codex_transport::http::RouteAwareRequestError::Request(error)
                         if error.is_decode()
                 )
     ) || matches!(

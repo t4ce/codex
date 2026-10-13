@@ -5,7 +5,7 @@ use crate::shell::get_shell;
 #[cfg(not(windows))]
 use codex_exec_server::Environment;
 use codex_utils_output_truncation::TruncationPolicy;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use std::sync::Arc;
 
@@ -375,7 +375,7 @@ async fn exec_command_reuses_foreign_windows_grant() {
     use codex_features::Feature;
     use codex_protocol::models::AdditionalPermissionProfile;
     use codex_protocol::models::FileSystemPermissions;
-    use codex_utils_path_uri::PathUri;
+    use codex_utils_paths::path_uri::PathUri;
 
     let (session, mut turn, _events) = make_session_and_context_with_auth_and_config_and_rx(
         codex_login::CodexAuth::from_api_key("Test API Key"),

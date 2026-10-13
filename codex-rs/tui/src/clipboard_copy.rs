@@ -299,9 +299,9 @@ fn arboard_copy(
 #[cfg(target_os = "linux")]
 #[cfg(feature = "system-clipboard")]
 fn wsl_clipboard_copy(text: &str) -> Result<(), String> {
-    let executable = codex_utils_path::system_executable("powershell.exe")
+    let executable = codex_utils_paths::path::system_executable("powershell.exe")
         .ok_or_else(|| "PowerShell is unavailable in the system PATH".to_string())?;
-    let path = codex_utils_path::system_path()
+    let path = codex_utils_paths::path::system_path()
         .map_err(|error| format!("failed to resolve system PATH: {error}"))?;
     let mut child = std::process::Command::new(executable)
         .env("PATH", path)

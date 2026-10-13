@@ -140,7 +140,7 @@ use crate::protocol::WriteResponse;
 use crate::rpc::RpcCallError;
 use crate::rpc::RpcClient;
 use crate::rpc_server_requests::MAX_IN_FLIGHT_SERVER_CALLS;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClientFactory;
 
 #[path = "client/accepted.rs"]
 pub(crate) mod accepted;
@@ -685,7 +685,7 @@ pub enum ExecServerError {
     )]
     RpcTimedOut { method: String, timeout: Duration },
     #[error(transparent)]
-    ApplicationNetworkPolicy(#[from] codex_http_client::NetworkPolicyDenied),
+    ApplicationNetworkPolicy(#[from] codex_transport::http::NetworkPolicyDenied),
     #[error("exec-server transport closed")]
     Closed,
     #[error("{0}")]
@@ -717,7 +717,7 @@ pub enum ExecServerError {
     #[error("environment registry authentication error: {0}")]
     EnvironmentRegistryAuth(String),
     #[error("environment registry request failed: {0}")]
-    EnvironmentRegistryRequest(#[from] codex_http_client::RouteAwareRequestError),
+    EnvironmentRegistryRequest(#[from] codex_transport::http::RouteAwareRequestError),
     #[error("exec-server connection attempt failed: {0}")]
     ConnectionAttempt(#[source] Arc<ExecServerError>),
 }
@@ -1946,9 +1946,9 @@ mod tests {
     use codex_exec_server_protocol::JSONRPCMessage;
     use codex_exec_server_protocol::JSONRPCNotification;
     use codex_exec_server_protocol::JSONRPCResponse;
-    use codex_http_client::HttpClientFactory;
-    use codex_http_client::OutboundProxyPolicy;
-    use codex_utils_path_uri::PathUri;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
+    use codex_utils_paths::path_uri::PathUri;
     use futures::SinkExt;
     use futures::StreamExt;
     use http::HeaderMap;
@@ -2299,8 +2299,8 @@ mod tests {
                 },
                 initialize_timeout: DEFAULT_REMOTE_EXEC_SERVER_INITIALIZE_TIMEOUT,
             },
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
             /*started*/ &mut None,
         )
@@ -3092,8 +3092,8 @@ mod tests {
                 connect_timeout: Duration::from_secs(1),
                 initialize_timeout: Duration::from_secs(1),
                 resume_session_id: Some("session-1".to_string()),
-                http_client_factory: codex_http_client::HttpClientFactory::new(
-                    codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+                http_client_factory: codex_transport::http::HttpClientFactory::new(
+                    codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
                 ),
             }),
         )

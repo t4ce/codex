@@ -10,7 +10,7 @@ use codex_state::LogQuery;
 use codex_state::LogRow;
 use codex_state::SqliteConfig;
 use codex_state::StateRuntime;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use owo_colors::OwoColorize;
 
 #[derive(Debug, Parser)]

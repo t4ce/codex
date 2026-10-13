@@ -3,8 +3,8 @@
 use crate::CodexFeedback;
 use crate::FeedbackUploadOptions;
 use crate::UPLOAD_TIMEOUT;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use flate2::read::GzDecoder;
 use http::StatusCode;
 use pretty_assertions::assert_eq;

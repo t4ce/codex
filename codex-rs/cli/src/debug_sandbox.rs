@@ -34,7 +34,7 @@ use codex_sandboxing::seatbelt::CreateSeatbeltCommandArgsParams;
 #[cfg(target_os = "macos")]
 use codex_sandboxing::seatbelt::create_seatbelt_command_args;
 use codex_sandboxing::with_managed_mitm_ca_readable_root;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
 use tokio::process::Child;
 use tokio::process::Command as TokioCommand;
@@ -334,7 +334,7 @@ async fn run_command_under_sandbox(
                 let workspace_roots = config
                     .effective_workspace_roots()
                     .iter()
-                    .map(codex_utils_path_uri::PathUri::to_abs_path)
+                    .map(codex_utils_paths::path_uri::PathUri::to_abs_path)
                     .collect::<std::io::Result<Vec<_>>>()
                     .context("invalid Windows sandbox workspace roots")?;
                 run_command_under_windows_session(
@@ -482,7 +482,7 @@ async fn run_command_under_sandbox(
             use codex_sandboxing::SandboxCommand;
             use codex_sandboxing::SandboxManager;
             use codex_sandboxing::SandboxTransformRequest;
-            use codex_utils_path_uri::PathUri;
+            use codex_utils_paths::path_uri::PathUri;
 
             let (program, args) = command
                 .split_first()

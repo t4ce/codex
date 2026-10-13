@@ -19,9 +19,9 @@ codex-features = { workspace = true }
 codex-otel = { workspace = true }
 codex-protocol = { workspace = true }
 codex-tools = { workspace = true }
-codex-utils-absolute-path = { workspace = true }
+codex-utils-paths = { workspace = true }
 codex-utils-output-truncation = { workspace = true }
-codex-utils-template = { workspace = true }
+codex-utils-text = { workspace = true }
 schemars = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

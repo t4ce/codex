@@ -14,7 +14,7 @@ use crate::bazel_bwrap;
 use crate::exec_util::argv_to_cstrings;
 use crate::exec_util::make_files_inheritable;
 use codex_install_context::InstallContext;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use sha2::Digest as _;
 use sha2::Sha256;
 

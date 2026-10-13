@@ -5,7 +5,7 @@ use crate::ReadFileOptions;
 use crate::no_follow;
 use crate::protocol::FsOpenMode;
 use crate::regular_file;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::io;
 use std::io::Read;
 use tokio_util::sync::CancellationToken;

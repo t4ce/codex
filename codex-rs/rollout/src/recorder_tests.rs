@@ -25,7 +25,7 @@ use codex_protocol::protocol::TokenCountEvent;
 use codex_protocol::protocol::TurnContextItem;
 use codex_protocol::protocol::UserMessageEvent;
 use codex_protocol::security_risk::SecurityRiskScore;
-use codex_utils_absolute_path::test_support::PathExt;
+use codex_utils_paths::absolute_path::test_support::PathExt;
 use pretty_assertions::assert_eq;
 use std::collections::BTreeMap;
 use std::fs;

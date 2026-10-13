@@ -949,7 +949,7 @@ move /y tokens.next tokens.txt >nul
             // Match the model-provider default to avoid brittle shell-startup timing in CI.
             timeout_ms: non_zero_u64(/*value*/ 5_000),
             refresh_interval_ms: 60_000,
-            cwd: codex_utils_absolute_path::AbsolutePathBuf::try_from(self.tempdir.path())
+            cwd: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(self.tempdir.path())
                 .expect("tempdir should be absolute"),
         }
     }

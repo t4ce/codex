@@ -121,8 +121,8 @@ async fn shell_snapshot_concurrent_replays_keep_independent_readers(
         let environment = Environment::create(
             /*exec_server_url*/ None,
             codex_exec_server::ExecServerRuntimeOptions::new(exe, linux_sandbox)?,
-            codex_http_client::HttpClientFactory::new(
-                codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+            codex_transport::http::HttpClientFactory::new(
+                codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
             ),
         )?;
         ProcessContext {

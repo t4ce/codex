@@ -14,7 +14,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use codex_git_utils::get_git_repo_root;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use futures::FutureExt;
 use futures::future::BoxFuture;
 use futures::future::Shared;

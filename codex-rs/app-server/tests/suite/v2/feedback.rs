@@ -99,7 +99,7 @@ async fn feedback_upload_recovers_persisted_evidence_and_reports_sqlite_failures
     use app_test_support::MockResponsesConfig;
     use codex_app_server_protocol::ClientNotification;
     use codex_state::SqliteConfig;
-    use codex_utils_absolute_path::test_support::PathExt;
+    use codex_utils_paths::absolute_path::test_support::PathExt;
     use tokio::io::AsyncReadExt;
     use tokio_rustls::TlsAcceptor;
     use tokio_rustls::rustls;

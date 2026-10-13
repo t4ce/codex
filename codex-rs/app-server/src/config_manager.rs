@@ -17,7 +17,7 @@ use codex_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 use codex_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;
 use codex_model_provider_info::built_in_model_providers;
 use codex_model_provider_info::merge_configured_model_providers;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_json_to_toml::json_to_toml;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -50,8 +50,8 @@ pub(crate) struct ConfigManager {
     cloud_config_bundle: Arc<RwLock<CloudConfigBundleLoader>>,
     arg0_paths: Arg0DispatchPaths,
     thread_config_loader: Arc<dyn ThreadConfigLoader>,
-    network_policy: codex_http_client::NetworkPolicyController,
-    local_network_policy: codex_http_client::NetworkPolicyController,
+    network_policy: codex_transport::http::NetworkPolicyController,
+    local_network_policy: codex_transport::http::NetworkPolicyController,
     network_policy_reload: Arc<tokio::sync::Semaphore>,
     network_policy_snapshot: Arc<RwLock<Option<Arc<ApplicationPolicySnapshot>>>>,
 }
@@ -64,8 +64,8 @@ pub(crate) struct ApplicationPolicyLoad {
 
 #[derive(PartialEq, Eq)]
 struct ApplicationPolicySnapshot {
-    revision: codex_http_client::NetworkPolicyRevision,
-    policy: codex_http_client::DestinationPolicy,
+    revision: codex_transport::http::NetworkPolicyRevision,
+    policy: codex_transport::http::DestinationPolicy,
     cloud: Option<codex_config::CloudConfigBundle>,
 }
 
@@ -79,7 +79,7 @@ impl ConfigManager {
         arg0_paths: Arg0DispatchPaths,
         thread_config_loader: Arc<dyn ThreadConfigLoader>,
     ) -> Self {
-        let network_policy = codex_http_client::NetworkPolicyController::default();
+        let network_policy = codex_transport::http::NetworkPolicyController::default();
         Self {
             codex_home,
             cli_overrides: Arc::new(RwLock::new(cli_overrides)),
@@ -141,7 +141,7 @@ impl ConfigManager {
         &self,
         auth_manager: Arc<AuthManager>,
         chatgpt_base_url: String,
-        http_client_factory: codex_http_client::HttpClientFactory,
+        http_client_factory: codex_transport::http::HttpClientFactory,
     ) {
         let endpoint = codex_backend_client::Client::new(
             chatgpt_base_url.clone(),

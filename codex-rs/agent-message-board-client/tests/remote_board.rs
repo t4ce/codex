@@ -12,7 +12,7 @@ use codex_agent_message_board_extension::PostMetadata;
 use codex_agent_message_board_extension::PostPreview;
 use codex_agent_message_board_extension::PostRequest;
 use codex_agent_message_board_extension::ReadPostRequest;
-use codex_http_client::HttpClientBuilder;
+use codex_transport::http::HttpClientBuilder;
 use codex_protocol::AgentPath;
 use codex_protocol::SessionId;
 use codex_protocol::ThreadId;

@@ -1,6 +1,6 @@
 use codex_core::config::Config;
-use codex_http_client::HttpClient;
-use codex_http_client::HttpClientFactory;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::default_client::RESIDENCY_HEADER_NAME;

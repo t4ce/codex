@@ -13,7 +13,7 @@ use codex_file_system::ExecutorFileSystem;
 use codex_file_system::WalkEntryKind;
 use codex_file_system::WalkOptions;
 use codex_file_watcher::WatchPath;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use serde::Deserialize;
 use serde::Serialize;
 

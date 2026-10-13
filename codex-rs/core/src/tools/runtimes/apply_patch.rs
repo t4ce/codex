@@ -31,7 +31,7 @@ use codex_sandboxing::SandboxablePreference;
 use codex_sandboxing::is_likely_executor_managed_sandbox_denied;
 use codex_sandboxing::policy_transforms::effective_permission_profile;
 use codex_sandboxing::record_filesystem_sandbox_violation;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Instant;

@@ -17,7 +17,7 @@ use std::time::Duration;
 
 use anyhow::Context;
 use anyhow::Result;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use futures::TryStreamExt;
 use pretty_assertions::assert_eq;
 use tokio::process::Command;

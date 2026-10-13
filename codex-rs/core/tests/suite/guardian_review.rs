@@ -1604,7 +1604,7 @@ async fn guardian_session_is_reused_for_consecutive_tool_reviews_without_prewarm
         })
         .with_workspace_setup(|cwd, fs| async move {
             fs.write_file(
-                &codex_utils_path_uri::PathUri::from_abs_path(&cwd.join("guardian-secret.txt")),
+                &codex_utils_paths::path_uri::PathUri::from_abs_path(&cwd.join("guardian-secret.txt")),
                 SECRET.as_bytes().to_vec(),
                 Default::default(),
                 /*sandbox*/ None,

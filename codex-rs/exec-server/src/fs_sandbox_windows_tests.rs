@@ -15,7 +15,7 @@ use codex_sandboxing::SandboxExecRequest;
 #[cfg(windows)]
 use codex_sandboxing::SandboxType;
 #[cfg(windows)]
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use codex_utils_pty::Command;
 use pretty_assertions::assert_eq;
 #[cfg(windows)]

@@ -3,7 +3,7 @@ use std::sync::atomic::AtomicUsize;
 use std::time::Duration;
 
 use base64::Engine as _;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use wiremock::Mock;
 use wiremock::MockServer;

@@ -49,7 +49,7 @@ impl From<GuardianApprovalRequest> for ReviewAction {
 impl ReviewAction {
     pub(crate) fn from_approval_action(
         action: crate::tools::sandboxing::ApprovalAction,
-        exec_command_cwd_convention: Option<codex_utils_path_uri::PathConvention>,
+        exec_command_cwd_convention: Option<codex_utils_paths::path_uri::PathConvention>,
     ) -> Self {
         let category = action.guardian_scope();
         let original = serde_json::to_value(&action).map_err(|error| error.to_string());

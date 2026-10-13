@@ -1,7 +1,7 @@
 //! Trusted permission state keeps local and remote profile roots as executor path URIs.
 
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::models::ActivePermissionProfile;
 use crate::models::PermissionProfile;

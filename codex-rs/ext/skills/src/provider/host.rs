@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::SkillLoadOutcome;
 use codex_skills::SkillMetadata;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::catalog::SkillAuthority;
 use crate::catalog::SkillCatalog;

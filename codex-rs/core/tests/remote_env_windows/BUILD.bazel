@@ -15,7 +15,7 @@ wine_rust_test(
         "//codex-rs/exec-server/testing:wine-exec-server-test-support",
         "//codex-rs/features",
         "//codex-rs/protocol",
-        "//codex-rs/utils/path-uri",
+        "//codex-rs/utils/paths",
         "@crates//:anyhow",
         "@crates//:pretty_assertions",
         "@crates//:serde_json",

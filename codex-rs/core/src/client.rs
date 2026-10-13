@@ -38,39 +38,39 @@ mod tool_metadata;
 use crate::CodexResponsesHeaders;
 use crate::tools::ExecutedToolCalls;
 use async_channel::Sender;
-use codex_api::AgentIdentityTelemetry;
-use codex_api::ApiError;
-use codex_api::AuthProvider;
-use codex_api::Compression;
-use codex_api::MemoriesClient as ApiMemoriesClient;
-use codex_api::MemorySummarizeInput as ApiMemorySummarizeInput;
-use codex_api::MemorySummarizeOutput as ApiMemorySummarizeOutput;
-use codex_api::Provider as ApiProvider;
-use codex_api::RawMemory as ApiRawMemory;
-use codex_api::RealtimeCallClient as ApiRealtimeCallClient;
-use codex_api::RealtimeSessionConfig as ApiRealtimeSessionConfig;
-use codex_api::Reasoning;
-use codex_api::ReasoningContext;
-use codex_api::RequestTelemetry;
-use codex_api::ReqwestTransport;
-use codex_api::ResponseCreateWsRequest;
-use codex_api::ResponsesApiRequest;
-use codex_api::ResponsesClient as ApiResponsesClient;
-use codex_api::ResponsesOptions as ApiResponsesOptions;
-use codex_api::ResponsesWebsocketClient as ApiWebSocketResponsesClient;
-use codex_api::ResponsesWebsocketConnection as ApiWebSocketConnection;
-use codex_api::ResponsesWsRequest;
-use codex_api::SharedAuthProvider;
-use codex_api::SseTelemetry;
-use codex_api::StreamOptions;
-use codex_api::TransportError;
-use codex_api::WebsocketTelemetry;
-use codex_api::auth_header_telemetry;
-use codex_api::build_session_headers;
-use codex_api::create_text_param_for_request;
-use codex_api::response_create_client_metadata;
-use codex_http_client::ClientRouteClass;
-use codex_http_client::HttpClientFactory;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::ApiError;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::Compression;
+use codex_transport::api::MemoriesClient as ApiMemoriesClient;
+use codex_transport::api::MemorySummarizeInput as ApiMemorySummarizeInput;
+use codex_transport::api::MemorySummarizeOutput as ApiMemorySummarizeOutput;
+use codex_transport::api::Provider as ApiProvider;
+use codex_transport::api::RawMemory as ApiRawMemory;
+use codex_transport::api::RealtimeCallClient as ApiRealtimeCallClient;
+use codex_transport::api::RealtimeSessionConfig as ApiRealtimeSessionConfig;
+use codex_transport::api::Reasoning;
+use codex_transport::api::ReasoningContext;
+use codex_transport::api::RequestTelemetry;
+use codex_transport::api::ReqwestTransport;
+use codex_transport::api::ResponseCreateWsRequest;
+use codex_transport::api::ResponsesApiRequest;
+use codex_transport::api::ResponsesClient as ApiResponsesClient;
+use codex_transport::api::ResponsesOptions as ApiResponsesOptions;
+use codex_transport::api::ResponsesWebsocketClient as ApiWebSocketResponsesClient;
+use codex_transport::api::ResponsesWebsocketConnection as ApiWebSocketConnection;
+use codex_transport::api::ResponsesWsRequest;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::api::SseTelemetry;
+use codex_transport::api::StreamOptions;
+use codex_transport::api::TransportError;
+use codex_transport::api::WebsocketTelemetry;
+use codex_transport::api::auth_header_telemetry;
+use codex_transport::api::build_session_headers;
+use codex_transport::api::create_text_param_for_request;
+use codex_transport::api::response_create_client_metadata;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::RefreshTokenError;
@@ -1024,7 +1024,7 @@ impl ModelClient {
             && is_openai
             && reasoning.summary.is_some())
         .then_some(StreamOptions {
-            reasoning_summary_delivery: codex_api::ReasoningSummaryDelivery::SequentialCutoff,
+            reasoning_summary_delivery: codex_transport::api::ReasoningSummaryDelivery::SequentialCutoff,
         });
         let mut include = vec!["reasoning.encrypted_content".to_string()];
         if self.state.output_token_replay_enabled && is_openai {
@@ -1288,7 +1288,7 @@ impl ModelClient {
     async fn connect_websocket(
         &self,
         session_telemetry: &SessionTelemetry,
-        api_provider: codex_api::Provider,
+        api_provider: codex_transport::api::Provider,
         api_auth: SharedAuthProvider,
         responses_metadata: &CodexResponsesMetadata,
         auth_context: AuthRequestTelemetryContext,
@@ -2450,7 +2450,7 @@ const RESPONSE_STREAM_CHANNEL_CAPACITY: usize = 1600;
 const STREAM_DROPPED_REASON: &str = "response stream dropped before provider terminal event";
 
 fn map_response_stream(
-    mut api_stream: codex_api::ResponseStream,
+    mut api_stream: codex_transport::api::ResponseStream,
     session_telemetry: SessionTelemetry,
     inference_trace_attempt: InferenceTraceAttempt,
     provider: SharedModelProvider,
@@ -2693,7 +2693,7 @@ impl AuthRequestTelemetryContext {
 
 struct WebsocketConnectParams<'a> {
     session_telemetry: &'a SessionTelemetry,
-    api_provider: codex_api::Provider,
+    api_provider: codex_transport::api::Provider,
     auth_revision: Option<u64>,
     api_auth: SharedAuthProvider,
     auth_owner_generation: Option<u64>,

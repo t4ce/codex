@@ -91,13 +91,13 @@ use codex_app_server_protocol::TurnStartResponse;
 use codex_app_server_protocol::TurnStatus as AppServerTurnStatus;
 use codex_app_server_protocol::TurnSteerParams;
 use codex_app_server_protocol::TurnSteerResponse;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 #[cfg(debug_assertions)]
 use codex_login::AuthManager;
 use codex_protocol::protocol::RealtimeConversationVersion;
-use codex_utils_absolute_path::test_support::PathBufExt;
-use codex_utils_absolute_path::test_support::test_path_buf;
+use codex_utils_paths::absolute_path::test_support::PathBufExt;
+use codex_utils_paths::absolute_path::test_support::test_path_buf;
 use pretty_assertions::assert_eq;
 use std::collections::BTreeMap;
 use std::collections::HashSet;
@@ -894,7 +894,7 @@ fn track_response_ignores_unserializable_thread_responses() {
     let ClientResponsePayload::ThreadStart(thread_start) = &mut response else {
         panic!("expected thread/start response");
     };
-    thread_start.cwd = codex_utils_absolute_path::AbsolutePathBuf::from_absolute_path(
+    thread_start.cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
         std::path::PathBuf::from(OsString::from_vec(vec![b'/', b'b', b'a', b'd', 0xff])),
     )
     .expect("non-UTF-8 Unix paths are valid absolute paths");
@@ -1131,8 +1131,8 @@ fn track_event_request_batches_only_isolates_accepted_line_fingerprint_events() 
 #[cfg(debug_assertions)]
 #[tokio::test]
 async fn account_switch_between_batches_does_not_send_old_credentials() {
-    use codex_http_client::DestinationPolicy;
-    use codex_http_client::NetworkPolicyController;
+    use codex_transport::http::DestinationPolicy;
+    use codex_transport::http::NetworkPolicyController;
     use codex_login::AuthCredentialsStoreMode as Store;
     use tokio::io::AsyncReadExt;
     use tokio::io::AsyncWriteExt;

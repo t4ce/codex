@@ -3,7 +3,7 @@
 use pretty_assertions::assert_eq;
 use std::path::Path;
 
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 
 use super::CapabilityLocation;
 use super::CapabilityLocationRequest;

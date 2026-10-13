@@ -1,5 +1,5 @@
 use super::*;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_protocol::error::CodexErrorDetails;
 use wiremock::Mock;
 use wiremock::MockServer;

@@ -10,8 +10,8 @@ use std::time::Duration;
 use codex_exec_server_protocol::JSONRPCMessage;
 use codex_exec_server_protocol::JSONRPCRequest;
 use codex_exec_server_protocol::RequestId;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_network_proxy::NetworkProxyConfig;
 use codex_network_proxy::RemoteNetworkProxyConfig;
 use codex_network_proxy::RemoteNetworkProxyLaunchConfig;
@@ -20,7 +20,7 @@ use codex_otel::OtelHttpProtocol;
 use codex_otel::OtelProvider;
 use codex_otel::OtelSettings;
 use codex_protocol::protocol::W3cTraceContext;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use pretty_assertions::assert_eq;
 use serde_json::Value;
 use serde_json::json;
@@ -622,8 +622,8 @@ fn exported_logs(
         tls: None,
     };
     let otel = OtelProvider::try_new(&OtelSettings {
-        http_client_factory: codex_http_client::HttpClientFactory::new(
-            codex_http_client::OutboundProxyPolicy::ReqwestDefault,
+        http_client_factory: codex_transport::http::HttpClientFactory::new(
+            codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
         environment: "test".to_string(),
         service_name: "codex-exec-server".to_string(),

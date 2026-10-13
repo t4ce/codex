@@ -191,7 +191,7 @@ use codex_thread_store::ThreadPersistenceMetadata;
 use codex_thread_store::ThreadStore;
 use codex_utils_git_discovery::GitRootDiscovery;
 use codex_utils_output_truncation::with_serialization_allowance;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::path_uri::PathUri;
 use futures::future::BoxFuture;
 use futures::future::Shared;
 use futures::prelude::*;
@@ -403,9 +403,9 @@ use codex_protocol::turn_input::TurnStartOptions;
 use codex_protocol::user_input::UserInput;
 use codex_skills_extension::HostSkillsService;
 use codex_tools::ToolName;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 #[cfg(test)]
-use codex_utils_stream_parser::ProposedPlanSegment;
+use codex_utils_text::stream_parser::ProposedPlanSegment;
 
 /// Queue and lifecycle endpoints for a running [`Session`].
 ///

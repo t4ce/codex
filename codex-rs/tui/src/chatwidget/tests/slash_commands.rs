@@ -720,7 +720,7 @@ async fn ctrl_d_with_modal_open_does_not_quit() {
 #[tokio::test]
 async fn slash_init_does_not_depend_on_loaded_instruction_sources() {
     let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
-    chat.instruction_source_paths = vec![codex_utils_path_uri::PathUri::from_abs_path(
+    chat.instruction_source_paths = vec![codex_utils_paths::path_uri::PathUri::from_abs_path(
         &chat.config.cwd.join("project-instructions.md"),
     )];
 

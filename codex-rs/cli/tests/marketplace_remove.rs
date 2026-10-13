@@ -2,7 +2,7 @@ use anyhow::Result;
 use codex_config::MarketplaceConfigUpdate;
 use codex_config::record_user_marketplace;
 use codex_core_plugins::installed_marketplaces::marketplace_install_root;
-use codex_utils_absolute_path::canonicalize_existing_preserving_symlinks;
+use codex_utils_paths::absolute_path::canonicalize_existing_preserving_symlinks;
 use predicates::str::contains;
 use pretty_assertions::assert_eq;
 use serde_json::json;

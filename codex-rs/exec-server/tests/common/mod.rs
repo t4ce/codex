@@ -11,8 +11,8 @@ use codex_exec_server::CODEX_FS_HELPER_ARG1;
 use codex_exec_server::ExecServerRuntimeOptions;
 use codex_exec_server::ExecServerTelemetry;
 use codex_exec_server::RequestDispatchMode;
-use codex_http_client::HttpClientFactory;
-use codex_http_client::OutboundProxyPolicy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_sandboxing::landlock::CODEX_LINUX_SANDBOX_ARG0;
 use codex_test_binary_support::TestBinaryDispatchGuard;
 use codex_test_binary_support::TestBinaryDispatchMode;
@@ -247,7 +247,7 @@ fn maybe_run_exec_server_from_test_binary(guard: Option<&TestBinaryDispatchGuard
         env::var(SYSTEM_PROXY_URL_ENV),
     ) {
         (Ok(request_url), Ok(proxy_url)) => {
-            codex_http_client::cache_system_proxy_route_for_test(&request_url, proxy_url);
+            codex_transport::http::cache_system_proxy_route_for_test(&request_url, proxy_url);
             HttpClientFactory::new(OutboundProxyPolicy::RespectSystemProxy)
         }
         (Err(env::VarError::NotPresent), Err(env::VarError::NotPresent)) => {
@@ -261,7 +261,7 @@ fn maybe_run_exec_server_from_test_binary(guard: Option<&TestBinaryDispatchGuard
     let exit_code = match runtime.block_on(async {
         #[cfg(target_os = "macos")]
         let runtime_paths = {
-            let home = codex_utils_home_dir::find_codex_home()?;
+            let home = codex_utils_paths::home_dir::find_codex_home()?;
             let config = codex_config::loader::load_config_layers_state(
                 &codex_exec_server::LocalFileSystem::unsandboxed(),
                 home.as_path(),

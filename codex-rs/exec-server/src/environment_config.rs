@@ -18,9 +18,9 @@ use codex_exec_server_protocol::EnvironmentConfigLayerStack;
 use codex_exec_server_protocol::EnvironmentConfigReadParams;
 use codex_exec_server_protocol::EnvironmentConfigReadResponse;
 use codex_file_system::ExecutorFileSystem;
-use codex_utils_absolute_path::AbsolutePathBuf;
-use codex_utils_home_dir::find_codex_home;
-use codex_utils_path_uri::PathUri;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
+use codex_utils_paths::home_dir::find_codex_home;
+use codex_utils_paths::path_uri::PathUri;
 
 use crate::Environment;
 use crate::ExecServerError;

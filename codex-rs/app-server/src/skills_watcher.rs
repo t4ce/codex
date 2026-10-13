@@ -17,7 +17,7 @@ use codex_protocol::protocol::TurnEnvironmentSelection;
 use codex_skills::system_cache_root_dir;
 use codex_skills_extension::HostSkillsLoadInput;
 use codex_skills_extension::HostSkillsService;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use tokio_util::sync::CancellationToken;
 use tokio_util::sync::DropGuard;
 use tracing::warn;

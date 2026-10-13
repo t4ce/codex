@@ -8,7 +8,7 @@ use crate::reasons::REASON_NOT_ALLOWED_LOCAL;
 use crate::runtime::network_proxy_state_for_policy;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
-use codex_utils_absolute_path::AbsolutePathBuf;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use pretty_assertions::assert_eq;
 use rama_http::Body;
 use rama_http::HeaderMap;
