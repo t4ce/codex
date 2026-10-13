@@ -1288,6 +1288,7 @@ async fn run_ratatui_app(
         let Some(active_app_server) = app_server.as_mut() else {
             unreachable!("app server should exist when auth is required");
         };
+        codex_arg0::startup_timing::mark("account_status_begin");
         let login_status = startup_draft
             .run_until(&mut tui, get_login_status(active_app_server))
             .await;

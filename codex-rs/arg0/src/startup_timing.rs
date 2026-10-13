@@ -60,6 +60,7 @@ pub fn mark(stage: &str) {
         let _ = file.write_all(row.as_bytes());
     }
     if timing.stderr {
-        let _ = std::io::stderr().write_all(format!("[codex-startup] {row}").as_bytes());
+        let _ = std::io::stderr()
+            .write_all(format!("[codex-startup] {}\r\n", row.trim_end()).as_bytes());
     }
 }

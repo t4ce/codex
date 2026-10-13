@@ -42,7 +42,7 @@ def rows(path):
     return result
 
 
-def run(binary, home, cwd, output, name, replies, timeout):
+def run(binary, home, cwd, output, name, replies, timeout, stderr=False):
     trace = output / (name + '.tsv')
     trace.write_text('')
     transcript = output / (name + '.terminal')
@@ -50,6 +50,7 @@ def run(binary, home, cwd, output, name, replies, timeout):
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 40, 120, 0, 0))
     env = os.environ.copy()
     env.update(CODEX_HOME=str(home), CODEX_STARTUP_TIMING_FILE=str(trace), TERM='xterm-256color')
+    env['CODEX_STARTUP_TIMING_STDERR'] = '1' if stderr else '0'
     for key in ['OPENAI_API_KEY', 'CODEX_API_KEY', 'CODEX_EXEC_SERVER_URL', 'SSH_TTY', 'SSH_CONNECTION']:
         env.pop(key, None)
 
@@ -141,6 +142,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--auth-source', type=Path, help='Copy authentication into the disposable profile; never print it.')
     parser.add_argument('--timeout', type=float, default=60)
+    parser.add_argument('--stderr', action='store_true', help='Also verify visible startup markers in the terminal capture.')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     result = []
@@ -156,12 +158,12 @@ def main():
             (home / 'auth.json').chmod(0o600)
         for name, replies in [('fresh', True), ('repeat', True), ('repeat_no_terminal_replies', False)]:
             print('Measuring', name, flush=True)
-            result.append(run(args.binary.resolve(), home, cwd, args.output, name, replies, args.timeout))
+            result.append(run(args.binary.resolve(), home, cwd, args.output, name, replies, args.timeout, args.stderr))
             (args.output / 'results.json').write_text(json.dumps(result, indent=2) + '\n')
         unauth = root / 'unauthenticated-home'
         unauth.mkdir(mode=0o700)
         (unauth / 'config.toml').write_text(f'[projects.{json.dumps(str(cwd))}]\ntrust_level = "trusted"\n')
-        result.append(run(args.binary.resolve(), unauth, cwd, args.output, 'fresh_unauthenticated', True, args.timeout))
+        result.append(run(args.binary.resolve(), unauth, cwd, args.output, 'fresh_unauthenticated', True, args.timeout, args.stderr))
         (args.output / 'results.json').write_text(json.dumps(result, indent=2) + '\n')
     for row in result:
         print(row['name'], row['milestone'], row['launch_wall_ms'], 'ms; editing:', row['typed_text_visible'])

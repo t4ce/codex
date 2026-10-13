@@ -29,6 +29,7 @@ fn spawn_startup_thread_start(
     let remote_cwd_override = app_server.remote_cwd_override().map(Path::to_path_buf);
     let thread_tool_transport = app_server.thread_tool_transport();
     tokio::spawn(async move {
+        codex_arg0::startup_timing::mark("thread_start_begin");
         let result = crate::app_server_session::start_thread_with_request_handle(
             request_handle,
             &local_settings,
