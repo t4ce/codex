@@ -128,6 +128,7 @@ impl StartupDraft {
         session_action: StartupDraftSessionAction,
         screen: StartupScreen,
     ) -> io::Result<Self> {
+        codex_arg0::startup_timing::mark("tui_draft_begin");
         initialized_terminal.terminal.clear()?;
 
         let mut tui = Tui::new(
@@ -135,6 +136,7 @@ impl StartupDraft {
             initialized_terminal.enhanced_keys_supported,
             initialized_terminal.stderr_guard,
         );
+        codex_arg0::startup_timing::mark("tui_event_loop_created");
         tui.terminal_app_over_ssh = initialized_terminal.terminal_app_over_ssh;
         tui.set_alt_screen_enabled(screen.use_alt_screen);
         let mut pump = StartupDraftPump::new(&tui, initial_screen, session_action);
@@ -157,6 +159,11 @@ impl StartupDraft {
                 .set_owned_screen(screen.transcript_mode.is_owned())?;
             draft.pump.redraw_if_visible(&mut draft.tui)
         })??;
+        codex_arg0::startup_timing::mark(match initial_screen {
+            StartupDraftInitialScreen::Composer => "editable_composer_visible",
+            StartupDraftInitialScreen::Onboarding => "onboarding_provisional_frame",
+            StartupDraftInitialScreen::SessionPicker => "picker_provisional_frame",
+        });
         Ok(draft)
     }
 

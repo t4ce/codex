@@ -45,6 +45,11 @@ fn spawn_startup_thread_start(
             }
             Ok(started)
         });
+        codex_arg0::startup_timing::mark(if result.is_ok() {
+            "thread_start_done"
+        } else {
+            "thread_start_failed"
+        });
         app_event_tx.send(AppEvent::StartupThreadStarted { result });
     });
 }
@@ -173,6 +178,13 @@ impl App {
         }
         self.chat_widget.pre_draw_tick();
         self.render_chat_widget_frame(tui, tui.terminal.last_known_screen_size)?;
+        if self.primary_session_configured.is_some()
+            && !self.pending_startup_thread_start
+            && !self.chat_widget.has_active_modal()
+            && app_event_rx.is_empty()
+        {
+            codex_arg0::startup_timing::mark("session_prompt_ready");
+        }
         if self.chat_widget.has_active_modal() && self.startup_protected_input_boundary {
             self.discard_startup_modal_input(tui)?;
         }

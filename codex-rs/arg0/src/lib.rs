@@ -1,3 +1,5 @@
+pub mod startup_timing;
+
 use std::ffi::OsString;
 use std::fs::File;
 use std::future::Future;
@@ -129,13 +131,17 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
 
     // This modifies the environment, which is not thread-safe, so do this
     // before creating any threads/the Tokio runtime.
+    startup_timing::mark("dotenv_begin");
     load_dotenv();
+    startup_timing::mark("dotenv_done");
 
+    startup_timing::mark("path_aliases_begin");
     let (path_entry_guard, updated_path_env_var) = prepare_path_env_var_with_aliases(
         InstallContext::current(),
         std::env::var_os("PATH"),
         prepare_path_entry_for_codex_aliases,
     );
+    startup_timing::mark("path_aliases_done");
     if let Some(updated_path_env_var) = updated_path_env_var {
         // It is safe to call set_var() because our process is single-threaded at
         // this point in its execution.
@@ -198,22 +204,28 @@ where
     // this executable. Admittedly, we could invoke `keep()` on it, but it
     // would be nice to avoid leaving temporary directories behind, if possible.
     let path_entry_guard = arg0_dispatch();
+    startup_timing::mark("arg0_dispatch_done");
     let current_exe = std::env::current_exe().ok();
 
     // Regular invocation. Run the async entry point on a thread with the same
     // stack budget as Tokio workers; `Runtime::block_on` otherwise runs the
     // top-level future on the caller's OS stack.
+    startup_timing::mark("main_thread_spawn_begin");
     let handle = std::thread::Builder::new()
         .name("codex-main".to_string())
         .stack_size(THREAD_STACK_SIZE_BYTES)
         .spawn(move || {
+            startup_timing::mark("main_thread_entered");
+            startup_timing::mark("runtime_begin");
             let runtime = build_runtime()?;
+            startup_timing::mark("runtime_done");
             runtime.block_on(run_main_with_arg0_guard(
                 path_entry_guard,
                 current_exe,
                 main_fn,
             ))
         })?;
+    startup_timing::mark("main_thread_spawn_done");
     match handle.join() {
         Ok(result) => result,
         Err(payload) => std::panic::resume_unwind(payload),
@@ -337,10 +349,12 @@ fn prepare_path_entry_for_codex_aliases(
     }
 
     // Best-effort cleanup of stale per-session dirs. Ignore failures so startup proceeds.
+    startup_timing::mark("arg0_cleanup_begin");
     if let Err(err) = janitor_cleanup(&temp_root) {
         eprintln!("WARNING: failed to clean up stale arg0 temp dirs: {err}");
     }
 
+    startup_timing::mark("arg0_cleanup_done");
     let temp_dir = tempfile::Builder::new()
         .prefix("codex-arg0")
         .tempdir_in(&temp_root)?;

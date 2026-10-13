@@ -1030,6 +1030,7 @@ fn stage_str(stage: Stage) -> &'static str {
 }
 
 fn main() -> anyhow::Result<()> {
+    codex_arg0::startup_timing::mark("process_main");
     codex_build_info::initialize!();
     let remote_control_disabled = codex_app_server::take_remote_control_disabled_env();
     arg0_dispatch_or_else(move |arg0_paths: Arg0DispatchPaths| async move {
@@ -1043,6 +1044,7 @@ async fn cli_main(
     arg0_paths: Arg0DispatchPaths,
     remote_control_disabled: bool,
 ) -> anyhow::Result<()> {
+    codex_arg0::startup_timing::mark("cli_begin");
     let MultitoolCli {
         config_overrides: mut root_config_overrides,
         feature_toggles,
@@ -2461,6 +2463,7 @@ async fn run_interactive_tui(
         Err(err) => return Err(err),
     };
     let start_tui = || {
+        codex_arg0::startup_timing::mark("cli_entering_tui");
         codex_tui::run_main(
             interactive.clone(),
             arg0_paths.clone(),

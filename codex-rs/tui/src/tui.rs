@@ -465,24 +465,31 @@ pub(crate) fn flush_terminal_input_buffer() {}
 
 /// Initialize the terminal (inline viewport; history stays in normal scrollback)
 pub(crate) fn init() -> Result<InitializedTerminal> {
+    codex_arg0::startup_timing::mark("terminal_checks_begin");
     if !stdin().is_terminal() {
         return Err(std::io::Error::other("stdin is not a terminal"));
     }
     if !stdout().is_terminal() {
         return Err(std::io::Error::other("stdout is not a terminal"));
     }
+    codex_arg0::startup_timing::mark("terminal_checks_done");
     let mut restore_guard = TerminalInitializationGuard { active: true };
+    codex_arg0::startup_timing::mark("terminal_modes_begin");
     set_modes()?;
+    codex_arg0::startup_timing::mark("terminal_modes_done");
 
     set_panic_hook();
 
     #[cfg(unix)]
     let backend = CrosstermBackend::new(stdout());
+    #[cfg(unix)]
+    codex_arg0::startup_timing::mark("crossterm_backend_created");
 
     #[cfg(unix)]
     let startup_probe = {
         use crate::terminal_probe::StartupKeyboardEnhancementProbe;
 
+        codex_arg0::startup_timing::mark("terminal_queries_begin");
         let started_at = std::time::Instant::now();
         let keyboard_probe = if keyboard_modes::keyboard_enhancement_disabled() {
             StartupKeyboardEnhancementProbe::Skip
@@ -499,6 +506,7 @@ pub(crate) fn init() -> Result<InitializedTerminal> {
                     keyboard_enhancement_supported = ?probe.keyboard_enhancement_supported,
                     "terminal startup probes completed"
                 );
+                codex_arg0::startup_timing::mark("terminal_queries_done");
                 probe
             }
             Err(err) => {
@@ -506,6 +514,7 @@ pub(crate) fn init() -> Result<InitializedTerminal> {
                     duration_ms = %started_at.elapsed().as_millis(),
                     "terminal startup probes failed: {err}"
                 );
+                codex_arg0::startup_timing::mark("terminal_queries_done");
                 crate::terminal_probe::StartupProbe {
                     cursor_position: None,
                     default_colors: None,
@@ -548,8 +557,11 @@ pub(crate) fn init() -> Result<InitializedTerminal> {
     // trust and other protected startup screens have finished accepting their security decisions.
     crate::terminal_palette::set_default_colors_from_startup_probe(/*colors*/ None);
 
+    codex_arg0::startup_timing::mark("ratatui_terminal_begin");
     let tui = CustomTerminal::with_options_and_cursor_position(backend, cursor_pos)?;
+    codex_arg0::startup_timing::mark("ratatui_terminal_created");
     let stderr_guard = terminal_stderr::TerminalStderrGuard::install()?;
+    codex_arg0::startup_timing::mark("terminal_stderr_guard_done");
     let initialized_terminal = InitializedTerminal {
         terminal: tui,
         enhanced_keys_supported,

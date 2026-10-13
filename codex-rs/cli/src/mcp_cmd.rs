@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+// Preserve the std map used by configuration and MCP APIs across Blueprint overlays.
+use std::collections::HashMap as StdHashMap;
 use std::sync::Arc;
 
 use anyhow::Context;
@@ -318,7 +319,7 @@ async fn run_add(config: &Config, add_args: AddArgs) -> Result<()> {
                 let env_map = if stdio.env.is_empty() {
                     None
                 } else {
-                    Some(stdio.env.into_iter().collect::<HashMap<_, _>>())
+                    Some(stdio.env.into_iter().collect::<StdHashMap<_, _>>())
                 };
                 (
                     McpServerTransportConfig::Stdio {
@@ -441,7 +442,7 @@ async fn run_add(config: &Config, add_args: AddArgs) -> Result<()> {
                 ..Default::default()
             }),
         oauth_resource: oauth_resource.clone(),
-        tools: HashMap::new(),
+        tools: StdHashMap::new(),
     };
 
     let mut servers = load_global_mcp_servers(codex_home)

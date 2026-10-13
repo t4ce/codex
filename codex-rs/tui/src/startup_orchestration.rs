@@ -13,6 +13,7 @@ pub(super) async fn run_main_inner(
     loader_overrides: LoaderOverrides,
     explicit_remote_endpoint: Option<RemoteAppServerEndpoint>,
 ) -> std::io::Result<AppExitInfo> {
+    codex_arg0::startup_timing::mark("tui_preflight_begin");
     if cli.oss || cli.oss_provider.is_some() {
         codex_utils_oss::ensure_local_models_enabled()?;
     }
@@ -260,6 +261,7 @@ pub(super) async fn run_main_inner(
     // Reuse the profile path resolved above; do not reconstruct profile precedence here.
     let mut loader_overrides = launch_loader_overrides;
     loader_overrides.ignore_login_requirements = presentation_target.uses_remote_workspace();
+    codex_arg0::startup_timing::mark("presentation_config_begin");
     let presentation = startup_presentation::load(
         &cli,
         &codex_home,
@@ -281,6 +283,8 @@ pub(super) async fn run_main_inner(
             err
         }
     })?;
+    codex_arg0::startup_timing::mark("presentation_config_done");
+    codex_arg0::startup_timing::mark("terminal_init_begin");
     // Keep normal terminal signals available until local configuration is ready. Once raw
     // mode begins, StartupDraft immediately takes ownership of input.
     let (initialized_terminal, terminal_restore_guard) = tokio::task::spawn_blocking(|| {
@@ -288,6 +292,7 @@ pub(super) async fn run_main_inner(
     })
     .await
     .map_err(std::io::Error::other)??;
+    codex_arg0::startup_timing::mark("terminal_init_done");
     let startup_presentation::StartupPresentation {
         bootstrap_config,
         config_cwd,
@@ -345,6 +350,7 @@ pub(super) async fn run_main_inner(
     } else {
         Ok(())
     };
+    codex_arg0::startup_timing::mark("cloud_config_begin");
     let cloud_config_bundle = startup_draft
         .run_until(cloud_config_bundle_for_app_server_target(
             &app_server_target,
@@ -361,6 +367,7 @@ pub(super) async fn run_main_inner(
         cwd.clone()
     };
 
+    codex_arg0::startup_timing::mark("cloud_config_done");
     let mut manually_selected_oss_provider = None;
     let model_provider_override = if cli.oss {
         let bootstrap_config_with_cloud_config;
@@ -450,6 +457,7 @@ pub(super) async fn run_main_inner(
         ..Default::default()
     };
 
+    codex_arg0::startup_timing::mark("full_config_begin");
     let mut config = startup_draft
         .run_until(load_config_or_exit(
             cli_kv_overrides.clone(),
@@ -459,6 +467,7 @@ pub(super) async fn run_main_inner(
             strict_config,
         ))
         .await?;
+    codex_arg0::startup_timing::mark("full_config_done");
     if app_server_target.uses_embedded_network_policy() {
         embedded_network_policy.activate(&mut config);
     }
@@ -738,12 +747,14 @@ pub(super) async fn run_main_inner(
         let _ = metrics.counter("codex.tui.start", /*inc*/ 1, &launch_tags);
     };
     let launch_telemetry = daemon_telemetry::Launch(Some(launch_telemetry));
+    codex_arg0::startup_timing::mark("state_db_begin");
     let state_db = startup_draft
         .run_until(init_state_db_for_app_server_target(
             &config,
             &app_server_target,
         ))
         .await??;
+    codex_arg0::startup_timing::mark("state_db_done");
     let config_toml_log_dir_configured = config
         .config_layer_stack
         .effective_config()

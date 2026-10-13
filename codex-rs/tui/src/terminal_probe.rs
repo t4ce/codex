@@ -7,14 +7,10 @@
 //! prefers duplicated stdio handles, falls back to the controlling terminal path when stdio is
 //! unavailable, and reports `None` when a response is unavailable.
 //!
-//! Probes run only while the crossterm event stream is absent or paused. Startup replays consumed
-//! terminal bytes through crossterm's parser so interleaved user input remains available after the
-//! probe completes.
+//! Probes run only while the crossterm event stream is absent or paused. Input consumed during
+//! startup probes is discarded after terminal responses have been extracted.
 
 use std::time::Duration;
-
-#[cfg(unix)]
-mod startup_replay;
 
 #[cfg(unix)]
 mod terminal_identity;
@@ -40,7 +36,6 @@ pub(crate) struct DefaultColors {
 mod imp {
     use super::DefaultColors;
     use super::parse_default_colors;
-    use super::startup_replay::startup_replay_input;
     use super::terminal_identity;
     use std::fs::File;
     use std::fs::OpenOptions;
@@ -272,8 +267,8 @@ mod imp {
 
     /// Runs the optional terminal queries needed during TUI startup under one shared deadline.
     ///
-    /// Bytes read while waiting for terminal responses are replayed through crossterm's event
-    /// parser so keys, bracketed paste, and incomplete sequences survive the startup probe.
+    /// Bytes read while waiting for terminal responses are discarded, including interleaved
+    /// user input. The buffer is used only to parse terminal responses.
     pub(crate) fn startup(
         timeout: Duration,
         keyboard_probe: StartupKeyboardEnhancementProbe,
@@ -298,15 +293,13 @@ mod imp {
         tty.write_all(&query)?;
 
         let mut buffer = Vec::new();
-        let result = read_startup_probe(
+        read_startup_probe(
             &mut tty,
             timeout,
             keyboard_probe,
             query_identity,
             &mut buffer,
-        );
-        crossterm::event::buffer_input(&startup_replay_input(&buffer))?;
-        result
+        )
     }
 
     /// Reads available terminal bytes until `parse` recognizes a probe response or time expires.
@@ -768,9 +761,6 @@ mod imp {
                     terminal_app_over_ssh: Some(false),
                 }
             );
-            let mut expected_replay = vec![b'x'; 2_048];
-            expected_replay.extend_from_slice(b"\x1B[20;10R\x1B[?64;1;2c\x1B[?7u");
-            assert_eq!(startup_replay_input(&buffer), expected_replay);
         }
 
         #[test]

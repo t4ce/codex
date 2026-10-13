@@ -632,6 +632,7 @@ async fn run_onboarding_screen_inner(
         frame.render_widget_ref(&onboarding_screen, frame.area());
     })?;
 
+    codex_arg0::startup_timing::mark("onboarding_visible");
     tui.discard_pending_input_before_interactive_screen()?;
     let tui_events = tui.event_stream();
     tokio::pin!(tui_events);

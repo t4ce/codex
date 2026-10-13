@@ -4,6 +4,9 @@ mod pid_tracker;
 #[cfg(target_os = "macos")]
 mod seatbelt;
 
+// Environment maps cross crate boundaries using std's HashMap. The explicit alias
+// also preserves that type when Blueprint packing rewrites local collections.
+use std::collections::HashMap as StdHashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
 
@@ -552,7 +555,7 @@ async fn run_command_under_windows_session(
     command: Vec<String>,
     cwd: AbsolutePathBuf,
     workspace_roots: Vec<AbsolutePathBuf>,
-    env: std::collections::HashMap<String, String>,
+    env: StdHashMap<String, String>,
 ) -> ! {
     use codex_core::windows_sandbox::WindowsSandboxLevelExt;
     use codex_protocol::config_types::WindowsSandboxLevel;
@@ -615,8 +618,8 @@ async fn spawn_debug_sandbox_child(
     arg0: Option<&str>,
     cwd: PathBuf,
     network_sandbox_policy: NetworkSandboxPolicy,
-    mut env: std::collections::HashMap<String, String>,
-    apply_env: impl FnOnce(&mut std::collections::HashMap<String, String>),
+    mut env: StdHashMap<String, String>,
+    apply_env: impl FnOnce(&mut StdHashMap<String, String>),
 ) -> std::io::Result<Child> {
     let mut cmd = TokioCommand::new(&program);
     #[cfg(unix)]

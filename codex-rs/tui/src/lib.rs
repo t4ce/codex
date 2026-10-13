@@ -1105,7 +1105,9 @@ pub async fn run_main(
     loader_overrides: LoaderOverrides,
     explicit_remote_endpoint: Option<RemoteAppServerEndpoint>,
 ) -> std::io::Result<AppExitInfo> {
+    codex_arg0::startup_timing::mark("motion_begin");
     system_motion::initialize().await;
+    codex_arg0::startup_timing::mark("motion_done");
     startup_recovery::scope(async move {
         // Startup retains a large future for the whole session. Keep it off callers' stacks,
         // which also need room to construct a replacement chat widget on `/new`.
@@ -1208,6 +1210,7 @@ async fn run_ratatui_app(
     // Initialize high-fidelity session event logging if enabled.
     session_log::maybe_init(&initial_config);
 
+    codex_arg0::startup_timing::mark("app_server_begin");
     let startup_app_server = startup_draft
         .run_until(
             &mut tui,
@@ -1227,6 +1230,7 @@ async fn run_ratatui_app(
             ),
         )
         .await;
+    codex_arg0::startup_timing::mark("app_server_done");
     launch_telemetry.record(&app_server_target, matches!(&startup_app_server, Ok(Ok(_))));
     let mut app_server_session = match startup_app_server {
         Ok(Ok(app_server)) => {
@@ -1303,6 +1307,7 @@ async fn run_ratatui_app(
     let requires_openai_auth = startup_account
         .as_ref()
         .is_some_and(|account| account.requires_openai_auth);
+    codex_arg0::startup_timing::mark("account_status_done");
     let should_show_onboarding = should_show_onboarding(
         login_status,
         requires_openai_auth,
@@ -1323,6 +1328,7 @@ async fn run_ratatui_app(
             &initial_config,
             &app_server_target,
         );
+        codex_arg0::startup_timing::mark("onboarding_begin");
         let onboarding_result = run_onboarding_app(
             OnboardingScreenArgs {
                 show_login_screen,

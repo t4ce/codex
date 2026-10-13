@@ -4,7 +4,8 @@
 //! callback, and dropping terminal input restores the terminal immediately.
 //! Ctrl-C also cancels token exchange and scope retries in manual login mode.
 
-use std::collections::HashMap;
+// Preserve the std map used by configuration and MCP APIs across Blueprint overlays.
+use std::collections::HashMap as StdHashMap;
 use std::io;
 use std::io::BufRead;
 use std::io::IsTerminal;
@@ -47,8 +48,8 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
     url: &str,
     store_mode: OAuthCredentialsStoreMode,
     keyring_backend_kind: AuthKeyringBackendKind,
-    http_headers: Option<HashMap<String, String>>,
-    env_http_headers: Option<HashMap<String, String>>,
+    http_headers: Option<StdHashMap<String, String>>,
+    env_http_headers: Option<StdHashMap<String, String>>,
     resolved_scopes: &ResolvedMcpOAuthScopes,
     oauth_config: Option<&McpServerOAuthConfig>,
     client_registration: McpOAuthClientRegistration,

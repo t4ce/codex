@@ -13,7 +13,8 @@
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::collections::HashMap;
+// Preserve the std map used by configuration and MCP APIs across Blueprint overlays.
+use std::collections::HashMap as StdHashMap;
 use std::env;
 use std::ffi::OsStr;
 use std::future::Future;
@@ -24,7 +25,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
-use std::time::Instant;
+use std::time::Instant as StdInstant;
 
 use anyhow::Context;
 use clap::Parser;
@@ -367,7 +368,7 @@ async fn build_report(
     checks.push(run_sync_check("search", progress.clone(), search_check));
 
     progress.begin("config");
-    let config_started = Instant::now();
+    let config_started = StdInstant::now();
     let config_result = load_config(root_config_overrides, interactive, arg0_paths).await;
     let config_duration = config_started.elapsed();
     let cwd = config_result
@@ -833,7 +834,7 @@ fn run_sync_check(
     f: impl FnOnce() -> DoctorCheck,
 ) -> DoctorCheck {
     progress.begin(label);
-    let start = Instant::now();
+    let start = StdInstant::now();
     let mut check = f();
     check.duration_ms = start.elapsed().as_millis().try_into().unwrap_or(u64::MAX);
     progress.finish(label, check.status);
@@ -849,7 +850,7 @@ where
     Fut: Future<Output = DoctorCheck>,
 {
     progress.begin(label);
-    let start = Instant::now();
+    let start = StdInstant::now();
     tokio::pin!(future);
     let mut progress_interval = tokio::time::interval(SLOW_CHECK_PROGRESS_INTERVAL);
     loop {
@@ -1512,7 +1513,7 @@ async fn mcp_check(config: &Config) -> DoctorCheck {
     mcp_check_from_servers(config.mcp_servers.get()).await
 }
 
-async fn mcp_check_from_servers(servers: &HashMap<String, McpServerConfig>) -> DoctorCheck {
+async fn mcp_check_from_servers(servers: &StdHashMap<String, McpServerConfig>) -> DoctorCheck {
     if servers.is_empty() {
         return DoctorCheck::new(
             "mcp.config",
@@ -2112,7 +2113,7 @@ async fn state_check(config: &Config, command: &DoctorCommand) -> DoctorCheck {
         // Feedback collection gives each database its own budget; direct runs scan fully.
         let deadline = command
             .feedback
-            .then(|| Instant::now() + Duration::from_secs(1));
+            .then(|| StdInstant::now() + Duration::from_secs(1));
         let db_status = sqlite_integrity_detail(
             config.sqlite_config(),
             &mut details,
@@ -2164,7 +2165,7 @@ async fn sqlite_integrity_detail(
     details: &mut Vec<String>,
     label: &str,
     path: &Path,
-    deadline: Option<Instant>,
+    deadline: Option<StdInstant>,
 ) -> CheckStatus {
     if !path.is_file() {
         details.push(format!("{label} integrity: skipped (missing)"));
@@ -2551,7 +2552,7 @@ fn provider_reachability_plan(config: &Config) -> ReachabilityPlan {
         params
             .iter()
             .map(|(name, value)| (name.clone(), value.as_str().to_owned()))
-            .collect::<HashMap<_, _>>()
+            .collect::<StdHashMap<_, _>>()
     });
     let stored_auth = load_auth_dot_json(
         &config.codex_home,
@@ -2632,7 +2633,7 @@ fn provider_reachability_plan_from_parts(
     provider_id: &str,
     provider_name: &str,
     provider_base_url: Option<&str>,
-    provider_query_params: Option<&HashMap<String, String>>,
+    provider_query_params: Option<&StdHashMap<String, String>>,
     is_amazon_bedrock: bool,
     chatgpt_base_url: &str,
 ) -> ReachabilityPlan {
@@ -2677,7 +2678,7 @@ fn should_probe_models_route(provider_name: &str, base_url: &str, is_amazon_bedr
 fn provider_url_for_path(
     base_url: &str,
     path: &str,
-    query_params: Option<&HashMap<String, String>>,
+    query_params: Option<&StdHashMap<String, String>>,
 ) -> String {
     let base = base_url.trim_end_matches('/');
     let path = path.trim_start_matches('/');
@@ -2927,7 +2928,7 @@ async fn http_get_probe_status_with_timeout(url: &str, timeout: Duration) -> Res
 fn stdio_command_resolves(
     command: &str,
     cwd: Option<&Path>,
-    server_env: Option<&HashMap<String, String>>,
+    server_env: Option<&StdHashMap<String, String>>,
 ) -> Result<(), String> {
     let command_path = Path::new(command);
     if command_path.is_absolute() {
@@ -3367,7 +3368,7 @@ mod tests {
             "#,
         )
         .expect("should deserialize disabled MCP config");
-        let servers = HashMap::from([("disabled".to_string(), disabled_server)]);
+        let servers = StdHashMap::from([("disabled".to_string(), disabled_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3396,7 +3397,7 @@ mod tests {
             "#,
         )
         .expect("should deserialize optional MCP config");
-        let servers = HashMap::from([("optional".to_string(), optional_server)]);
+        let servers = StdHashMap::from([("optional".to_string(), optional_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3426,7 +3427,7 @@ mod tests {
             "#,
         ))
         .expect("should deserialize required MCP config");
-        let servers = HashMap::from([("required".to_string(), required_server)]);
+        let servers = StdHashMap::from([("required".to_string(), required_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3450,7 +3451,7 @@ mod tests {
             "#,
         )
         .expect("remote MCP config");
-        let servers = HashMap::from([("remote".to_string(), remote_server)]);
+        let servers = StdHashMap::from([("remote".to_string(), remote_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3662,7 +3663,7 @@ mod tests {
 
     #[test]
     fn provider_reachability_adds_models_route_probe_for_openai_compatible_base_urls() {
-        let query_params = HashMap::from([("api-version".to_string(), "2026-01-01".to_string())]);
+        let query_params = StdHashMap::from([("api-version".to_string(), "2026-01-01".to_string())]);
 
         for (mode, description) in [
             (ProviderAuthReachabilityMode::NotRequired, "provider auth"),
@@ -3934,7 +3935,7 @@ mod tests {
             "#,
         )
         .expect("should deserialize required MCP config");
-        let servers = HashMap::from([("required".to_string(), required_server)]);
+        let servers = StdHashMap::from([("required".to_string(), required_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3967,7 +3968,7 @@ mod tests {
             "#,
         ))
         .expect("should deserialize remote MCP config");
-        let servers = HashMap::from([("remote".to_string(), remote_server)]);
+        let servers = StdHashMap::from([("remote".to_string(), remote_server)]);
 
         let check = mcp_check_from_servers(&servers).await;
 
@@ -3994,7 +3995,7 @@ mod tests {
             "#,
         )
         .expect("should deserialize remote MCP config with relative cwd");
-        let servers = HashMap::from([
+        let servers = StdHashMap::from([
             ("missing".to_string(), missing_cwd),
             ("relative".to_string(), relative_cwd),
         ]);

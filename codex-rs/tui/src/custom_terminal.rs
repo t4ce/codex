@@ -363,7 +363,9 @@ where
         }
         let mut frame = self.get_frame();
 
+        codex_arg0::startup_timing::mark("first_frame_render_begin");
         render_callback(&mut frame);
+        codex_arg0::startup_timing::mark("first_frame_render_done");
 
         // We can't change the cursor position right away because we have to flush the frame to
         // stdout first. But we also can't keep the frame around, since it holds a &mut to
@@ -392,6 +394,7 @@ where
         self.swap_buffers();
 
         Backend::flush(&mut self.backend)?;
+        codex_arg0::startup_timing::mark("first_frame_backend_flushed");
 
         Ok(())
     }

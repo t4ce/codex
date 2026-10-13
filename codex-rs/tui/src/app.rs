@@ -1155,6 +1155,13 @@ impl App {
                     self.chat_widget.pre_draw_tick();
                     self.refresh_agents_overview_usage(app_server, tui.frame_requester());
                     let rendered_area = self.render_chat_widget_frame(tui, screen_size)?;
+                    if self.primary_session_configured.is_some()
+                        && !self.pending_startup_thread_start
+                        && !self.chat_widget.has_active_modal()
+                        && !self.startup_pending_protected_request
+                    {
+                        codex_arg0::startup_timing::mark("session_prompt_ready");
+                    }
                     if tui.is_owned_screen()
                         && self.transcript_view.history
                             != crate::pager_overlay::TranscriptHistoryState::Failed
