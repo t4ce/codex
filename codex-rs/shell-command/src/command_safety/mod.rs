@@ -1,9 +1,11 @@
 // Keep the PowerShell subprocess parser available as a test oracle, but do not
 // compile it into production command classification.
-#[cfg(test)]
+#[cfg(all(test, not(feature = "nopowersh")))]
 #[allow(dead_code)]
 mod powershell_parser;
+#[cfg(not(feature = "nopowersh"))]
 mod powershell_tree_sitter;
 
 pub mod is_dangerous_command;
+#[cfg(not(feature = "nopowersh"))]
 pub(crate) use powershell_tree_sitter::try_parse_powershell_commands;

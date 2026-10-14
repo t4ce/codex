@@ -7,6 +7,7 @@ codex_rust_crate(
         "assets/**",
     ]),
     crate_name = "codex_tui",
+    crate_features = ["install-update"],
     extra_binaries = [
         "//codex-rs/cli:codex",
     ],

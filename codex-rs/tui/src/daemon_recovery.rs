@@ -50,7 +50,11 @@ pub(super) async fn check(
     }
     startup.flush_pending_events().await?;
     let keymap = RuntimeKeymap::from_config(&config.tui_keymap).map_err(io::Error::other)?;
-    let mut view = recovery_view(&issue, managed_daemon, &keymap);
+    let mut view = recovery_view(
+        &issue,
+        managed_daemon && cfg!(feature = "install-update"),
+        &keymap,
+    );
     let mut chord_matcher = crate::keymap::KeyChordMatcher::default();
     let tui = startup.tui_mut();
     tui.discard_pending_input_before_interactive_screen()?;
@@ -105,6 +109,7 @@ pub(super) async fn check(
             "Running without the shared background server: {}.",
             issue.reason
         ))),
+        #[cfg(feature = "install-update")]
         (Some(1), Some(features)) if managed_daemon => {
             tui.with_restored(crate::tui::TerminalHandoff::Restore, || async {
                 crossterm::terminal::disable_raw_mode()?;

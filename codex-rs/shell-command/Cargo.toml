@@ -7,6 +7,10 @@ license.workspace = true
 [lints]
 workspace = true
 
+[features]
+# Disable PowerShell for the sh3-only TRUEOS port.
+nopowersh = []
+
 [dependencies]
 base64 = { workspace = true }
 codex-protocol = { workspace = true }
@@ -19,9 +23,11 @@ serde_json = { workspace = true }
 shlex = { workspace = true }
 tree-sitter = { workspace = true }
 tree-sitter-bash = { workspace = true }
-tree-sitter-powershell = { workspace = true }
 url = { workspace = true }
 which = { workspace = true }
+
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
+tree-sitter-powershell = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }

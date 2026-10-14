@@ -21,6 +21,7 @@ impl<F: FnOnce(&AppServerTarget, bool)> Drop for Launch<F> {
     }
 }
 
+#[cfg(feature = "install-update")]
 pub(super) async fn record_start(
     config: &Config,
     result: &anyhow::Result<codex_app_server_daemon::LifecycleOutput>,

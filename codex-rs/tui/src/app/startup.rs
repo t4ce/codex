@@ -891,7 +891,7 @@ Fix the config and retry.\n\
 See the Codex keymap documentation for supported actions and examples."
                 )
             })?;
-        #[cfg(not(debug_assertions))]
+        #[cfg(all(not(debug_assertions), feature = "install-update"))]
         let upgrade_version = crate::updates::get_upgrade_version(&config);
 
         let agents_overview =
@@ -1178,7 +1178,7 @@ See the Codex keymap documentation for supported actions and examples."
         let mut waiting_for_initial_session_configured = wait_for_initial_session_configured;
         let mut waiting_for_initial_session_header = true;
 
-        #[cfg(not(debug_assertions))]
+        #[cfg(all(not(debug_assertions), feature = "install-update"))]
         let pre_loop_exit_reason = if let Some(latest_version) = upgrade_version {
             let control = Box::pin(app.handle_event(
                 tui,
@@ -1196,7 +1196,7 @@ See the Codex keymap documentation for supported actions and examples."
         } else {
             None
         };
-        #[cfg(debug_assertions)]
+        #[cfg(any(debug_assertions, not(feature = "install-update")))]
         let pre_loop_exit_reason: Option<ExitReason> = None;
 
         let exit_reason_result = if let Some(exit_reason) = pre_loop_exit_reason {

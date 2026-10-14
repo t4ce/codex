@@ -20,7 +20,9 @@ doctest = false
 
 [features]
 system-clipboard = ["dep:arboard"]
-default = ["system-clipboard"]
+default = ["system-clipboard", "install-update"]
+# Platform-owned packages disable this: no managed copies, updater, or install hashes.
+install-update = ["dep:codex-app-server-daemon"]
 local-models = ["codex-utils-oss/local-models"]
 voice = ["codex-realtime-webrtc/voice"]
 
@@ -36,7 +38,7 @@ chrono = { workspace = true, features = ["serde"] }
 clap = { workspace = true, features = ["derive"] }
 codex-ansi-escape = { workspace = true }
 codex-app-server-client = { workspace = true }
-codex-app-server-daemon = { workspace = true }
+codex-app-server-daemon = { workspace = true, optional = true }
 codex-app-server-protocol = { workspace = true }
 codex-arg0 = { workspace = true }
 codex-backend-client = { workspace = true }

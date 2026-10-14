@@ -49,7 +49,7 @@ use crate::external_editor;
 use crate::file_search::FileSearchManager;
 use crate::history_cell;
 use crate::history_cell::HistoryCell;
-#[cfg(not(debug_assertions))]
+#[cfg(all(not(debug_assertions), feature = "install-update"))]
 use crate::history_cell::UpdateAvailableHistoryCell;
 use crate::hooks_rpc::HookTrustUpdate;
 use crate::key_hint::KeyBinding;
@@ -607,7 +607,7 @@ pub(crate) struct App {
     daemon_cli_executable: Option<AbsolutePathBuf>,
     pub(crate) pending_update_action: Option<UpdateAction>,
     /// Retained through all loop exits so shutdown cannot interrupt stop followed by start.
-    daemon_restart: Option<JoinHandle<anyhow::Result<codex_app_server_daemon::LifecycleOutput>>>,
+    daemon_restart: Option<JoinHandle<anyhow::Result<()>>>,
 
     /// Tracks the thread we intentionally shut down while exiting the app.
     ///

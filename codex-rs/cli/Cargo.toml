@@ -70,12 +70,15 @@ unwrap_used = "deny"
 
 [features]
 # The TRUEOS packer selects this feature and disables Cargo default features.
-# Launch the resulting CLI with --no-daemon.
-trueos-blueprint = ["sh3"]
+# Installation/update management is omitted; local sessions use the embedded server.
+trueos-blueprint = ["sh3", "nopowersh"]
+nopowersh = ["codex-shell-command/nopowersh"]
 # Select the native Shell3 command-session backend on TRUEOS.
 sh3 = ["codex-utils-pty/sh3"]
 system-clipboard = ["codex-tui/system-clipboard"]
-default = ["system-clipboard"]
+default = ["system-clipboard", "install-update"]
+# Platform-owned packages disable this: no managed copies, updater, or install hashes.
+install-update = ["dep:codex-app-server-daemon", "codex-tui/install-update"]
 bedrock = ["dep:codex-aws-auth", "codex-model-provider/bedrock", "codex-app-server/bedrock"]
 local-models = ["codex-tui/local-models", "codex-exec/local-models"]
 voice = ["codex-core/voice", "codex-tui/voice"]
@@ -83,6 +86,7 @@ external-agent-imports = ["codex-app-server/external-agent-imports"]
 external-reporting = ["codex-core/external-reporting", "codex-app-server/external-reporting"]
 
 [dependencies]
+codex-shell-command = { workspace = true }
 codex-utils-pty = { workspace = true }
 httpdate = { version = "1.0.3", features = ["std-system-time"] }
 codex-utils-process = { workspace = true }
@@ -91,7 +95,7 @@ chrono = { workspace = true }
 clap = { version = "4", features = ["derive", "env"] }
 clap_complete = { workspace = true }
 codex-app-server = { workspace = true }
-codex-app-server-daemon = { workspace = true }
+codex-app-server-daemon = { workspace = true, optional = true }
 codex-app-server-protocol = { workspace = true }
 codex-app-server-test-client = { workspace = true }
 codex-arg0 = { workspace = true }

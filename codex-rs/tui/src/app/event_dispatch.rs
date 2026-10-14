@@ -161,16 +161,20 @@ impl App {
             AppEvent::OpenDaemonMenu => self.open_daemon_menu(),
             AppEvent::ConfirmDaemonRestart => self.confirm_daemon_restart(),
             AppEvent::RunDaemonRestart => {
+                #[cfg(feature = "install-update")]
                 if self.chat_widget.remote_connection.as_ref().is_some_and(|connection| connection.is_managed_daemon)
                     && self.daemon_restart.is_none()
                 {
-                    self.daemon_restart = Some(tokio::spawn(codex_app_server_daemon::run(
-                        codex_app_server_daemon::LifecycleCommand::Restart,
-                    )));
+                    self.daemon_restart = Some(tokio::spawn(async {
+                        codex_app_server_daemon::run(codex_app_server_daemon::LifecycleCommand::Restart).await.map(|_| ())
+                    }));
                 }
             }
             AppEvent::ConfirmDaemonUpdate(source) => self.confirm_daemon_update(source),
             AppEvent::RunDaemonUpdate(source) => {
+                if !cfg!(feature = "install-update") {
+                    return Ok(AppRunControl::Continue);
+                }
                 self.pending_update_action = Some(UpdateAction::Daemon(source));
                 return Ok(self.handle_exit_mode(app_server, ExitMode::Immediate).await);
             }

@@ -277,6 +277,12 @@ const POWERSHELL_FALLBACK_PATHS: &[&str] =
 #[cfg(not(windows))]
 const POWERSHELL_FALLBACK_PATHS: &[&str] = &[];
 
+#[cfg(feature = "nopowersh")]
+fn get_powershell_shell() -> Option<DetectedShell> {
+    None
+}
+
+#[cfg(not(feature = "nopowersh"))]
 fn get_powershell_shell() -> Option<DetectedShell> {
     let shell_path =
         get_shell_path(ShellType::PowerShell, "pwsh", PWSH_FALLBACK_PATHS).or_else(|| {
@@ -301,7 +307,10 @@ fn get_powershell_shell() -> Option<DetectedShell> {
 pub fn fallback_powershell_shell_for_windows_sandbox(
     shell_path: &std::path::Path,
 ) -> Option<DetectedShell> {
-    if !cfg!(windows) || !targets_inaccessible_windows_apps_powershell(shell_path) {
+    if cfg!(feature = "nopowersh")
+        || !cfg!(windows)
+        || !targets_inaccessible_windows_apps_powershell(shell_path)
+    {
         return None;
     }
 

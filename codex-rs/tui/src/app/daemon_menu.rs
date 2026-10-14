@@ -27,6 +27,7 @@ impl Renderable for DaemonMenuHeader {
 
 impl App {
     pub(super) async fn verify_managed_daemon(&mut self) {
+        #[cfg(feature = "install-update")]
         // A discovered socket alone does not prove it belongs to a managed daemon.
         // Probe only when the user opens a view that offers restart, never during startup.
         if !self.reconnect.offline
@@ -50,7 +51,9 @@ impl App {
             .map(|connection| format!("Running daemon: {}", connection.version))
             .unwrap_or_else(|| "Not connected to the local background server.".to_string());
         let mut header = vec![Line::from("Daemon".bold()), Line::from(status.dim())];
-        let unavailable = if matches!(self.app_server_target, AppServerTarget::Remote { .. }) {
+        let unavailable = if !cfg!(feature = "install-update") {
+            Some("Installation and updates are managed by your platform.")
+        } else if matches!(self.app_server_target, AppServerTarget::Remote { .. }) {
             Some(
                 "Manage this server on its host. Local daemon updates are unavailable for remote connections.",
             )
@@ -95,11 +98,12 @@ impl App {
         .collect();
         items.push(SelectionItem {
             name: "Restart background server".to_string(),
-            is_disabled: !self
-                .chat_widget
-                .remote_connection
-                .as_ref()
-                .is_some_and(|connection| connection.is_managed_daemon)
+            is_disabled: !cfg!(feature = "install-update")
+                || !self
+                    .chat_widget
+                    .remote_connection
+                    .as_ref()
+                    .is_some_and(|connection| connection.is_managed_daemon)
                 || self.reconnect.offline
                 || self.daemon_restart.is_some(),
             disabled_reason: self
@@ -123,11 +127,12 @@ impl App {
     }
 
     pub(super) fn confirm_daemon_restart(&mut self) {
-        if !self
-            .chat_widget
-            .remote_connection
-            .as_ref()
-            .is_some_and(|connection| connection.is_managed_daemon)
+        if !cfg!(feature = "install-update")
+            || !self
+                .chat_widget
+                .remote_connection
+                .as_ref()
+                .is_some_and(|connection| connection.is_managed_daemon)
             || self.daemon_restart.is_some()
         {
             return;
@@ -157,6 +162,9 @@ impl App {
     }
 
     pub(super) fn confirm_daemon_update(&mut self, source: DaemonUpdateSource) {
+        if !cfg!(feature = "install-update") {
+            return;
+        }
         let Some(executable) = &self.daemon_cli_executable else {
             return;
         };
@@ -198,6 +206,6 @@ impl App {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "install-update"))]
 #[path = "daemon_menu_tests.rs"]
 mod tests;

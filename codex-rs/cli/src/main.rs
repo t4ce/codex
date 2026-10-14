@@ -3,8 +3,11 @@ use clap::CommandFactory;
 use clap::Parser;
 use clap_complete::Shell;
 use clap_complete::generate;
+#[cfg(feature = "install-update")]
 use codex_app_server_daemon::BootstrapOptions as AppServerBootstrapOptions;
+#[cfg(feature = "install-update")]
 use codex_app_server_daemon::LifecycleCommand as AppServerLifecycleCommand;
+#[cfg(feature = "install-update")]
 use codex_app_server_daemon::RemoteControlMode as AppServerRemoteControlMode;
 use codex_arg0::Arg0DispatchPaths;
 use codex_arg0::arg0_dispatch_or_else;
@@ -50,12 +53,20 @@ use supports_color::Stream;
 #[global_allocator]
 static ALLOCATOR: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-#[cfg(any(target_os = "macos", target_os = "windows"))]
+#[cfg(all(
+    feature = "install-update",
+    any(target_os = "macos", target_os = "windows")
+))]
 mod app_cmd;
 mod cloud_config;
+#[cfg(feature = "install-update")]
 mod daemon_install;
+#[cfg(feature = "install-update")]
 mod daemon_telemetry;
-#[cfg(any(target_os = "macos", target_os = "windows"))]
+#[cfg(all(
+    feature = "install-update",
+    any(target_os = "macos", target_os = "windows")
+))]
 mod desktop_app;
 mod doctor;
 #[cfg(test)]
@@ -74,12 +85,13 @@ mod mcp_login;
 mod migrate_rollouts;
 mod plugin_cmd;
 mod queue_cmd;
+#[cfg(feature = "install-update")]
 mod remote_control_cmd;
 #[cfg(target_os = "windows")]
 mod sandbox_setup;
 mod sandbox_uninstall;
 mod state_db_recovery;
-#[cfg(not(windows))]
+#[cfg(all(not(windows), feature = "install-update"))]
 mod wsl_paths;
 
 use crate::exec_server_command::ExecServerCommand;
@@ -87,6 +99,7 @@ use crate::mcp_cmd::McpCli;
 use crate::plugin_cmd::PluginCli;
 use crate::plugin_cmd::PluginSubcommand;
 use crate::queue_cmd::QueueCommand;
+#[cfg(feature = "install-update")]
 use crate::remote_control_cmd::RemoteControlCommand;
 use doctor::DoctorCommand;
 use state_db_recovery as local_state_db;
@@ -175,16 +188,21 @@ enum Subcommand {
     AppServer(AppServerCommand),
 
     /// [experimental] Manage the app-server daemon with remote control enabled.
+    #[cfg(feature = "install-update")]
     RemoteControl(RemoteControlCommand),
 
     /// Launch the Desktop app (opens the app installer if missing).
-    #[cfg(any(target_os = "macos", target_os = "windows"))]
+    #[cfg(all(
+        feature = "install-update",
+        any(target_os = "macos", target_os = "windows")
+    ))]
     App(app_cmd::AppCommand),
 
     /// Generate shell completion scripts.
     Completion(CompletionCommand),
 
     /// Update Codex to the latest version.
+    #[cfg(feature = "install-update")]
     Update,
 
     /// Diagnose local Codex installation, config, auth, and runtime health.
@@ -628,6 +646,7 @@ struct AppServerCommand {
 #[allow(clippy::enum_variant_names)]
 enum AppServerSubcommand {
     /// Manage the local app-server daemon.
+    #[cfg(feature = "install-update")]
     Daemon(AppServerDaemonCommand),
 
     /// Proxy stdio bytes to the running app-server control socket.
@@ -644,12 +663,14 @@ enum AppServerSubcommand {
     GenerateInternalJsonSchema(GenerateInternalJsonSchemaCommand),
 }
 
+#[cfg(feature = "install-update")]
 #[derive(Debug, Args)]
 struct AppServerDaemonCommand {
     #[command(subcommand)]
     subcommand: AppServerDaemonSubcommand,
 }
 
+#[cfg(feature = "install-update")]
 #[derive(Debug, clap::Subcommand)]
 enum AppServerDaemonSubcommand {
     /// Install durable local app-server management for SSH-driven use.
@@ -702,6 +723,7 @@ struct AppServerProxyCommand {
     socket_path: Option<AbsolutePathBuf>,
 }
 
+#[cfg(feature = "install-update")]
 #[derive(Debug, Args)]
 struct AppServerBootstrapCommand {
     /// Launch the managed app-server with remote control enabled.
@@ -757,7 +779,7 @@ fn parse_socket_path(raw: &str) -> Result<AbsolutePathBuf, String> {
 /// Handle the app exit and print the results. Optionally run the update action.
 fn handle_app_exit(
     exit_info: AppExitInfo,
-    cli_executable: Option<&std::path::Path>,
+    _cli_executable: Option<&std::path::Path>,
 ) -> anyhow::Result<()> {
     let is_fatal = match &exit_info.exit_reason {
         ExitReason::Fatal(message) => {
@@ -781,13 +803,15 @@ fn handle_app_exit(
         std::io::stdout().flush()?;
         std::process::exit(1);
     }
+    #[cfg(feature = "install-update")]
     if let Some(action) = update_action {
-        run_update_action(action, cli_executable)?;
+        run_update_action(action, _cli_executable)?;
     }
     Ok(())
 }
 
 /// Run the update action and print the result.
+#[cfg(feature = "install-update")]
 fn run_update_action(
     action: UpdateAction,
     cli_executable: Option<&std::path::Path>,
@@ -872,6 +896,7 @@ fn resolve_windows_update_command_from_path(
         .ok_or_else(|| anyhow::anyhow!("could not find update command `{command}` on PATH"))
 }
 
+#[cfg(feature = "install-update")]
 fn run_update_command() -> anyhow::Result<()> {
     #[cfg(debug_assertions)]
     {
@@ -1057,7 +1082,7 @@ async fn cli_main(
         mut interactive,
         subcommand,
     } = MultitoolCli::parse();
-    #[cfg(target_os = "trueos")]
+    #[cfg(not(feature = "install-update"))]
     if subcommand.is_none() && remote.remote.is_none() {
         // A bare Blueprint launch uses the embedded server, not an installed daemon package.
         interactive.no_daemon = true;
@@ -1308,6 +1333,7 @@ async fn cli_main(
                         std::process::exit(0);
                     }
                 }
+                #[cfg(feature = "install-update")]
                 Some(AppServerSubcommand::Daemon(daemon_cli)) => match daemon_cli.subcommand {
                     AppServerDaemonSubcommand::Start => {
                         print_app_server_daemon_output(AppServerLifecycleCommand::Start).await?;
@@ -1442,6 +1468,7 @@ async fn cli_main(
                 }
             }
         }
+        #[cfg(feature = "install-update")]
         Some(Subcommand::RemoteControl(mut remote_control_cli)) => {
             remote_control_cli.no_daemon |= interactive.no_daemon;
             let subcommand_name = remote_control_cli.subcommand_name();
@@ -1457,7 +1484,10 @@ async fn cli_main(
             )
             .await?;
         }
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        #[cfg(all(
+            feature = "install-update",
+            any(target_os = "macos", target_os = "windows")
+        ))]
         Some(Subcommand::App(app_cli)) => {
             reject_remote_mode_for_subcommand(
                 root_remote.as_deref(),
@@ -1646,6 +1676,7 @@ async fn cli_main(
             )?;
             print_completion(completion_cli);
         }
+        #[cfg(feature = "install-update")]
         Some(Subcommand::Update) => {
             reject_remote_mode_for_subcommand(
                 root_remote.as_deref(),
@@ -2282,15 +2313,20 @@ fn unsupported_subcommand_name_for_strict_config(
         Some(Subcommand::AppServer(app_server)) => {
             Some(app_server_subcommand_name(app_server.subcommand.as_ref()))
         }
+        #[cfg(feature = "install-update")]
         Some(Subcommand::RemoteControl(remote_control)) => Some(remote_control.subcommand_name()),
         Some(Subcommand::Mcp(_)) => Some("mcp"),
         Some(Subcommand::Plugin(_)) => Some("plugin"),
         Some(Subcommand::MigrateRollouts(_)) => Some("migrate-rollouts"),
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        #[cfg(all(
+            feature = "install-update",
+            any(target_os = "macos", target_os = "windows")
+        ))]
         Some(Subcommand::App(_)) => Some("app"),
         Some(Subcommand::Login(_)) => Some("login"),
         Some(Subcommand::Logout(_)) => Some("logout"),
         Some(Subcommand::Completion(_)) => Some("completion"),
+        #[cfg(feature = "install-update")]
         Some(Subcommand::Update) => Some("update"),
         Some(Subcommand::Cloud(_)) => Some("cloud"),
         Some(Subcommand::Sandbox(_)) => Some("sandbox"),
@@ -2339,6 +2375,7 @@ fn reject_remote_mode_for_app_server_subcommand(
 fn app_server_subcommand_name(subcommand: Option<&AppServerSubcommand>) -> &'static str {
     match subcommand {
         None => "app-server",
+        #[cfg(feature = "install-update")]
         Some(AppServerSubcommand::Daemon(daemon)) => match daemon.subcommand {
             AppServerDaemonSubcommand::Bootstrap(_) => "app-server daemon bootstrap",
             AppServerDaemonSubcommand::Start => "app-server daemon start",
@@ -2363,12 +2400,14 @@ fn app_server_subcommand_name(subcommand: Option<&AppServerSubcommand>) -> &'sta
     }
 }
 
+#[cfg(feature = "install-update")]
 async fn print_app_server_daemon_output(command: AppServerLifecycleCommand) -> anyhow::Result<()> {
     let output = codex_app_server_daemon::run(command).await?;
     println!("{}", serde_json::to_string(&output)?);
     Ok(())
 }
 
+#[cfg(feature = "install-update")]
 fn updater_http_client_factory(
     config: anyhow::Result<codex_core::config::Config>,
 ) -> anyhow::Result<codex_transport::http::HttpClientFactory> {
@@ -2377,6 +2416,7 @@ fn updater_http_client_factory(
     Ok(config.http_client_factory())
 }
 
+#[cfg(feature = "install-update")]
 async fn print_app_server_remote_control_output(
     mode: AppServerRemoteControlMode,
 ) -> anyhow::Result<()> {
@@ -2411,6 +2451,10 @@ async fn run_interactive_tui(
     remote_auth_token_env: Option<String>,
     arg0_paths: Arg0DispatchPaths,
 ) -> std::io::Result<AppExitInfo> {
+    #[cfg(not(feature = "install-update"))]
+    if remote.is_none() {
+        interactive.no_daemon = true;
+    }
     if interactive.no_daemon {
         if interactive.agents_overview {
             return Ok(AppExitInfo::fatal(
@@ -2446,7 +2490,7 @@ async fn run_interactive_tui(
         }
     }
 
-    #[cfg(any(unix, windows))]
+    #[cfg(all(feature = "install-update", any(unix, windows)))]
     if interactive.agents_overview && remote.is_none() {
         if !std::io::stdin().is_terminal() {
             return Ok(AppExitInfo::fatal("stdin is not a terminal"));
@@ -2799,6 +2843,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "install-update")]
     #[tokio::test]
     async fn updater_http_client_factory_honors_respect_system_proxy() {
         let codex_home = tempfile::tempdir().expect("temporary Codex home");
@@ -2820,6 +2865,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "install-update")]
     #[test]
     fn updater_http_client_factory_propagates_config_errors() {
         assert_eq!(
@@ -2830,6 +2876,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "install-update")]
     #[tokio::test]
     async fn updater_http_client_factory_enforces_application_requirements() {
         let home = tempfile::tempdir().expect("temporary Codex home");
@@ -3578,6 +3625,37 @@ enabled = true
         assert!(matches!(cli.subcommand, Some(Subcommand::Plugin(_))));
     }
 
+    #[cfg(not(feature = "install-update"))]
+    #[test]
+    fn platform_owned_install_has_no_managed_install_commands() {
+        let command = MultitoolCli::command();
+        for name in ["update", "remote-control", "app"] {
+            assert!(
+                command
+                    .get_subcommands()
+                    .all(|subcommand| subcommand.get_name() != name)
+            );
+        }
+        // A bare unknown word remains a valid interactive prompt, not an update command.
+        let cli = MultitoolCli::try_parse_from(["codex", "update"]).expect("interactive prompt");
+        assert!(cli.subcommand.is_none());
+        for args in [
+            ["codex", "app-server", "daemon", "bootstrap"],
+            ["codex", "app-server", "daemon", "update"],
+        ] {
+            assert!(MultitoolCli::try_parse_from(args).is_err());
+        }
+        for args in [
+            vec!["codex"],
+            vec!["codex", "login"],
+            vec!["codex", "app-server", "--stdio"],
+            vec!["codex", "exec", "hello"],
+        ] {
+            MultitoolCli::try_parse_from(args).expect("ordinary app commands remain available");
+        }
+    }
+
+    #[cfg(feature = "install-update")]
     #[test]
     fn update_parses_as_update_subcommand() {
         let cli = MultitoolCli::try_parse_from(["codex", "update"]).expect("parse");
@@ -4404,6 +4482,7 @@ enabled = true
         );
     }
 
+    #[cfg(feature = "install-update")]
     #[test]
     fn reject_remote_flag_for_remote_control() {
         let cli = MultitoolCli::try_parse_from(["codex", "--remote", "unix://", "remote-control"])
@@ -4423,6 +4502,7 @@ enabled = true
         assert!(err.to_string().contains("remote-control"));
     }
 
+    #[cfg(feature = "install-update")]
     #[test]
     fn remote_control_pair_parses() {
         let cli = MultitoolCli::try_parse_from(["codex", "remote-control", "pair"]).expect("parse");
@@ -4712,6 +4792,7 @@ enabled = true
         ));
     }
 
+    #[cfg(feature = "install-update")]
     #[test]
     fn app_server_daemon_subcommands_parse() {
         assert!(matches!(
@@ -4804,6 +4885,7 @@ enabled = true
         assert!(err.to_string().contains("app-server proxy"));
     }
 
+    #[cfg(feature = "install-update")]
     #[test]
     fn reject_remote_auth_token_env_for_app_server_version() {
         let subcommand = AppServerSubcommand::Daemon(AppServerDaemonCommand {
@@ -5019,5 +5101,6 @@ enabled = true
 }
 
 #[cfg(all(test, unix))]
+#[cfg(feature = "install-update")]
 #[path = "daemon_update_tests.rs"]
 mod daemon_update_tests;

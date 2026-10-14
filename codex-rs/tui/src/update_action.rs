@@ -79,7 +79,7 @@ impl UpdateAction {
     }
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(all(not(debug_assertions), feature = "install-update"))]
 pub fn get_update_action() -> Option<UpdateAction> {
     UpdateAction::from_install_context(InstallContext::current())
 }
@@ -196,4 +196,9 @@ impl DaemonUpdateSource {
             Self::ThisCli => &["app-server", "daemon", "update", "--from-cli", "--yes"],
         }
     }
+}
+
+#[cfg(all(not(debug_assertions), not(feature = "install-update")))]
+pub fn get_update_action() -> Option<UpdateAction> {
+    None
 }

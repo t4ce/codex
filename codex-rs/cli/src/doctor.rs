@@ -73,6 +73,7 @@ use http::Method;
 use serde::Serialize;
 use supports_color::Stream;
 
+#[cfg(feature = "install-update")]
 mod background;
 mod desktop;
 mod disk;
@@ -87,6 +88,7 @@ mod security;
 mod system;
 mod thread_inventory;
 mod title;
+#[cfg(feature = "install-update")]
 mod updates;
 #[cfg(target_os = "windows")]
 mod windows_dev_drive;
@@ -95,7 +97,18 @@ mod windows_dev_drive;
 #[path = "doctor/desktop_tests.rs"]
 mod desktop_tests;
 
+#[cfg(feature = "install-update")]
 use background::background_server_check;
+
+#[cfg(not(feature = "install-update"))]
+async fn background_server_check(_config: &Config) -> DoctorCheck {
+    DoctorCheck::new(
+        "app_server.status",
+        "app-server",
+        CheckStatus::Ok,
+        "Managed installation and updates are disabled in this build",
+    )
+}
 use git::git_check;
 use output::HumanOutputOptions;
 use output::redact_detail;
@@ -108,7 +121,18 @@ use sandbox::sandbox_check;
 use system::system_check;
 use thread_inventory::thread_inventory_check;
 use title::terminal_title_check;
+#[cfg(feature = "install-update")]
 use updates::updates_check;
+
+#[cfg(not(feature = "install-update"))]
+async fn updates_check(_config: &Config) -> DoctorCheck {
+    DoctorCheck::new(
+        "updates.status",
+        "updates",
+        CheckStatus::Ok,
+        "Updates are managed by your platform",
+    )
+}
 
 const OPENAI_BETA_HEADER: &str = "OpenAI-Beta";
 const RESPONSES_WEBSOCKETS_V2_BETA_HEADER_VALUE: &str = "responses_websockets=2026-02-06";
@@ -592,7 +616,10 @@ async fn build_report(
 
     progress.begin("desktop");
     if let Some(desktop) = desktop::collect().await {
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        #[cfg(all(
+            feature = "install-update",
+            any(target_os = "macos", target_os = "windows")
+        ))]
         if let Some(application) = desktop.application.as_ref() {
             updates::append_desktop_update(&mut checks, config_result.as_ref().ok(), application)
                 .await;

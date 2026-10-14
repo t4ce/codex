@@ -254,8 +254,10 @@ pub use update_action::DaemonUpdateSource;
 pub use update_action::UpdateAction;
 #[cfg(not(debug_assertions))]
 pub use update_action::get_update_action;
+#[cfg(feature = "install-update")]
 mod update_prompt;
 mod update_versions;
+#[cfg(feature = "install-update")]
 mod updates;
 #[cfg(any(not(debug_assertions), test))]
 mod updates_cache;
@@ -1183,7 +1185,7 @@ async fn run_ratatui_app(
     }));
     let (mut tui, mut terminal_restore_guard, mut startup_draft) = startup_draft.into_parts();
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(all(not(debug_assertions), feature = "install-update"))]
     {
         use crate::update_prompt::UpdatePromptOutcome;
 

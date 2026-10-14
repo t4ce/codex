@@ -1287,6 +1287,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(feature = "nopowersh"))]
     #[test]
     fn powershell_command_is_stripped() {
         assert_parsed(
@@ -1297,6 +1298,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(feature = "nopowersh"))]
     #[test]
     fn powershell_file_reads_are_classified() {
         for (shell, script, path) in [
@@ -1371,6 +1373,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(feature = "nopowersh"))]
     #[test]
     fn complex_powershell_file_reads_are_intentionally_not_classified() {
         for script in [
@@ -1393,6 +1396,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(feature = "nopowersh"))]
     #[test]
     fn pwsh_with_noprofile_and_c_alias_is_stripped() {
         assert_parsed(
@@ -1403,6 +1407,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(feature = "nopowersh"))]
     #[test]
     fn powershell_with_path_is_stripped() {
         let command = if cfg!(windows) {
@@ -1425,32 +1430,37 @@ pub fn parse_command_impl(command: &[String]) -> Vec<ParsedCommand> {
         return commands;
     }
 
-    let powershell_command = command
-        .first()
-        .filter(|shell| shell.contains('\\'))
-        .map(|shell| {
-            let mut normalized = command.to_vec();
-            normalized[0] = shell.rsplit(['/', '\\']).next().unwrap_or(shell).to_owned();
-            normalized
-        });
-    if let Some((_, script)) =
-        extract_powershell_command(powershell_command.as_deref().unwrap_or(command))
+    #[cfg(not(feature = "nopowersh"))]
     {
-        let tokens = tokenize_powershell_command(script);
-        if tokens
-            .first()
-            .is_some_and(|executable| executable == "Get-Content")
-            && let [ParsedCommand::Read { name, path, .. }] = parse_command_impl(&tokens).as_slice()
+        let powershell_command =
+            command
+                .first()
+                .filter(|shell| shell.contains('\\'))
+                .map(|shell| {
+                    let mut normalized = command.to_vec();
+                    normalized[0] = shell.rsplit(['/', '\\']).next().unwrap_or(shell).to_owned();
+                    normalized
+                });
+        if let Some((_, script)) =
+            extract_powershell_command(powershell_command.as_deref().unwrap_or(command))
         {
-            return vec![ParsedCommand::Read {
+            let tokens = tokenize_powershell_command(script);
+            if tokens
+                .first()
+                .is_some_and(|executable| executable == "Get-Content")
+                && let [ParsedCommand::Read { name, path, .. }] =
+                    parse_command_impl(&tokens).as_slice()
+            {
+                return vec![ParsedCommand::Read {
+                    cmd: script.to_string(),
+                    name: name.clone(),
+                    path: path.clone(),
+                }];
+            }
+            return vec![ParsedCommand::Unknown {
                 cmd: script.to_string(),
-                name: name.clone(),
-                path: path.clone(),
             }];
         }
-        return vec![ParsedCommand::Unknown {
-            cmd: script.to_string(),
-        }];
     }
 
     let normalized = normalize_tokens(command);

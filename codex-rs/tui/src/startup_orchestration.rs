@@ -14,6 +14,16 @@ pub(super) async fn run_main_inner(
     explicit_remote_endpoint: Option<RemoteAppServerEndpoint>,
 ) -> std::io::Result<AppExitInfo> {
     codex_arg0::startup_timing::mark("tui_preflight_begin");
+    #[cfg(not(feature = "install-update"))]
+    if explicit_remote_endpoint.is_none() {
+        if cli.agents_overview {
+            return Err(std::io::Error::other(
+                "The agents overview requires managed daemon support, which is disabled in this build.",
+            ));
+        }
+        cli.no_daemon = true;
+        cli.managed_daemon = false;
+    }
     if cli.oss || cli.oss_provider.is_some() {
         codex_utils_oss::ensure_local_models_enabled()?;
     }
@@ -27,7 +37,7 @@ pub(super) async fn run_main_inner(
             "--add-dir is not supported with --remote. Configure additional workspace roots on the server.",
         ));
     }
-    #[cfg(windows)]
+    #[cfg(all(windows, feature = "install-update"))]
     let elevated_warning = if explicit_remote_endpoint.is_none()
         && !cli.no_daemon
         && !cli.agents_overview
@@ -38,7 +48,7 @@ pub(super) async fn run_main_inner(
     } else {
         None
     };
-    #[cfg(not(windows))]
+    #[cfg(not(all(windows, feature = "install-update")))]
     let elevated_warning: Option<&str> = None;
     let strict_config = cli.strict_config;
     if cli.shared.worktree {
@@ -521,7 +531,8 @@ pub(super) async fn run_main_inner(
     } else {
         None
     };
-    let auto_start_daemon = config.features.enabled(Feature::DaemonAutoStart)
+    let auto_start_daemon = cfg!(feature = "install-update")
+        && config.features.enabled(Feature::DaemonAutoStart)
         && !cli.agents_overview
         && !cli.no_daemon
         && !app_server_target.uses_remote_workspace();
@@ -558,7 +569,9 @@ pub(super) async fn run_main_inner(
     let mut daemon_features = daemon_startup::server_features(&cli_kv_overrides);
     // Disabling shared services requires confirmation, even on a fresh auto-start.
     daemon_features.retain(|_, enabled| *enabled);
+    #[cfg_attr(not(feature = "install-update"), allow(unused_mut))]
     let mut managed_daemon = cli.managed_daemon;
+    #[cfg(feature = "install-update")]
     if auto_start_daemon && daemon_exclusion.is_none() {
         let output = startup_draft
             .run_until(async {
@@ -692,6 +705,7 @@ pub(super) async fn run_main_inner(
         (AppServerTarget::LocalDaemon { .. }, _) => "existing_daemon",
         (AppServerTarget::Embedded, None) => "auto_start_disabled",
     };
+    #[cfg(feature = "install-update")]
     let daemon_settings = if metrics.is_some() {
         codex_app_server_daemon::telemetry::settings_tags(&config.codex_home)
             .await
@@ -699,6 +713,8 @@ pub(super) async fn run_main_inner(
     } else {
         Vec::new()
     };
+    #[cfg(not(feature = "install-update"))]
+    let daemon_settings: Vec<(&str, &str)> = Vec::new();
     let mut launch_tags = daemon_settings.to_vec();
     launch_tags.extend([
         ("daemon_selection_reason", selection_reason),
