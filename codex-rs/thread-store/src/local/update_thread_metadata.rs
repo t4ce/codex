@@ -2259,8 +2259,9 @@ mod tests {
         let child = workspace.join("child");
         std::fs::create_dir_all(child.as_path()).expect("create workspace");
         let unnormalized_cwd = child.join("..");
-        let normalized_cwd = codex_utils_paths::path::normalize_for_path_comparison(workspace.as_path())
-            .expect("normalize cwd");
+        let normalized_cwd =
+            codex_utils_paths::path::normalize_for_path_comparison(workspace.as_path())
+                .expect("normalize cwd");
 
         store
             .update_thread_metadata(UpdateThreadMetadataParams {

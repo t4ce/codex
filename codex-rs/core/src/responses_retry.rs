@@ -10,13 +10,13 @@ use crate::context::ContextualUserFragment;
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
 use crate::session::turn_context::TurnContext;
-use codex_transport::client::RetryOperation;
 use codex_features::Feature;
-use codex_transport::http::RetryAfter;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::CodexErrorDetails;
 use codex_protocol::protocol::EventMsg;
 use codex_protocol::protocol::WarningEvent;
+use codex_transport::client::RetryOperation;
+use codex_transport::http::RetryAfter;
 use tokio::time::Instant;
 use tracing::warn;
 
@@ -109,7 +109,11 @@ pub(crate) async fn handle_response_stream_error(
         sess.notify_stream_error(turn_context, "Reconnecting... waiting for network", err)
             .await;
         retry_state.connection_retries = retry_state.connection_retries.saturating_add(1);
-        codex_transport::client::record_retry!(retry_state.connection_retries, retry_delay, operation);
+        codex_transport::client::record_retry!(
+            retry_state.connection_retries,
+            retry_delay,
+            operation
+        );
         tokio::time::sleep(retry_delay).await;
         retry_state.connection_retry_delay = retry_delay
             .saturating_mul(2)

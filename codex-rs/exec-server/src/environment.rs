@@ -9,11 +9,11 @@ use std::time::Duration;
 
 use arc_swap::ArcSwapOption;
 use codex_config::ScopedSkillsConfig;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_protocol::capabilities::CapabilityRootLocation;
 use codex_protocol::capabilities::SelectedCapabilityRoot;
 use codex_protocol::shell_environment::CODEX_EXEC_SERVER_NOISE_AUTH_TOKEN_ENV_VAR;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 
 use crate::CapabilityRootsDiscoverParams;
 use crate::CapabilityRootsDiscoverResponse;

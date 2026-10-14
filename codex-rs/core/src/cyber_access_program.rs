@@ -1,12 +1,12 @@
 //! Forward explicit programs while leaving entitlement and model policy to the server.
 
-use codex_transport::api::AccessPrograms;
 use codex_features::Feature;
 use codex_login::CodexAuth;
 use codex_model_provider_info::OPENAI_PROVIDER_ID;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::Result;
 use codex_protocol::turn_input::CyberAccessProgram;
+use codex_transport::api::AccessPrograms;
 
 /// Configured support for explicit Cyber programs on API-key requests.
 #[derive(Clone, Copy, Debug)]

@@ -15,9 +15,9 @@ use codex_agent_identity::is_retryable_registration_error;
 use codex_agent_identity::public_key_ssh_from_private_key_pkcs8_base64;
 use codex_agent_identity::register_agent_identity;
 use codex_agent_identity::register_agent_task;
-use codex_transport::http::HttpClient;
 use codex_protocol::account::PlanType as AccountPlanType;
 use codex_protocol::protocol::SessionSource;
+use codex_transport::http::HttpClient;
 use thiserror::Error;
 
 use crate::default_client::create_default_auth_client;

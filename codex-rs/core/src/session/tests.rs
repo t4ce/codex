@@ -55,10 +55,6 @@ use core_test_support::test_codex::TurnInputRequest as ExternalTurnInputRequest;
 
 use codex_features::Feature;
 use codex_file_system::FileSystemSandboxContext;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
-use codex_transport::http::RouteAwareClientPool;
 use codex_login::CodexAuth;
 use codex_login::auth::AgentIdentityAuthPolicy;
 use codex_model_provider::create_model_provider;
@@ -105,6 +101,10 @@ use codex_protocol::turn_input::TurnInputMode;
 use codex_protocol::turn_input::TurnInputRequest;
 use codex_protocol::turn_input::TurnInputSubmission;
 use codex_tools::ToolSpec;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RouteAwareClientPool;
 use codex_utils_paths::path_uri::PathUri;
 use std::collections::BTreeMap;
 use tracing::Span;
@@ -5568,8 +5568,10 @@ async fn session_configuration_apply_permission_profile_accepts_direct_write_roo
     session_configuration.legacy_fallback_cwd = cwd.path().abs();
     let external_write_dir = tempfile::tempdir().expect("create external write root");
     let external_write_path = AbsolutePathBuf::from_absolute_path(
-        codex_utils_paths::absolute_path::canonicalize_preserving_symlinks(external_write_dir.path())
-            .expect("canonical temp dir"),
+        codex_utils_paths::absolute_path::canonicalize_preserving_symlinks(
+            external_write_dir.path(),
+        )
+        .expect("canonical temp dir"),
     )
     .expect("canonical temp dir should be absolute");
     let file_system_sandbox_policy =
@@ -13372,9 +13374,10 @@ async fn session_start_hooks_only_load_from_trusted_project_layers() -> std::io:
         config_layer_stack: Some(config.config_layer_stack.clone()),
         ..codex_hooks::HooksConfig::default()
     });
-    let expected_source_path = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
-        nested_dot_codex.join("hooks.json"),
-    )?;
+    let expected_source_path =
+        codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
+            nested_dot_codex.join("hooks.json"),
+        )?;
     assert_eq!(
         hook_list
             .hooks

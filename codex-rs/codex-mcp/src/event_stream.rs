@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use anyhow::bail;
-use codex_transport::api::SharedAuthProvider;
 use codex_config::types::AuthKeyringBackendKind;
 use codex_config::types::OAuthCredentialsStoreMode;
 use codex_exec_server::Environment;
@@ -13,6 +12,7 @@ use codex_login::CodexAuth;
 use codex_protocol::mcp::ClientMcpExtensions;
 use codex_rmcp_client::ElicitationResponse;
 use codex_rmcp_client::McpOAuthRefreshMode;
+use codex_transport::api::SharedAuthProvider;
 use rmcp::model::ElicitationAction;
 use rmcp::model::ElicitationCapability;
 use serde_json::Map;

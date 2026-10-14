@@ -13,18 +13,18 @@ use crate::pull::PullProgressReporter;
 use crate::url::base_url_to_host_root;
 use crate::url::is_openai_compatible_base_url;
 use codex_core::config::Config;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::HttpClientFactory;
-#[cfg(test)]
-use codex_transport::http::OutboundProxyPolicy;
-use codex_transport::http::RouteAwareClientPool;
-use codex_transport::http::RouteAwareRequestError;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_model_provider_info::OLLAMA_OSS_PROVIDER_ID;
 #[cfg(test)]
 use codex_model_provider_info::WireApi;
 #[cfg(test)]
 use codex_model_provider_info::create_oss_provider_with_base_url;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+#[cfg(test)]
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RouteAwareClientPool;
+use codex_transport::http::RouteAwareRequestError;
 
 const OLLAMA_CONNECTION_ERROR: &str = "No running Ollama server detected. Start it with: `ollama serve` (after installing). Install instructions: https://github.com/ollama/ollama?tab=readme-ov-file#ollama";
 const OLLAMA_CONNECTION_TIMEOUT: Duration = Duration::from_secs(5);

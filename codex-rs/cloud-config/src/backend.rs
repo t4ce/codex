@@ -6,8 +6,8 @@ use codex_config::CloudConfigFragment;
 use codex_config::CloudConfigTomlBundle;
 use codex_config::CloudRequirementsFragment;
 use codex_config::CloudRequirementsTomlBundle;
-use codex_transport::http::HttpClientFactory;
 use codex_login::CodexAuth;
+use codex_transport::http::HttpClientFactory;
 use std::future::Future;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

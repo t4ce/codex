@@ -1,11 +1,11 @@
 use codex_core::config::Config;
-use codex_transport::http::HttpClient;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::default_client::RESIDENCY_HEADER_NAME;
 use codex_login::default_client::create_client_with_chatgpt_cookies;
 use codex_login::default_client::default_headers;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientFactory;
 
 use anyhow::Context;
 use serde::Serialize;

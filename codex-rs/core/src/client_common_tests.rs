@@ -1,12 +1,12 @@
-use codex_transport::api::OpenAiVerbosity;
-use codex_transport::api::ResponsesApiRequest;
-use codex_transport::api::TextControls;
-use codex_transport::api::create_text_param_for_request;
 use codex_models_manager::model_info::model_info_from_slug;
 use codex_protocol::config_types::ServiceTier;
 use codex_protocol::models::FunctionCallOutputPayload;
 use codex_protocol::models::ImageDetail;
 use codex_protocol::models::ImageReference;
+use codex_transport::api::OpenAiVerbosity;
+use codex_transport::api::ResponsesApiRequest;
+use codex_transport::api::TextControls;
+use codex_transport::api::create_text_param_for_request;
 use pretty_assertions::assert_eq;
 use serde_json::value::RawValue;
 use std::sync::Arc;

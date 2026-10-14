@@ -11,7 +11,6 @@ use axum::extract::State;
 use axum::extract::WebSocketUpgrade;
 use axum::response::IntoResponse;
 use axum::routing::any;
-use codex_transport::api::AuthProvider;
 #[cfg(unix)]
 use codex_exec_server::EnvironmentConnectionState;
 use codex_exec_server::EnvironmentInfo;
@@ -40,6 +39,7 @@ use codex_exec_server_protocol::JSONRPCMessage;
 use codex_exec_server_protocol::JSONRPCNotification;
 use codex_exec_server_protocol::JSONRPCRequest;
 use codex_exec_server_protocol::JSONRPCResponse;
+use codex_transport::api::AuthProvider;
 use codex_transport::http::DestinationPolicy;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::NetworkPolicy;

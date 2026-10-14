@@ -2,10 +2,10 @@
 
 use std::time::Duration;
 
-use codex_transport::api::ApiError;
-use codex_transport::api::TransportError;
 use codex_core::context::GuardianContextMode;
 use codex_extension_api::ExtensionMetrics;
+use codex_transport::api::ApiError;
+use codex_transport::api::TransportError;
 
 use super::decisions::DecisionsError;
 use super::sampler::LunaSamplerError;

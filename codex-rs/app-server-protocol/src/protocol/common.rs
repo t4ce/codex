@@ -3279,9 +3279,9 @@ mod tests {
                 cwd,
                 runtime_workspace_roots: Vec::new(),
                 instruction_sources: vec![
-                    codex_utils_paths::path_uri::LegacyAppPathString::from_abs_path(&absolute_path(
-                        "/tmp/AGENTS.md",
-                    )),
+                    codex_utils_paths::path_uri::LegacyAppPathString::from_abs_path(
+                        &absolute_path("/tmp/AGENTS.md"),
+                    ),
                 ],
                 approval_policy: v2::AskForApproval::OnRequest,
                 approvals_reviewer: v2::ApprovalsReviewer::User,

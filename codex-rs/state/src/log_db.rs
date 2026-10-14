@@ -78,7 +78,10 @@ pub fn default_filter() -> Targets {
         .with_target("runtime::", LevelFilter::INFO)
         .with_target("tokio_graceful::guard", LevelFilter::DEBUG)
         .with_target("tokio_graceful::trigger", LevelFilter::DEBUG)
-        .with_target("codex_transport::api::responses_websocket_timing", LevelFilter::OFF)
+        .with_target(
+            "codex_transport::api::responses_websocket_timing",
+            LevelFilter::OFF,
+        )
         .with_target("codex_core::post_sampling_token_estimate", LevelFilter::OFF)
         // Full model request bodies and streamed response payloads overwhelm the
         // SQLite log database, but remain available to explicit TRACE subscribers.

@@ -1,4 +1,3 @@
-pub use codex_transport::api::ResponseEvent;
 use codex_protocol::error::Result;
 use codex_protocol::models::BaseInstructions;
 use codex_protocol::models::ContentItem;
@@ -8,6 +7,7 @@ use codex_protocol::models::ImageDetail;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::openai_models::ModelInfo;
 use codex_tools::ToolSpec;
+pub use codex_transport::api::ResponseEvent;
 use futures::Stream;
 use serde_json::Value;
 use std::pin::Pin;

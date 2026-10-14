@@ -7,11 +7,11 @@ use std::sync::Weak;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 
-use codex_transport::http::HttpClientFactory;
 use codex_protocol::config_types::ForcedLoginMethod;
 use codex_protocol::shell_environment::OPENAI_FEDERATION_RULE_ID_ENV_VAR;
 use codex_protocol::shell_environment::OPENAI_IDENTITY_TOKEN_FILE_ENV_VAR;
 use codex_protocol::shell_environment::OPENAI_WORKLOAD_IDENTITY_CONTEXT_ENV_VAR;
+use codex_transport::http::HttpClientFactory;
 use codex_workload_identity::WorkloadIdentityConfig;
 use codex_workload_identity::WorkloadIdentityError;
 use codex_workload_identity::WorkloadIdentityExchange;

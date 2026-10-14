@@ -20,3 +20,13 @@ Responses callers provide `ResponsesApiRequest` for the model, input, tools, par
 Memory summarize callers provide `MemorySummarizeInput`: a model, optional reasoning, and `Vec<RawMemory>` serialized as `traces`. Each raw memory retains its ID, source-path metadata, and normalized items. `MemoriesClient::summarize_input` wraps JSON encoding, retries, and telemetry, returning `Vec<MemorySummarizeOutput>`.
 
 Original unit and integration coverage remains part of this package, including CA subprocess fixtures, HTTP routing and revocation, API SSE/realtime behavior, and WebSocket proxy/cookie tests. `custom_ca_probe` retains its binary target name for subprocess tests.
+
+## Tests
+
+Run the consolidated socket fixtures with two test threads. On host toolchains that inject `SSL_CERT_FILE`, clear ambient CA overrides when executing test binaries so native-TLS fixtures exercise their intended backend; individual CA probes still supply their own overrides. For Linux:
+
+```sh
+CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER="env -u CODEX_CA_CERTIFICATE -u SSL_CERT_FILE" \
+  cargo test --offline -p codex-network-foundation -p codex-transport -p codex-protocol \
+  --lib --tests -j 2 -- --test-threads=2
+```

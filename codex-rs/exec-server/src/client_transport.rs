@@ -15,13 +15,13 @@ use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tracing::debug;
 use tracing::warn;
 
+use codex_network_foundation::ensure_rustls_crypto_provider;
+use codex_protocol::shell_environment::scrub_non_inheritable_env_vars;
 use codex_transport::api::AuthError;
 use codex_transport::api::AuthProvider;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::Request;
 use codex_transport::http::RequestCompression;
-use codex_protocol::shell_environment::scrub_non_inheritable_env_vars;
-use codex_network_foundation::ensure_rustls_crypto_provider;
 use codex_transport::websocket::WebSocketConnection;
 use codex_transport::websocket::WebSocketConnector;
 use codex_transport::websocket::WebSocketTlsMode;

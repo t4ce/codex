@@ -281,9 +281,10 @@ mod tests {
             &[],
         );
         let canonical = source.path().canonicalize().unwrap();
-        let legacy =
-            codex_utils_paths::absolute_path::normalize_windows_device_path(&canonical.to_string_lossy())
-                .unwrap();
+        let legacy = codex_utils_paths::absolute_path::normalize_windows_device_path(
+            &canonical.to_string_lossy(),
+        )
+        .unwrap();
         for spelling in [
             canonical.to_string_lossy().into_owned(),
             legacy.replace('\\', "/"),

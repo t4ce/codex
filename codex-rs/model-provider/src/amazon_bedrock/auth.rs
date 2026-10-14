@@ -1,21 +1,21 @@
 use std::sync::Arc;
 
-use codex_transport::api::AuthError;
-use codex_transport::api::AuthProvider;
-use codex_transport::api::SharedAuthProvider;
 use codex_aws_auth::AwsAccessKeys;
 use codex_aws_auth::AwsAuthContext;
 use codex_aws_auth::AwsAuthError;
 use codex_aws_auth::AwsRequestToSign;
-use codex_transport::http::Request;
-use codex_transport::http::RequestBody;
-use codex_transport::http::RequestCompression;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider_info::ModelProviderAwsAuthInfo;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::Result;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::http::Request;
+use codex_transport::http::RequestBody;
+use codex_transport::http::RequestCompression;
 use http::HeaderMap;
 
 use crate::BearerAuthProvider;
@@ -353,10 +353,10 @@ impl AuthProvider for BedrockSigV4AuthProvider {
 mod tests {
     use std::num::NonZeroU64;
 
-    use codex_transport::api::AuthProvider;
     use codex_login::auth::BedrockAccessKeysAuth;
     use codex_login::auth::BedrockApiKeyAuth;
     use codex_model_provider_info::AwsCredentialExportConfig;
+    use codex_transport::api::AuthProvider;
     use http::HeaderValue;
     use pretty_assertions::assert_eq;
 

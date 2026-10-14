@@ -884,7 +884,7 @@ mod tests {
         .expect_err("blob transport failure should be returned");
 
         let message = error.to_string();
-        assert!(message.contains("failed after"));
+        assert!(message.contains("failed after"), "{message}");
         assert!(message.contains("(connect,"), "{message}");
         assert!(message.contains("azure_client_request_id="));
         assert!(!message.contains("sig=secret"));

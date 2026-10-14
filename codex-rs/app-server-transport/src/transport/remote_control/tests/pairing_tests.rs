@@ -1,9 +1,9 @@
 use super::super::protocol::RemoteControlPairingStatusRequest;
 use super::super::protocol::StartRemoteControlPairingRequest;
 use super::*;
+use codex_login::AuthKeyringBackendKind;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::OutboundProxyPolicy;
-use codex_login::AuthKeyringBackendKind;
 use pretty_assertions::assert_eq;
 use std::io;
 

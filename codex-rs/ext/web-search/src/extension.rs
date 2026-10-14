@@ -1,13 +1,5 @@
 use std::sync::Arc;
 
-use codex_transport::api::AllowedCaller;
-use codex_transport::api::ApproximateLocation;
-use codex_transport::api::ExternalWebAccess;
-use codex_transport::api::ExternalWebAccessMode;
-use codex_transport::api::LocationType;
-use codex_transport::api::SearchContextSize;
-use codex_transport::api::SearchFilters;
-use codex_transport::api::SearchSettings;
 use codex_core::config::Config;
 use codex_extension_api::ConfigContributor;
 use codex_extension_api::ExtensionData;
@@ -17,12 +9,20 @@ use codex_extension_api::ThreadLifecycleContributor;
 use codex_extension_api::ThreadOriginator;
 use codex_extension_api::ThreadStartInput;
 use codex_extension_api::ToolContributor;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_model_provider::create_model_provider;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_protocol::config_types::WebSearchContextSize;
 use codex_protocol::config_types::WebSearchMode;
+use codex_transport::api::AllowedCaller;
+use codex_transport::api::ApproximateLocation;
+use codex_transport::api::ExternalWebAccess;
+use codex_transport::api::ExternalWebAccessMode;
+use codex_transport::api::LocationType;
+use codex_transport::api::SearchContextSize;
+use codex_transport::api::SearchFilters;
+use codex_transport::api::SearchSettings;
+use codex_transport::http::HttpClientFactory;
 
 use crate::tool::WebSearchTool;
 
@@ -161,10 +161,10 @@ mod tests {
     use codex_extension_api::ExtensionData;
     use codex_extension_api::ExtensionRegistryBuilder;
     use codex_extension_api::ToolName;
-    use codex_transport::http::HttpClientFactory;
-    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::CodexAuth;
     use codex_model_provider_info::ModelProviderInfo;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use pretty_assertions::assert_eq;
 
     use super::AuthManager;
@@ -174,9 +174,9 @@ mod tests {
     use super::install;
     use crate::tool::RUN_TOOL_NAME;
     use crate::tool::WEB_NAMESPACE;
+    use codex_protocol::config_types::WebSearchMode;
     use codex_transport::api::ExternalWebAccess;
     use codex_transport::api::ExternalWebAccessMode;
-    use codex_protocol::config_types::WebSearchMode;
 
     #[test]
     fn external_web_access_preserves_legacy_values_until_indexed() {

@@ -10,10 +10,10 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use codex_core::config::Config;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::RouteAwareClientPool;
 use codex_install_context::InstallContext;
 use codex_install_context::InstallMethod;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::RouteAwareClientPool;
 use http::Method;
 use serde::Deserialize;
 #[cfg(target_os = "macos")]

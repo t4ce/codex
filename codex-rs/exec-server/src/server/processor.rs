@@ -67,12 +67,13 @@ impl ConnectionProcessor {
         http_client_factory: HttpClientFactory,
         request_dispatch_mode: RequestDispatchMode,
     ) -> Self {
-        let request =
-            codex_utils_paths::home_dir::find_codex_home().map(|codex_home| CapabilityLocationRequest {
+        let request = codex_utils_paths::home_dir::find_codex_home().map(|codex_home| {
+            CapabilityLocationRequest {
                 codex_home: PathUri::from_abs_path(&codex_home),
                 user_home: dirs::home_dir()
                     .and_then(|home| PathUri::from_host_native_path(home).ok()),
-            });
+            }
+        });
         Self::new_with_location_request(
             runtime_paths,
             telemetry,

@@ -3,11 +3,11 @@
 
 use crate::Client;
 use crate::RequestError;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_login::AuthManagerConfig;
 use codex_login::CodexAuth;
 use codex_protocol::account::PlanType;
+use codex_transport::http::HttpClientFactory;
 use std::sync::Arc;
 
 /// Non-secret account metadata associated with an analytics session.

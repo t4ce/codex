@@ -38,8 +38,8 @@ use codex_protocol::openai_models::ModelInfo;
 use codex_protocol::openai_models::ReasoningEffort as ReasoningEffortConfig;
 use codex_protocol::protocol::SessionSource;
 use codex_protocol::protocol::ThreadSource;
-use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_git_discovery::GitRootDiscovery;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 
 // Memory requests await this optional metadata before sending their model request.
 const MEMORY_GIT_METADATA_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(1);

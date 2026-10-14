@@ -3,9 +3,9 @@
 
 use axum::http::HeaderMap;
 use axum::http::HeaderValue;
-use codex_transport::api::SharedAuthProvider;
 use codex_login::AuthManager;
 use codex_login::UnauthorizedRecovery;
+use codex_transport::api::SharedAuthProvider;
 use std::io;
 use std::io::ErrorKind;
 use std::sync::Arc;

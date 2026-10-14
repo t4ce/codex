@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use async_channel::Sender;
-use codex_transport::api::SharedAuthProvider;
 use codex_config::McpServerAuth;
 use codex_config::McpServerConfig;
 use codex_config::McpServerTransportConfig;
@@ -12,6 +11,7 @@ use codex_protocol::protocol::McpStartupFailureReason;
 use codex_protocol::protocol::McpStartupUpdateEvent;
 use codex_rmcp_client::McpAuthState;
 use codex_rmcp_client::McpLoginRequirement;
+use codex_transport::api::SharedAuthProvider;
 
 use crate::mcp::CODEX_APPS_MCP_SERVER_NAME;
 use crate::rmcp_client::DEFAULT_STARTUP_TIMEOUT;

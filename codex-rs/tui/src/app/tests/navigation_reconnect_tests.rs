@@ -166,7 +166,9 @@ async fn reconnect_daemon_command_center_after_socket_replacement_without_a_conv
         let socket_path = directory.path().join("daemon.sock");
         let listener = UnixListener::bind(&socket_path)?;
         let endpoint = crate::RemoteAppServerEndpoint::UnixSocket {
-            socket_path: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(socket_path.clone())?,
+            socket_path: codex_utils_paths::absolute_path::AbsolutePathBuf::try_from(
+                socket_path.clone(),
+            )?,
         };
         app.app_server_target = AppServerTarget::LocalDaemon {
             allow_embedded_fallback: true,

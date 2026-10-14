@@ -1,10 +1,10 @@
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthHeaders;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider::create_model_provider;
 use codex_model_provider_info::ModelProviderInfo;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_utils_output_truncation::TruncationPolicy;
 use http::HeaderMap;
 use http::HeaderValue;

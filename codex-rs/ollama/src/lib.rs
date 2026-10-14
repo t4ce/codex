@@ -72,10 +72,10 @@ pub async fn ensure_responses_supported(client: &OllamaClient) -> std::io::Resul
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codex_transport::http::HttpClientFactory;
-    use codex_transport::http::OutboundProxyPolicy;
     use codex_model_provider_info::WireApi;
     use codex_model_provider_info::create_oss_provider_with_base_url;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     use pretty_assertions::assert_eq;
 
     #[tokio::test]

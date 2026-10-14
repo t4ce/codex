@@ -1,7 +1,7 @@
-use codex_transport::api::ApiError;
-use codex_transport::api::TransportError;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::CodexErrorDetails;
+use codex_transport::api::ApiError;
+use codex_transport::api::TransportError;
 use http::StatusCode;
 
 pub(super) const CREDENTIAL_EXPORT_CONFIG_ERROR_PREFIX: &str =

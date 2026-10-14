@@ -15,11 +15,11 @@ use crate::api::TaskText;
 use chrono::DateTime;
 use chrono::Utc;
 
-use codex_transport::api::SharedAuthProvider;
 use codex_backend_client as backend;
 use codex_backend_client::CodeTaskDetailsResponseExt;
 use codex_git_utils::ApplyGitRequest;
 use codex_git_utils::apply_git_patch;
+use codex_transport::api::SharedAuthProvider;
 
 #[derive(Clone)]
 pub struct HttpClient {

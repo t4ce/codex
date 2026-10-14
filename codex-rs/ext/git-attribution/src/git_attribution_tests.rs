@@ -3,13 +3,13 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::ExternalAuth;
 use codex_login::ExternalAuthFuture;
 use codex_login::ExternalAuthRefreshContext;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use tokio::sync::Notify;
 use wiremock::Mock;
 use wiremock::MockServer;

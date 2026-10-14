@@ -1,5 +1,3 @@
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_otel::EXEC_SERVER_CLIENT_REQUEST_COUNT_METRIC;
 use codex_otel::MetricsClient;
 use codex_otel::MetricsConfig;
@@ -11,6 +9,8 @@ use codex_otel::Result;
 use codex_otel::current_span_w3c_trace_context;
 use codex_otel::set_parent_from_w3c_trace_context;
 use codex_protocol::protocol::W3cTraceContext;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use std::collections::BTreeMap;
 use std::collections::HashMap;

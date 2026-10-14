@@ -1,8 +1,8 @@
 use crate::error_subtype::http_status_sub_error_type;
 use crate::remote::RemotePluginServiceConfig;
-use codex_transport::http::RouteAwareRequestError;
 use codex_login::CodexAuth;
 use codex_protocol::protocol::Product;
+use codex_transport::http::RouteAwareRequestError;
 use http::Method;
 use http::StatusCode;
 use serde::Deserialize;

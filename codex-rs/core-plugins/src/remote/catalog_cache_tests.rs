@@ -63,7 +63,8 @@ fn global_catalog_cache_reuses_legacy_cache_file() {
         "plugins": [],
     });
     let contents = serde_json::to_string_pretty(&legacy_cache).expect("serialize legacy cache");
-    codex_utils_paths::path::write_atomically(&legacy_cache_path, &contents).expect("write legacy cache");
+    codex_utils_paths::path::write_atomically(&legacy_cache_path, &contents)
+        .expect("write legacy cache");
 
     let cached = load_cached_directory_plugins(
         codex_home.path(),

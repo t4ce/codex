@@ -9,8 +9,8 @@ use codex_extension_api::ExtensionFuture;
 use codex_extension_api::ExtensionRegistryBuilder;
 use codex_extension_api::WorldStateContributionInput;
 use codex_extension_api::WorldStateSectionContribution;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
+use codex_transport::http::HttpClientFactory;
 
 use crate::policy::GitAttributionPolicy;
 use crate::policy::GitAttributionRetry;

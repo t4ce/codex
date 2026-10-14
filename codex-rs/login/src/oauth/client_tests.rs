@@ -296,8 +296,10 @@ async fn success_body_revocation_preserves_the_policy_error() {
     .unwrap();
     assert!(matches!(
         result,
-        Err(OAuthError::Transport(codex_transport::http::HttpError::Policy(
-            codex_transport::http::NetworkPolicyDenied::Revoked
-        )))
+        Err(OAuthError::Transport(
+            codex_transport::http::HttpError::Policy(
+                codex_transport::http::NetworkPolicyDenied::Revoked
+            )
+        ))
     ));
 }

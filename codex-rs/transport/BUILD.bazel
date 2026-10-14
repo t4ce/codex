@@ -4,4 +4,5 @@ codex_rust_crate(
     name = "transport",
     compile_data = glob(["tests/**"]),
     crate_name = "codex_transport",
+    test_threads = 2,
 )

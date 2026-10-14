@@ -76,7 +76,10 @@ mod tests {
         #[cfg(feature = "local-models")]
         assert_eq!(result, Some(codex_lmstudio::DEFAULT_OSS_MODEL));
         #[cfg(not(feature = "local-models"))]
-        assert_eq!(get_default_model_for_oss_provider(LMSTUDIO_OSS_PROVIDER_ID), None);
+        assert_eq!(
+            get_default_model_for_oss_provider(LMSTUDIO_OSS_PROVIDER_ID),
+            None
+        );
     }
 
     #[test]
@@ -86,7 +89,10 @@ mod tests {
         #[cfg(feature = "local-models")]
         assert_eq!(result, Some(codex_ollama::DEFAULT_OSS_MODEL));
         #[cfg(not(feature = "local-models"))]
-        assert_eq!(get_default_model_for_oss_provider(OLLAMA_OSS_PROVIDER_ID), None);
+        assert_eq!(
+            get_default_model_for_oss_provider(OLLAMA_OSS_PROVIDER_ID),
+            None
+        );
     }
 
     #[test]

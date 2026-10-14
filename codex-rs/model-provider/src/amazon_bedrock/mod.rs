@@ -11,10 +11,6 @@ mod runtime_catalog;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use codex_transport::api::ApiError;
-use codex_transport::api::Provider;
-use codex_transport::api::SharedAuthProvider;
-use codex_transport::api::TransportError;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_model_provider_info::AMAZON_BEDROCK_GPT_5_6_LUNA_MODEL_ID;
@@ -29,6 +25,10 @@ use codex_protocol::account::ProviderAccount;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::Result;
 use codex_protocol::openai_models::ModelsResponse;
+use codex_transport::api::ApiError;
+use codex_transport::api::Provider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::api::TransportError;
 
 use crate::ProviderCapabilities;
 use crate::RemoteCompactionSupport;

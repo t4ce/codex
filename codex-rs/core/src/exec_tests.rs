@@ -954,8 +954,10 @@ fn windows_elevated_supports_split_write_read_carveouts() {
             write_roots_override: None,
             additional_deny_read_paths: vec![],
             additional_deny_write_paths: vec![
-                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(expected_docs)
-                    .expect("absolute docs"),
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
+                    expected_docs
+                )
+                .expect("absolute docs"),
             ],
         }))
     );
@@ -1064,8 +1066,10 @@ fn windows_elevated_supports_unreadable_split_carveouts() {
                 .expect("absolute blocked"),
             ],
             additional_deny_write_paths: vec![
-                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(expected_blocked)
-                    .expect("absolute blocked"),
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
+                    expected_blocked
+                )
+                .expect("absolute blocked"),
             ],
         }))
     );

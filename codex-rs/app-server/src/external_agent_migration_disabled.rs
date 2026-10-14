@@ -8,8 +8,7 @@ use codex_app_server_protocol::ExternalAgentConfigImportHistoryRecordResponse;
 use codex_app_server_protocol::ExternalAgentConfigImportParams;
 use codex_app_server_protocol::JSONRPCErrorError;
 
-const DISABLED_MESSAGE: &str =
-    "External agent config import is disabled in this build. Rebuild with the `external-agent-imports` Cargo feature enabled.";
+const DISABLED_MESSAGE: &str = "External agent config import is disabled in this build. Rebuild with the `external-agent-imports` Cargo feature enabled.";
 
 #[derive(Clone)]
 pub(crate) struct ExternalAgentConfigRequestProcessor;

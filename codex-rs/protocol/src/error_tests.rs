@@ -5,10 +5,10 @@ use chrono::DateTime;
 use chrono::Duration as ChronoDuration;
 use chrono::TimeZone;
 use chrono::Utc;
-use reqwest::Response as HttpResponse;
 use http::Response as RawHttpResponse;
 use http::StatusCode;
 use pretty_assertions::assert_eq;
+use reqwest::Response as HttpResponse;
 use std::time::Duration;
 
 #[tokio::test(start_paused = true)]

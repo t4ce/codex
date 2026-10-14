@@ -164,8 +164,9 @@ async fn thread_initialized_classifies_validated_linked_worktrees() {
         let ClientResponsePayload::ThreadStart(start) = &mut response else {
             panic!("expected thread/start response");
         };
-        start.thread.cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(cwd)
-            .expect("absolute checkout path");
+        start.thread.cwd =
+            codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(cwd)
+                .expect("absolute checkout path");
         reducer
             .ingest(
                 AnalyticsFact::ClientResponse {

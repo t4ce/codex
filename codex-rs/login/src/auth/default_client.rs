@@ -4,6 +4,7 @@
 //! Use [`crate::default_client`] or [`codex_login::default_client`] from other crates in this
 //! workspace.
 
+use codex_terminal_detection::user_agent;
 use codex_transport::http::BuildRouteAwareHttpClientError;
 use codex_transport::http::ClientRouteClass;
 use codex_transport::http::HttpClient;
@@ -13,7 +14,6 @@ use codex_transport::http::OutboundProxyPolicy;
 pub use codex_transport::http::RequestBuilder as CodexRequestBuilder;
 use codex_transport::http::ReqwestTransport;
 use codex_transport::http::RouteAwareClientPool;
-use codex_terminal_detection::user_agent;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::header::USER_AGENT;

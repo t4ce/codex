@@ -1,13 +1,13 @@
 use std::num::NonZeroU64;
 use std::time::Duration;
 
-use codex_transport::api::ApiError;
-use codex_transport::api::TransportError;
-use codex_transport::http::RetryAfter;
 use codex_model_provider_info::AwsCredentialExportConfig;
 use codex_model_provider_info::ModelProviderAwsAuthInfo;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_protocol::error::CodexErrorDetails;
+use codex_transport::api::ApiError;
+use codex_transport::api::TransportError;
+use codex_transport::http::RetryAfter;
 use http::HeaderMap;
 use http::HeaderValue;
 use http::StatusCode;

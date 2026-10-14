@@ -1,11 +1,11 @@
 //! Renders Bedrock catalogs and exercises Astra reasoning and service-tier choices.
 
 use super::*;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_model_provider::create_model_provider;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_models_manager::manager::RefreshStrategy;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 
 #[tokio::test]
 async fn bedrock_astra_model_and_reasoning_pickers() {

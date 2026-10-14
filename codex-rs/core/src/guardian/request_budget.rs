@@ -1,7 +1,6 @@
 //! Restores compacted retained evidence and checks complete synchronous requests.
 //! Restored records are budgeted and persisted before sampling, including continuations.
 
-use codex_transport::api::ResponsesApiRequest;
 use codex_context_fragments::set_annotated_content;
 use codex_guardian_context::HistoryTruncation;
 use codex_guardian_context::REQUEST_TOKENS_BOUNDARIES;
@@ -14,6 +13,7 @@ use codex_protocol::error::Result as CodexResult;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ResponseItem;
 use codex_protocol::protocol::TruncationPolicy;
+use codex_transport::api::ResponsesApiRequest;
 
 use super::input_budget::RetainedReviewContext;
 use crate::context::ContextualUserFragment;

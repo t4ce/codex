@@ -190,7 +190,11 @@ pub(crate) fn build_async_http_client(
     Ok(crate::network_policy::RuntimeHttpClient {
         client: codex_transport::http::HttpClientBuilder::new()
             .without_request_logging()
-            .build_with_tls(factory, codex_transport::http::ClientRouteClass::Other, config),
+            .build_with_tls(
+                factory,
+                codex_transport::http::ClientRouteClass::Other,
+                config,
+            ),
         timeout: resolve_otlp_timeout(timeout_var),
         runtime: tokio::runtime::Handle::try_current()?,
     })

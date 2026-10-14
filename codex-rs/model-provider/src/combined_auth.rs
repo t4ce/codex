@@ -3,11 +3,6 @@
 use std::sync::Arc;
 
 use crate::auth::ResolvedProviderAuth;
-use codex_transport::api::AuthError;
-use codex_transport::api::AuthHeadersFuture;
-use codex_transport::api::AuthProvider;
-use codex_transport::api::AuthProviderFuture;
-use codex_transport::api::SharedAuthProvider;
 use codex_login::GatewayAuthError;
 use codex_login::GatewayAuthManager;
 use codex_model_provider_info::GatewayOAuthConfig;
@@ -15,6 +10,11 @@ use codex_model_provider_info::GatewayOAuthDelivery;
 use codex_model_provider_info::ModelProviderInfo;
 use codex_protocol::error::CodexErr;
 use codex_protocol::error::Result;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthHeadersFuture;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::AuthProviderFuture;
+use codex_transport::api::SharedAuthProvider;
 use http::HeaderMap;
 use http::HeaderName;
 use http::HeaderValue;

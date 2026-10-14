@@ -1,13 +1,13 @@
 //! Authentication recovery preserves actionable status without changing the account scope.
 
 use super::*;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_login::ExternalAuth;
 use codex_login::ExternalAuthFuture;
 use codex_login::ExternalAuthRefreshContext;
 use codex_login::RefreshTokenError;
 use codex_protocol::auth::RefreshTokenFailedError;
 use codex_protocol::auth::RefreshTokenFailedReason;
+use codex_transport::http::OutboundProxyPolicy;
 use pretty_assertions::assert_eq;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;

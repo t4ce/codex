@@ -91,11 +91,11 @@ use codex_app_server_protocol::TurnStartResponse;
 use codex_app_server_protocol::TurnStatus as AppServerTurnStatus;
 use codex_app_server_protocol::TurnSteerParams;
 use codex_app_server_protocol::TurnSteerResponse;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 #[cfg(debug_assertions)]
 use codex_login::AuthManager;
 use codex_protocol::protocol::RealtimeConversationVersion;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use codex_utils_paths::absolute_path::test_support::PathBufExt;
 use codex_utils_paths::absolute_path::test_support::test_path_buf;
 use pretty_assertions::assert_eq;
@@ -1131,9 +1131,9 @@ fn track_event_request_batches_only_isolates_accepted_line_fingerprint_events() 
 #[cfg(debug_assertions)]
 #[tokio::test]
 async fn account_switch_between_batches_does_not_send_old_credentials() {
+    use codex_login::AuthCredentialsStoreMode as Store;
     use codex_transport::http::DestinationPolicy;
     use codex_transport::http::NetworkPolicyController;
-    use codex_login::AuthCredentialsStoreMode as Store;
     use tokio::io::AsyncReadExt;
     use tokio::io::AsyncWriteExt;
 

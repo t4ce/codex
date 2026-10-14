@@ -18,13 +18,7 @@ use crate::responses_metadata::MCP_ATTRIBUTION_CLIENT_METADATA_KEY;
 use crate::test_support::TestCodexResponsesRequestKind;
 use crate::test_support::responses_metadata as test_responses_metadata;
 use base64::Engine;
-use codex_transport::api::AgentIdentityTelemetry;
-use codex_transport::api::ApiError;
-use codex_transport::api::ResponseEvent;
-use codex_transport::api::TransportError;
 use codex_history::HistoryInitialization;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::auth::AgentIdentityAuthPolicy;
@@ -75,6 +69,12 @@ use codex_rollout_trace::replay_bundle;
 use codex_tools::JsonSchema;
 use codex_tools::ResponsesApiTool;
 use codex_tools::ToolSpec;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::ApiError;
+use codex_transport::api::ResponseEvent;
+use codex_transport::api::TransportError;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use futures::StreamExt;
 use pretty_assertions::assert_eq;
 use serde_json::json;
@@ -146,10 +146,10 @@ fn test_model_provider() -> SharedModelProvider {
 
 #[tokio::test]
 async fn workspace_routed_http_rejects_redirects_without_a_routing_header() {
-    use codex_transport::client::HttpTransport;
     use codex_login::WorkspaceRouting;
     use codex_login::WorkspaceRoutingRequest;
     use codex_login::WorkspaceRoutingResolver;
+    use codex_transport::client::HttpTransport;
 
     struct Routing(Option<&'static str>);
     impl WorkspaceRoutingResolver for Routing {
@@ -274,7 +274,8 @@ impl ModelProvider for SetupRefreshProvider {
 
     fn api_provider(
         &self,
-    ) -> ModelProviderFuture<'_, codex_protocol::error::Result<codex_transport::api::Provider>> {
+    ) -> ModelProviderFuture<'_, codex_protocol::error::Result<codex_transport::api::Provider>>
+    {
         Box::pin(async move {
             self.setup_calls.fetch_add(1, Ordering::SeqCst);
             let manager = self.inner.auth_manager().expect("auth manager");

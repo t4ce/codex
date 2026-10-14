@@ -5,17 +5,8 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
-use codex_transport::api::AgentIdentityTelemetry;
-use codex_transport::api::ModelsClient;
-use codex_transport::api::RequestTelemetry;
-use codex_transport::api::ReqwestTransport;
-use codex_transport::api::TransportError;
-use codex_transport::api::auth_header_telemetry;
-use codex_transport::api::map_api_error;
 use codex_feedback::FeedbackRequestTags;
 use codex_feedback::emit_feedback_request_tags_with_auth_env;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthEnvTelemetry;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
@@ -33,6 +24,15 @@ use codex_protocol::error::CodexErr;
 use codex_protocol::error::Result as CoreResult;
 use codex_response_debug_context::extract_response_debug_context;
 use codex_response_debug_context::telemetry_transport_error_message;
+use codex_transport::api::AgentIdentityTelemetry;
+use codex_transport::api::ModelsClient;
+use codex_transport::api::RequestTelemetry;
+use codex_transport::api::ReqwestTransport;
+use codex_transport::api::TransportError;
+use codex_transport::api::auth_header_telemetry;
+use codex_transport::api::map_api_error;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 use http::HeaderMap;
 use tokio::time::timeout;
 
@@ -401,7 +401,6 @@ mod tests {
     use std::sync::Mutex;
 
     use super::*;
-    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::default_client::RESIDENCY_HEADER_NAME;
     use codex_login::default_client::ResidencyRequirement;
     use codex_login::default_client::create_client;
@@ -415,6 +414,7 @@ mod tests {
     use codex_protocol::error::CodexErrorDetails;
     use codex_protocol::openai_models::ModelVisibility;
     use codex_protocol::openai_models::ModelsResponse;
+    use codex_transport::http::OutboundProxyPolicy;
     use pretty_assertions::assert_eq;
     use wiremock::Mock;
     use wiremock::MockServer;

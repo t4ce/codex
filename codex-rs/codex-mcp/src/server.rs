@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::runtime::McpRuntimeContext;
-use codex_transport::api::SharedAuthProvider;
 use codex_config::AppToolApproval;
 use codex_config::McpServerAuth;
 use codex_config::McpServerConfig;
@@ -19,6 +18,7 @@ use codex_protocol::mcp::ClientMcpExtensions;
 use codex_rmcp_client::McpOAuthRefreshMode;
 use codex_rmcp_client::StoredOAuthCredentialSnapshot;
 use codex_rmcp_client::StoredOAuthTokens;
+use codex_transport::api::SharedAuthProvider;
 use codex_utils_paths::path_uri::PathUri;
 use rmcp::model::ElicitationCapability;
 use tracing::warn;

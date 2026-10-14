@@ -18,13 +18,13 @@ use codex_extension_api::ExtensionWarning;
 use codex_extension_api::TurnStartAdmission;
 use codex_goal_extension::GoalExtensionConfig;
 use codex_goal_extension::GoalService;
-use codex_transport::http::HttpClientFactory;
 use codex_login::AuthManager;
 use codex_protocol::ThreadId;
 use codex_protocol::protocol::Event;
 use codex_protocol::protocol::EventMsg;
 use codex_queue_extension::QueuedItemService;
 use codex_rollout::state_db::StateDbHandle;
+use codex_transport::http::HttpClientFactory;
 
 use crate::outgoing_message::OutgoingMessageSender;
 use crate::outgoing_message::ThreadScopedOutgoingMessageSender;

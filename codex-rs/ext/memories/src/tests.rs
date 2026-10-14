@@ -13,10 +13,10 @@ use codex_extension_api::ToolExecutor;
 use codex_extension_api::ToolName;
 use codex_extension_api::ToolPayload;
 use codex_tools::ToolOutput;
+use codex_utils_output_truncation::TruncationPolicy;
 use codex_utils_paths::absolute_path::test_support::PathBufExt;
 use codex_utils_paths::absolute_path::test_support::PathExt;
 use codex_utils_paths::absolute_path::test_support::test_path_buf;
-use codex_utils_output_truncation::TruncationPolicy;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 

@@ -1,8 +1,8 @@
 use crate::MEMORY_TOOL_DEVELOPER_INSTRUCTIONS_SUMMARY_TOKEN_LIMIT;
 use codex_protocol::MemoryVersion;
-use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_output_truncation::TruncationPolicy;
 use codex_utils_output_truncation::truncate_text;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_text::template::Template;
 use std::sync::LazyLock;
 use tokio::fs;

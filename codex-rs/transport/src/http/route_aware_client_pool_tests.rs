@@ -713,7 +713,10 @@ async fn request_timeout_covers_route_selection() {
         .await
         .expect_err("request should time out during route selection");
 
-    assert!(matches!(error, RouteAwareRequestError::Timeout));
+    assert!(
+        matches!(error, RouteAwareRequestError::Timeout),
+        "{error:?}"
+    );
     assert_eq!(resolver_calls.load(Ordering::SeqCst), 1);
 }
 
@@ -820,7 +823,10 @@ async fn request_timeout_is_shared_across_redirect_hops() {
         .await
         .expect_err("redirect chain should exceed its shared timeout");
 
-    assert!(matches!(error, RouteAwareRequestError::Timeout));
+    assert!(
+        matches!(error, RouteAwareRequestError::Timeout),
+        "{error:?}"
+    );
     assert_eq!(resolver_calls.load(Ordering::SeqCst), 2);
     assert_eq!(
         server.join().expect("redirect server should finish").len(),

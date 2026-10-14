@@ -8,9 +8,9 @@ use crate::AuthRouteConfig;
 use crate::CodexAuth;
 use crate::auth::AgentIdentityAuth;
 use crate::auth::AgentIdentityAuthRecord;
+use codex_protocol::account::PlanType as AccountPlanType;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::OutboundProxyPolicy;
-use codex_protocol::account::PlanType as AccountPlanType;
 use std::sync::Arc;
 
 /// Creates an authentication manager with optional credentials for cross-crate tests.

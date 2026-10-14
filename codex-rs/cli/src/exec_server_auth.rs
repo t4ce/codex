@@ -4,13 +4,13 @@
 
 use std::sync::Arc;
 
-use codex_transport::api::AuthError;
-use codex_transport::api::AuthProvider;
-use codex_transport::api::SharedAuthProvider;
 use codex_aws_auth::AwsAuthConfig;
 use codex_aws_auth::AwsAuthContext;
 use codex_aws_auth::AwsAuthError;
 use codex_aws_auth::AwsRequestToSign;
+use codex_transport::api::AuthError;
+use codex_transport::api::AuthProvider;
+use codex_transport::api::SharedAuthProvider;
 use codex_transport::http::Request;
 use codex_transport::http::RequestBody;
 use codex_transport::http::RequestCompression;

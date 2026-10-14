@@ -13,13 +13,13 @@
 
 use crate::session::session::Session;
 use crate::session::step_context::StepContext;
-use codex_transport::api::HostedFileUploadContext;
-use codex_transport::api::OPENAI_FILE_UPLOAD_LIMIT_BYTES;
-use codex_transport::api::upload_openai_file;
 use codex_exec_server::GetMetadataOptions;
 use codex_login::CodexAuth;
 use codex_protocol::permissions::FileSystemAccessMode;
 use codex_sandboxing::policy_transforms::effective_file_system_sandbox_policy;
+use codex_transport::api::HostedFileUploadContext;
+use codex_transport::api::OPENAI_FILE_UPLOAD_LIMIT_BYTES;
+use codex_transport::api::upload_openai_file;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::sync::Arc;

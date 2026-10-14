@@ -1,8 +1,3 @@
-use codex_transport::api::SearchClient;
-use codex_transport::api::SearchCommands;
-use codex_transport::api::SearchQuery;
-use codex_transport::api::SearchRequest;
-use codex_transport::api::SearchSettings;
 use codex_core::X_CODEX_TURN_METADATA_HEADER;
 use codex_core::web_search_action_detail;
 use codex_extension_api::ExtensionTurnItem;
@@ -17,8 +12,6 @@ use codex_extension_api::parse_tool_input_schema_without_compaction;
 use codex_extension_items::ExtensionItem;
 use codex_extension_items::web_search::WebSearchAction;
 use codex_extension_items::web_search::WebSearchItem;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::HttpClientFactory;
 use codex_login::default_client::add_originator_header;
 use codex_login::default_client::create_transport_for_routes_async;
 use codex_model_provider::SharedModelProvider;
@@ -30,6 +23,13 @@ use codex_tools::ResponsesApiNamespace;
 use codex_tools::ResponsesApiNamespaceTool;
 use codex_tools::ToolExposure;
 use codex_tools::default_namespace_description;
+use codex_transport::api::SearchClient;
+use codex_transport::api::SearchCommands;
+use codex_transport::api::SearchQuery;
+use codex_transport::api::SearchRequest;
+use codex_transport::api::SearchSettings;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
 use http::HeaderMap;
 use http::HeaderValue;
 use url::Url;
@@ -272,8 +272,8 @@ fn extension_turn_item(item: WebSearchItem, legacy_event: EventMsg) -> Extension
 
 #[cfg(test)]
 mod tests {
-    use codex_transport::api::SearchCommands;
     use codex_extension_items::web_search::WebSearchAction;
+    use codex_transport::api::SearchCommands;
     use pretty_assertions::assert_eq;
 
     use super::command_action;

@@ -19,16 +19,16 @@ use std::time::Instant;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
+use codex_login::AuthEnvTelemetry;
+use codex_protocol::ThreadId;
+use codex_protocol::protocol::SessionSource;
+use codex_state::LogWriteFailureReporter;
 #[cfg(feature = "external-reporting")]
 use codex_transport::http::ClientRouteClass;
 #[cfg(feature = "external-reporting")]
 use codex_transport::http::HttpClientFactory;
 #[cfg(feature = "external-reporting")]
 use codex_transport::http::RouteAwareClientPool;
-use codex_login::AuthEnvTelemetry;
-use codex_protocol::ThreadId;
-use codex_protocol::protocol::SessionSource;
-use codex_state::LogWriteFailureReporter;
 use tracing::Event;
 use tracing::Level;
 use tracing::field::Visit;
@@ -279,7 +279,10 @@ impl CodexFeedback {
                     // target before re-emitting them as `log`; tungstenite TRACE
                     // includes full websocket frames and authenticated handshakes.
                     .with_target("tungstenite", LevelFilter::DEBUG)
-                    .with_target("codex_transport::api::responses_websocket_timing", LevelFilter::OFF)
+                    .with_target(
+                        "codex_transport::api::responses_websocket_timing",
+                        LevelFilter::OFF,
+                    )
                     .with_target("codex_core::post_sampling_token_estimate", LevelFilter::OFF),
             )
     }

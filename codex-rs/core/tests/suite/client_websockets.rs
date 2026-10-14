@@ -1,6 +1,4 @@
 #![allow(clippy::unwrap_used)]
-use codex_transport::api::WS_REQUEST_HEADER_TRACEPARENT_CLIENT_METADATA_KEY;
-use codex_transport::api::WS_REQUEST_HEADER_TRACESTATE_CLIENT_METADATA_KEY;
 use codex_core::CodexResponsesMetadata;
 use codex_core::ModelClient;
 use codex_core::ModelClientSession;
@@ -13,7 +11,6 @@ use codex_core::test_support::EmptyUserInstructionsProvider;
 use codex_core::test_support::with_parent_turn;
 use codex_extension_api::ExtensionRegistryBuilder;
 use codex_features::Feature;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::auth::AgentIdentityAuthPolicy;
@@ -51,6 +48,9 @@ use codex_rollout_trace::InferenceTraceContext;
 use codex_rollout_trace::RawTraceEventPayload;
 use codex_rollout_trace::TraceWriter;
 use codex_rollout_trace::replay_bundle;
+use codex_transport::api::WS_REQUEST_HEADER_TRACEPARENT_CLIENT_METADATA_KEY;
+use codex_transport::api::WS_REQUEST_HEADER_TRACESTATE_CLIENT_METADATA_KEY;
+use codex_transport::http::OutboundProxyPolicy;
 use core_test_support::TestCodexResponsesRequestKind;
 use core_test_support::ThreadIdle;
 use core_test_support::load_default_config_for_test;

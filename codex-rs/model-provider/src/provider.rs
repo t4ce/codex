@@ -4,10 +4,6 @@ use std::path::PathBuf;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use codex_transport::api::ApiError;
-use codex_transport::api::Provider;
-use codex_transport::api::SharedAuthProvider;
-use codex_transport::api::TransportError;
 use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::GatewayAuthManager;
@@ -21,6 +17,10 @@ use codex_models_manager::manager::StaticModelsManager;
 use codex_protocol::account::ProviderAccount;
 use codex_protocol::error::CodexErr;
 use codex_protocol::openai_models::ModelsResponse;
+use codex_transport::api::ApiError;
+use codex_transport::api::Provider;
+use codex_transport::api::SharedAuthProvider;
+use codex_transport::api::TransportError;
 
 use crate::ProviderCapabilities;
 #[cfg(test)]
@@ -125,7 +125,8 @@ pub trait ModelProvider: fmt::Debug + Send + Sync {
             || url::Url::parse(&provider.base_url).ok().is_some_and(|url| {
                 url.scheme() == "https"
                     && url.host_str().is_some_and(|host| {
-                        host == "api.openai.com" || codex_transport::http::is_allowed_chatgpt_host(host)
+                        host == "api.openai.com"
+                            || codex_transport::http::is_allowed_chatgpt_host(host)
                     })
             })
     }
@@ -594,8 +595,6 @@ mod tests {
     #[cfg(feature = "bedrock")]
     use std::task::Waker;
 
-    use codex_transport::http::HttpClientFactory;
-    use codex_transport::http::OutboundProxyPolicy;
     use codex_login::auth::AgentIdentityAuthPolicy;
     use codex_login::auth::BedrockApiKeyAuth;
     #[cfg(feature = "bedrock")]
@@ -614,6 +613,8 @@ mod tests {
     use codex_protocol::openai_models::ModelInfo;
     use codex_protocol::openai_models::ModelsResponse;
     use codex_protocol::protocol::SessionSource;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
     #[cfg(feature = "bedrock")]
     use codex_utils_redacted_string::RedactedString;
     use pretty_assertions::assert_eq;

@@ -7,8 +7,8 @@
 use serde::Serialize;
 use std::time::Duration;
 
-use codex_transport::http::HttpClient;
 use codex_protocol::auth::AuthMode;
+use codex_transport::http::HttpClient;
 
 use super::manager::REFRESH_TOKEN_URL_OVERRIDE_ENV_VAR;
 use super::manager::REVOKE_TOKEN_URL;

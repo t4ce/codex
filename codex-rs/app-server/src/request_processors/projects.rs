@@ -324,11 +324,12 @@ fn validate_roots(roots: Vec<ProjectRoot>) -> Result<Vec<StoredProjectRoot>, JSO
     roots
         .into_iter()
         .map(|root| {
-            let path = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path_checked(
-                root.path.into_path_buf(),
-            )
-            .map_err(|error| invalid_params(format!("invalid project root: {error}")))?
-            .into_path_buf();
+            let path =
+                codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path_checked(
+                    root.path.into_path_buf(),
+                )
+                .map_err(|error| invalid_params(format!("invalid project root: {error}")))?
+                .into_path_buf();
             if !logical.insert(path.clone()) {
                 return Err(invalid_params(format!(
                     "duplicate project root: {}",
@@ -369,10 +370,12 @@ fn api_project(project: StoredProject) -> Result<Project, JSONRPCErrorError> {
             .into_iter()
             .map(|root| {
                 Ok(ProjectRoot {
-                    path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(root.path)
-                        .map_err(|error| {
-                            internal_error(format!("stored project root is not absolute: {error}"))
-                        })?,
+                    path: codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
+                        root.path,
+                    )
+                    .map_err(|error| {
+                        internal_error(format!("stored project root is not absolute: {error}"))
+                    })?,
                 })
             })
             .collect::<Result<_, JSONRPCErrorError>>()?,

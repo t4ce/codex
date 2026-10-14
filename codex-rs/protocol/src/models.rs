@@ -24,8 +24,8 @@ use crate::permissions::NetworkSandboxPolicy;
 use crate::permissions::RawFileSystemSandboxEntry;
 use crate::protocol::SandboxPolicy;
 use crate::user_input::UserInput;
-use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_image::ImageProcessingError;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use schemars::JsonSchema;
 
 use crate::ResponseItemId;

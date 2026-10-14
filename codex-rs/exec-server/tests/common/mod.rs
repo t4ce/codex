@@ -11,12 +11,12 @@ use codex_exec_server::CODEX_FS_HELPER_ARG1;
 use codex_exec_server::ExecServerRuntimeOptions;
 use codex_exec_server::ExecServerTelemetry;
 use codex_exec_server::RequestDispatchMode;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_sandboxing::landlock::CODEX_LINUX_SANDBOX_ARG0;
 use codex_test_binary_support::TestBinaryDispatchGuard;
 use codex_test_binary_support::TestBinaryDispatchMode;
 use codex_test_binary_support::configure_test_binary_dispatch;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use ctor::ctor;
 
 pub(crate) mod exec_server;

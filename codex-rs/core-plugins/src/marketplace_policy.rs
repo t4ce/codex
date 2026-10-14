@@ -543,8 +543,9 @@ fn is_expected_managed_path(path: &Path, expected: &Path) -> bool {
             .chain(canonical_expected.as_deref())
             .any(|expected| {
                 let expected = expected.to_string_lossy();
-                let expected = codex_utils_paths::absolute_path::normalize_windows_device_path(&expected)
-                    .unwrap_or_else(|| expected.into_owned());
+                let expected =
+                    codex_utils_paths::absolute_path::normalize_windows_device_path(&expected)
+                        .unwrap_or_else(|| expected.into_owned());
                 path.eq_ignore_ascii_case(&expected.replace('/', "\\"))
             })
     }

@@ -38,6 +38,18 @@ mod tool_metadata;
 use crate::CodexResponsesHeaders;
 use crate::tools::ExecutedToolCalls;
 use async_channel::Sender;
+use codex_login::AuthManager;
+use codex_login::CodexAuth;
+use codex_login::RefreshTokenError;
+use codex_login::UnauthorizedRecovery;
+use codex_login::default_client::ClientRedirectPolicy;
+use codex_login::default_client::add_originator_header;
+use codex_login::default_client::create_client_for_route;
+use codex_otel::SessionTelemetry;
+use codex_otel::WEBSOCKET_CONTINUATION_COUNT_METRIC;
+use codex_otel::current_span_w3c_trace_context;
+use codex_protocol::ResponseItemId;
+use codex_protocol::auth::AuthMode;
 use codex_transport::api::AgentIdentityTelemetry;
 use codex_transport::api::ApiError;
 use codex_transport::api::AuthProvider;
@@ -71,18 +83,6 @@ use codex_transport::api::create_text_param_for_request;
 use codex_transport::api::response_create_client_metadata;
 use codex_transport::http::ClientRouteClass;
 use codex_transport::http::HttpClientFactory;
-use codex_login::AuthManager;
-use codex_login::CodexAuth;
-use codex_login::RefreshTokenError;
-use codex_login::UnauthorizedRecovery;
-use codex_login::default_client::ClientRedirectPolicy;
-use codex_login::default_client::add_originator_header;
-use codex_login::default_client::create_client_for_route;
-use codex_otel::SessionTelemetry;
-use codex_otel::WEBSOCKET_CONTINUATION_COUNT_METRIC;
-use codex_otel::current_span_w3c_trace_context;
-use codex_protocol::ResponseItemId;
-use codex_protocol::auth::AuthMode;
 
 use codex_protocol::ThreadId;
 use codex_protocol::config_types::ReasoningSummary as ReasoningSummaryConfig;
@@ -1024,7 +1024,8 @@ impl ModelClient {
             && is_openai
             && reasoning.summary.is_some())
         .then_some(StreamOptions {
-            reasoning_summary_delivery: codex_transport::api::ReasoningSummaryDelivery::SequentialCutoff,
+            reasoning_summary_delivery:
+                codex_transport::api::ReasoningSummaryDelivery::SequentialCutoff,
         });
         let mut include = vec!["reasoning.encrypted_content".to_string()];
         if self.state.output_token_replay_enabled && is_openai {

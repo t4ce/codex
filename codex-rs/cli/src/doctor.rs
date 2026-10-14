@@ -29,9 +29,6 @@ use std::time::Instant as StdInstant;
 
 use anyhow::Context;
 use clap::Parser;
-use codex_transport::api::ApiError;
-use codex_transport::api::ResponsesWebsocketClient;
-use codex_transport::api::is_azure_responses_provider;
 use codex_arg0::Arg0DispatchPaths;
 use codex_config::ConfigLoadError;
 use codex_config::types::McpServerConfig;
@@ -41,10 +38,6 @@ use codex_core::config::ConfigOverrides;
 use codex_core::config::LoaderOverrides;
 use codex_core::config::find_codex_home;
 use codex_features::FEATURES;
-use codex_transport::http::ClientRouteClass;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
-use codex_transport::http::RouteAwareClientPool;
 use codex_install_context::CodexPackageLayout;
 use codex_install_context::InstallContext;
 use codex_install_context::InstallMethod;
@@ -65,6 +58,13 @@ use codex_terminal_detection::Multiplexer;
 use codex_terminal_detection::TerminalInfo;
 use codex_terminal_detection::TerminalName;
 use codex_terminal_detection::terminal_info;
+use codex_transport::api::ApiError;
+use codex_transport::api::ResponsesWebsocketClient;
+use codex_transport::api::is_azure_responses_provider;
+use codex_transport::http::ClientRouteClass;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
+use codex_transport::http::RouteAwareClientPool;
 use codex_tui::Cli as TuiCli;
 use codex_utils_cli::CliConfigOverrides;
 use http::HeaderMap;
@@ -3663,7 +3663,8 @@ mod tests {
 
     #[test]
     fn provider_reachability_adds_models_route_probe_for_openai_compatible_base_urls() {
-        let query_params = StdHashMap::from([("api-version".to_string(), "2026-01-01".to_string())]);
+        let query_params =
+            StdHashMap::from([("api-version".to_string(), "2026-01-01".to_string())]);
 
         for (mode, description) in [
             (ProviderAuthReachabilityMode::NotRequired, "provider auth"),

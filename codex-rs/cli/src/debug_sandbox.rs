@@ -34,8 +34,8 @@ use codex_sandboxing::seatbelt::CreateSeatbeltCommandArgsParams;
 #[cfg(target_os = "macos")]
 use codex_sandboxing::seatbelt::create_seatbelt_command_args;
 use codex_sandboxing::with_managed_mitm_ca_readable_root;
-use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use tokio::process::Child;
 use tokio::process::Command as TokioCommand;
 use toml::Value as TomlValue;

@@ -1,7 +1,5 @@
 //! Exercises global operation buffering across shutdown and rejected configuration changes.
 
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_otel::MetricsClient;
 use codex_otel::MetricsConfig;
 use codex_otel::OtelExporter;
@@ -10,6 +8,8 @@ use codex_otel::OtelProvider;
 use codex_otel::OtelSettings;
 use codex_otel::install_global_metrics;
 use codex_otel::record_global_operation;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use opentelemetry_sdk::metrics::data::AggregatedMetrics;
 use opentelemetry_sdk::metrics::data::MetricData;
 use pretty_assertions::assert_eq;

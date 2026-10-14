@@ -1,3 +1,7 @@
+use codex_login::default_client::add_originator_header;
+use codex_login::default_client::create_transport_for_routes_async;
+use codex_model_provider::SharedModelProvider;
+use codex_protocol::error::CodexErr;
 use codex_transport::api::ImageEditRequest;
 use codex_transport::api::ImageGenerationRequest;
 use codex_transport::api::ImageRequestError;
@@ -7,10 +11,6 @@ use codex_transport::api::ReqwestTransport;
 use codex_transport::api::map_api_error;
 use codex_transport::http::ClientRouteClass;
 use codex_transport::http::HttpClientFactory;
-use codex_login::default_client::add_originator_header;
-use codex_login::default_client::create_transport_for_routes_async;
-use codex_model_provider::SharedModelProvider;
-use codex_protocol::error::CodexErr;
 use http::HeaderMap;
 use http::HeaderValue;
 

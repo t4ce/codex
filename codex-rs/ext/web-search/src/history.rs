@@ -1,4 +1,3 @@
-use codex_transport::api::SearchInput;
 use codex_core::parse_turn_item;
 use codex_protocol::items::TurnItem;
 use codex_protocol::models::ContentItem;
@@ -6,6 +5,7 @@ use codex_protocol::models::ResponseItem;
 use codex_protocol::models::plaintext_agent_message_content;
 use codex_tools::retain_tail_from_last_n_user_messages;
 use codex_tools::truncate_assistant_output_text_to_token_budget;
+use codex_transport::api::SearchInput;
 
 const ASSISTANT_CONTEXT_TOKEN_LIMIT: usize = 1_000;
 const ASSISTANT_ROLE: &str = "assistant";
@@ -88,11 +88,11 @@ fn push_visible_message(messages: &mut Vec<ResponseItem>, item: &ResponseItem) {
 
 #[cfg(test)]
 mod tests {
-    use codex_transport::api::SearchInput;
     use codex_protocol::ResponseItemId;
     use codex_protocol::models::ContentItem;
     use codex_protocol::models::ImageReference;
     use codex_protocol::models::ResponseItem;
+    use codex_transport::api::SearchInput;
     use pretty_assertions::assert_eq;
 
     use super::ASSISTANT_ROLE;

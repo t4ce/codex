@@ -16,8 +16,6 @@ mod http_client_redirect;
 mod http_headers;
 mod in_process_transport;
 mod local_stdio_transport;
-#[cfg(any(target_os = "trueos", test))]
-mod vmx_stdio_transport;
 mod logging_client_handler;
 mod oauth;
 mod oauth_callback;
@@ -36,6 +34,8 @@ mod tool_input;
 mod trace_context;
 mod user_verification;
 mod utils;
+#[cfg(any(target_os = "trueos", test))]
+mod vmx_stdio_transport;
 mod www_authenticate;
 
 pub use auth_status::McpAuthState;

@@ -13,10 +13,10 @@ use crate::updates_cache::read_version_info;
 use crate::updates_cache::version_filepath;
 use chrono::Duration;
 use chrono::Utc;
+use codex_login::default_client::default_headers;
 use codex_transport::http::ClientRouteClass;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::RouteAwareClientPool;
-use codex_login::default_client::default_headers;
 use serde::Deserialize;
 use std::path::Path;
 

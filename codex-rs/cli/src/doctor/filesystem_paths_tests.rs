@@ -237,7 +237,8 @@ extends = ":read-only"
         .build()
         .await
         .unwrap();
-    let user_home = codex_utils_paths::absolute_path::AbsolutePathBufGuard::home_directory().unwrap();
+    let user_home =
+        codex_utils_paths::absolute_path::AbsolutePathBufGuard::home_directory().unwrap();
     let path = PathUri::from_host_native_path(user_home.join("doctor-provenance")).unwrap();
     assert_eq!(
         source(&config, &path),

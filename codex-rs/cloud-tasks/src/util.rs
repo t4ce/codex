@@ -4,9 +4,9 @@ use chrono::Utc;
 use http::header::HeaderMap;
 
 use codex_core::config::Config;
+use codex_login::AuthManager;
 use codex_transport::http::HttpClientFactory;
 use codex_transport::http::OutboundProxyPolicy;
-use codex_login::AuthManager;
 use std::sync::Arc;
 
 pub fn set_user_agent_suffix(suffix: &str) {

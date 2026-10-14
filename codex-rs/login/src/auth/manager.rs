@@ -73,14 +73,14 @@ use crate::token_data::parse_chatgpt_jwt_claims;
 use crate::token_data::parse_jwt_expiration;
 use codex_config::ManagedAuthPolicy;
 use codex_config::types::AuthCredentialsStoreMode;
-use codex_transport::http::HttpClient;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::OutboundProxyPolicy;
 use codex_protocol::account::PlanType as AccountPlanType;
 use codex_protocol::auth::PlanType as InternalPlanType;
 use codex_protocol::auth::RefreshTokenFailedError;
 use codex_protocol::auth::RefreshTokenFailedReason;
 use codex_protocol::protocol::SessionSource;
+use codex_transport::http::HttpClient;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::OutboundProxyPolicy;
 use thiserror::Error;
 pub use workspace_routing::WorkspaceRouting;
 pub use workspace_routing::WorkspaceRoutingRequest;
@@ -1649,7 +1649,9 @@ async fn request_chatgpt_token_refresh(
     {
         Ok(response) => Ok(response),
         Err(OAuthError::Rejected(rejection)) => {
-            if let Some(codex_transport::http::HttpError::Policy(denied)) = rejection.body_read_error {
+            if let Some(codex_transport::http::HttpError::Policy(denied)) =
+                rejection.body_read_error
+            {
                 return Err(denied.into());
             }
             let status = rejection.status;

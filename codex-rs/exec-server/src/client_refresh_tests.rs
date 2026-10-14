@@ -375,34 +375,33 @@ async fn registration_renewal_recovers_the_session_and_running_process() -> Resu
     );
     let original = client.get().await?;
     let session_id = original.session_id();
-    let process =
-        original
-            .start_process(
-                crate::protocol::ExecParams {
-                    metadata: Default::default(),
-                    process_id: ProcessId::from("renewed-process"),
-                    argv: vec![
-                        "/bin/sh".to_owned(),
-                        "-c".to_owned(),
-                        "IFS= read line; printf 'from-stdin:%s\\n' \"$line\"".to_owned(),
-                    ],
-                    cwd: codex_utils_paths::path_uri::PathUri::from_host_native_path(
-                        std::env::current_dir()?,
-                    )?,
-                    shell_snapshot: None,
-                    env_policy: None,
-                    env: Default::default(),
-                    tty: false,
-                    pipe_stdin: true,
-                    arg0: None,
-                    sandbox: None,
-                    enforce_managed_network: false,
-                    managed_network: None,
-                    network_proxy: None,
-                },
-                /*network_policy_decider*/ None,
-            )
-            .await?;
+    let process = original
+        .start_process(
+            crate::protocol::ExecParams {
+                metadata: Default::default(),
+                process_id: ProcessId::from("renewed-process"),
+                argv: vec![
+                    "/bin/sh".to_owned(),
+                    "-c".to_owned(),
+                    "IFS= read line; printf 'from-stdin:%s\\n' \"$line\"".to_owned(),
+                ],
+                cwd: codex_utils_paths::path_uri::PathUri::from_host_native_path(
+                    std::env::current_dir()?,
+                )?,
+                shell_snapshot: None,
+                env_policy: None,
+                env: Default::default(),
+                tty: false,
+                pipe_stdin: true,
+                arg0: None,
+                sandbox: None,
+                enforce_managed_network: false,
+                managed_network: None,
+                network_proxy: None,
+            },
+            /*network_policy_decider*/ None,
+        )
+        .await?;
     let mut events = process.subscribe_events();
     *registry.target.lock().unwrap() = renewed.target.clone();
     disconnect(&original).await;

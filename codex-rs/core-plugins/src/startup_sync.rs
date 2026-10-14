@@ -7,11 +7,11 @@ use std::process::Stdio;
 use std::time::Duration;
 
 use self::http_client::StartupSyncHttpClient;
-use codex_transport::http::HttpClientFactory;
-use codex_transport::http::RequestBuilder;
 use codex_login::default_client::default_headers;
 use codex_otel::CURATED_PLUGINS_STARTUP_SYNC_FINAL_METRIC;
 use codex_otel::CURATED_PLUGINS_STARTUP_SYNC_METRIC;
+use codex_transport::http::HttpClientFactory;
+use codex_transport::http::RequestBuilder;
 use http::Method;
 use serde::Deserialize;
 use tempfile::TempDir;

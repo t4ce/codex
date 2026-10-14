@@ -2,7 +2,6 @@
 
 use anyhow::Result;
 use codex_features::Feature;
-use codex_transport::http::cache_system_proxy_route_for_test;
 use codex_login::CodexAuth;
 use codex_models_manager::bundled_models_response;
 use codex_protocol::protocol::CodexResponseHandoffMode;
@@ -14,6 +13,7 @@ use codex_protocol::protocol::RealtimeConversationRealtimeEvent;
 use codex_protocol::protocol::RealtimeConversationVersion;
 use codex_protocol::protocol::RealtimeEvent;
 use codex_protocol::protocol::RealtimeOutputModality;
+use codex_transport::http::cache_system_proxy_route_for_test;
 use core_test_support::responses::start_mock_server;
 use core_test_support::skip_if_no_network;
 use core_test_support::test_codex::test_codex;
