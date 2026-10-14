@@ -61,6 +61,14 @@ use crate::tui::scrollback::ScrollbackStrategy;
 use codex_config::types::NotificationCondition;
 use codex_config::types::NotificationMethod;
 
+#[cfg(target_os = "trueos")]
+unsafe extern "C" {
+    fn trueos_cabi_blueprint_terminal_lease_current_v1(
+        ready_epoch: u64,
+        out_epoch: *mut u64,
+    ) -> i32;
+}
+
 mod alternate_screen;
 mod event_stream;
 mod frame_rate_limiter;
@@ -243,6 +251,19 @@ mod tests {
 }
 
 pub fn set_modes() -> Result<()> {
+    #[cfg(target_os = "trueos")]
+    {
+        // The first ANSI write must go to the terminal surface, not the
+        // Matrix transcript. Raw mode's implicit lease claim happens later.
+        let mut epoch = 0;
+        let status = unsafe { trueos_cabi_blueprint_terminal_lease_current_v1(0, &mut epoch) };
+        if status != 0 || epoch == 0 {
+            return Err(io::Error::other(format!(
+                "failed to claim TRUEOS terminal lease (status {status}, epoch {epoch})"
+            )));
+        }
+    }
+
     ensure_virtual_terminal_processing()?;
 
     execute!(stdout(), EnableBracketedPaste)?;
