@@ -29,6 +29,7 @@ members = [
     "code-mode",
     "code-mode-host",
     "code-mode-protocol",
+    "code-mode-quickjs",
     "code-mode-runtime",
     "codex-home",
     "cloud-config",
@@ -192,6 +193,7 @@ codex-cloud-tasks-client = { path = "cloud-tasks-client" }
 codex-cloud-tasks-mock-client = { path = "cloud-tasks-mock-client" }
 codex-code-mode = { path = "code-mode" }
 codex-code-mode-protocol = { path = "code-mode-protocol" }
+codex-code-mode-quickjs = { path = "code-mode-quickjs" }
 codex-code-mode-runtime = { path = "code-mode-runtime" }
 codex-home = { path = "codex-home" }
 codex-websocket-auth = { path = "websocket-auth" }

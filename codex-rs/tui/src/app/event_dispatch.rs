@@ -2791,11 +2791,11 @@ impl App {
                     .await
                 {
                     tracing::error!(
-                        error = %err,
+                        error = %format!("{err:#}"),
                         "failed to persist model migration prompt acknowledgement"
                     );
                     self.chat_widget.add_error_message(format!(
-                        "Failed to save model migration prompt preference: {err}"
+                        "Failed to save model migration prompt preference: {err:#}"
                     ));
                 }
             }

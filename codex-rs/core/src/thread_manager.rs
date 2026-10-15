@@ -47,6 +47,7 @@ use codex_attachment_store::AttachmentStore;
 use codex_attachment_store::InlineAttachmentStore;
 use codex_code_mode::CodeModeSessionProvider;
 use codex_code_mode::DisabledCodeModeSessionProvider;
+#[cfg(not(target_os = "trueos"))]
 use codex_code_mode::ProcessOwnedCodeModeSessionProvider;
 use codex_core_plugins::PluginsManager;
 use codex_exec_server::EnvironmentManager;
@@ -682,16 +683,26 @@ impl ThreadManager {
         config: &Config,
         host_program: PathBuf,
     ) -> Arc<dyn CodeModeSessionProvider> {
-        if config.features.enabled(Feature::CodeModeHostGrpc) {
-            Arc::new(
-                crate::code_mode_host::ProcessOwnedGrpcCodeModeSessionProvider::with_host_program(
+        #[cfg(target_os = "trueos")]
+        {
+            // TRUEOS runs its native interpreter through the same session and
+            // tool-delegation contracts, without spawning a Unix/V8 host.
+            let _ = (config, host_program);
+            Arc::new(codex_code_mode_quickjs::QuickJsCodeModeSessionProvider::default())
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            if config.features.enabled(Feature::CodeModeHostGrpc) {
+                Arc::new(
+                    crate::code_mode_host::ProcessOwnedGrpcCodeModeSessionProvider::with_host_program(
+                        host_program,
+                    ),
+                )
+            } else {
+                Arc::new(ProcessOwnedCodeModeSessionProvider::with_host_program(
                     host_program,
-                ),
-            )
-        } else {
-            Arc::new(ProcessOwnedCodeModeSessionProvider::with_host_program(
-                host_program,
-            ))
+                ))
+            }
         }
     }
 

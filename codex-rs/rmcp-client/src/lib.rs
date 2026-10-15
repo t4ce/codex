@@ -17,6 +17,7 @@ mod http_headers;
 mod in_process_transport;
 mod local_stdio_transport;
 mod logging_client_handler;
+mod mcp_phase_timing;
 mod oauth;
 mod oauth_callback;
 mod oauth_client_credentials;

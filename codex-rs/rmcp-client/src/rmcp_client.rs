@@ -698,8 +698,22 @@ impl RmcpClient {
         params: Option<PaginatedRequestParams>,
         timeout: Option<Duration>,
     ) -> Result<ListToolsResult> {
+        let phase_capture = crate::mcp_phase_timing::Capture::new(
+            "operation",
+            Some("tools/list"),
+            timeout.map(|duration| u64::try_from(duration.as_millis()).unwrap_or(u64::MAX)),
+        );
+        let mut phase = phase_capture
+            .as_ref()
+            .map(|capture| capture.phase("operation"));
         let mut params = crate::trace_context::traced_pagination(params);
-        self.refresh_oauth_if_needed().await?;
+        let refreshed = self.refresh_oauth_if_needed().await;
+        if refreshed.is_err() {
+            if let Some(phase) = phase.as_mut() {
+                phase.finish(true);
+            }
+        }
+        refreshed?;
         if self.requires_read_only_tools {
             self.apply_read_only_tools_meta(&mut params.get_or_insert_default().meta);
         }
@@ -708,7 +722,11 @@ impl RmcpClient {
                 let params = params.clone();
                 async move { service.list_tools(params).await }.boxed()
             })
-            .await?;
+            .await;
+        if let Some(phase) = phase.as_mut() {
+            phase.finish(result.is_err());
+        }
+        let result = result?;
         self.persist_oauth_tokens().await;
         Ok(result)
     }

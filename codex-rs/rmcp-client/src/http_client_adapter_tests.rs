@@ -283,3 +283,78 @@ fn size_accounting_saturates_without_overflow() {
 
     assert_eq!((error.kind(), limit.failed), (ErrorKind::InvalidData, true));
 }
+
+#[tokio::test]
+async fn observed_body_preserves_chunks_and_reports_first_byte_and_total() {
+    let capture = crate::mcp_phase_timing::Capture::new("http", Some("tools/list"), None).unwrap();
+    let mut body = codex_exec_server::HttpResponseBodyStream::from_chunks(vec![
+        b"abc".to_vec(),
+        b"defg".to_vec(),
+    ]);
+    let actual = super::collect_body_observed(&mut body, None, Some(&capture))
+        .await
+        .unwrap();
+    assert_eq!(actual, b"abcdefg");
+    assert_eq!(
+        capture.test_records(),
+        vec![
+            ("body", "started", 0),
+            ("first_body_byte", "complete", 3),
+            ("body", "complete", 7)
+        ]
+    );
+}
+
+#[tokio::test]
+async fn observed_body_limit_is_reported_as_error_without_changing_limit() {
+    let capture = crate::mcp_phase_timing::Capture::new("http", Some("tools/list"), None).unwrap();
+    let mut body = codex_exec_server::HttpResponseBodyStream::from_chunks(vec![b"abc".to_vec()]);
+    assert!(
+        super::collect_body_observed(&mut body, Some(2), Some(&capture))
+            .await
+            .is_err()
+    );
+    assert_eq!(capture.test_records().last(), Some(&("body", "error", 3)));
+}
+
+#[tokio::test]
+async fn observed_sse_preserves_events_and_records_first_parsed_event() {
+    use futures::StreamExt;
+    let capture = crate::mcp_phase_timing::Capture::new("http", Some("tools/list"), None).unwrap();
+    let body = codex_exec_server::HttpResponseBodyStream::from_chunks(vec![
+        b"data: one\n\n".to_vec(),
+        b"data: two\n\n".to_vec(),
+    ]);
+    let mut stream = super::sse_stream_from_body_observed(body, None, Some(capture.clone()));
+    assert_eq!(
+        stream.next().await.unwrap().unwrap().data.as_deref(),
+        Some("one")
+    );
+    assert_eq!(
+        stream.next().await.unwrap().unwrap().data.as_deref(),
+        Some("two")
+    );
+    assert!(stream.next().await.is_none());
+    drop(stream);
+    let records = capture.test_records();
+    assert_eq!(
+        records
+            .iter()
+            .filter(|(phase, state, _)| *phase == "first_sse_event" && *state == "complete")
+            .count(),
+        1
+    );
+    assert!(records.contains(&("body", "complete", 22)));
+}
+
+#[test]
+fn unconsumed_sse_is_distinct_from_successful_body_completion() {
+    let capture = crate::mcp_phase_timing::Capture::new("http", Some("tools/list"), None).unwrap();
+    let body =
+        codex_exec_server::HttpResponseBodyStream::from_chunks(vec![b"data: one\n\n".to_vec()]);
+    let stream = super::sse_stream_from_body_observed(body, None, Some(capture.clone()));
+    drop(stream);
+    let records = capture.test_records();
+    assert!(records.contains(&("body", "cancelled", 0)));
+    assert!(!records.iter().any(|(_, state, _)| *state == "complete"));
+}

@@ -2772,6 +2772,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "codex-code-mode-quickjs"
+version = "0.0.0"
+dependencies = [
+ "codex-code-mode-protocol",
+ "codex-protocol",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "trueos-qjs",
+]
+
+[[package]]
 name = "codex-code-mode-runtime"
 version = "0.0.0"
 dependencies = [
@@ -2918,6 +2930,7 @@ dependencies = [
  "codex-async-utils",
  "codex-attachment-store",
  "codex-code-mode",
+ "codex-code-mode-quickjs",
  "codex-config",
  "codex-connectors",
  "codex-context-fragments",
@@ -16408,6 +16421,15 @@ name = "trueos-math"
 version = "0.1.0"
 dependencies = [
  "libm",
+]
+
+[[package]]
+name = "trueos-qjs"
+version = "0.1.0"
+dependencies = [
+ "cc",
+ "spin 0.10.1",
+ "v",
 ]
 
 [[package]]

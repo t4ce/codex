@@ -149,6 +149,11 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         custom_headers: HashMap<HeaderName, HeaderValue>,
     ) -> std::result::Result<StreamableHttpPostResponse, StreamableHttpError<Self::Error>> {
         let (mcp_method, mcp_request_id) = client_jsonrpc_message_fields(&message);
+        let phase_capture =
+            crate::mcp_phase_timing::Capture::new("http", mcp_method.as_deref(), None);
+        let mut prepare_phase = phase_capture
+            .as_ref()
+            .map(|capture| capture.synchronous_phase("prepare"));
         let has_session_id = session_id.is_some();
         let mut headers = self.default_headers.clone();
         headers.extend(custom_headers);
@@ -219,6 +224,9 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
             None
         };
 
+        if let Some(capture) = phase_capture.as_ref() {
+            capture.set_deadline(timeout_ms);
+        }
         let body = serde_json::to_value(&message).map_err(StreamableHttpError::Deserialize)?;
         let request_span = crate::trace_context::request_span(&body);
         let body = serde_json::to_vec(&body).map_err(StreamableHttpError::Deserialize)?;
@@ -236,6 +244,14 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
             return Ok(StreamableHttpPostResponse::Accepted);
         }
 
+        if let Some(phase) = prepare_phase.as_mut() {
+            phase.finish(false);
+        }
+        drop(prepare_phase);
+        // The interval includes dispatch through a local or executor HTTP client.
+        let mut headers_phase = phase_capture
+            .as_ref()
+            .map(|capture| capture.phase("headers"));
         let request = self
             .http_client
             .http_request_stream(HttpRequestParams {
@@ -260,6 +276,13 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         } else {
             request.await
         };
+        if let (Some(capture), Ok((response, _))) = (phase_capture.as_ref(), &response) {
+            capture.response_status(response.status);
+        }
+        if let Some(phase) = headers_phase.as_mut() {
+            phase.finish(response.is_err());
+        }
+        drop(headers_phase);
         let (response, mut body_stream) = match response {
             Ok(response) => response,
             Err(error) => {
@@ -315,7 +338,12 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         let content_type = response_header(&response.headers, CONTENT_TYPE);
         let session_id = response_header(&response.headers, HEADER_SESSION_ID);
         if !status_is_success(response.status) {
-            let body = collect_body(&mut body_stream, maximum_response_bytes).await?;
+            let body = collect_body_observed(
+                &mut body_stream,
+                maximum_response_bytes,
+                phase_capture.as_ref(),
+            )
+            .await?;
             if !retryable_post_response_status(mcp_method.as_deref(), response.status)
                 && (content_type
                     .as_deref()
@@ -366,7 +394,11 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         }
         match content_type.as_deref() {
             Some(content_type) if content_type.starts_with(EVENT_STREAM_MIME_TYPE) => {
-                let mut event_stream = sse_stream_from_body(body_stream, maximum_response_bytes);
+                let mut event_stream = sse_stream_from_body_observed(
+                    body_stream,
+                    maximum_response_bytes,
+                    phase_capture.clone(),
+                );
                 if mcp_method.as_deref() == Some(DiscoverRequestMethod::VALUE) {
                     while let Some(event) = event_stream.next().await {
                         let event = event.map_err(StreamableHttpError::Sse)?;
@@ -429,9 +461,21 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
                 Ok(StreamableHttpPostResponse::Sse(event_stream, session_id))
             }
             Some(content_type) if content_type.starts_with(JSON_MIME_TYPE) => {
-                let body = collect_body(&mut body_stream, maximum_response_bytes).await?;
-                let response_message =
-                    serde_json::from_slice(&body).map_err(StreamableHttpError::Deserialize)?;
+                let body = collect_body_observed(
+                    &mut body_stream,
+                    maximum_response_bytes,
+                    phase_capture.as_ref(),
+                )
+                .await?;
+                let mut decode_phase = phase_capture
+                    .as_ref()
+                    .map(|capture| capture.phase("json_decode"));
+                let decoded = serde_json::from_slice(&body);
+                if let Some(phase) = decode_phase.as_mut() {
+                    phase.finish(decoded.is_err());
+                }
+                drop(decode_phase);
+                let response_message = decoded.map_err(StreamableHttpError::Deserialize)?;
                 Ok(StreamableHttpPostResponse::Json(
                     legacy_discovery_fallback_response(
                         &message,
@@ -442,7 +486,12 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
                 ))
             }
             _ => {
-                let body = collect_body(&mut body_stream, maximum_response_bytes).await?;
+                let body = collect_body_observed(
+                    &mut body_stream,
+                    maximum_response_bytes,
+                    phase_capture.as_ref(),
+                )
+                .await?;
                 let content_type = content_type.unwrap_or_else(|| "missing-content-type".into());
                 Err(StreamableHttpError::UnexpectedContentType(Some(format!(
                     "{content_type}; body: {}",
@@ -938,25 +987,43 @@ fn has_legacy_fallback_evidence(message: &str) -> bool {
         })
 }
 
-async fn collect_body(
+async fn collect_body_observed(
     body_stream: &mut HttpResponseBodyStream,
     maximum_bytes: Option<usize>,
+    capture: Option<&crate::mcp_phase_timing::Capture>,
 ) -> std::result::Result<Vec<u8>, StreamableHttpError<StreamableHttpClientAdapterError>> {
+    let mut phase = capture.map(|capture| capture.phase("body"));
     let mut body = Vec::new();
-    while let Some(chunk) = body_stream
-        .recv()
-        .await
-        .map_err(StreamableHttpClientAdapterError::from)
-        .map_err(StreamableHttpError::Client)?
-    {
+    loop {
+        let received = body_stream.recv().await;
+        if received.is_err() {
+            if let Some(phase) = phase.as_mut() {
+                phase.finish(true);
+            }
+        }
+        let Some(chunk) = received
+            .map_err(StreamableHttpClientAdapterError::from)
+            .map_err(StreamableHttpError::Client)?
+        else {
+            break;
+        };
+        if let Some(phase) = phase.as_mut() {
+            phase.bytes(chunk.len());
+        }
         if let Some(maximum_bytes) = maximum_bytes
             && chunk.len() > maximum_bytes.saturating_sub(body.len())
         {
+            if let Some(phase) = phase.as_mut() {
+                phase.finish(true);
+            }
             return Err(StreamableHttpError::Client(
                 StreamableHttpClientAdapterError::ResponseTooLarge { maximum_bytes },
             ));
         }
         body.extend_from_slice(&chunk);
+    }
+    if let Some(phase) = phase.as_mut() {
+        phase.finish(false);
     }
     Ok(body)
 }
@@ -965,22 +1032,62 @@ fn sse_stream_from_body(
     body_stream: HttpResponseBodyStream,
     maximum_event_bytes: Option<usize>,
 ) -> BoxStream<'static, std::result::Result<Sse, sse_stream::Error>> {
+    sse_stream_from_body_observed(body_stream, maximum_event_bytes, None)
+}
+
+fn sse_stream_from_body_observed(
+    body_stream: HttpResponseBodyStream,
+    maximum_event_bytes: Option<usize>,
+    capture: Option<crate::mcp_phase_timing::Capture>,
+) -> BoxStream<'static, std::result::Result<Sse, sse_stream::Error>> {
+    let phase = capture.as_ref().map(|capture| capture.phase("body"));
+    let mut first_event = capture
+        .as_ref()
+        .map(|capture| capture.phase("first_sse_event"));
     SseStream::from_bytes_stream(stream::unfold(
-        (body_stream, SseEventSizeLimit::new(maximum_event_bytes)),
-        |(mut body_stream, mut size_limit)| async move {
+        (
+            body_stream,
+            SseEventSizeLimit::new(maximum_event_bytes),
+            phase,
+        ),
+        |(mut body_stream, mut size_limit, mut phase)| async move {
             match body_stream.recv().await {
                 Ok(Some(bytes)) => {
+                    if let Some(phase) = phase.as_mut() {
+                        phase.bytes(bytes.len());
+                    }
                     if let Err(error) = size_limit.observe(&bytes) {
-                        Some((Err(error), (body_stream, size_limit)))
+                        if let Some(phase) = phase.as_mut() {
+                            phase.finish(true);
+                        }
+                        Some((Err(error), (body_stream, size_limit, phase)))
                     } else {
-                        Some((Ok(Bytes::from(bytes)), (body_stream, size_limit)))
+                        Some((Ok(Bytes::from(bytes)), (body_stream, size_limit, phase)))
                     }
                 }
-                Ok(None) => None,
-                Err(error) => Some((Err(io::Error::other(error)), (body_stream, size_limit))),
+                Ok(None) => {
+                    if let Some(phase) = phase.as_mut() {
+                        phase.finish(false);
+                    }
+                    None
+                }
+                Err(error) => {
+                    if let Some(phase) = phase.as_mut() {
+                        phase.finish(true);
+                    }
+                    Some((
+                        Err(io::Error::other(error)),
+                        (body_stream, size_limit, phase),
+                    ))
+                }
             }
         },
     ))
+    .inspect(move |event| {
+        if let Some(mut phase) = first_event.take() {
+            phase.finish(event.is_err());
+        }
+    })
     .boxed()
 }
 

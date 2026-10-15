@@ -1,0 +1,22 @@
+[package]
+name = "codex-code-mode-quickjs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+doctest = false
+
+[dependencies]
+codex-code-mode-protocol = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt", "sync", "time"] }
+tokio-util = { workspace = true, features = ["rt"] }
+
+trueos-qjs = { path = "../../../TRUEOS-Blueprints/apps/qjs/crates/trueos-qjs", features = ["native-engine"] }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+codex-protocol = { workspace = true }
