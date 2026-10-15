@@ -24,7 +24,7 @@ pub(super) struct TestFileSystem;
 fn embedded_trueos_defaults_choose_luna_with_low_effort() {
     let trueos: TomlValue =
         toml::from_str(&embedded_packaged_defaults(true)).expect("valid TRUEOS defaults");
-    assert_eq!(trueos["model"].as_str(), Some("gpt-5.6-luna"));
+    assert_eq!(trueos["model"].as_str(), Some("gpt-6-luna"));
     assert_eq!(trueos["model_reasoning_effort"].as_str(), Some("low"));
 
     let other: TomlValue =

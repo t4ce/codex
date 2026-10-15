@@ -82,7 +82,7 @@ const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/codex/config.toml";
 // Keep the temporary hardware bring-up default visible in the TRUEOS build.
 // Packaged defaults are the lowest-priority layer, so saved user choices win.
 const TRUEOS_PACKAGED_MODEL_DEFAULTS: &str =
-    "model = \"gpt-5.6-luna\"\nmodel_reasoning_effort = \"low\"\n";
+    "model = \"gpt-6-luna\"\nmodel_reasoning_effort = \"low\"\n";
 
 fn embedded_packaged_defaults(for_trueos: bool) -> String {
     let common = include_str!("../../defaults.toml");
