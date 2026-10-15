@@ -79,6 +79,20 @@ pub use windows::probe_windows_system_config_namespace;
 #[cfg(unix)]
 const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/codex/config.toml";
 
+// Keep the temporary hardware bring-up default visible in the TRUEOS build.
+// Packaged defaults are the lowest-priority layer, so saved user choices win.
+const TRUEOS_PACKAGED_MODEL_DEFAULTS: &str =
+    "model = \"gpt-5.6-luna\"\nmodel_reasoning_effort = \"low\"\n";
+
+fn embedded_packaged_defaults(for_trueos: bool) -> String {
+    let common = include_str!("../../defaults.toml");
+    if for_trueos {
+        format!("{TRUEOS_PACKAGED_MODEL_DEFAULTS}{common}")
+    } else {
+        common.to_owned()
+    }
+}
+
 #[cfg(windows)]
 const DEFAULT_PROGRAM_DATA_DIR_WINDOWS: &str = r"C:\ProgramData";
 
@@ -185,8 +199,8 @@ pub async fn load_config_layers_state(
         )
     } else {
         let file = AbsolutePathBuf::from_absolute_path(std::env::current_exe()?)?;
-        let raw_toml = include_str!("../../defaults.toml");
-        let config = toml::from_str(raw_toml).map_err(|error| {
+        let raw_toml = embedded_packaged_defaults(cfg!(target_os = "trueos"));
+        let config = toml::from_str(&raw_toml).map_err(|error| {
             io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!("invalid embedded packaged defaults; this is a Codex build error: {error}"),
@@ -195,7 +209,7 @@ pub async fn load_config_layers_state(
         ConfigLayerEntry::new_with_raw_toml(
             ConfigLayerSource::PackagedDefaults { file },
             config,
-            raw_toml.to_owned(),
+            raw_toml,
             AbsolutePathBuf::from_absolute_path(codex_home)?,
         )
     };

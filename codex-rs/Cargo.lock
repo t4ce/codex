@@ -4750,6 +4750,7 @@ dependencies = [
  "tungstenite 0.27.0",
  "url",
  "uuid",
+ "webpki-roots 1.0.5",
  "windows-sys 0.61.2",
  "wiremock",
  "zstd",

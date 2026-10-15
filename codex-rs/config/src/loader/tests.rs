@@ -21,6 +21,19 @@ use tempfile::tempdir;
 pub(super) struct TestFileSystem;
 
 #[test]
+fn embedded_trueos_defaults_choose_luna_with_low_effort() {
+    let trueos: TomlValue =
+        toml::from_str(&embedded_packaged_defaults(true)).expect("valid TRUEOS defaults");
+    assert_eq!(trueos["model"].as_str(), Some("gpt-5.6-luna"));
+    assert_eq!(trueos["model_reasoning_effort"].as_str(), Some("low"));
+
+    let other: TomlValue =
+        toml::from_str(&embedded_packaged_defaults(false)).expect("valid standard defaults");
+    assert!(other.get("model").is_none());
+    assert!(other.get("model_reasoning_effort").is_none());
+}
+
+#[test]
 fn project_config_cannot_override_configured_credential_broker_hosts() {
     let mut config: TomlValue = toml::from_str(
         "[shell_environment_policy.set]\n\
@@ -576,6 +589,7 @@ async fn packaged_defaults_have_lower_precedence_than_existing_config_layers() {
         packaged_defaults_path.as_path(),
         r#"
 model = "packaged-model"
+model_reasoning_effort = "low"
 model_provider = "packaged-provider"
 model_context_window = 120000
 "#,
@@ -589,7 +603,11 @@ model_provider = "system-provider"
 "#,
     )
     .expect("write system config");
-    std::fs::write(&user_config_path, r#"model = "user-model""#).expect("write user config");
+    std::fs::write(
+        &user_config_path,
+        "model = \"user-model\"\nmodel_reasoning_effort = \"high\"\n",
+    )
+    .expect("write user config");
 
     let mut overrides = LoaderOverrides::without_managed_config_for_tests();
     overrides.packaged_defaults_path = Some(packaged_defaults_path.clone());
@@ -634,6 +652,7 @@ model_provider = "system-provider"
         stack.effective_config(),
         toml::toml! {
             model = "session-model"
+            model_reasoning_effort = "high"
             model_provider = "system-provider"
             model_context_window = 120000
         }

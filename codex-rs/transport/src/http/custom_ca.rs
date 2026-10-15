@@ -149,6 +149,10 @@ fn build_rustls_client_config(
     // they would get from tungstenite's default rustls connector, then layer in the Codex custom
     // CA bundle on top when configured.
     let mut root_store = RootCertStore::empty();
+    // TRUEOS cannot rely on a Unix CA certificate directory. Match reqwest's
+    // bundled Mozilla trust roots while retaining native and custom roots below.
+    #[cfg(target_os = "trueos")]
+    add_bundled_webpki_roots(&mut root_store);
     let rustls_native_certs::CertificateResult { certs, errors, .. } =
         rustls_native_certs::load_native_certs();
     if !errors.is_empty() {
@@ -157,7 +161,13 @@ fn build_rustls_client_config(
             "encountered errors while loading native root certificates"
         );
     }
-    let _ = root_store.add_parsable_certificates(certs);
+    let (_native_parsed_root_count, _) = root_store.add_parsable_certificates(certs);
+    #[cfg(target_os = "trueos")]
+    tracing::info!(
+        native_parsed_root_count = _native_parsed_root_count,
+        bundled_root_count = webpki_roots::TLS_SERVER_ROOTS.len(),
+        "configured TRUEOS websocket trust roots"
+    );
 
     if let Some(bundle) = bundle {
         let certificates = bundle.load_certificates()?;
@@ -185,6 +195,11 @@ fn build_rustls_client_config(
             .with_root_certificates(root_store)
             .with_no_client_auth(),
     ))
+}
+
+#[cfg(any(target_os = "trueos", test))]
+fn add_bundled_webpki_roots(root_store: &mut RootCertStore) {
+    root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
 }
 
 /// Builds a reqwest client using an injected environment source and reqwest builder.

@@ -1,4 +1,4 @@
-//! Handshake coverage for the custom trust path retained by Windows realtime connections.
+//! Handshake coverage for custom trust and TRUEOS bundled trust roots.
 
 use super::CODEX_CA_CERT_ENV;
 use super::ConfiguredCaBundle;
@@ -10,6 +10,44 @@ use rcgen::CertifiedIssuer;
 use rcgen::IsCa;
 use rcgen::KeyPair;
 use std::sync::Arc;
+
+#[test]
+fn bundled_roots_retain_custom_roots() {
+    let mut roots = rustls::RootCertStore::empty();
+    let mut params = CertificateParams::default();
+    params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
+    let root = CertifiedIssuer::self_signed(params, KeyPair::generate().unwrap()).unwrap();
+    roots.add(root.der().clone()).unwrap();
+    let custom_root = roots.roots[0].clone();
+
+    super::add_bundled_webpki_roots(&mut roots);
+
+    assert_eq!(roots.len(), 1 + webpki_roots::TLS_SERVER_ROOTS.len());
+    assert_eq!(roots.roots[0], custom_root);
+}
+
+#[test]
+fn bundled_roots_reject_untrusted_server() {
+    super::ensure_rustls_crypto_provider();
+    let mut roots = rustls::RootCertStore::empty();
+    super::add_bundled_webpki_roots(&mut roots);
+    let config = Arc::new(
+        rustls::ClientConfig::builder()
+            .with_root_certificates(roots)
+            .with_no_client_auth(),
+    );
+    let leaf = rcgen::generate_simple_self_signed(vec!["localhost".to_string()]).unwrap();
+    let server = Arc::new(
+        rustls::ServerConfig::builder()
+            .with_no_client_auth()
+            .with_single_cert(vec![leaf.cert.der().clone()], leaf.signing_key.into())
+            .unwrap(),
+    );
+    assert!(matches!(
+        handshake(config, server, "localhost"),
+        Err(rustls::Error::InvalidCertificate(_))
+    ));
+}
 
 #[test]
 fn custom_intermediate_trust_preserves_hostname_validation() {
