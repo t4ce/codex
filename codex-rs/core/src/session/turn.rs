@@ -279,10 +279,17 @@ pub(crate) async fn run_turn(
         }
         Err(err) => return Err(err),
     };
+    let post_capture_timing = super::step_phase_timing::Capture::new(
+        &turn_context.session_telemetry,
+        &cancellation_token,
+    );
     // Record initial context while preparing diff display roots.
     let (record_context, display_roots) = tokio::join!(
-        sess.record_context_updates_and_set_reference_context_item(first_step_context.as_ref()),
-        async {
+        post_capture_timing.result_started(
+            "turn_record_context",
+            sess.record_context_updates_and_set_reference_context_item(first_step_context.as_ref())
+        ),
+        post_capture_timing.run_started("turn_display_roots", async {
             // Guardian must not wait for remote Git discovery just to display diff paths.
             if crate::guardian::is_basic_session_source(&turn_context.session_source)
                 || first_step_context
@@ -304,23 +311,33 @@ pub(crate) async fn run_turn(
             } else {
                 turn_diff_display_roots(first_step_context.as_ref()).await
             }
-        },
+        }),
     );
     record_context?;
 
-    let Some((injection_items, explicitly_enabled_connectors)) = build_skills_and_plugins(
-        &sess,
-        first_step_context.as_ref(),
-        &user_input,
-        &mentioned_plugins,
-        &cancellation_token,
-    )
-    .await
+    let Some((injection_items, explicitly_enabled_connectors)) = post_capture_timing
+        .run_started(
+            "turn_skills_plugins",
+            build_skills_and_plugins(
+                &sess,
+                first_step_context.as_ref(),
+                &user_input,
+                &mentioned_plugins,
+                &cancellation_token,
+            ),
+        )
+        .await
     else {
         return Ok(None);
     };
 
-    if run_pending_session_start_hooks(&sess, &turn_context).await {
+    if post_capture_timing
+        .run_started(
+            "turn_start_hooks",
+            run_pending_session_start_hooks(&sess, &turn_context),
+        )
+        .await
+    {
         return Ok(None);
     }
     if crate::guardian::is_basic_session_source(&turn_context.session_source)
@@ -364,14 +381,18 @@ pub(crate) async fn run_turn(
         .await?;
     }
     let mut can_drain_pending_input = input.is_empty();
-    if run_hooks_and_record_inputs(
-        &sess,
-        &turn_context,
-        &first_step_context.settings.model_info,
-        &input,
-        PersistContext::TurnStart,
-    )
-    .await
+    if post_capture_timing
+        .run_started(
+            "turn_hooks_inputs",
+            run_hooks_and_record_inputs(
+                &sess,
+                &turn_context,
+                &first_step_context.settings.model_info,
+                &input,
+                PersistContext::TurnStart,
+            ),
+        )
+        .await
     {
         return Ok(None);
     }
@@ -1611,6 +1632,10 @@ async fn run_sampling_request(
     cancellation_token: CancellationToken,
 ) -> CodexResult<(SamplingRequestResult, Vec<ResponseItem>)> {
     let turn_context = Arc::clone(&step_context.turn);
+    let sampling_timing = super::step_phase_timing::Capture::new(
+        &step_context.session_telemetry,
+        &cancellation_token,
+    );
     let preempt = step_context.preempt.clone().unwrap_or_default();
     let _input_watch = if let Some(preempt) = &step_context.preempt {
         sess.input_queue
@@ -1619,7 +1644,12 @@ async fn run_sampling_request(
     } else {
         None
     };
-    let base_instructions = sess.get_prompt_base_instructions().await;
+    let base_instructions = sampling_timing
+        .run_started(
+            "sampling_base_instructions",
+            sess.get_prompt_base_instructions(),
+        )
+        .await;
 
     let tool_runtime = ToolCallRuntime::new(
         Arc::clone(&sess),
@@ -1651,15 +1681,26 @@ async fn run_sampling_request(
         sess.services
             .executed_tool_calls
             .attach_to_prompt(&mut prompt_input, &mut executed_tool_calls_by_output);
+        let incremental_tools = sampling_timing
+            .run_started(
+                "sampling_incremental_tools",
+                sess.current_window_uses_incremental_tools(&step_context),
+            )
+            .await;
+        let mut prompt_timing = sampling_timing.started_phase("sampling_build_prompt");
         let mut prompt = build_prompt(
             prompt_input,
             step_context.as_ref(),
             base_instructions.clone(),
-            sess.current_window_uses_incremental_tools(&step_context)
-                .await,
+            incremental_tools,
         );
-        let responses_metadata = sess
-            .responses_metadata(step_context.as_ref(), CodexResponsesRequestKind::Turn)
+        prompt_timing.finish(false);
+        drop(prompt_timing);
+        let responses_metadata = sampling_timing
+            .run_started(
+                "sampling_metadata",
+                sess.responses_metadata(step_context.as_ref(), CodexResponsesRequestKind::Turn),
+            )
             .await;
         if crate::guardian::is_basic_session_source(&turn_context.session_source) {
             crate::guardian::prepare_guardian_prompt(
@@ -2562,20 +2603,28 @@ async fn try_run_sampling_request(
     let effort = sess
         .reasoning_effort_for_request(&step_context.settings, super::RequestEffortUsage::Sampling)
         .await;
-    let mut stream = client_session
-        .stream(
-            prompt,
-            &step_context.settings.model_info,
-            &step_context.session_telemetry,
-            effort,
-            step_context.settings.reasoning_summary,
-            step_context.settings.service_tier.clone(),
-            responses_metadata,
-            &inference_trace,
-        )
-        .instrument(trace_span!("stream_request"))
-        .or_cancel(&cancellation_token)
-        .await??;
+    let stream_timing = super::step_phase_timing::Capture::new(
+        &step_context.session_telemetry,
+        &cancellation_token,
+    );
+    let mut stream = stream_timing
+        .result_started("sampling_stream", async {
+            client_session
+                .stream(
+                    prompt,
+                    &step_context.settings.model_info,
+                    &step_context.session_telemetry,
+                    effort,
+                    step_context.settings.reasoning_summary,
+                    step_context.settings.service_tier.clone(),
+                    responses_metadata,
+                    &inference_trace,
+                )
+                .instrument(trace_span!("stream_request"))
+                .or_cancel(&cancellation_token)
+                .await?
+        })
+        .await?;
     if cancellation_token.is_cancelled() {
         return Err(CodexErr::TurnAborted);
     }

@@ -377,7 +377,17 @@ impl SessionTelemetry {
                 | "build_router"
                 | "conversation_snapshot"
                 | "retain_context"
-        ) && matches!(status, "complete" | "cancelled" | "error")
+                | "turn_record_context"
+                | "turn_display_roots"
+                | "turn_skills_plugins"
+                | "turn_start_hooks"
+                | "turn_hooks_inputs"
+                | "sampling_base_instructions"
+                | "sampling_incremental_tools"
+                | "sampling_build_prompt"
+                | "sampling_metadata"
+                | "sampling_stream"
+        ) && matches!(status, "started" | "complete" | "cancelled" | "error")
         {
             log_and_trace_event!(
                 self,
