@@ -61,6 +61,7 @@ impl Default for ProcessOwnedCodeModeSessionProvider {
 
 impl CodeModeSessionProvider for ProcessOwnedCodeModeSessionProvider {
     fn availability(&self) -> Result<(), String> {
+        process_host_platform_availability()?;
         let host_program = &self.host.host_program;
         if host_program.is_file() {
             Ok(())
@@ -83,6 +84,15 @@ impl CodeModeSessionProvider for ProcessOwnedCodeModeSessionProvider {
     ) -> CodeModeSessionProviderFuture<'a> {
         Box::pin(create_host_session(self.process_host(), limits))
     }
+}
+
+fn process_host_platform_availability() -> Result<(), String> {
+    if cfg!(target_os = "trueos") {
+        return Err(
+            "TRUEOS does not support spawning the standalone code-mode host process".to_string(),
+        );
+    }
+    Ok(())
 }
 
 impl CodeModeSessionProvider for DisabledCodeModeSessionProvider {
@@ -133,6 +143,7 @@ impl OwnedCodeModeHost {
     }
 
     async fn connection(&self) -> Result<Arc<Connection>, ConnectionError> {
+        process_host_platform_availability().map_err(ConnectionError::Other)?;
         if let Some(connection) = self.live_connection() {
             return Ok(connection);
         }

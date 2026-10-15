@@ -353,6 +353,50 @@ impl SessionTelemetry {
         }
     }
 
+    /// Numeric-only phase boundaries for TRUEOS step-context captures.
+    pub fn record_step_context_phase(
+        &self,
+        capture_id: u64,
+        phase: &'static str,
+        offset: Duration,
+        duration: Duration,
+        status: &'static str,
+    ) {
+        #[cfg(target_os = "trueos")]
+        if matches!(
+            phase,
+            "capture"
+                | "active_turn_snapshot"
+                | "environment_ready"
+                | "instructions"
+                | "capability_roots"
+                | "capability_discovery"
+                | "mcp_ready"
+                | "recommendations"
+                | "selected_contributors"
+                | "build_router"
+                | "conversation_snapshot"
+                | "retain_context"
+        ) && matches!(status, "complete" | "cancelled" | "error")
+        {
+            log_and_trace_event!(
+                self,
+                common: {
+                    event.name = "codex.step_context_phase",
+                    capture_id = capture_id,
+                    phase = phase,
+                    offset_ms = %offset.as_millis(),
+                    duration_ms = %duration.as_millis(),
+                    status = status,
+                },
+                log: {},
+                trace: {},
+            );
+        }
+        #[cfg(not(target_os = "trueos"))]
+        let _ = (capture_id, phase, offset, duration, status);
+    }
+
     /// Records a coarse startup phase for production latency breakdowns.
     pub fn record_startup_phase(
         &self,

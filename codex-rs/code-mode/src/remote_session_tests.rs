@@ -56,6 +56,7 @@ fn missing_host_error_preserves_utf8_boundaries_when_truncating_the_path() {
 }
 
 #[tokio::test]
+#[cfg(not(target_os = "trueos"))]
 async fn provider_returns_missing_host_error() {
     let provider = ProcessOwnedCodeModeSessionProvider::with_host_program(
         "codex-code-mode-host-does-not-exist".into(),
@@ -68,6 +69,55 @@ async fn provider_returns_missing_host_error() {
         .expect("missing host should fail");
 
     assert!(error.contains("failed to spawn code-mode host codex-code-mode-host-does-not-exist"));
+}
+
+#[test]
+#[cfg(not(target_os = "trueos"))]
+fn provider_accepts_an_existing_host_file() {
+    let provider = ProcessOwnedCodeModeSessionProvider::with_host_program(
+        std::env::current_exe().expect("test executable"),
+    );
+
+    assert_eq!(provider.availability(), Ok(()));
+}
+
+#[tokio::test]
+#[cfg(target_os = "trueos")]
+async fn unsupported_platform_rejects_availability_and_direct_session_creation() {
+    let provider = ProcessOwnedCodeModeSessionProvider::with_host_program(
+        "codex-code-mode-host-does-not-exist".into(),
+    );
+    let expected = "TRUEOS does not support spawning the standalone code-mode host process";
+
+    assert_eq!(provider.availability(), Err(expected.to_string()));
+    let existing_host = ProcessOwnedCodeModeSessionProvider::with_host_program(
+        std::env::current_exe().expect("test executable"),
+    );
+    assert_eq!(existing_host.availability(), Err(expected.to_string()));
+    assert_eq!(
+        provider
+            .create_session()
+            .await
+            .err()
+            .expect("unsupported host"),
+        expected
+    );
+    assert_eq!(
+        provider
+            .create_session_with_limits(Default::default())
+            .await
+            .err()
+            .expect("unsupported host"),
+        expected
+    );
+    assert_eq!(
+        ProcessOwnedCodeModeSession::new()
+            .connection()
+            .await
+            .err()
+            .expect("unsupported host"),
+        expected
+    );
 }
 
 #[tokio::test]

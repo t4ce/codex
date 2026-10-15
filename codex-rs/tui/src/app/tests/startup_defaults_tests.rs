@@ -12,7 +12,10 @@ fn trueos_diagnostic_prompt_only_queues_for_authenticated_fresh_session() {
     let fresh = SessionSelection::StartFresh;
     assert_eq!(
         trueos_diagnostic_initial_prompt(&fresh, true, None, false, true),
-        Some("hi".into())
+        Some(
+            "Run exactly `gri` through native Shell3 to open Gridpaper in UI4. Use the execution tool and report its actual result."
+                .into()
+        )
     );
     assert_eq!(
         trueos_diagnostic_initial_prompt(&fresh, false, None, false, true),

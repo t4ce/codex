@@ -249,6 +249,7 @@ mod guardian_checkpoint;
 mod handlers;
 mod inject;
 mod reasoning_effort;
+mod step_phase_timing;
 mod submission;
 pub(crate) use reasoning_effort::RequestEffortUsage;
 pub(crate) use submission::Submission;
@@ -3838,15 +3839,32 @@ impl Session {
         required_servers: &[String],
         required_plugins: &HashSet<String>,
     ) -> CodexResult<Arc<StepContext>> {
-        let step_context = self
+        let timing =
+            step_phase_timing::Capture::new(&turn_context.session_telemetry, cancellation_token);
+        let mut total = timing.phase("capture");
+        let captured = self
             .capture_step_context_inner(
                 turn_context,
                 cancellation_token,
                 required_servers,
                 required_plugins,
+                &timing,
             )
-            .await?;
-        self.set_last_known_step_context(&step_context).await;
+            .await;
+        let step_context = match captured {
+            Ok(step_context) => step_context,
+            Err(error) => {
+                total.finish(true);
+                return Err(error);
+            }
+        };
+        timing
+            .run(
+                "retain_context",
+                self.set_last_known_step_context(&step_context),
+            )
+            .await;
+        total.finish(false);
         Ok(step_context)
     }
 
@@ -3857,13 +3875,20 @@ impl Session {
         turn_context: Arc<TurnContext>,
         cancellation_token: &CancellationToken,
     ) -> CodexResult<Arc<StepContext>> {
-        self.capture_step_context_inner(
-            turn_context,
-            cancellation_token,
-            /*required_servers*/ &[],
-            /*required_plugins*/ &HashSet::new(),
-        )
-        .await
+        let timing =
+            step_phase_timing::Capture::new(&turn_context.session_telemetry, cancellation_token);
+        timing
+            .result(
+                "capture",
+                self.capture_step_context_inner(
+                    turn_context,
+                    cancellation_token,
+                    /*required_servers*/ &[],
+                    /*required_plugins*/ &HashSet::new(),
+                    &timing,
+                ),
+            )
+            .await
     }
 
     #[tracing::instrument(name = "step_context.capture", level = "info", skip_all)]
@@ -3873,20 +3898,23 @@ impl Session {
         cancellation_token: &CancellationToken,
         required_servers: &[String],
         required_plugins: &HashSet<String>,
+        timing: &step_phase_timing::Capture,
     ) -> CodexResult<Arc<StepContext>> {
         // Read the step's model and record its environments together so an update cannot split them.
         // Wait for executor startup below, after releasing the lock.
-        let (mut settings, environments) = {
-            let _active = self
-                .active_turn
-                .lock()
-                .or_cancel(cancellation_token)
-                .await?;
-            (
-                turn_context.next_step_settings.load_full(),
-                self.services.turn_environments.snapshot(),
-            )
-        };
+        let (mut settings, environments) = timing
+            .result("active_turn_snapshot", async {
+                let _active = self
+                    .active_turn
+                    .lock()
+                    .or_cancel(cancellation_token)
+                    .await?;
+                Ok::<_, CodexErr>((
+                    turn_context.next_step_settings.load_full(),
+                    self.services.turn_environments.snapshot(),
+                ))
+            })
+            .await?;
         if matches!(
             turn_context.session_source,
             SessionSource::SubAgent(SubAgentSource::ThreadSpawn { .. })
@@ -3911,9 +3939,14 @@ impl Session {
             settings.model_info.as_ref(),
         );
         let session_telemetry = settings.telemetry(&turn_context.session_telemetry);
-        let environments = environments.or_cancel(cancellation_token).await?;
+        let environments = timing
+            .result(
+                "environment_ready",
+                environments.or_cancel(cancellation_token),
+            )
+            .await?;
         // Keep both preparation futures off caller stacks while they are live together.
-        let load_agents_md = Box::pin(async {
+        let load_agents_md = Box::pin(timing.result("instructions", async {
             let (loaded_agents_md, warnings) = self
                 .services
                 .agents_md_manager
@@ -3922,18 +3955,24 @@ impl Session {
                 .await?;
             self.emit_instruction_warnings(warnings).await;
             loaded_agents_md
-        });
+        }));
         let prepare_tools = Box::pin(async {
-            let selected_capability_roots = self
-                .resolve_selected_capability_roots_for_step(&environments)
+            let selected_capability_roots = timing
+                .run(
+                    "capability_roots",
+                    self.resolve_selected_capability_roots_for_step(&environments),
+                )
                 .await;
             let ready_selected_capability_roots =
                 Self::ready_selected_capability_roots(&selected_capability_roots);
-            let executor_capability_discovery = self
-                .executor_capability_discovery_for_step(
-                    &turn_context.config,
-                    &ready_selected_capability_roots,
-                    &environments,
+            let executor_capability_discovery = timing
+                .run(
+                    "capability_discovery",
+                    self.executor_capability_discovery_for_step(
+                        &turn_context.config,
+                        &ready_selected_capability_roots,
+                        &environments,
+                    ),
                 )
                 .await;
             let extension_data =
@@ -3953,46 +3992,57 @@ impl Session {
             }
             let (mcp, prepared_recommendations) = tokio::join!(
                 // MCP refresh can be large; keep it off the sampling request's stack.
-                Box::pin(self.mcp_runtime_for_step(
-                    turn_context.as_ref(),
-                    &selected_capability_roots,
-                    required_servers,
-                    required_plugins,
+                Box::pin(timing.run(
+                    "mcp_ready",
+                    self.mcp_runtime_for_step(
+                        turn_context.as_ref(),
+                        &selected_capability_roots,
+                        required_servers,
+                        required_plugins,
+                    )
                 )),
-                turn::prepare_tool_recommendations(self.as_ref(), turn_context.as_ref()),
+                timing.run(
+                    "recommendations",
+                    turn::prepare_tool_recommendations(self.as_ref(), turn_context.as_ref())
+                ),
             );
             // A step keeps the plugins from the environments it captured, even if shared MCP
             // moves on to another environment. Its skill tools and the model use this same copy.
             // Policy follows this step's MCP binding, which may have refreshed mid-turn.
-            let selected_plugins = self
-                .services
-                .mcp_manager
-                .selected_plugins_for_step(
-                    codex_extension_api::McpServerContributionContext::for_step(
-                        turn_context.config.as_ref(),
-                        &self.services.mcp_thread_init,
-                        &self.services.thread_extension_data,
-                        &turn_context.originator,
-                        &ready_selected_capability_roots,
-                        executor_capability_discovery.as_deref(),
-                    )
-                    .with_session_source(&turn_context.session_source)
-                    .with_selected_environments(&environments.all_selections()),
-                    &mcp.config().plugins,
-                    &turn_context.disabled_plugin_ids,
+            let selected_plugins = timing
+                .run(
+                    "selected_contributors",
+                    self.services.mcp_manager.selected_plugins_for_step(
+                        codex_extension_api::McpServerContributionContext::for_step(
+                            turn_context.config.as_ref(),
+                            &self.services.mcp_thread_init,
+                            &self.services.thread_extension_data,
+                            &turn_context.originator,
+                            &ready_selected_capability_roots,
+                            executor_capability_discovery.as_deref(),
+                        )
+                        .with_session_source(&turn_context.session_source)
+                        .with_selected_environments(&environments.all_selections()),
+                        &mcp.config().plugins,
+                        &turn_context.disabled_plugin_ids,
+                    ),
                 )
                 .await;
             extension_data.insert(selected_plugins);
-            let tool_router = turn::built_tools(
-                self.as_ref(),
-                turn_context.as_ref(),
-                &settings.model_info,
-                &environments,
-                &mcp,
-                &extension_data,
-                prepared_recommendations,
-            )
-            .await?;
+            let tool_router = timing
+                .result(
+                    "build_router",
+                    turn::built_tools(
+                        self.as_ref(),
+                        turn_context.as_ref(),
+                        &settings.model_info,
+                        &environments,
+                        &mcp,
+                        &extension_data,
+                        prepared_recommendations,
+                    ),
+                )
+                .await?;
             Ok::<_, CodexErr>((
                 selected_capability_roots,
                 executor_capability_discovery,
@@ -4021,7 +4071,9 @@ impl Session {
                 .features
                 .enabled(Feature::InstantInterrupt)
                 .then(CancellationToken::new),
-            realtime: self.conversation.snapshot().await,
+            realtime: timing
+                .run("conversation_snapshot", self.conversation.snapshot())
+                .await,
             settings,
             token_budget,
             session_telemetry,

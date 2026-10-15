@@ -76,7 +76,10 @@ pub(super) fn trueos_diagnostic_initial_prompt(
         && initial_prompt.is_none()
         && !has_initial_images
     {
-        Some("hi".to_owned())
+        Some(
+            "Run exactly `gri` through native Shell3 to open Gridpaper in UI4. Use the execution tool and report its actual result."
+                .to_owned(),
+        )
     } else {
         initial_prompt
     }
