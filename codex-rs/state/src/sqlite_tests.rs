@@ -122,3 +122,41 @@ async fn open_read_write_pool_preserves_wal_conversion_lock_error() -> anyhow::R
         .await;
     Ok(())
 }
+
+#[tokio::test]
+async fn database_exists_does_not_create_an_absent_database() -> anyhow::Result<()> {
+    let sqlite_home = crate::runtime::test_support::unique_temp_dir();
+    tokio::fs::create_dir_all(&sqlite_home).await?;
+    let _cleanup = scopeguard::guard(sqlite_home.clone(), |sqlite_home| {
+        let _ = std::fs::remove_dir_all(sqlite_home);
+    });
+    let sqlite = SqliteConfig::new_for_testing(sqlite_home.as_path().abs());
+    let path = sqlite.thread_history_db_path();
+    assert!(!sqlite.database_exists(&path).await?);
+    assert!(!path.exists());
+    let pool = sqlite.open_read_write_pool(&path).await?;
+    assert!(sqlite.database_exists(&path).await?);
+    pool.close().await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn database_exists_preserves_filesystem_errors() -> anyhow::Result<()> {
+    let sqlite_home = crate::runtime::test_support::unique_temp_dir();
+    tokio::fs::create_dir_all(&sqlite_home).await?;
+    let _cleanup = scopeguard::guard(sqlite_home.clone(), |sqlite_home| {
+        let _ = std::fs::remove_dir_all(sqlite_home);
+    });
+    let sqlite = SqliteConfig::new_for_testing(sqlite_home.as_path().abs());
+    let blocked = sqlite_home.join("not-a-directory");
+    tokio::fs::write(&blocked, b"block").await?;
+    let error = sqlite
+        .database_exists(&blocked.join("database.sqlite"))
+        .await
+        .expect_err("a filesystem error is not absence");
+    assert_eq!(
+        error.downcast_ref::<std::io::Error>().map(std::io::Error::kind),
+        Some(std::io::ErrorKind::NotADirectory)
+    );
+    Ok(())
+}

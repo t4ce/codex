@@ -249,7 +249,11 @@ async fn http_response_body_stream_uses_generated_ids_and_receives_ordered_delta
     );
 
     // Phase 5: drain the body stream and verify the caller-visible byte order.
-    let mut body = Vec::new();
+    let first = timeout(TEST_TIMEOUT, body_stream.recv_bytes())
+        .await??
+        .unwrap();
+    assert_eq!(&first[..], b"hello ");
+    let mut body = first.to_vec();
     while let Some(chunk) = timeout(TEST_TIMEOUT, body_stream.recv())
         .await
         .context("http response body delta should arrive")??

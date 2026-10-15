@@ -4832,6 +4832,10 @@ impl Session {
         &self,
         step_context: &StepContext,
     ) -> CodexResult<()> {
+        let timing = step_phase_timing::Capture::new(
+            &step_context.session_telemetry,
+            &CancellationToken::new(),
+        );
         let turn_context = step_context.turn.as_ref();
         let reference_context_item = {
             let state = self.state.lock().await;
@@ -4840,9 +4844,13 @@ impl Session {
         let turn_context_item = step_context.to_turn_context_item();
         let turn_context_changed = reference_context_item.as_ref() != Some(&turn_context_item);
         let should_inject_full_context = reference_context_item.is_none();
-        let world_state = self
-            .build_world_state_for_step(step_context, should_inject_full_context)
+        let world_state = timing
+            .result_started(
+                "context_world_state",
+                self.build_world_state_for_step(step_context, should_inject_full_context),
+            )
             .await?;
+        let mut render_timing = timing.started_phase("context_render");
         // Full initial context resets the baseline; later turns persist only its changes.
         let (mut context_items, world_state_item) = if should_inject_full_context {
             let (context_updates, snapshot) = self
@@ -4876,22 +4884,32 @@ impl Session {
                     .await,
             );
         }
+        render_timing.finish(false);
+        drop(render_timing);
         // A snapshot can change without producing model-visible or TurnContext updates.
         let only_world_state_changed = !turn_context_changed && context_items.is_empty();
         if only_world_state_changed && world_state_item.is_none() {
             return Ok(());
         }
         if !context_items.is_empty() {
-            self.record_conversation_items(
-                turn_context,
-                &step_context.settings.model_info,
-                &context_items,
-            )
-            .await;
+            timing
+                .run_started(
+                    "context_record_items",
+                    self.record_conversation_items(
+                        turn_context,
+                        &step_context.settings.model_info,
+                        &context_items,
+                    ),
+                )
+                .await;
         }
         // Persist state only after any model-visible context generated from it.
         if let Some(world_state_item) = world_state_item {
-            self.persist_rollout_items(&[RolloutItem::WorldState(world_state_item)])
+            timing
+                .run_started(
+                    "context_persist_snapshot",
+                    self.persist_rollout_items(&[RolloutItem::WorldState(world_state_item)]),
+                )
                 .await;
         }
         // A snapshot-only change does not require a duplicate TurnContext record.
@@ -4903,6 +4921,7 @@ impl Session {
         // Checkpoint current thread-owned settings after the first turn's context:
         // the step may predate an acknowledged update or use executor-owned permissions.
         // Serialize with settings updates so an older checkpoint cannot supersede a newer one.
+        let mut checkpoint_timing = timing.started_phase("context_checkpoint");
         let _settings_guard = if should_inject_full_context {
             Some(thread_settings::acquire_persistence_lock(self).await)
         } else {
@@ -4920,6 +4939,7 @@ impl Session {
         // context items.
         let mut state = self.state.lock().await;
         state.set_reference_context_item(Some(turn_context_item));
+        checkpoint_timing.finish(false);
         Ok(())
     }
 
@@ -5138,6 +5158,11 @@ impl Session {
         metadata: UserInputMetadata,
         persist_context: PersistContext,
     ) {
+        let timing = step_phase_timing::Capture::new(
+            &turn_context.session_telemetry,
+            &CancellationToken::new(),
+        );
+        let mut prepare_timing = timing.started_phase("input_prepare");
         // Persist the user message to history, but emit the turn item from `UserInput` so
         // UI-only `text_elements` are preserved. `ResponseItem::Message` does not carry
         // those spans, and `record_response_item_and_emit_turn_item` would drop them.
@@ -5177,18 +5202,33 @@ impl Session {
             &prepared_items,
             &user_image_content_indices,
         );
-        self.record_prepared_conversation_items(
-            turn_context,
-            model_info,
-            prepared_items,
-            image_preparations,
-        )
-        .await;
+        prepare_timing.finish(false);
+        drop(prepare_timing);
+        timing
+            .run_started(
+                "input_record_history",
+                self.record_prepared_conversation_items(
+                    turn_context,
+                    model_info,
+                    prepared_items,
+                    image_preparations,
+                ),
+            )
+            .await;
         user_message_item.client_id = client_id;
         let turn_item = TurnItem::UserMessage(user_message_item);
-        self.emit_turn_item_started(turn_context, &turn_item).await;
-        self.emit_turn_item_completed(turn_context, turn_item).await;
-        self.ensure_rollout_materialized(persist_context).await;
+        timing
+            .run_started("input_emit_items", async {
+                self.emit_turn_item_started(turn_context, &turn_item).await;
+                self.emit_turn_item_completed(turn_context, turn_item).await;
+            })
+            .await;
+        timing
+            .run_started(
+                "input_persist",
+                self.ensure_rollout_materialized(persist_context),
+            )
+            .await;
     }
 
     pub(crate) async fn notify_stream_error(
@@ -5245,7 +5285,14 @@ impl Session {
     }
 
     pub(crate) async fn hook_transcript_path(&self) -> Option<PathBuf> {
-        let rollout_path = match self.current_rollout_path().await {
+        let timing = step_phase_timing::Capture::new(
+            &self.services.session_telemetry,
+            &CancellationToken::new(),
+        );
+        let rollout_path = match timing
+            .result_started("hook_transcript_path", self.current_rollout_path())
+            .await
+        {
             Ok(Some(path)) => path,
             Ok(None) => return None,
             Err(err) => {
@@ -5253,7 +5300,11 @@ impl Session {
                 return None;
             }
         };
-        self.ensure_rollout_materialized(PersistContext::Standard)
+        timing
+            .run_started(
+                "hook_transcript_persist",
+                self.ensure_rollout_materialized(PersistContext::Standard),
+            )
             .await;
         Some(rollout_path)
     }

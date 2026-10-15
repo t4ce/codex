@@ -59,9 +59,13 @@ pub(super) async fn projection_state(
         return Ok(None);
     }
     let db_path = store.config.sqlite.thread_history_db_path();
-    if !tokio::fs::try_exists(db_path.as_path())
-        .await
-        .map_err(thread_history_error)?
+    if store.thread_history_db.get().is_none()
+        && !store
+            .config
+            .sqlite
+            .database_exists(db_path.as_path())
+            .await
+            .map_err(thread_history_error)?
     {
         return Ok(None);
     }
@@ -246,9 +250,13 @@ pub(super) async fn delete_thread(
     thread_id: ThreadId,
 ) -> ThreadStoreResult<()> {
     let db_path = store.config.sqlite.thread_history_db_path();
-    if !tokio::fs::try_exists(db_path.as_path())
-        .await
-        .map_err(thread_history_delete_error)?
+    if store.thread_history_db.get().is_none()
+        && !store
+            .config
+            .sqlite
+            .database_exists(db_path.as_path())
+            .await
+            .map_err(thread_history_delete_error)?
     {
         return Ok(());
     }

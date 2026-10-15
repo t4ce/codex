@@ -358,3 +358,101 @@ fn unconsumed_sse_is_distinct_from_successful_body_completion() {
     assert!(records.contains(&("body", "cancelled", 0)));
     assert!(!records.iter().any(|(_, state, _)| *state == "complete"));
 }
+
+#[tokio::test]
+async fn stalled_body_reports_received_progress_without_starting_json_decode() -> anyhow::Result<()>
+{
+    use codex_exec_server::HttpClient;
+    use codex_exec_server::HttpRequestParams;
+    use codex_exec_server::RouteAwareHttpClient;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
+    use std::sync::Arc;
+    use std::sync::Mutex;
+    use std::time::Duration;
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
+    let endpoint = format!("http://{}/mcp", listener.local_addr()?);
+    let (chunks, receiver) = tokio::sync::mpsc::channel::<Result<bytes::Bytes, std::io::Error>>(2);
+    let receiver = Arc::new(Mutex::new(Some(receiver)));
+    let app = axum::Router::new().route(
+        "/mcp",
+        axum::routing::get(move || {
+            let receiver = receiver.lock().unwrap().take().expect("one request");
+            async move {
+                let stream = futures::stream::unfold(receiver, |mut receiver| async {
+                    receiver.recv().await.map(|chunk| (chunk, receiver))
+                });
+                (
+                    [("content-type", "application/json")],
+                    axum::body::Body::from_stream(stream),
+                )
+            }
+        }),
+    );
+    let server = tokio_util::task::AbortOnDropHandle::new(tokio::spawn(async move {
+        axum::serve(listener, app).await
+    }));
+    let client =
+        RouteAwareHttpClient::new(HttpClientFactory::new(OutboundProxyPolicy::ReqwestDefault));
+    crate::oauth::test_support::warm_http_client(&client).await?;
+    chunks
+        .send(Ok(bytes::Bytes::from(vec![b' '; 64 * 1024])))
+        .await?;
+    let (_, mut body) = client
+        .http_request_stream(HttpRequestParams {
+            method: "GET".to_string(),
+            url: endpoint,
+            headers: Vec::new(),
+            body: None,
+            timeout_ms: None,
+            redirect_policy: codex_exec_server::HttpRedirectPolicy::Stop,
+            request_id: "test-stalled-body".to_string(),
+            stream_response: true,
+        })
+        .await?;
+    let capture = crate::mcp_phase_timing::Capture::new("http", Some("tools/list"), None).unwrap();
+    let mut pending = Box::pin(async {
+        let body = super::collect_body_observed(&mut body, None, Some(&capture)).await?;
+        let mut decode = capture.phase("json_decode");
+        let parsed = serde_json::from_slice::<serde_json::Value>(&body);
+        decode.finish(parsed.is_err());
+        Ok::<
+            _,
+            rmcp::transport::streamable_http_client::StreamableHttpError<
+                super::StreamableHttpClientAdapterError,
+            >,
+        >(parsed)
+    });
+    tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            tokio::select! {
+                _ = &mut pending => panic!("body must remain pending before EOF"),
+                _ = tokio::time::sleep(Duration::from_millis(1)) => {}
+            }
+            if capture
+                .test_records()
+                .iter()
+                .any(|(phase, _, bytes)| *phase == "body_progress" && *bytes == 64 * 1024)
+            {
+                break;
+            }
+        }
+    })
+    .await?;
+    let before_drop = capture.test_records();
+    assert!(
+        !before_drop
+            .iter()
+            .any(|(phase, _, _)| *phase == "json_decode")
+    );
+    assert!(!before_drop.contains(&("body", "complete", 64 * 1024)));
+    drop(pending);
+    assert_eq!(
+        capture.test_records().last(),
+        Some(&("body", "cancelled", 64 * 1024))
+    );
+    drop(chunks);
+    server.abort();
+    Ok(())
+}

@@ -27,7 +27,12 @@ impl StateRuntime {
 
     pub async fn clear_all_memory_data(&self) -> anyhow::Result<()> {
         self.memories.clear_memory_data().await?;
-        if tokio::fs::try_exists(self.sqlite.memories_v2_db_path()).await? {
+        if self.memories_v2.get().is_some()
+            || self
+                .sqlite
+                .database_exists(&self.sqlite.memories_v2_db_path())
+                .await?
+        {
             self.memories_for_version(MemoryVersion::V2)
                 .await?
                 .clear_memory_data()
@@ -41,7 +46,12 @@ impl StateRuntime {
         thread_id: ThreadId,
     ) -> anyhow::Result<()> {
         self.memories.delete_thread_memory(thread_id).await?;
-        if tokio::fs::try_exists(self.sqlite.memories_v2_db_path()).await? {
+        if self.memories_v2.get().is_some()
+            || self
+                .sqlite
+                .database_exists(&self.sqlite.memories_v2_db_path())
+                .await?
+        {
             self.memories_for_version(MemoryVersion::V2)
                 .await?
                 .delete_thread_memory(thread_id)

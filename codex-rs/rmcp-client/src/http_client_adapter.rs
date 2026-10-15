@@ -15,7 +15,6 @@ use std::sync::PoisonError;
 use std::time::Duration;
 use std::time::Instant;
 
-use bytes::Bytes;
 use codex_exec_server::ExecServerError;
 use codex_exec_server::HttpClient;
 use codex_exec_server::HttpHeader;
@@ -995,7 +994,7 @@ async fn collect_body_observed(
     let mut phase = capture.map(|capture| capture.phase("body"));
     let mut body = Vec::new();
     loop {
-        let received = body_stream.recv().await;
+        let received = body_stream.recv_bytes().await;
         if received.is_err() {
             if let Some(phase) = phase.as_mut() {
                 phase.finish(true);
@@ -1051,7 +1050,7 @@ fn sse_stream_from_body_observed(
             phase,
         ),
         |(mut body_stream, mut size_limit, mut phase)| async move {
-            match body_stream.recv().await {
+            match body_stream.recv_bytes().await {
                 Ok(Some(bytes)) => {
                     if let Some(phase) = phase.as_mut() {
                         phase.bytes(bytes.len());
@@ -1062,7 +1061,7 @@ fn sse_stream_from_body_observed(
                         }
                         Some((Err(error), (body_stream, size_limit, phase)))
                     } else {
-                        Some((Ok(Bytes::from(bytes)), (body_stream, size_limit, phase)))
+                        Some((Ok(bytes), (body_stream, size_limit, phase)))
                     }
                 }
                 Ok(None) => {

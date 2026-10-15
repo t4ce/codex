@@ -137,6 +137,13 @@ impl HttpResponseBodyStream {
     /// Returns `Ok(None)` at EOF and converts sequence gaps or stream-side
     /// stream errors into protocol errors.
     pub async fn recv(&mut self) -> Result<Option<Vec<u8>>, ExecServerError> {
+        self.recv_bytes().await.map(|chunk| chunk.map(Vec::from))
+    }
+
+    /// Receives the next owned chunk without copying its payload.
+    ///
+    /// Shares the ordering, cancellation, error and EOF contract of [`Self::recv`].
+    pub async fn recv_bytes(&mut self) -> Result<Option<Bytes>, ExecServerError> {
         let Some(cancellation) = self.cancellation.clone() else {
             return self.recv_inner().await;
         };
@@ -147,11 +154,11 @@ impl HttpResponseBodyStream {
         }
     }
 
-    async fn recv_inner(&mut self) -> Result<Option<Vec<u8>>, ExecServerError> {
+    async fn recv_inner(&mut self) -> Result<Option<Bytes>, ExecServerError> {
         match &mut self.inner {
             HttpResponseBodyStreamInner::Local { body } => match body.next().await {
                 Some(chunk) => match chunk {
-                    Ok(bytes) => Ok(Some(bytes.to_vec())),
+                    Ok(bytes) => Ok(Some(bytes)),
                     Err(error) => Err(ExecServerError::HttpRequest(error.to_string())),
                 },
                 None => Ok(None),
@@ -206,7 +213,7 @@ impl HttpResponseBodyStream {
                     }
                     *pending_eof = true;
                 }
-                Ok(Some(chunk))
+                Ok(Some(Bytes::from(chunk)))
             }
         }
     }
@@ -464,5 +471,50 @@ impl Inner {
         self.http_body_stream_failures
             .store(Arc::new(next_failures));
         error
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn local_recv_bytes_preserves_each_owned_payload_allocation() {
+        let chunks: Vec<_> = (0..16)
+            .map(|index| Bytes::from(vec![index; 16 * 1024]))
+            .collect();
+        let mut stream = HttpResponseBodyStream {
+            inner: HttpResponseBodyStreamInner::Local {
+                body: Box::pin(futures::stream::iter(chunks.clone().into_iter().map(Ok))),
+            },
+            cancellation: None,
+        };
+        for expected in &chunks {
+            let received = stream.recv_bytes().await.unwrap().unwrap();
+            assert_eq!(received.as_ptr(), expected.as_ptr());
+            assert_eq!(&received[..], &expected[..]);
+        }
+        assert!(stream.recv_bytes().await.unwrap().is_none());
+    }
+
+    #[tokio::test]
+    async fn legacy_recv_retains_owned_vec_and_shared_cancellation_contract() {
+        let original = Bytes::from(vec![5; 1024]);
+        let body = futures::stream::iter([Ok(original.clone())]).chain(futures::stream::pending());
+        let cancellation = CancellationToken::new();
+        let mut stream = HttpResponseBodyStream {
+            inner: HttpResponseBodyStreamInner::Local {
+                body: Box::pin(body),
+            },
+            cancellation: Some(cancellation.clone()),
+        };
+        let received = stream.recv().await.unwrap().unwrap();
+        assert_eq!(&received[..], &original[..]);
+        assert_ne!(received.as_ptr(), original.as_ptr());
+        let next = stream.recv_bytes();
+        tokio::pin!(next);
+        assert!(futures::poll!(&mut next).is_pending());
+        cancellation.cancel();
+        assert!(next.await.unwrap().is_none());
     }
 }

@@ -900,10 +900,19 @@ pub(crate) async fn run_hooks_and_record_inputs(
     {
         return false;
     }
+    let input_timing = super::step_phase_timing::Capture::new(
+        &turn_context.session_telemetry,
+        &CancellationToken::new(),
+    );
     let mut blocked_input = false;
     let mut accepted_user_input = false;
     for input_item in input {
-        let hook_outcome = inspect_pending_input(sess, turn_context, input_item).await;
+        let hook_outcome = input_timing
+            .run_started(
+                "input_inspect_hooks",
+                inspect_pending_input(sess, turn_context, input_item),
+            )
+            .await;
         if hook_outcome.should_stop {
             blocked_input = true;
             record_additional_contexts(sess, turn_context, hook_outcome.additional_contexts).await;
@@ -919,15 +928,19 @@ pub(crate) async fn run_hooks_and_record_inputs(
             } else {
                 persist_context
             };
-            record_pending_input(
-                sess,
-                turn_context,
-                model_info,
-                input_item.clone(),
-                hook_outcome.additional_contexts,
-                input_persist_context,
-            )
-            .await;
+            input_timing
+                .run_started("input_record", async {
+                    record_pending_input(
+                        sess,
+                        turn_context,
+                        model_info,
+                        input_item.clone(),
+                        hook_outcome.additional_contexts,
+                        input_persist_context,
+                    )
+                    .await;
+                })
+                .await;
         }
     }
     blocked_input && !accepted_user_input

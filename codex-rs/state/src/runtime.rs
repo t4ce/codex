@@ -151,13 +151,7 @@ impl StateRuntime {
         let goals_path = sqlite.goals_db_path();
         let memories_path = sqlite.memories_db_path();
         let queue_path = sqlite.queue_db_path();
-        #[cfg(not(target_os = "trueos"))]
-        let has_memories_v2 = tokio::fs::try_exists(sqlite.memories_v2_db_path()).await?;
-        #[cfg(target_os = "trueos")]
-        let has_memories_v2 = <Sqlite as sqlx::migrate::MigrateDatabase>::database_exists(
-            &format!("sqlite://{}", sqlite.memories_v2_db_path().display()),
-        )
-        .await?;
+        let has_memories_v2 = sqlite.database_exists(&sqlite.memories_v2_db_path()).await?;
         let pool = match sqlite
             .open_state_db(&state_migrator, telemetry_override)
             .await
@@ -341,7 +335,7 @@ impl StateRuntime {
                 codex_protocol::MemoryVersion::V1 => sqlite.memories_db_path(),
                 codex_protocol::MemoryVersion::V2 => sqlite.memories_v2_db_path(),
             };
-            if !tokio::fs::try_exists(path).await? {
+            if !sqlite.database_exists(&path).await? {
                 continue;
             }
             let pool = match version {

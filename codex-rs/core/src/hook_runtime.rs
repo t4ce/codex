@@ -152,17 +152,23 @@ pub(crate) async fn run_pending_session_start_hooks(
                 source: session_start_source,
             },
         };
-        let request = codex_hooks::SessionStartRequest {
+        let mut request = codex_hooks::SessionStartRequest {
             session_id: sess.session_id().into(),
             #[allow(deprecated)]
             cwd: turn_context.cwd.clone(),
-            transcript_path: sess.hook_transcript_path().await,
+            transcript_path: None,
             model: turn_context.model_info().slug.clone(),
             permission_mode: hook_permission_mode(turn_context.approval_policy()),
             target,
         };
         let hooks = sess.hooks();
         let preview_runs = hooks.preview_session_start(&request);
+        // Selection depends on the event/source, not the transcript. Avoid a
+        // persistence barrier when no handler will consume the path. Keep the
+        // same Hooks snapshot for preview and dispatch, including async hooks.
+        if !preview_runs.is_empty() {
+            request.transcript_path = sess.hook_transcript_path().await;
+        }
         if run_context_injecting_hook(
             sess,
             turn_context,
@@ -681,19 +687,25 @@ pub(crate) async fn inspect_pending_input(
 ) -> HookRuntimeOutcome {
     match pending_input_item {
         TurnInput::UserInput { content, .. } => {
-            let request = UserPromptSubmitRequest {
+            let mut request = UserPromptSubmitRequest {
                 session_id: sess.session_id().into(),
                 turn_id: turn_context.sub_id.clone(),
                 subagent: thread_spawn_subagent_hook_context(sess, turn_context),
                 #[allow(deprecated)]
                 cwd: turn_context.cwd.clone(),
-                transcript_path: sess.hook_transcript_path().await,
+                transcript_path: None,
                 model: turn_context.model_info().slug.clone(),
                 permission_mode: hook_permission_mode(turn_context.approval_policy()),
                 prompt: UserMessageItem::new(content).message(),
             };
             let hooks = sess.hooks();
             let preview_runs = hooks.preview_user_prompt_submit(&request);
+            // Selection depends on the event/source, not the transcript. Avoid a
+            // persistence barrier when no handler will consume the path. Keep the
+            // same Hooks snapshot for preview and dispatch, including async hooks.
+            if !preview_runs.is_empty() {
+                request.transcript_path = sess.hook_transcript_path().await;
+            }
             run_context_injecting_hook(
                 sess,
                 turn_context,

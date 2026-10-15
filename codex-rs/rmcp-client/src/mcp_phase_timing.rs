@@ -98,6 +98,7 @@ impl Capture {
             finished: None,
             state: "cancelled",
             bytes: 0,
+            next_progress_bytes: Some(64 * 1024),
         }
     }
 
@@ -114,6 +115,7 @@ impl Capture {
             "prepare"
                 | "headers"
                 | "body"
+                | "body_progress"
                 | "first_body_byte"
                 | "json_decode"
                 | "first_sse_event"
@@ -164,6 +166,7 @@ pub(crate) struct Phase {
     finished: Option<Instant>,
     state: &'static str,
     bytes: u64,
+    next_progress_bytes: Option<u64>,
 }
 impl Phase {
     pub(crate) fn finish(&mut self, error: bool) {
@@ -183,6 +186,27 @@ impl Phase {
             );
         }
         self.bytes = self.bytes.saturating_add(count as u64);
+        if self.phase == "body"
+            && self
+                .next_progress_bytes
+                .is_some_and(|threshold| self.bytes >= threshold)
+        {
+            // One cumulative sample per chunk, at exponentially spaced bounds.
+            // Even a saturated u64 total emits fewer than 64 progress records.
+            self.capture.record(
+                "body_progress",
+                "complete",
+                self.started,
+                self.started.elapsed(),
+                self.bytes,
+            );
+            while let Some(threshold) = self.next_progress_bytes {
+                if threshold > self.bytes {
+                    break;
+                }
+                self.next_progress_bytes = threshold.checked_mul(2);
+            }
+        }
     }
 }
 impl Drop for Phase {
@@ -238,6 +262,57 @@ mod tests {
         assert_eq!(records[2].state, "complete");
         assert!(records[1].duration_ms <= records[2].duration_ms);
     }
+    #[test]
+    #[cfg(target_pointer_width = "64")]
+    fn body_progress_is_exponentially_bounded_and_total_survives_saturation() {
+        let capture = Capture::new("http", Some("tools/list"), None).unwrap();
+        let mut phase = capture.phase("body");
+        for power in 16..64 {
+            let next = 1_u64 << power;
+            phase.bytes((next - phase.bytes) as usize);
+        }
+        phase.bytes(usize::MAX);
+        phase.bytes(usize::MAX);
+        drop(phase);
+        let records = capture.0.records.lock().unwrap();
+        let progress = records
+            .iter()
+            .filter(|r| r.phase == "body_progress")
+            .collect::<Vec<_>>();
+        assert_eq!(progress.len(), 48);
+        assert!(progress.len() <= 64);
+        assert_eq!(progress[0].bytes, 64 * 1024);
+        assert!(
+            progress
+                .windows(2)
+                .all(|pair| pair[0].bytes < pair[1].bytes)
+        );
+        assert_eq!(records.last().unwrap().bytes, u64::MAX);
+        assert_eq!(records.last().unwrap().state, "cancelled");
+    }
+
+    #[test]
+    #[cfg(target_pointer_width = "64")]
+    fn a_large_chunk_emits_one_progress_sample_before_body_completion() {
+        let capture = Capture::new("http", Some("tools/list"), None).unwrap();
+        let mut phase = capture.phase("body");
+        phase.bytes(usize::MAX);
+        let records = capture.test_records();
+        assert_eq!(
+            records.last(),
+            Some(&("body_progress", "complete", u64::MAX))
+        );
+        assert_eq!(
+            records
+                .iter()
+                .filter(|(phase, _, _)| *phase == "body_progress")
+                .count(),
+            1
+        );
+        assert!(!records.iter().any(|(phase, _, _)| *phase == "json_decode"));
+        drop(phase);
+    }
+
     #[test]
     fn returned_failure_is_distinct_from_cancellation() {
         let capture = Capture::new("operation", Some("tools/list"), Some(30_000)).unwrap();

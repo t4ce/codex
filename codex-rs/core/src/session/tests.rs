@@ -11710,6 +11710,198 @@ async fn attach_in_memory_thread_store(
     store
 }
 
+// Hook selection must happen before transcript materialization: an unused hook
+// must not add a durability barrier, while a matching hook must read real data.
+async fn install_transcript_test_hook(session: &Session, hooks: serde_json::Value) {
+    let config = session.get_config().await;
+    let user_config: codex_config::TomlValue =
+        serde_json::from_value(serde_json::json!({ "hooks": hooks })).expect("hook test config");
+    let hooks = session.hooks().reconfigured(codex_hooks::HooksConfig {
+        feature_enabled: true,
+        bypass_hook_trust: true,
+        config_layer_stack: Some(
+            config
+                .config_layer_stack
+                .with_user_config(&config.codex_home.join(CONFIG_TOML_FILE), user_config)
+                .expect("hook config layer"),
+        ),
+        shell_program: Some("/bin/sh".to_string()),
+        shell_args: vec!["-c".to_string()],
+        ..Default::default()
+    });
+    session.services.hooks.store(Arc::new(hooks));
+}
+
+fn transcript_test_user_input() -> TurnInput {
+    TurnInput::UserInput {
+        content: vec![UserInput::Text {
+            text: "test input".to_string(),
+            text_elements: Vec::new(),
+        }],
+        client_id: None,
+        metadata: Default::default(),
+    }
+}
+
+#[cfg(unix)]
+#[tokio::test]
+async fn unmatched_start_and_input_hooks_do_not_materialize_lazy_transcript() {
+    for configured in [false, true] {
+        let (mut session, turn_context) = make_session_and_context().await;
+        let rollout_path = open_thread_persistence(&mut session).await;
+        if configured {
+            // Configured hooks with another source are also a no-match. This
+            // command must never execute for the pending Startup source.
+            install_transcript_test_hook(
+                &session,
+                serde_json::json!({
+                    "SessionStart": [{
+                        "matcher": "^resume$",
+                        "hooks": [{ "type": "command", "command": "exit 42" }],
+                    }],
+                }),
+            )
+            .await;
+        }
+        session
+            .state
+            .lock()
+            .await
+            .queue_pending_session_start_source(codex_hooks::SessionStartSource::Startup);
+        let session = Arc::new(session);
+        let turn_context = Arc::new(turn_context);
+        assert!(!rollout_path.exists());
+        assert!(
+            !crate::hook_runtime::run_pending_session_start_hooks(&session, &turn_context).await
+        );
+        assert!(!rollout_path.exists());
+        let outcome = crate::hook_runtime::inspect_pending_input(
+            &session,
+            &turn_context,
+            &transcript_test_user_input(),
+        )
+        .await;
+        assert!(!outcome.should_stop);
+        assert!(outcome.additional_contexts.is_empty());
+        assert!(!rollout_path.exists());
+    }
+}
+
+#[cfg(unix)]
+#[tokio::test]
+async fn matched_start_and_input_hooks_receive_durable_transcript() {
+    for (event, asynchronous) in [
+        ("SessionStart", false),
+        ("UserPromptSubmit", false),
+        ("SessionStart", true),
+        ("UserPromptSubmit", true),
+    ] {
+        let (mut session, turn_context) = make_session_and_context().await;
+        let rollout_path = open_thread_persistence(&mut session).await;
+        let temp_dir = tempfile::tempdir().expect("hook files");
+        let observed_path = temp_dir.path().join("observed-path");
+        let script_path = temp_dir.path().join("check-transcript.py");
+        std::fs::write(
+            &script_path,
+            format!(
+                "import json,pathlib,sys\nrequest=json.load(sys.stdin)\np=pathlib.Path(request['transcript_path'])\nassert p.is_file()\nrows=[json.loads(line) for line in p.read_text().splitlines()]\nassert any(row.get('type')=='session_meta' for row in rows)\npathlib.Path({:?}).write_text(str(p))\n",
+                observed_path.to_string_lossy(),
+            ),
+        )
+        .expect("hook transcript checker");
+        let group = serde_json::json!({
+            "hooks": [{
+                "type": "command",
+                "command": format!("python3 '{}'", script_path.display()),
+                "async": asynchronous,
+            }],
+        });
+        install_transcript_test_hook(
+            &session,
+            serde_json::Value::Object(serde_json::Map::from_iter([(
+                event.to_string(),
+                serde_json::json!([group]),
+            )])),
+        )
+        .await;
+        assert!(!rollout_path.exists());
+        // Both previews must select the same handler regardless of whether the
+        // transcript is filled in. Async runs use this same selection path.
+        let hooks = session.hooks();
+        let preview_ids = if event == "SessionStart" {
+            let mut request = codex_hooks::SessionStartRequest {
+                session_id: session.session_id().into(),
+                cwd: turn_context.cwd.clone(),
+                transcript_path: None,
+                model: turn_context.model_info().slug.clone(),
+                permission_mode: "default".to_string(),
+                target: codex_hooks::StartHookTarget::SessionStart {
+                    source: codex_hooks::SessionStartSource::Startup,
+                },
+            };
+            let before = hooks.preview_session_start(&request);
+            request.transcript_path = Some(rollout_path.clone());
+            let after = hooks.preview_session_start(&request);
+            (before, after)
+        } else {
+            let mut request = codex_hooks::UserPromptSubmitRequest {
+                session_id: session.session_id().into(),
+                turn_id: turn_context.sub_id.clone(),
+                subagent: None,
+                cwd: turn_context.cwd.clone(),
+                transcript_path: None,
+                model: turn_context.model_info().slug.clone(),
+                permission_mode: "default".to_string(),
+                prompt: "test input".to_string(),
+            };
+            let before = hooks.preview_user_prompt_submit(&request);
+            request.transcript_path = Some(rollout_path.clone());
+            let after = hooks.preview_user_prompt_submit(&request);
+            (before, after)
+        };
+        assert_eq!(preview_ids.0.len(), 1);
+        assert_eq!(
+            preview_ids.0.iter().map(|run| &run.id).collect::<Vec<_>>(),
+            preview_ids.1.iter().map(|run| &run.id).collect::<Vec<_>>(),
+        );
+        session
+            .state
+            .lock()
+            .await
+            .queue_pending_session_start_source(codex_hooks::SessionStartSource::Startup);
+        let session = Arc::new(session);
+        let turn_context = Arc::new(turn_context);
+        if event == "SessionStart" {
+            assert!(
+                !crate::hook_runtime::run_pending_session_start_hooks(&session, &turn_context)
+                    .await
+            );
+        } else {
+            let outcome = crate::hook_runtime::inspect_pending_input(
+                &session,
+                &turn_context,
+                &transcript_test_user_input(),
+            )
+            .await;
+            assert!(!outcome.should_stop);
+        }
+        // Async handlers are selected by the same preview but may finish after
+        // dispatch returns. Their transcript must already be readable too.
+        tokio::time::timeout(StdDuration::from_secs(10), async {
+            loop {
+                if std::fs::read_to_string(&observed_path)
+                    .is_ok_and(|path| path == rollout_path.to_string_lossy())
+                {
+                    break;
+                }
+                tokio::time::sleep(StdDuration::from_millis(5)).await;
+            }
+        })
+        .await
+        .expect("matching hook read durable transcript");
+    }
+}
+
 #[tokio::test]
 async fn hook_transcript_path_does_not_persist_non_local_thread_store() {
     let (mut session, _) = make_session_and_context().await;

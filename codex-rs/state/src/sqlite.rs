@@ -181,6 +181,36 @@ impl SqliteConfig {
         self.sqlite_home.as_path()
     }
 
+    /// Check the database owner without creating an absent database.
+    ///
+    /// TRUEOS keeps SQLite images in a service-owned namespace. Its logical
+    /// client path is not a local file and cannot be tested with filesystem APIs.
+    pub async fn database_exists(&self, path: &Path) -> anyhow::Result<bool> {
+        #[cfg(not(target_os = "trueos"))]
+        {
+            Ok(tokio::fs::try_exists(path).await?)
+        }
+        #[cfg(target_os = "trueos")]
+        {
+            use sqlx::Connection;
+
+            match SqliteConnectOptions::new()
+                .filename(path)
+                .read_only(true)
+                .create_if_missing(false)
+                .connect()
+                .await
+            {
+                Ok(connection) => {
+                    connection.close().await?;
+                    Ok(true)
+                }
+                Err(Error::Database(error)) if error.code().as_deref() == Some("14") => Ok(false),
+                Err(error) => Err(error.into()),
+            }
+        }
+    }
+
     /// Return the path to the primary state database.
     pub fn state_db_path(&self) -> PathBuf {
         STATE_DB.path(self.home())
