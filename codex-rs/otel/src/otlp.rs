@@ -74,8 +74,8 @@ pub(crate) fn build_grpc_tls_config(
 pub(crate) fn build_http_client(
     tls: &OtelTlsConfig,
     timeout_var: &str,
-) -> Result<reqwest::blocking::Client, Box<dyn Error>> {
-    if current_tokio_runtime_is_multi_thread() {
+) -> Result<BlockingHttpClient, Box<dyn Error>> {
+    let client = if current_tokio_runtime_is_multi_thread() {
         tokio::task::block_in_place(|| build_http_client_inner(tls, timeout_var))
     } else if tokio::runtime::Handle::try_current().is_ok() {
         let tls = tls.clone();
@@ -88,6 +88,40 @@ pub(crate) fn build_http_client(
         .map_err(config_error)
     } else {
         build_http_client_inner(tls, timeout_var)
+    }?;
+    Ok(BlockingHttpClient(client))
+}
+
+/// Adapts the workspace reqwest client without enabling OTLP's separate reqwest backend.
+#[derive(Debug)]
+pub(crate) struct BlockingHttpClient(reqwest::blocking::Client);
+
+impl opentelemetry_http::HttpClient for BlockingHttpClient {
+    fn send_bytes<'client, 'request>(
+        &'client self,
+        request: http::Request<bytes::Bytes>,
+    ) -> std::pin::Pin<
+        Box<
+            dyn std::future::Future<
+                    Output = Result<http::Response<bytes::Bytes>, opentelemetry_http::HttpError>,
+                > + Send
+                + 'request,
+        >,
+    >
+    where
+        'client: 'request,
+        Self: 'request,
+    {
+        Box::pin(async move {
+            let request = request.try_into()?;
+            let mut response = self.0.execute(request)?.error_for_status()?;
+            let headers = std::mem::take(response.headers_mut());
+            let mut response_builder = http::Response::builder().status(response.status());
+            *response_builder
+                .headers_mut()
+                .expect("valid response status") = headers;
+            Ok(response_builder.body(response.bytes()?)?)
+        })
     }
 }
 

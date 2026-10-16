@@ -1,6 +1,6 @@
 # Upstream parity integration — 2026-10-16
 
-This integration merges all 195 upstream commits into the TRUEOS fork while retaining its 30 local commits. The initial merge produced 58 conflicted paths.
+This integration merges all 195 upstream commits into the TRUEOS fork while retaining its 30 local commits. The initial merge produced 58 conflicted paths, listed in [`upstream-parity-20261016-conflicts.json`](upstream-parity-20261016-conflicts.json).
 
 | Input | Exact commit |
 | --- | --- |
@@ -48,4 +48,27 @@ The ten oldest upstream commits, in integration order:
 
 ## Validation
 
-Validation is pending. Source resolution and formatting are integration preparation, not evidence that builds or tests pass. Cargo dependency/lock reconciliation, focused host suites, TRUEOS target compilation and the repository-required integration checks must be completed and recorded before the parity PR is considered validated. No test success is claimed by this report.
+| Check | Result |
+| --- | --- |
+| Linux CLI, default features | Passed |
+| Linux CLI, no defaults with `sh3,nopowersh` | Passed |
+| Foundation/transport/protocol/state/utility suites | 1,169 passed; 0 failed; 1 ignored |
+| Core unified execution | 81 passed; 0 failed |
+| Execution server, reporting disabled | 414 passed; 0 failed |
+| Execution server exporter tests, reporting enabled | 3 passed; 0 failed |
+| Daemon PID tests | 20 passed; 0 failed |
+| TUI startup (includes input replay) | 222 passed; 0 failed; 1 ignored |
+| TUI package/version identity | 2 passed; 0 failed |
+| Formatting, 153 non-vendored workspace packages | Passed |
+| TRUEOS Blueprint package | Passed; rebuilt with host startup compatibility fix |
+| Physical rig | Not run; package publication disabled |
+
+Focused foundation tests used `CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='env -u CODEX_CA_CERTIFICATE -u SSL_CERT_FILE'` so inherited certificate overrides do not alter the TLS fixtures. TUI tests use `RUST_MIN_STACK=16777216`; the ordinary test-thread stack overflowed in the large existing app fixture. The focused checks do not constitute the complete repository test suite.
+
+Testing also identified and corrected three compatibility issues after the initial merge: exporter-dependent tests now follow an explicit `external-reporting` forwarding feature; optional OTLP export adapts the configured workspace reqwest client rather than enabling OpenTelemetry's separate reqwest backend; startup snapshots normalize version-dependent widths. All three exporter tests were then exercised with reporting enabled, rather than only excluded in the default build.
+
+The prior local patch discarded startup-probe input on every Unix target. Upstream host input replay is now restored only for `all(unix, not(target_os = "trueos"))`; the existing TRUEOS discard/terminal-lease policy remains intact. The pinned upstream crossterm fork provides the required replay API.
+
+All three startup-replay tests were also rerun independently and passed. The restored host PTY typeahead case and both normalized snapshots pass.
+
+The single draft PR is https://github.com/t4ce/codex/pull/1. This branch retains upstream ancestry: the merge commit has the exact local and upstream input commits as its two parents.
