@@ -6,7 +6,7 @@ version.workspace = true
 
 [features]
 default = []
-external-reporting = ["codex-otel/external-reporting", "codex-feedback/external-reporting", "codex-analytics/external-reporting"]
+external-reporting = ["codex-exec-server/external-reporting", "codex-otel/external-reporting", "codex-feedback/external-reporting", "codex-analytics/external-reporting"]
 voice = ["dep:codex-utils-audio"]
 
 [lib]

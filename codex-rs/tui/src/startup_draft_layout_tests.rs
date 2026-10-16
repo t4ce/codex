@@ -20,16 +20,19 @@ fn owned_startup_keeps_the_live_bottom_geometry() {
     layout.render(area, &mut buffer);
     let frame = (area.y..area.bottom())
         .map(|y| {
-            (area.x..area.right())
+            let row = (area.x..area.right())
                 .map(|x| buffer[(x, y)].symbol())
-                .collect::<String>()
+                .collect::<String>();
+            // Normalize the title before padding so package version length cannot move cells
+            // in the snapshot. Keep the canonical fixture version used by existing snapshots.
+            let normalized = row.replace(crate::version::CODEX_CLI_VERSION, "0.0.0");
+            format!("{normalized:width$}", width = usize::from(area.width))
         })
         .collect::<Vec<_>>()
         .join("\n");
     insta::assert_snapshot!(
         "owned_startup_layout",
-        format!("cursor={:?}\n{frame}", layout.cursor_pos(area))
-            .replace(crate::version::CODEX_CLI_VERSION, "<VERSION>")
+        format!("cursor={:?}\n{frame}", layout.cursor_pos(area)).replace("0.0.0", "<VERSION>")
     );
 }
 

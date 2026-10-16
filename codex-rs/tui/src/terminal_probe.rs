@@ -7,10 +7,14 @@
 //! prefers duplicated stdio handles, falls back to the controlling terminal path when stdio is
 //! unavailable, and reports `None` when a response is unavailable.
 //!
-//! Probes run only while the crossterm event stream is absent or paused. Input consumed during
-//! startup probes is discarded after terminal responses have been extracted.
+//! Probes run only while the crossterm event stream is absent or paused. Unix hosts replay
+//! consumed startup input through crossterm. TRUEOS discards consumed input after extracting
+//! terminal responses, preserving its terminal handoff behavior.
 
 use std::time::Duration;
+
+#[cfg(all(unix, not(target_os = "trueos")))]
+mod startup_replay;
 
 #[cfg(unix)]
 mod terminal_identity;
@@ -36,6 +40,8 @@ pub(crate) struct DefaultColors {
 mod imp {
     use super::DefaultColors;
     use super::parse_default_colors;
+    #[cfg(not(target_os = "trueos"))]
+    use super::startup_replay::startup_replay_input;
     use super::terminal_identity;
     use std::fs::File;
     use std::fs::OpenOptions;
@@ -267,8 +273,8 @@ mod imp {
 
     /// Runs the optional terminal queries needed during TUI startup under one shared deadline.
     ///
-    /// Bytes read while waiting for terminal responses are discarded, including interleaved
-    /// user input. The buffer is used only to parse terminal responses.
+    /// Unix hosts replay interleaved user input through crossterm after parsing responses.
+    /// TRUEOS retains its terminal handoff behavior by discarding consumed input.
     pub(crate) fn startup(
         timeout: Duration,
         keyboard_probe: StartupKeyboardEnhancementProbe,
@@ -293,13 +299,16 @@ mod imp {
         tty.write_all(&query)?;
 
         let mut buffer = Vec::new();
-        read_startup_probe(
+        let result = read_startup_probe(
             &mut tty,
             timeout,
             keyboard_probe,
             query_identity,
             &mut buffer,
-        )
+        );
+        #[cfg(not(target_os = "trueos"))]
+        crossterm::event::buffer_input(&startup_replay_input(&buffer))?;
+        result
     }
 
     /// Reads available terminal bytes until `parse` recognizes a probe response or time expires.

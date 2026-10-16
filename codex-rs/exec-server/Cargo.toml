@@ -18,6 +18,10 @@ ignored-paths = [
 [lints]
 workspace = true
 
+[features]
+default = []
+external-reporting = ["codex-otel/external-reporting"]
+
 [dependencies]
 codex-utils-process = { workspace = true }
 arc-swap = { workspace = true }

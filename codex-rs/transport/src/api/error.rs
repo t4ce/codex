@@ -1,6 +1,7 @@
 use crate::api::rate_limits::RateLimitError;
 use crate::client::TransportError;
 use crate::http::RetryAfter;
+use codex_protocol::error::ResponseIncompleteError;
 use codex_protocol::protocol::MisalignmentErrorDetails;
 use http::StatusCode;
 use serde_json::Value;
@@ -16,6 +17,8 @@ pub enum ApiError {
     Stream(String),
     #[error("stream error: Incomplete response returned, reason: content_filter")]
     ContentFilter,
+    #[error(transparent)]
+    ResponseIncomplete(Box<ResponseIncompleteError>),
     #[error("context window exceeded")]
     ContextWindowExceeded,
     #[error("quota exceeded")]

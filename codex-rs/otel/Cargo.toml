@@ -36,8 +36,6 @@ opentelemetry-otlp = { workspace = true, optional = true, features = [
     "logs",
     "metrics",
     "trace",
-    "reqwest-blocking-client",
-    "reqwest-rustls",
     "tls",
     "tls-roots",
 ]}

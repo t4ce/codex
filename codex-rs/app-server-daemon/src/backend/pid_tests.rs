@@ -820,7 +820,8 @@ async fn updater_readiness_and_post_publication_failure_preserve_ownership() {
         .acquire_reservation_lock()
         .await
         .expect("reservation lock");
-    let mut predecessor_stderr = backend.open_stderr_log().await.expect("predecessor log");
+    let mut predecessor_stderr =
+        tokio::fs::File::from_std(backend.open_stderr_log().await.expect("predecessor log"));
     predecessor_stderr
         .write_all(&vec![b'x'; 512 * 1024])
         .await
@@ -836,7 +837,7 @@ async fn updater_readiness_and_post_publication_failure_preserve_ownership() {
             "[Console]::Error.WriteLine('successor startup'); [IO.File]::WriteAllText($env:CODEX_TEST_UPDATER_READY, ''); Start-Sleep 60",
         ])
         .env("CODEX_TEST_UPDATER_READY", &ready)
-        .stderr(Stdio::from(successor_stderr.into_std().await))
+        .stderr(Stdio::from(successor_stderr))
         .creation_flags(windows_sys::Win32::System::Threading::CREATE_NO_WINDOW)
         .kill_on_drop(true)
         .spawn()
@@ -1031,10 +1032,10 @@ async fn stderr_handoff_appends_after_truncation_without_gaps() -> anyhow::Resul
         home.path().join("updater.pid"),
         /*restore_release*/ None,
     );
-    let mut predecessor = backend.open_stderr_log().await?;
+    let mut predecessor = tokio::fs::File::from_std(backend.open_stderr_log().await?);
     predecessor.write_all(&vec![b'x'; 512 * 1024]).await?;
     predecessor.flush().await?;
-    let mut successor = backend.open_stderr_log().await?;
+    let mut successor = tokio::fs::File::from_std(backend.open_stderr_log().await?);
     successor.write_all(b"successor startup failure\n").await?;
     successor.flush().await?;
     predecessor

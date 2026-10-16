@@ -1,0 +1,5178 @@
+{
+  "base_local": "7a19e0a9d8ffcf8c6e61d1f6eb0b16fd10f17e90",
+  "upstream": "0e67502123b4c6952b9fa5d672d2907fe4059f56",
+  "count": 195,
+  "classification_note": "Per-commit path and subject audit; mixed_tests_runtime marks runtime commits also changing dedicated test paths. Inline tests can coexist in runtime source files. Platform-only means platform-targeted behavior, even when shared source files contain gated changes. AWS-specific is empty when no commit exclusively targets AWS.",
+  "counts": {
+    "common-runtime": 160,
+    "docs/tests-only": 15,
+    "CI": 7,
+    "Windows-macOS-only": 11,
+    "releases": 2
+  },
+  "commits": [
+    {
+      "commit": "7e9c061ceb388c67097acac069d6b7f8a60e5011",
+      "subject": "Finish remote exec cleanup when output streams remain open (#53331)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/unified_exec/oneshot.rs",
+        "codex-rs/core/src/unified_exec/process_manager.rs",
+        "codex-rs/core/tests/suite/unified_exec_process_events.rs"
+      ],
+      "keywords": [
+        "remote execution",
+        "stream closure",
+        "cleanup"
+      ]
+    },
+    {
+      "commit": "6e5f665feb9b71e1500a5721036fbdb8e871f4b0",
+      "subject": "Test final polling of remote processes with open output streams (#53339)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/tests/suite/unified_exec_process_events.rs"
+      ],
+      "keywords": [
+        "remote polling",
+        "inherited streams",
+        "regression test"
+      ]
+    },
+    {
+      "commit": "ddb33e34b278ca1b7d16d1e68f8ad363a2042f2e",
+      "subject": "Remove selected protocol, apply-patch, MCP, and TUI tests (#53358)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/app-server-protocol/src/export.rs",
+        "codex-rs/app-server-protocol/src/protocol/common.rs",
+        "codex-rs/apply-patch/src/invocation.rs",
+        "codex-rs/codex-mcp/src/mcp/mod_tests.rs",
+        "codex-rs/tui/src/markdown_render/local_links.rs",
+        "codex-rs/tui/src/markdown_render/local_links_tests.rs"
+      ],
+      "keywords": [
+        "test removal",
+        "protocol/MCP",
+        "apply-patch/TUI"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "6c372fbef45f730b6d8aa727b0ec8332365588db",
+      "subject": "Allow turns when the agent message board is unavailable (#53369)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/tools/spec_plan.rs",
+        "codex-rs/core/tests/suite/scenarios_agent_message_board.rs"
+      ],
+      "keywords": [
+        "message board",
+        "availability",
+        "turn admission"
+      ]
+    },
+    {
+      "commit": "0c7362d121d1c7f69540262425fd4e2209fd8e8d",
+      "subject": "Ignore the unsafe-libyaml advisory in dependency audits (#53382)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/.cargo/audit.toml",
+        "codex-rs/deny.toml"
+      ],
+      "keywords": [
+        "unsafe-libyaml",
+        "advisory exception",
+        "dependency audit"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "27e6192e84fa8a2969d9d56c2fbe05754205958b",
+      "subject": "Use cached login credentials for Guardian decisions (#53389)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/startup.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/startup_tests.rs"
+      ],
+      "keywords": [
+        "Guardian Decisions",
+        "credential cache",
+        "authentication"
+      ]
+    },
+    {
+      "commit": "cab328f2754e6ec53f6a61b1c58b51f15d7a4538",
+      "subject": "Distinguish Guardian parent-compaction failure reasons (#53393)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/observation.rs"
+      ],
+      "keywords": [
+        "Guardian",
+        "parent compaction",
+        "failure reasons"
+      ]
+    },
+    {
+      "commit": "97239fd052db455bd08c41afcdab738e0fe83b87",
+      "subject": "Add explicit local board connections with fixed runtime access (#53400)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/agent_message_board.rs",
+        "codex-rs/core/src/thread_manager.rs",
+        "codex-rs/core/tests/suite/scenarios_agent_message_board.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__agent_message_board__board_connections.snap",
+        "codex-rs/ext/agent-message-board/README.md",
+        "codex-rs/ext/agent-message-board/src/api.rs",
+        "codex-rs/ext/agent-message-board/src/extension.rs",
+        "codex-rs/ext/agent-message-board/src/host.rs",
+        "codex-rs/ext/agent-message-board/src/lib.rs",
+        "codex-rs/ext/agent-message-board/src/local.rs",
+        "codex-rs/ext/agent-message-board/src/local/connection.rs",
+        "codex-rs/ext/agent-message-board/src/local/queries.rs",
+        "codex-rs/ext/agent-message-board/src/permissions.rs"
+      ],
+      "keywords": [
+        "local board",
+        "explicit connections",
+        "runtime access"
+      ]
+    },
+    {
+      "commit": "16845bb8e85d781f6e745bdec011384450929ff9",
+      "subject": "Isolate arg0 helper directories by operating system (#53412)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/arg0/src/lib.rs",
+        "codex-rs/core/src/config/permissions.rs",
+        "codex-rs/core/src/config/permissions_tests.rs"
+      ],
+      "keywords": [
+        "arg0 helpers",
+        "OS isolation",
+        "temporary directories"
+      ]
+    },
+    {
+      "commit": "bf4ca52b61686398aafb6f4467da4202b6bdec53",
+      "subject": "Restore saved thread permissions during configuration loading (#53419)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/request_processors/thread_processor.rs",
+        "codex-rs/app-server/tests/suite/v2/thread_resume.rs",
+        "codex-rs/core/src/codex_delegate.rs",
+        "codex-rs/core/src/config/config_tests.rs",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/core/src/config/permission_profile_catalog.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/tests/guardian_tests.rs",
+        "codex-rs/core/src/thread_manager.rs",
+        "codex-rs/exec/src/lib.rs"
+      ],
+      "keywords": [
+        "thread permissions",
+        "configuration loading",
+        "restore"
+      ]
+    },
+    {
+      "commit": "fc4921f487a1f07275394a0476acb3d1edf1cd65",
+      "subject": "Add regression coverage for network grants on cold thread resume (#53424)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/thread_resume.rs",
+        "codex-rs/app-server/tests/suite/v2/thread_resume_network_tests.rs"
+      ],
+      "keywords": [
+        "Add",
+        "regression",
+        "coverage",
+        "for",
+        "network",
+        "grants",
+        "on",
+        "cold",
+        "thread"
+      ]
+    },
+    {
+      "commit": "f60516235442c99cb14490b2758e5f7a882b029d",
+      "subject": "Preserve Windows runtime registration failure diagnostics (#53426)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/windows-sandbox-service/src/registered_runtime.rs",
+        "codex-rs/windows-sandbox-service/src/registered_runtime/registration_result.rs",
+        "codex-rs/windows-sandbox-service/src/registered_runtime/registration_result_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "Windows",
+        "runtime",
+        "registration",
+        "failure",
+        "diagnostics"
+      ]
+    },
+    {
+      "commit": "b3c3bad9760fc2214fab2e93659c240d147e6168",
+      "subject": "Apply configuration toggles live and improve settings navigation (#53429)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/config_panel.rs",
+        "codex-rs/tui/src/app/config_panel_tests.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/right_click_paste.rs",
+        "codex-rs/tui/src/app/right_click_paste_tests.rs",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__config_panel__tests__effects_picker_after_animation_save.snap",
+        "codex-rs/tui/src/bottom_pane/list_selection_view.rs",
+        "codex-rs/tui/src/bottom_pane/mod.rs",
+        "codex-rs/tui/src/bottom_pane/selection_popup_common.rs",
+        "codex-rs/tui/src/bottom_pane/selection_row_layout.rs",
+        "codex-rs/tui/src/chatwidget/config_panel.rs",
+        "codex-rs/tui/src/chatwidget/keymap_picker.rs",
+        "codex-rs/tui/src/chatwidget/tests.rs",
+        "codex-rs/tui/src/config_panel/config_panel_tests.rs",
+        "codex-rs/tui/src/config_panel/input.rs",
+        "codex-rs/tui/src/config_panel/mod.rs",
+        "codex-rs/tui/src/config_panel/render.rs",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Appearance.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Input.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Notifications.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Sessions.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Text selection.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_copy_on_select_choice.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_global_search.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_notification_condition_choice.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_notifications_custom.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_notifications_off.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_panel_wraps_complete_save_error.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_resume_directory_remote.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_right_click_paste_choice.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_right_click_paste_unavailable.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_session_picker_layout_choice.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__deselect_after_copy_unavailable.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__effects_picker.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__refresh_preserves_search_and_updates_visible_state.snap",
+        "codex-rs/tui/src/config_panel/toggle.rs",
+        "codex-rs/tui/src/local_settings.rs",
+        "codex-rs/tui/src/pets/ambient.rs",
+        "codex-rs/tui/src/status_indicator_widget.rs"
+      ],
+      "keywords": [
+        "Apply",
+        "configuration",
+        "toggles",
+        "live",
+        "and",
+        "improve",
+        "settings",
+        "navigation"
+      ]
+    },
+    {
+      "commit": "6f47fcb0bea40155ba00a352fd833c2df2738076",
+      "subject": "Route TUI request replies to their originating connection and thread (#53436)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/agents_overview.rs",
+        "codex-rs/tui/src/app/agents_overview_details.rs",
+        "codex-rs/tui/src/app/agents_overview_tests.rs",
+        "codex-rs/tui/src/app/app_server_events.rs",
+        "codex-rs/tui/src/app/app_server_requests.rs",
+        "codex-rs/tui/src/app/retained_reply_tests.rs",
+        "codex-rs/tui/src/app/session_lifecycle.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/fork_workspace_roots_tests.rs",
+        "codex-rs/tui/src/app/tests/startup.rs",
+        "codex-rs/tui/src/app/tests/user_verification_routes_tests.rs",
+        "codex-rs/tui/src/app/thread_routing.rs",
+        "codex-rs/tui/src/app/user_verification.rs",
+        "codex-rs/tui/src/app/user_verification_requests.rs",
+        "codex-rs/tui/src/app/user_verification_requests_tests.rs",
+        "codex-rs/tui/src/app/user_verification_tests.rs",
+        "codex-rs/tui/src/app_event_sender.rs",
+        "codex-rs/tui/src/app_server_session.rs",
+        "codex-rs/tui/src/bottom_pane/request_user_input/mod.rs"
+      ],
+      "keywords": [
+        "Route",
+        "TUI",
+        "request",
+        "replies",
+        "to",
+        "their",
+        "originating",
+        "connection",
+        "and"
+      ]
+    },
+    {
+      "commit": "7c1b64c5df07ae124c70a9a0094811cd3e23fcb5",
+      "subject": "Stop identifying Apple Terminal from `TERM_SESSION_ID` (#53438)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/terminal-detection/src/lib.rs",
+        "codex-rs/terminal-detection/src/terminal_tests.rs"
+      ],
+      "keywords": [
+        "Stop",
+        "identifying",
+        "Apple",
+        "Terminal",
+        "from",
+        "TERM_SESSION_ID"
+      ]
+    },
+    {
+      "commit": "6c7d409a6d31ce745c95dda9a09a1050deb82649",
+      "subject": "Preserve status line accents on 16-color terminals (#53440)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/tui/src/bottom_pane/status_line_style.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "status",
+        "line",
+        "accents",
+        "on",
+        "color",
+        "terminals"
+      ]
+    },
+    {
+      "commit": "3ece80b784c7629230c38927b3a8f85fc059c66d",
+      "subject": "Use local MSVC toolchains for native Windows Bazel tests (#53443)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".bazelrc",
+        ".github/workflows/bazel.yml"
+      ],
+      "keywords": [
+        "Use",
+        "local",
+        "MSVC",
+        "toolchains",
+        "for",
+        "native",
+        "Windows",
+        "Bazel",
+        "tests"
+      ]
+    },
+    {
+      "commit": "c308e127e0e8cd040f670ca0e0496ae1c7519d3f",
+      "subject": "Suppress repeated turn diffs in `codex exec` human output (#53444)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/exec/Cargo.toml",
+        "codex-rs/exec/src/event_processor_with_human_output.rs",
+        "codex-rs/exec/src/event_processor_with_human_output_tests.rs",
+        "codex-rs/exec/tests/suite/apply_patch.rs"
+      ],
+      "keywords": [
+        "Suppress",
+        "repeated",
+        "turn",
+        "diffs",
+        "in",
+        "codex",
+        "exec",
+        "human",
+        "output"
+      ]
+    },
+    {
+      "commit": "bc9cad3473d4092d34d11a8d050c2dc199a74959",
+      "subject": "Treat incomplete responses as terminal errors (#53451)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/src/doctor.rs",
+        "codex-rs/codex-api/src/api_bridge.rs",
+        "codex-rs/codex-api/src/error.rs",
+        "codex-rs/codex-api/src/sse/responses.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/compact_model_fallback.rs",
+        "codex-rs/core/tests/suite/client.rs",
+        "codex-rs/core/tests/suite/compact.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs",
+        "codex-rs/protocol/src/error.rs",
+        "codex-rs/response-debug-context/src/lib.rs"
+      ],
+      "keywords": [
+        "Treat",
+        "incomplete",
+        "responses",
+        "as",
+        "terminal",
+        "errors"
+      ]
+    },
+    {
+      "commit": "7a0a8ac9c4aba9b687e5a11b5daa6404dab09728",
+      "subject": "Close input admission while a turn finishes recording (#53452)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/session/inject.rs",
+        "codex-rs/core/src/session/notification_tests.rs",
+        "codex-rs/core/src/state/turn.rs",
+        "codex-rs/core/src/tasks/mod.rs",
+        "codex-rs/core/tests/suite/scenarios_retained_tool_outputs.rs"
+      ],
+      "keywords": [
+        "Close",
+        "input",
+        "admission",
+        "while",
+        "turn",
+        "finishes",
+        "recording"
+      ]
+    },
+    {
+      "commit": "0c329ad2c9d5a2592128a1d536c66e16f9397e46",
+      "subject": "Prefer the Windows clipboard and bound copy attempts on WSL (#53453)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/clipboard_copy.rs",
+        "codex-rs/tui/src/clipboard_copy/wsl.rs",
+        "codex-rs/tui/src/clipboard_copy/wsl_tests.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__clipboard_copy__tests__all_copy_backends_fail.snap"
+      ],
+      "keywords": [
+        "Prefer",
+        "the",
+        "Windows",
+        "clipboard",
+        "and",
+        "bound",
+        "copy",
+        "attempts",
+        "on"
+      ]
+    },
+    {
+      "commit": "4a93bd249a4e73e24c3cc889053c947c6986362a",
+      "subject": "Update `quinn-proto` to 0.11.18 (#53485)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock"
+      ],
+      "keywords": [
+        "Update",
+        "quinn-proto",
+        "to"
+      ]
+    },
+    {
+      "commit": "92caad782887cde063572fc0a0efbf5b1317520d",
+      "subject": "Preserve pending Effects toggles across save refreshes (#53496)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/config_panel.rs",
+        "codex-rs/tui/src/app/config_panel_tests.rs",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__config_panel__tests__effects_picker_after_animation_save.snap",
+        "codex-rs/tui/src/bottom_pane/bottom_pane_view.rs",
+        "codex-rs/tui/src/bottom_pane/list_selection_view.rs",
+        "codex-rs/tui/src/bottom_pane/mod.rs",
+        "codex-rs/tui/src/chatwidget/config_panel.rs",
+        "codex-rs/tui/src/config_panel/mod.rs",
+        "codex-rs/tui/src/config_panel/render.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "pending",
+        "Effects",
+        "toggles",
+        "across",
+        "save",
+        "refreshes"
+      ]
+    },
+    {
+      "commit": "12cca49c81c8aa6a37a5cc4e39964ee3b70f9458",
+      "subject": "Reject duplicate Host headers in the network proxy (#53506)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/network-proxy/src/http_proxy.rs",
+        "codex-rs/network-proxy/src/http_proxy/host_header_tests.rs"
+      ],
+      "keywords": [
+        "Reject",
+        "duplicate",
+        "Host",
+        "headers",
+        "in",
+        "the",
+        "network",
+        "proxy"
+      ]
+    },
+    {
+      "commit": "f82e36592278a0a782fb0d0fc97e5fa10e832ac2",
+      "subject": "Deduplicate TUI modifier handling and terminal color caching (#53556)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/tui/src/custom_terminal.rs",
+        "codex-rs/tui/src/insert_history.rs",
+        "codex-rs/tui/src/terminal_palette.rs"
+      ],
+      "keywords": [
+        "Deduplicate",
+        "TUI",
+        "modifier",
+        "handling",
+        "and",
+        "terminal",
+        "color",
+        "caching"
+      ]
+    },
+    {
+      "commit": "669449b02c4b58de4bcd22485eb60c98a6e38a54",
+      "subject": "Add async compaction feature configuration (#53595)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/schema.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/config/config_loader_tests.rs",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/features/src/feature_configs.rs",
+        "codex-rs/features/src/lib.rs",
+        "codex-rs/thread-manager-sample/src/main.rs"
+      ],
+      "keywords": [
+        "Add",
+        "async",
+        "compaction",
+        "feature",
+        "configuration"
+      ]
+    },
+    {
+      "commit": "be5296d4672f59205c1b8a76f46e74eae4f10d51",
+      "subject": "Prepare compaction helpers for background requests (#53606)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/client.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/compact_remote_history.rs",
+        "codex-rs/core/src/compact_remote_v2.rs",
+        "codex-rs/core/src/compact_remote_v2_attempt.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/session.rs"
+      ],
+      "keywords": [
+        "Prepare",
+        "compaction",
+        "helpers",
+        "for",
+        "background",
+        "requests"
+      ]
+    },
+    {
+      "commit": "1a69ad3237fc485273ccfa9731239fdf789b43e4",
+      "subject": "Add infrastructure for speculative remote V2 compaction (#53614)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/compact_remote_v2.rs",
+        "codex-rs/core/src/compact_remote_v2_attempt.rs",
+        "codex-rs/core/src/session/async_compaction.rs",
+        "codex-rs/core/src/session/handlers.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/state/session.rs"
+      ],
+      "keywords": [
+        "Add",
+        "infrastructure",
+        "for",
+        "speculative",
+        "remote",
+        "V2",
+        "compaction"
+      ]
+    },
+    {
+      "commit": "308ddf5e7c2aa7b8102eda043dc7656e691a96c8",
+      "subject": "Allow hiding native tools while retaining the multi-agent V2 runtime (#53617)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/config/config_tests.rs",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/core/src/tools/spec_plan.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__multi_agent_native_tools_hidden.snap",
+        "codex-rs/features/src/feature_configs.rs",
+        "codex-rs/features/src/tests.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "hiding",
+        "native",
+        "tools",
+        "while",
+        "retaining",
+        "the",
+        "multi-agent",
+        "V2"
+      ]
+    },
+    {
+      "commit": "9167a0b2d4a74d44a4d388057d304682e47313c6",
+      "subject": "Reuse background results for remote V2 compaction (#53620)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/compact_remote_v2.rs",
+        "codex-rs/core/src/compact_remote_v2_attempt.rs",
+        "codex-rs/core/src/compact_remote_v2_installation.rs",
+        "codex-rs/core/src/session/async_compaction.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/turn.rs"
+      ],
+      "keywords": [
+        "Reuse",
+        "background",
+        "results",
+        "for",
+        "remote",
+        "V2",
+        "compaction"
+      ]
+    },
+    {
+      "commit": "b043762f9e3eb65dd5164ff5880f139bc6d084c7",
+      "subject": "Preserve remote exec output until it is collected (#53622)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/unified_exec/process.rs",
+        "codex-rs/core/src/unified_exec/process_manager.rs",
+        "codex-rs/core/src/unified_exec/process_manager_tests.rs",
+        "codex-rs/core/tests/suite/unified_exec_process_events.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "remote",
+        "exec",
+        "output",
+        "until",
+        "it",
+        "is",
+        "collected"
+      ]
+    },
+    {
+      "commit": "f5297229c18a63d6788c3933c49162b77d7b67ec",
+      "subject": "Record truncation metrics for accepted Guardian review inputs (#53628)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/guardian/input_budget.rs",
+        "codex-rs/core/src/guardian/input_budget_tests.rs",
+        "codex-rs/core/tests/suite/dynamic_tool_cancellation.rs",
+        "codex-rs/otel/src/metrics/names.rs"
+      ],
+      "keywords": [
+        "Record",
+        "truncation",
+        "metrics",
+        "for",
+        "accepted",
+        "Guardian",
+        "review",
+        "inputs"
+      ]
+    },
+    {
+      "commit": "86966c3230053548bf3005cd59f4d80f6afdec3b",
+      "subject": "Materialize the thread before testing a discovered daemon restart (#53631)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/cli/tests/daemon_startup.rs"
+      ],
+      "keywords": [
+        "Materialize",
+        "the",
+        "thread",
+        "before",
+        "testing",
+        "discovered",
+        "daemon",
+        "restart"
+      ]
+    },
+    {
+      "commit": "6042ec37b0e6468ce550939dc96cd17e12a381d1",
+      "subject": "Stabilize write ordering in the shared message board scenario (#53632)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/tests/suite/scenarios_agent_message_board.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__agent_message_board__board_connections.snap"
+      ],
+      "keywords": [
+        "Stabilize",
+        "write",
+        "ordering",
+        "in",
+        "the",
+        "shared",
+        "message",
+        "board",
+        "scenario"
+      ]
+    },
+    {
+      "commit": "90f00bd89ed3263b4d5993849cccb795f4330449",
+      "subject": "Add an environment API key fallback for Guardian Decisions (#53633)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/startup.rs"
+      ],
+      "keywords": [
+        "Add",
+        "an",
+        "environment",
+        "API",
+        "key",
+        "fallback",
+        "for",
+        "Guardian",
+        "Decisions"
+      ]
+    },
+    {
+      "commit": "4e7ef7d19d59c51ac04e62d062664bfd012d76da",
+      "subject": "Keep spawned children provisional until the spawn result returns (#53654)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/agent/api.rs",
+        "codex-rs/core/src/agent/control/spawn.rs",
+        "codex-rs/core/src/agent/control/spawn_guard.rs",
+        "codex-rs/core/src/agent/control_tests.rs",
+        "codex-rs/core/tests/suite/pending_input_persistence.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "spawned",
+        "children",
+        "provisional",
+        "until",
+        "the",
+        "spawn",
+        "result",
+        "returns"
+      ]
+    },
+    {
+      "commit": "ab82af0b2cfc1e894de72f5971b79d451dc2b337",
+      "subject": "Share hook configuration across cloned hook views (#53657)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/hooks/src/engine/command_runner_tests.rs",
+        "codex-rs/hooks/src/engine/mod.rs",
+        "codex-rs/hooks/src/engine/mod_tests.rs",
+        "codex-rs/hooks/src/registry.rs"
+      ],
+      "keywords": [
+        "Share",
+        "hook",
+        "configuration",
+        "across",
+        "cloned",
+        "hook",
+        "views"
+      ]
+    },
+    {
+      "commit": "73bbb654b3b9796b11624914b3be908ab8a0551f",
+      "subject": "Extract shared multi-agent v2 thread spawning (#53660)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/lib.rs",
+        "codex-rs/core/src/thread_spawn.rs",
+        "codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs"
+      ],
+      "keywords": [
+        "Extract",
+        "shared",
+        "multi-agent",
+        "v2",
+        "thread",
+        "spawning"
+      ]
+    },
+    {
+      "commit": "a68a7a6ab05242735b816c71dfa4c3f794c6efd7",
+      "subject": "Improve remote exec-server test startup diagnostics (#53668)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/cli/tests/exec_server.rs"
+      ],
+      "keywords": [
+        "Improve",
+        "remote",
+        "exec-server",
+        "test",
+        "startup",
+        "diagnostics"
+      ]
+    },
+    {
+      "commit": "816fa702ec66a4c81b204701a03371a1ac3511e6",
+      "subject": "Account for token usage from incomplete responses (#53670)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-api/src/error.rs",
+        "codex-rs/codex-api/src/sse/responses.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/compact_remote_v2.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/turn.rs",
+        "codex-rs/core/src/tasks/mod_tests.rs",
+        "codex-rs/core/tests/suite/client.rs",
+        "codex-rs/core/tests/suite/compact.rs",
+        "codex-rs/core/tests/suite/request_user_input.rs",
+        "codex-rs/protocol/src/error.rs"
+      ],
+      "keywords": [
+        "Account",
+        "for",
+        "token",
+        "usage",
+        "from",
+        "incomplete",
+        "responses"
+      ]
+    },
+    {
+      "commit": "4c1cd8bbccb337c7043817c8e894058b103c9cdd",
+      "subject": "Keep discovered Apps tools available during startup recovery (#53672)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-mcp/src/connection_manager.rs",
+        "codex-rs/codex-mcp/src/connection_manager/tool_catalog.rs",
+        "codex-rs/codex-mcp/src/connection_manager_tests.rs",
+        "codex-rs/codex-mcp/src/rmcp_client.rs",
+        "codex-rs/codex-mcp/src/rmcp_client/status.rs",
+        "codex-rs/core/tests/common/apps_test_server.rs",
+        "codex-rs/core/tests/suite/mcp_tool_exposure.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "discovered",
+        "Apps",
+        "tools",
+        "available",
+        "during",
+        "startup",
+        "recovery"
+      ]
+    },
+    {
+      "commit": "7b06e4af664049a3c1ed3113c4ee52ec3d5993f2",
+      "subject": "Publish Rust releases with the GitHub CLI (#53673)",
+      "group": "releases",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".github/workflows/rust-release.yml"
+      ],
+      "keywords": [
+        "Publish",
+        "Rust",
+        "releases",
+        "with",
+        "the",
+        "GitHub",
+        "CLI"
+      ]
+    },
+    {
+      "commit": "044e74fef3d1af2b01f4375158ac1e7ad4ae17ea",
+      "subject": "Preserve inherited context in prediction forks (#53678)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/request_processors/thread_processor.rs",
+        "codex-rs/app-server/tests/suite/v2/compaction.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/session/turn.rs",
+        "codex-rs/core/src/tools/handlers/new_context_window.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__prediction_fork_preserves_context_above_compaction_threshold.snap"
+      ],
+      "keywords": [
+        "Preserve",
+        "inherited",
+        "context",
+        "in",
+        "prediction",
+        "forks"
+      ]
+    },
+    {
+      "commit": "c03bbff4831a23a6dfc6f178838b73a50a9f554a",
+      "subject": "Constrain API-key model access programs to server support (#53689)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/tests/misalignment_policy_tests.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/app_event.rs",
+        "codex-rs/tui/src/app_server_session.rs",
+        "codex-rs/tui/src/app_server_session/daybreak_api_key_compat.rs",
+        "codex-rs/tui/src/chatwidget/model_popup_state.rs",
+        "codex-rs/tui/src/chatwidget/session_flow.rs",
+        "codex-rs/tui/src/chatwidget/settings.rs"
+      ],
+      "keywords": [
+        "Constrain",
+        "API-key",
+        "model",
+        "access",
+        "programs",
+        "to",
+        "server",
+        "support"
+      ]
+    },
+    {
+      "commit": "979771476a6dc8cae59dfc9224b91ae0515b04fd",
+      "subject": "Account for replay caches in encrypted compaction budgets (#53691)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/context_manager/history.rs",
+        "codex-rs/core/src/context_manager/history_tests.rs",
+        "codex-rs/core/tests/suite/guardian_context_budget.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/config.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/parent_compaction.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/parent_compaction_tests.rs",
+        "codex-rs/guardian-context/src/budget.rs",
+        "codex-rs/guardian-context/src/lib.rs",
+        "codex-rs/protocol/src/protocol.rs"
+      ],
+      "keywords": [
+        "Account",
+        "for",
+        "replay",
+        "caches",
+        "in",
+        "encrypted",
+        "compaction",
+        "budgets"
+      ]
+    },
+    {
+      "commit": "31434401fa3cd111866acdc1bba2a73b561f53d5",
+      "subject": "Add keyboard selection support to the transcript view (#53693)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/transcript_view.rs",
+        "codex-rs/tui/src/transcript_view/input.rs",
+        "codex-rs/tui/src/transcript_view/select_mode.rs",
+        "codex-rs/tui/src/transcript_view/select_mode/motion.rs",
+        "codex-rs/tui/src/transcript_view/select_mode_tests.rs",
+        "codex-rs/tui/src/transcript_view/selection.rs",
+        "codex-rs/tui/src/transcript_view/text.rs"
+      ],
+      "keywords": [
+        "Add",
+        "keyboard",
+        "selection",
+        "support",
+        "to",
+        "the",
+        "transcript",
+        "view"
+      ]
+    },
+    {
+      "commit": "ffc14026337b3637cb2b61b9adee55aa4dcba2e6",
+      "subject": "Interrupt and drain canceled classifier responses before socket reuse (#53698)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-api/src/common.rs",
+        "codex-rs/codex-api/src/endpoint/responses_websocket.rs",
+        "codex-rs/codex-api/src/lib.rs",
+        "codex-rs/core/src/client_common.rs",
+        "codex-rs/core/src/session/turn.rs",
+        "codex-rs/core/tests/suite/pending_input.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/connection_pool.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/connection_pool_cancellation_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/response.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler_tests.rs"
+      ],
+      "keywords": [
+        "Interrupt",
+        "and",
+        "drain",
+        "canceled",
+        "classifier",
+        "responses",
+        "before",
+        "socket",
+        "reuse"
+      ]
+    },
+    {
+      "commit": "f6aca7dc461d6a9e0ae12828cd04845c31dd504e",
+      "subject": "Cancel Guardian V2 classifications that exceed the tool-call lag window (#53699)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/classification.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/conversation.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/conversation_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/pending_score_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/score.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/wrapper_lag.rs"
+      ],
+      "keywords": [
+        "Cancel",
+        "Guardian",
+        "V2",
+        "classifications",
+        "that",
+        "exceed",
+        "the",
+        "tool-call",
+        "lag"
+      ]
+    },
+    {
+      "commit": "6fbfc352cafb50332d62dbdc8720cb5d7fe3b7c7",
+      "subject": "Enable CLI Daybreak by default and enforce background-turn eligibility (#53701)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/features/src/lib.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/chatwidget/tests/history_replay.rs",
+        "codex-rs/tui/src/chatwidget/tests/slash_commands.rs",
+        "codex-rs/tui/src/chatwidget/tests/status_surface_previews.rs",
+        "codex-rs/tui/src/dynamic_tools.rs"
+      ],
+      "keywords": [
+        "Enable",
+        "CLI",
+        "Daybreak",
+        "by",
+        "default",
+        "and",
+        "enforce",
+        "background-turn",
+        "eligibility"
+      ]
+    },
+    {
+      "commit": "cb7091b1803761ea882bf4017f519b9b83b83fd4",
+      "subject": "Preserve URLs and email addresses during external agent migration (#53706)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml",
+        "codex-rs/app-server/tests/suite/v2/external_agent_config.rs",
+        "codex-rs/external-agent-migration/Cargo.toml",
+        "codex-rs/external-agent-migration/src/rewrite.rs",
+        "codex-rs/external-agent-migration/src/rewrite_tests.rs",
+        "codex-rs/external-agent-migration/src/service_tests/general/config_import.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "URLs",
+        "and",
+        "email",
+        "addresses",
+        "during",
+        "external",
+        "agent",
+        "migration"
+      ]
+    },
+    {
+      "commit": "7d0b91d5d686688893fecb356e27fdebaad66ee1",
+      "subject": "Separate MCP sandbox policy from launcher metadata (#53709)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/src/lib.rs",
+        "codex-rs/codex-mcp/README.md",
+        "codex-rs/codex-mcp/src/binding.rs",
+        "codex-rs/codex-mcp/src/binding_tests.rs",
+        "codex-rs/codex-mcp/src/lib.rs",
+        "codex-rs/codex-mcp/src/rmcp_client.rs",
+        "codex-rs/codex-mcp/src/runtime.rs",
+        "codex-rs/codex-mcp/src/sandbox_metadata.rs",
+        "codex-rs/codex-mcp/src/sandbox_metadata_tests.rs",
+        "codex-rs/core/src/mcp_tool_call.rs",
+        "codex-rs/core/tests/suite/mcp_sandbox_tests.rs",
+        "codex-rs/core/tests/suite/rmcp_client.rs",
+        "codex-rs/rmcp-client/src/bin/test_stdio_server.rs"
+      ],
+      "keywords": [
+        "Separate",
+        "MCP",
+        "sandbox",
+        "policy",
+        "from",
+        "launcher",
+        "metadata"
+      ]
+    },
+    {
+      "commit": "6cc7d9cc5c702c0ca133f7ea48432166e0b880be",
+      "subject": "Enable Cyber access programs for API-key sessions by default (#53717)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/tests/suite/compact_program_tests.rs",
+        "codex-rs/exec/src/daybreak.rs",
+        "codex-rs/exec/src/lib.rs",
+        "codex-rs/exec/tests/suite/daybreak.rs",
+        "codex-rs/features/src/lib.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/chatwidget/tests/history_replay.rs",
+        "codex-rs/tui/src/daybreak.rs",
+        "codex-rs/tui/src/daybreak_tests.rs",
+        "codex-rs/tui/src/dynamic_tools.rs",
+        "codex-rs/tui/src/experimental_features.rs"
+      ],
+      "keywords": [
+        "Enable",
+        "Cyber",
+        "access",
+        "programs",
+        "for",
+        "API-key",
+        "sessions",
+        "by",
+        "default"
+      ]
+    },
+    {
+      "commit": "703d253ed676c26e4b9708a374b7344b5c1bcc53",
+      "subject": "Wire V2 capability discovery through exec-server RPC (#53723)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/client.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_discoveries.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_manager.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_manager/capability_watchers.rs",
+        "codex-rs/exec-server/src/discoverV2/mod.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_discoveries_tests.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_manager_tests.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_watchers_tests.rs",
+        "codex-rs/exec-server/src/environment.rs",
+        "codex-rs/exec-server/src/environment/discovery_recovery.rs",
+        "codex-rs/exec-server/src/environment/discovery_v2.rs",
+        "codex-rs/exec-server/src/environment/discovery_v2_tests.rs",
+        "codex-rs/exec-server/src/server/handler.rs",
+        "codex-rs/exec-server/src/server/handler/tests.rs",
+        "codex-rs/exec-server/src/server/process_otel_tests.rs",
+        "codex-rs/exec-server/src/server/processor.rs",
+        "codex-rs/exec-server/src/server/registry.rs",
+        "codex-rs/exec-server/src/server/request_dispatcher_tests.rs",
+        "codex-rs/exec-server/tests/capabilities_v2.rs",
+        "codex-rs/exec-server/tests/initialize.rs",
+        "codex-rs/file-watcher/src/file_watcher_tests.rs",
+        "codex-rs/file-watcher/src/lib.rs"
+      ],
+      "keywords": [
+        "Wire",
+        "V2",
+        "capability",
+        "discovery",
+        "through",
+        "exec-server",
+        "RPC"
+      ]
+    },
+    {
+      "commit": "72ad8747e926daa9a761ec858a99c061e2734a18",
+      "subject": "Render Markdown web links as labels in Rex (#53725)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/markdown_render/web_links.rs",
+        "codex-rs/tui/src/markdown_render/web_links_tests.rs"
+      ],
+      "keywords": [
+        "Render",
+        "Markdown",
+        "web",
+        "links",
+        "as",
+        "labels",
+        "in",
+        "Rex"
+      ]
+    },
+    {
+      "commit": "237b7d4323f876237c10c14592525c8bec25b74e",
+      "subject": "Preserve the remote cwd filter in the in-app resume picker (#53728)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/session_picker.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "the",
+        "remote",
+        "cwd",
+        "filter",
+        "in",
+        "the",
+        "in-app",
+        "resume"
+      ]
+    },
+    {
+      "commit": "efa159f7aa3fcdb23a2f3aaf1f6f1249376bffc7",
+      "subject": "Reuse compiled search patterns across compressed rollouts (#53732)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/rollout/src/search.rs",
+        "codex-rs/rollout/src/search_tests.rs"
+      ],
+      "keywords": [
+        "Reuse",
+        "compiled",
+        "search",
+        "patterns",
+        "across",
+        "compressed",
+        "rollouts"
+      ]
+    },
+    {
+      "commit": "4d82d36ccf0746b75437d78b874ba4c96ff2cc75",
+      "subject": "Default Guardian v2 async classification to conversation mode (#53733)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/guardian_v2.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/tests/suite/scenarios_guardian_orchestrator_connector.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/config_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_lifecycle_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension_tests.rs",
+        "codex-rs/features/src/feature_configs.rs",
+        "codex-rs/protocol/src/openai_models/guardian_v2.rs"
+      ],
+      "keywords": [
+        "Default",
+        "Guardian",
+        "v2",
+        "async",
+        "classification",
+        "to",
+        "conversation",
+        "mode"
+      ]
+    },
+    {
+      "commit": "cf0ed4c600161fcaa18eeac02b5fc715e1076955",
+      "subject": "Acquire and cache opt-in executor capability inventories via V2 (#53736)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core-plugins/src/provider.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/mcp.rs",
+        "codex-rs/core/src/session/mcp.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/session.rs",
+        "codex-rs/core/src/session/step_context.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/world_state.rs",
+        "codex-rs/core/src/tasks/mod.rs",
+        "codex-rs/core/src/thread_manager_tests.rs",
+        "codex-rs/core/tests/suite/executor_discovery_v2.rs",
+        "codex-rs/core/tests/suite/mod.rs",
+        "codex-rs/exec-server-protocol/src/capabilities.rs",
+        "codex-rs/exec-server/src/capability_discovery_v2_cache.rs",
+        "codex-rs/exec-server/src/client_refresh_tests.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_locations.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_manager.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_locations_tests.rs",
+        "codex-rs/exec-server/src/environment/discovery_v2.rs",
+        "codex-rs/exec-server/src/lib.rs",
+        "codex-rs/exec-server/src/server/processor.rs",
+        "codex-rs/ext/extension-api/src/contributors/mcp.rs",
+        "codex-rs/ext/extension-api/src/contributors/world_state.rs",
+        "codex-rs/ext/extension-api/tests/registry.rs",
+        "codex-rs/ext/mcp/src/cloud_plugin.rs",
+        "codex-rs/ext/mcp/src/cloud_plugin_tests.rs",
+        "codex-rs/ext/mcp/src/lib_tests.rs",
+        "codex-rs/ext/mcp/tests/plugin_mcp.rs",
+        "codex-rs/ext/skills/src/cloud_cache_tests.rs",
+        "codex-rs/ext/skills/src/cloud_skill.rs",
+        "codex-rs/ext/skills/src/extension.rs",
+        "codex-rs/ext/skills/src/provider.rs",
+        "codex-rs/ext/skills/src/render_tests.rs",
+        "codex-rs/ext/skills/src/world_state_catalogs.rs",
+        "codex-rs/ext/skills/tests/executor_file_system_authority.rs",
+        "codex-rs/ext/skills/tests/skills_extension.rs",
+        "codex-rs/ext/skills/tests/skills_extension/presentation_dedup_tests.rs",
+        "codex-rs/features/src/lib.rs"
+      ],
+      "keywords": [
+        "Acquire",
+        "and",
+        "cache",
+        "opt-in",
+        "executor",
+        "capability",
+        "inventories",
+        "via",
+        "V2"
+      ]
+    },
+    {
+      "commit": "c12cdc924bdd3ce8a2e57d16b882c865d363fceb",
+      "subject": "Remove `modelSlug` from the latest-model resolver output (#53745)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/skills/src/assets/samples/openai-docs/scripts/resolve-latest-model-info.cjs"
+      ],
+      "keywords": [
+        "Remove",
+        "modelSlug",
+        "from",
+        "the",
+        "latest-model",
+        "resolver",
+        "output"
+      ]
+    },
+    {
+      "commit": "5d4922595ae0eb81dde3c0f0f412ad771628d205",
+      "subject": "Prefer remote Visualize installs over the bundled plugin (#53747)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core-plugins/src/loader.rs",
+        "codex-rs/core/tests/suite/plugins.rs"
+      ],
+      "keywords": [
+        "Prefer",
+        "remote",
+        "Visualize",
+        "installs",
+        "over",
+        "the",
+        "bundled",
+        "plugin"
+      ]
+    },
+    {
+      "commit": "e762c05bd686dd1eb3595aef2e14cc37c739f401",
+      "subject": "Apply feature overrides when restarting the app-server daemon (#53751)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/app-server-daemon/Cargo.toml",
+        "codex-rs/app-server-daemon/src/launch.rs",
+        "codex-rs/app-server-daemon/src/lib.rs",
+        "codex-rs/app-server-daemon/src/update_loop_tests.rs",
+        "codex-rs/cli/src/main.rs",
+        "codex-rs/cli/tests/app_server_daemon.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs"
+      ],
+      "keywords": [
+        "Apply",
+        "feature",
+        "overrides",
+        "when",
+        "restarting",
+        "the",
+        "app-server",
+        "daemon"
+      ]
+    },
+    {
+      "commit": "3517671c6061e1704cf1c0df4a5039de23514df8",
+      "subject": "Extend copy-on-select to composer text (#53753)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/types.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/tui/src/app/clipboard.rs",
+        "codex-rs/tui/src/app/footer_selection.rs",
+        "codex-rs/tui/src/app/owned_transcript.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer/mouse.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer/mouse_tests.rs",
+        "codex-rs/tui/src/bottom_pane/mod.rs",
+        "codex-rs/tui/src/bottom_pane/textarea/mouse.rs",
+        "codex-rs/tui/src/chatwidget/interaction.rs",
+        "codex-rs/tui/src/config_panel/mod.rs",
+        "codex-rs/tui/src/config_panel/render.rs",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_Text selection.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_copy_on_select_choice.snap",
+        "codex-rs/tui/src/config_panel/snapshots/codex_tui__config_panel__tests__config_right_click_paste_unavailable.snap",
+        "codex-rs/tui/src/transcript_view.rs",
+        "codex-rs/tui/src/transcript_view/copy_on_select_tests.rs",
+        "codex-rs/tui/src/transcript_view/input.rs",
+        "codex-rs/tui/src/transcript_view/selection.rs",
+        "codex-rs/tui/src/tui.rs",
+        "codex-rs/tui/src/tui/selection_clipboard.rs"
+      ],
+      "keywords": [
+        "Extend",
+        "copy-on-select",
+        "to",
+        "composer",
+        "text"
+      ]
+    },
+    {
+      "commit": "21c16161191ff965031d1ac41fe9046011610743",
+      "subject": "Support Command/Super shortcuts in the TUI keymap (#53754)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/tui_keymap.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/tests/local_command_scroll_tests.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/app/tests/snapshots/codex_tui__app__tests__local_command_scroll_tests__keymap_daemon_rejected_binding.snap",
+        "codex-rs/tui/src/bottom_pane/textarea.rs",
+        "codex-rs/tui/src/key_hint.rs",
+        "codex-rs/tui/src/key_hint_label_tests.rs",
+        "codex-rs/tui/src/keymap.rs",
+        "codex-rs/tui/src/keymap/chords.rs",
+        "codex-rs/tui/src/keymap/chords_tests.rs",
+        "codex-rs/tui/src/keymap/leader.rs",
+        "codex-rs/tui/src/keymap_setup.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_editor.snap",
+        "codex-rs/tui/src/startup_draft_input.rs",
+        "codex-rs/tui/src/startup_draft_tests.rs",
+        "codex-rs/tui/src/tui_startup_tests.rs"
+      ],
+      "keywords": [
+        "Support",
+        "Command",
+        "Super",
+        "shortcuts",
+        "in",
+        "the",
+        "TUI",
+        "keymap"
+      ]
+    },
+    {
+      "commit": "20b4ff2f35f2193608385e4caa8da8ceee45a3cf",
+      "subject": "Enrich V2 capability discovery with resolved plugin and skill metadata (#53763)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/core/tests/suite/executor_discovery_v2.rs",
+        "codex-rs/exec-server-protocol/Cargo.toml",
+        "codex-rs/exec-server-protocol/src/capabilities.rs",
+        "codex-rs/exec-server-protocol/src/capabilities_tests.rs",
+        "codex-rs/exec-server-protocol/src/protocol.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_discoveries.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_locations.rs",
+        "codex-rs/exec-server/src/discoverV2/capability_locations/candidates.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_discoveries_tests.rs",
+        "codex-rs/exec-server/src/discoverV2/tests/capability_locations_tests.rs",
+        "codex-rs/exec-server/src/lib.rs",
+        "codex-rs/exec-server/tests/capabilities_v2.rs",
+        "codex-rs/ext/skills/Cargo.toml",
+        "codex-rs/ext/skills/src/loader/environment.rs",
+        "codex-rs/ext/skills/src/loader/metadata.rs",
+        "codex-rs/ext/skills/src/loader/mod.rs",
+        "codex-rs/skills/src/lib.rs",
+        "codex-rs/skills/src/metadata.rs",
+        "codex-rs/skills/src/model.rs"
+      ],
+      "keywords": [
+        "Enrich",
+        "V2",
+        "capability",
+        "discovery",
+        "with",
+        "resolved",
+        "plugin",
+        "and",
+        "skill"
+      ]
+    },
+    {
+      "commit": "8b507a8e4566288b4b35e81905673900198c479b",
+      "subject": "Remove redundant Codex manual cache directory check (#53780)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/skills/src/assets/samples/openai-docs/scripts/fetch-codex-manual.mjs"
+      ],
+      "keywords": [
+        "Remove",
+        "redundant",
+        "Codex",
+        "manual",
+        "cache",
+        "directory",
+        "check"
+      ]
+    },
+    {
+      "commit": "b56a579fc6f5ca54a690c0e463e0a33f5c276d63",
+      "subject": "Remove the product-gating TODO from `SkillPolicy` (#53781)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/skills/src/model.rs"
+      ],
+      "keywords": [
+        "Remove",
+        "the",
+        "product-gating",
+        "TODO",
+        "from",
+        "SkillPolicy"
+      ]
+    },
+    {
+      "commit": "6786dccbe7261b75103260475bc0a04cb36c2c0a",
+      "subject": "Forward client voice session IDs in realtime requests (#53784)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst",
+        "codex-rs/app-server-protocol/src/protocol/common.rs",
+        "codex-rs/app-server-protocol/src/protocol/v2/realtime.rs",
+        "codex-rs/app-server/src/request_processors/turn_processor.rs",
+        "codex-rs/app-server/tests/suite/v2/experimental_api.rs",
+        "codex-rs/app-server/tests/suite/v2/realtime_conversation.rs",
+        "codex-rs/core/src/realtime_conversation.rs",
+        "codex-rs/core/src/realtime_conversation_tests.rs",
+        "codex-rs/core/tests/suite/compact_remote.rs",
+        "codex-rs/core/tests/suite/realtime_attachment.rs",
+        "codex-rs/core/tests/suite/realtime_conversation.rs",
+        "codex-rs/core/tests/suite/realtime_initial_items.rs",
+        "codex-rs/core/tests/suite/realtime_misalignment.rs",
+        "codex-rs/core/tests/suite/realtime_sideband_endpoint.rs",
+        "codex-rs/core/tests/suite/realtime_system_proxy.rs",
+        "codex-rs/core/tests/suite/turn_input_submission.rs",
+        "codex-rs/protocol/src/conversation_start_params_tests.rs",
+        "codex-rs/protocol/src/protocol.rs",
+        "codex-rs/tui/src/app_server_session/realtime.rs"
+      ],
+      "keywords": [
+        "Forward",
+        "client",
+        "voice",
+        "session",
+        "IDs",
+        "in",
+        "realtime",
+        "requests"
+      ]
+    },
+    {
+      "commit": "815ef9bbc47bef3bde9cfceaaaf3ef74bb43d052",
+      "subject": "Fix cancellation of macOS user-verification prompts (#53790)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/user-verification/Cargo.toml",
+        "codex-rs/user-verification/README.md",
+        "codex-rs/user-verification/src/native_operation.rs",
+        "codex-rs/user-verification/src/native_operation_tests.rs",
+        "codex-rs/user-verification/src/platform_macos/key_protection.rs",
+        "codex-rs/user-verification/src/platform_macos/key_protection_tests.rs",
+        "codex-rs/user-verification/src/platform_macos/provider.rs",
+        "codex-rs/user-verification/tests/hardware.rs"
+      ],
+      "keywords": [
+        "Fix",
+        "cancellation",
+        "of",
+        "macOS",
+        "user-verification",
+        "prompts"
+      ]
+    },
+    {
+      "commit": "a373281e9ef021ffb1b340123ce96c75bac869fb",
+      "subject": "Retain rollout migration locks across worker cancellation (#53794)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/thread-store/src/local/rollout_migration.rs",
+        "codex-rs/thread-store/src/local/rollout_migration/publish.rs",
+        "codex-rs/thread-store/src/local/rollout_migration_tests.rs"
+      ],
+      "keywords": [
+        "Retain",
+        "rollout",
+        "migration",
+        "locks",
+        "across",
+        "worker",
+        "cancellation"
+      ]
+    },
+    {
+      "commit": "8af93416ddf2c56575a7e9c890d5f446ec909943",
+      "subject": "Use the bundled model catalog in the MCP startup invalidation test (#53795)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/thread_manager_tests.rs"
+      ],
+      "keywords": [
+        "Use",
+        "the",
+        "bundled",
+        "model",
+        "catalog",
+        "in",
+        "the",
+        "MCP",
+        "startup"
+      ]
+    },
+    {
+      "commit": "2b2d7923055f3ad4827270edefe65e71293cf26c",
+      "subject": "Refresh Guardian reviews when review context changes (#53797)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/guardian/review_request.rs",
+        "codex-rs/core/tests/suite/guardian_pending_root_delivery.rs"
+      ],
+      "keywords": [
+        "Refresh",
+        "Guardian",
+        "reviews",
+        "when",
+        "review",
+        "context",
+        "changes"
+      ]
+    },
+    {
+      "commit": "9e03960cf8807c37fc987bf17b4e745b8b3339d2",
+      "subject": "Wire background compaction into the turn lifecycle (#53800)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/client.rs",
+        "codex-rs/core/src/codex_thread.rs",
+        "codex-rs/core/src/compact_remote_v2.rs",
+        "codex-rs/core/src/compact_remote_v2_installation.rs",
+        "codex-rs/core/src/compact_remote_v2_installation_tests.rs",
+        "codex-rs/core/src/session/async_compaction.rs",
+        "codex-rs/core/src/session/async_compaction_tests.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/turn.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__astra_async_compaction_with_live_suffix.snap"
+      ],
+      "keywords": [
+        "Wire",
+        "background",
+        "compaction",
+        "into",
+        "the",
+        "turn",
+        "lifecycle"
+      ]
+    },
+    {
+      "commit": "923f276f579c64251825ba767ff5bc36a28e36a0",
+      "subject": "Keep the Agent command center visible during archive and delete (#53804)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/agents_overview.rs",
+        "codex-rs/tui/src/app/agents_overview_action_progress_tests.rs",
+        "codex-rs/tui/src/app/agents_overview_actions.rs",
+        "codex-rs/tui/src/app/agents_overview_tests.rs",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__agents_overview_actions__progress_tests__archive_progress.snap",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__agents_overview_actions__progress_tests__delete_progress.snap",
+        "codex-rs/tui/src/bottom_pane/view_stack.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "the",
+        "Agent",
+        "command",
+        "center",
+        "visible",
+        "during",
+        "archive",
+        "and"
+      ]
+    },
+    {
+      "commit": "ca2b076fffbc24ad5fa57258ece8a8277b326138",
+      "subject": "Add safe diagnostics to workspace routing configuration errors (#53805)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/request_processors/account_processor/workspace_routing.rs",
+        "codex-rs/app-server/src/request_processors/account_processor/workspace_routing_tests.rs",
+        "codex-rs/app-server/tests/suite/v2/workspace_routing.rs"
+      ],
+      "keywords": [
+        "Add",
+        "safe",
+        "diagnostics",
+        "to",
+        "workspace",
+        "routing",
+        "configuration",
+        "errors"
+      ]
+    },
+    {
+      "commit": "eb1d7065f8b1b2fb3d197bc66448deb432ab0a12",
+      "subject": "Support daemon installation from Windows WinGet packages (#53811)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-daemon/src/prepare_install.rs",
+        "codex-rs/app-server-daemon/src/prepare_install_tests.rs",
+        "codex-rs/cli/tests/app_server_daemon_windows.rs"
+      ],
+      "keywords": [
+        "Support",
+        "daemon",
+        "installation",
+        "from",
+        "Windows",
+        "WinGet",
+        "packages"
+      ]
+    },
+    {
+      "commit": "c3733756a969aa20e23a2a90e0da16646b4c100c",
+      "subject": "Reject Guardian review threads during interactive CLI resume (#53816)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/tests/daemon_startup.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/session_resume.rs"
+      ],
+      "keywords": [
+        "Reject",
+        "Guardian",
+        "review",
+        "threads",
+        "during",
+        "interactive",
+        "CLI",
+        "resume"
+      ]
+    },
+    {
+      "commit": "0960e379a5555f1b6d7b97d7980039902213c26c",
+      "subject": "Prune unused app-server daemon releases safely (#53827)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-daemon/src/backend/pid.rs",
+        "codex-rs/app-server-daemon/src/lib.rs",
+        "codex-rs/app-server-daemon/src/managed_install.rs",
+        "codex-rs/app-server-daemon/src/prepare_install.rs",
+        "codex-rs/app-server-daemon/src/prepare_install_tests.rs",
+        "codex-rs/app-server-daemon/src/release_pruning.rs",
+        "codex-rs/app-server-daemon/src/update_loop.rs",
+        "codex-rs/app-server-daemon/src/update_loop_tests.rs",
+        "scripts/install/install.ps1",
+        "scripts/install/install.sh",
+        "scripts/install/test_install_sh.py"
+      ],
+      "keywords": [
+        "Prune",
+        "unused",
+        "app-server",
+        "daemon",
+        "releases",
+        "safely"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "1b6e0d8145e1fe5b2663d32fbe7ee02f51a10e1c",
+      "subject": "Track content provenance through prompt assembly and compaction (#53831)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/history_notes_extension.rs",
+        "codex-rs/codex-mcp/src/connection_manager/tool_catalog.rs",
+        "codex-rs/codex-mcp/src/lib.rs",
+        "codex-rs/codex-mcp/src/runtime.rs",
+        "codex-rs/context-fragments/src/annotated_content.rs",
+        "codex-rs/context-fragments/src/fragment.rs",
+        "codex-rs/context-fragments/src/lib.rs",
+        "codex-rs/core/src/agent/control.rs",
+        "codex-rs/core/src/client.rs",
+        "codex-rs/core/src/codex_thread.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/compact_tests.rs",
+        "codex-rs/core/src/context/contextual_user_message_tests.rs",
+        "codex-rs/core/src/context/current_time_reminder.rs",
+        "codex-rs/core/src/context/developer_instructions.rs",
+        "codex-rs/core/src/context/hook_additional_context.rs",
+        "codex-rs/core/src/context/token_budget_context.rs",
+        "codex-rs/core/src/context/user_instructions.rs",
+        "codex-rs/core/src/context/world_state/managed_developer_instructions.rs",
+        "codex-rs/core/src/context/world_state/mod.rs",
+        "codex-rs/core/src/context/world_state/model_catalog.rs",
+        "codex-rs/core/src/context/world_state/multi_agent_mode.rs",
+        "codex-rs/core/src/context/world_state/multi_agent_mode_tests.rs",
+        "codex-rs/core/src/context/world_state/multi_agent_usage_hint.rs",
+        "codex-rs/core/src/context/world_state/snapshots/codex_core__context__world_state__top_level_tools__tests__snapshots_namespace_transitions.snap",
+        "codex-rs/core/src/context/world_state/tools.rs",
+        "codex-rs/core/src/context/world_state/top_level_tools.rs",
+        "codex-rs/core/src/context/world_state/top_level_tools_tests.rs",
+        "codex-rs/core/src/context/world_state/world_state_tests.rs",
+        "codex-rs/core/src/context_manager/history_tests.rs",
+        "codex-rs/core/src/context_manager/updates.rs",
+        "codex-rs/core/src/context_manager/updates_tests.rs",
+        "codex-rs/core/src/event_mapping.rs",
+        "codex-rs/core/src/event_mapping_tests.rs",
+        "codex-rs/core/src/hook_mcp_executor.rs",
+        "codex-rs/core/src/hook_runtime.rs",
+        "codex-rs/core/src/image_preparation.rs",
+        "codex-rs/core/src/image_preparation_tests.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/world_state.rs",
+        "codex-rs/core/src/thread_manager_tests.rs",
+        "codex-rs/core/tests/suite/compact.rs",
+        "codex-rs/core/tests/suite/guardian_retained_context.rs",
+        "codex-rs/core/tests/suite/mcp_auth_refresh.rs",
+        "codex-rs/core/tests/suite/responses_lite.rs",
+        "codex-rs/core/tests/suite/token_budget.rs",
+        "codex-rs/ext/extension-api/src/contributors/prompt.rs",
+        "codex-rs/ext/extension-api/src/contributors/world_state.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/config_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/extension_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/sampler_tests.rs",
+        "codex-rs/ext/history-notes/src/extension.rs",
+        "codex-rs/ext/history-notes/tests/history_notes_extension.rs",
+        "codex-rs/ext/skills/src/extension.rs",
+        "codex-rs/ext/skills/src/fragments.rs",
+        "codex-rs/ext/skills/src/world_state.rs",
+        "codex-rs/hooks/src/context.rs",
+        "codex-rs/hooks/src/engine/command_runner.rs",
+        "codex-rs/hooks/src/engine/dispatcher.rs",
+        "codex-rs/hooks/src/engine/mcp_runner.rs",
+        "codex-rs/hooks/src/engine/mcp_runner_tests.rs",
+        "codex-rs/hooks/src/engine/mod.rs",
+        "codex-rs/hooks/src/engine/mod_tests.rs",
+        "codex-rs/hooks/src/events/common.rs",
+        "codex-rs/hooks/src/events/compact.rs",
+        "codex-rs/hooks/src/events/interrupt_tests.rs",
+        "codex-rs/hooks/src/events/post_tool_use.rs",
+        "codex-rs/hooks/src/events/pre_tool_use.rs",
+        "codex-rs/hooks/src/events/session_end_tests.rs",
+        "codex-rs/hooks/src/events/session_start.rs",
+        "codex-rs/hooks/src/events/stop.rs",
+        "codex-rs/hooks/src/events/user_prompt_submit.rs",
+        "codex-rs/hooks/src/lib.rs",
+        "codex-rs/hooks/src/mcp.rs",
+        "codex-rs/hooks/src/output_spill.rs",
+        "codex-rs/hooks/src/output_spill_tests.rs",
+        "codex-rs/prompts/src/multi_agent_instructions_tests.rs",
+        "codex-rs/prompts/src/permissions_instructions_tests.rs",
+        "codex-rs/protocol/src/items.rs",
+        "codex-rs/protocol/src/models.rs",
+        "codex-rs/protocol/src/models/executed_tool_calls.rs",
+        "codex-rs/protocol/src/models/item_metadata.rs",
+        "codex-rs/utils/string/src/lib.rs",
+        "codex-rs/utils/string/src/truncate.rs"
+      ],
+      "keywords": [
+        "Track",
+        "content",
+        "provenance",
+        "through",
+        "prompt",
+        "assembly",
+        "and",
+        "compaction"
+      ]
+    },
+    {
+      "commit": "2f05c0a71f59fb2f05800846351f3e9926c3e52b",
+      "subject": "Fix daemon updater socket binding and bootstrap readiness on Unix (#53845)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-daemon/src/lib.rs",
+        "codex-rs/app-server-daemon/src/update_loop.rs",
+        "codex-rs/app-server-transport/src/lib.rs",
+        "codex-rs/app-server-transport/src/transport/mod.rs",
+        "codex-rs/app-server-transport/src/transport/unix_socket.rs",
+        "codex-rs/cli/tests/app_server_daemon.rs"
+      ],
+      "keywords": [
+        "Fix",
+        "daemon",
+        "updater",
+        "socket",
+        "binding",
+        "and",
+        "bootstrap",
+        "readiness",
+        "on"
+      ]
+    },
+    {
+      "commit": "e342df7b668acea2a0417d56cf872dab837276ef",
+      "subject": "Reuse staged file digests when preparing daemon installs (#53853)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-daemon/src/managed_install.rs",
+        "codex-rs/app-server-daemon/src/prepare_install.rs",
+        "codex-rs/app-server-daemon/src/prepare_install_tests.rs"
+      ],
+      "keywords": [
+        "Reuse",
+        "staged",
+        "file",
+        "digests",
+        "when",
+        "preparing",
+        "daemon",
+        "installs"
+      ]
+    },
+    {
+      "commit": "c22a06c18070c3e33bd2648c7210a00a2a9f6f80",
+      "subject": "Record bucketed terminal sizes in TUI telemetry (#53859)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/tests/worktree.rs",
+        "codex-rs/otel/src/metrics/client.rs",
+        "codex-rs/otel/src/metrics/client_tests.rs",
+        "codex-rs/tui/src/app.rs",
+        "codex-rs/tui/src/app/startup.rs",
+        "codex-rs/tui/src/app/test_support.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/terminal_size_telemetry_tests.rs",
+        "codex-rs/tui/src/app/thread_routing.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/daemon_startup_tests.rs",
+        "codex-rs/tui/src/daemon_telemetry.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/startup_orchestration.rs",
+        "codex-rs/tui/src/terminal_size_telemetry.rs",
+        "codex-rs/tui/src/tui.rs"
+      ],
+      "keywords": [
+        "Record",
+        "bucketed",
+        "terminal",
+        "sizes",
+        "in",
+        "TUI",
+        "telemetry"
+      ]
+    },
+    {
+      "commit": "cb03f28a4034b6ee901885808d27182ac586830a",
+      "subject": "Refresh model instructions in incremental-tool context windows (#53872)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/agent/control/spawn.rs",
+        "codex-rs/core/src/agent/control_tests.rs",
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/src/compact_tests.rs",
+        "codex-rs/core/src/context/base_instructions.rs",
+        "codex-rs/core/src/context/mod.rs",
+        "codex-rs/core/src/context/model_instructions.rs",
+        "codex-rs/core/src/context/world_state/base_instructions.rs",
+        "codex-rs/core/src/context/world_state/mod.rs",
+        "codex-rs/core/src/context/world_state/model.rs",
+        "codex-rs/core/src/context/world_state/model_tests.rs",
+        "codex-rs/core/src/context_manager/history.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/world_state.rs",
+        "codex-rs/core/tests/suite/base_instructions.rs",
+        "codex-rs/core/tests/suite/mod.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/scenarios_incremental_tools.rs",
+        "codex-rs/core/tests/suite/scenarios_model_instructions.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__incremental_tools__incremental_tools.snap",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__model_instructions__incremental_model_instructions.snap"
+      ],
+      "keywords": [
+        "Refresh",
+        "model",
+        "instructions",
+        "in",
+        "incremental-tool",
+        "context",
+        "windows"
+      ]
+    },
+    {
+      "commit": "7eed30ad1beaebc20b7d848ce9ee887525a379b0",
+      "subject": "Preserve running turn recovery across thread settings updates (#53879)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/thread_settings.rs",
+        "codex-rs/core/src/session/turn_input.rs",
+        "codex-rs/core/src/tasks/mod.rs",
+        "codex-rs/core/tests/suite/compact.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__compact__compaction_cold_resume_after_completion.snap",
+        "codex-rs/core/tests/suite/turn_input_submission.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "running",
+        "turn",
+        "recovery",
+        "across",
+        "thread",
+        "settings",
+        "updates"
+      ]
+    },
+    {
+      "commit": "4906ddf5b80d4cf4e54ac1a22dc000c389835e9c",
+      "subject": "Resume unloaded subagent threads when selected in the TUI (#53895)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/session_lifecycle.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__app__tests__selected_unloaded_subagent_V1.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__app__tests__selected_unloaded_subagent_V2.snap"
+      ],
+      "keywords": [
+        "Resume",
+        "unloaded",
+        "subagent",
+        "threads",
+        "when",
+        "selected",
+        "in",
+        "the",
+        "TUI"
+      ]
+    },
+    {
+      "commit": "97771b1d78cf6366bc3946fe9e4bbca4ebee31d1",
+      "subject": "Isolate daemon package tests to reduce disk contention (#53897)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/.config/nextest.toml",
+        "codex-rs/cli/BUILD.bazel",
+        "codex-rs/cli/Cargo.toml",
+        "codex-rs/cli/tests/app_server_daemon.rs",
+        "codex-rs/cli/tests/app_server_daemon/package.rs",
+        "codex-rs/cli/tests/app_server_daemon/support.rs"
+      ],
+      "keywords": [
+        "Isolate",
+        "daemon",
+        "package",
+        "tests",
+        "to",
+        "reduce",
+        "disk",
+        "contention"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "95273b84fbff40f9df7d71d50f1ca52c6489b25d",
+      "subject": "Keep the agent dashboard browsable during task removal (#53908)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/agent_center/render.rs",
+        "codex-rs/tui/src/app/agents_overview_action_progress_tests.rs",
+        "codex-rs/tui/src/app/agents_overview_actions.rs",
+        "codex-rs/tui/src/app/agents_overview_view.rs",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__agents_overview_actions__progress_tests__archive_progress.snap",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__agents_overview_actions__progress_tests__delete_progress.snap"
+      ],
+      "keywords": [
+        "Keep",
+        "the",
+        "agent",
+        "dashboard",
+        "browsable",
+        "during",
+        "task",
+        "removal"
+      ]
+    },
+    {
+      "commit": "400f2356d60c4663d46817a40b4d09c5c86f35ad",
+      "subject": "Preserve conversation history when compaction fails (#53932)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/compact.rs",
+        "codex-rs/core/tests/suite/compact.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "conversation",
+        "history",
+        "when",
+        "compaction",
+        "fails"
+      ]
+    },
+    {
+      "commit": "5670b1c18e861e5f89bafaff768b86ed579edd81",
+      "subject": "Bound rollout input for memory extraction (#53940)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/memories/write/src/phase1.rs",
+        "codex-rs/memories/write/src/rollout_input.rs",
+        "codex-rs/memories/write/src/rollout_input_tests.rs",
+        "codex-rs/memories/write/src/startup_tests.rs"
+      ],
+      "keywords": [
+        "Bound",
+        "rollout",
+        "input",
+        "for",
+        "memory",
+        "extraction"
+      ]
+    },
+    {
+      "commit": "78dc2503840d05f4411ae184bb5560ef327fce3c",
+      "subject": "Stop rollout reads when the calling task is cancelled (#53947)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec/src/lib.rs",
+        "codex-rs/memories/write/src/rollout_input.rs",
+        "codex-rs/rollout/src/compression_tests.rs",
+        "codex-rs/rollout/src/seekable_reader.rs",
+        "codex-rs/rollout/src/seekable_reader_tests.rs",
+        "codex-rs/thread-store/src/local/model_context.rs",
+        "codex-rs/thread-store/src/local/rollout_lineage.rs",
+        "codex-rs/thread-store/src/local/thread_history_materialization.rs",
+        "codex-rs/thread-store/src/local/thread_history_materialization_tests.rs",
+        "codex-rs/tui/src/worktree_startup.rs"
+      ],
+      "keywords": [
+        "Stop",
+        "rollout",
+        "reads",
+        "when",
+        "the",
+        "calling",
+        "task",
+        "is",
+        "cancelled"
+      ]
+    },
+    {
+      "commit": "0d58012ec20d0f42ea1c11056815e4a0c5122e99",
+      "subject": "Test memory extraction budgets with excluded items and ciphertext (#53963)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/memories/write/src/startup_tests.rs"
+      ],
+      "keywords": [
+        "Test",
+        "memory",
+        "extraction",
+        "budgets",
+        "with",
+        "excluded",
+        "items",
+        "and",
+        "ciphertext"
+      ]
+    },
+    {
+      "commit": "7a08c5f6271e818d832eb9061dac935936e2b539",
+      "subject": "Avoid reconnect races in the daemon restart test (#53969)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/cli/tests/daemon_startup.rs"
+      ],
+      "keywords": [
+        "Avoid",
+        "reconnect",
+        "races",
+        "in",
+        "the",
+        "daemon",
+        "restart",
+        "test"
+      ]
+    },
+    {
+      "commit": "835cd7552d6a089bbdfeb21b001cb76c503249c7",
+      "subject": "Skip service backoff for stale Guardian authorization retries (#53987)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-reviewer/src/retry.rs",
+        "codex-rs/ext/guardian-reviewer/src/retry_tests.rs"
+      ],
+      "keywords": [
+        "Skip",
+        "service",
+        "backoff",
+        "for",
+        "stale",
+        "Guardian",
+        "authorization",
+        "retries"
+      ]
+    },
+    {
+      "commit": "0b73618146d55a2565589bf4e2d5e40e8f298d9e",
+      "subject": "Keep host MCP and plugin configuration local with remote environments (#53990)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/environment_selection.rs",
+        "codex-rs/core/src/lib.rs",
+        "codex-rs/core/src/session/mcp_runtime.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/session.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/turn_context.rs",
+        "codex-rs/core/src/skills.rs",
+        "codex-rs/core/tests/suite/rmcp_client.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "host",
+        "MCP",
+        "and",
+        "plugin",
+        "configuration",
+        "local",
+        "with",
+        "remote"
+      ]
+    },
+    {
+      "commit": "f87ba04ec3cd386a92e775405b252a310b40bb0d",
+      "subject": "Report the reason for ChatGPT token refresh requests (#53991)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/login/src/auth/manager.rs",
+        "codex-rs/login/src/gateway_auth.rs",
+        "codex-rs/login/src/oauth/client.rs",
+        "codex-rs/login/src/oauth/client_tests.rs",
+        "codex-rs/login/src/oauth/mod.rs",
+        "codex-rs/login/tests/suite/auth_refresh.rs"
+      ],
+      "keywords": [
+        "Report",
+        "the",
+        "reason",
+        "for",
+        "ChatGPT",
+        "token",
+        "refresh",
+        "requests"
+      ]
+    },
+    {
+      "commit": "954750be9c4044e7ef2fea18e22648e8c6c4cb0f",
+      "subject": "Bump `rustls` to `0.23.46` (#53996)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml"
+      ],
+      "keywords": [
+        "Bump",
+        "rustls",
+        "to"
+      ]
+    },
+    {
+      "commit": "c6327eba6a5a31304c289f2121cc74f56f9a441b",
+      "subject": "Filter rollout filenames before checking compressed siblings (#53997)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/rollout/src/compression_tests.rs",
+        "codex-rs/rollout/src/list.rs",
+        "codex-rs/rollout/src/tests.rs"
+      ],
+      "keywords": [
+        "Filter",
+        "rollout",
+        "filenames",
+        "before",
+        "checking",
+        "compressed",
+        "siblings"
+      ]
+    },
+    {
+      "commit": "0c02887a0c4d09a99eb8e078aa12ff3edc9eb331",
+      "subject": "Include compressed rollouts in doctor storage statistics (#54003)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/cli/src/doctor.rs"
+      ],
+      "keywords": [
+        "Include",
+        "compressed",
+        "rollouts",
+        "in",
+        "doctor",
+        "storage",
+        "statistics"
+      ]
+    },
+    {
+      "commit": "76ed3b484d62ccceb9fa512ff4dd139f421814c3",
+      "subject": "Fix session lookup and resume after rollout compression (#54008)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/rollout_compress_tests.rs",
+        "codex-rs/thread-store/src/local/read_thread.rs",
+        "codex-rs/tui/src/lib.rs"
+      ],
+      "keywords": [
+        "Fix",
+        "session",
+        "lookup",
+        "and",
+        "resume",
+        "after",
+        "rollout",
+        "compression"
+      ]
+    },
+    {
+      "commit": "81aee8c86ba2549e53f82ea56f163c3e450fb55a",
+      "subject": "Preserve Windows startup variables and MXC child environment defaults (#54027)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/tests/exec_process/windows_sandbox.rs",
+        "codex-rs/mxc-sandbox/README.md",
+        "codex-rs/mxc-sandbox/src/lib.rs",
+        "codex-rs/mxc-sandbox/src/policy_tests.rs",
+        "codex-rs/mxc-sandbox/src/transport.rs",
+        "codex-rs/mxc-sandbox/src/transport_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "Windows",
+        "startup",
+        "variables",
+        "and",
+        "MXC",
+        "child",
+        "environment",
+        "defaults"
+      ]
+    },
+    {
+      "commit": "8cbce633876eb71be1e897c1599c713cec7a262c",
+      "subject": "Bound concurrent Git diffs for untracked files (#54032)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/git-utils/src/diff_tests.rs",
+        "codex-rs/git-utils/src/info.rs"
+      ],
+      "keywords": [
+        "Bound",
+        "concurrent",
+        "Git",
+        "diffs",
+        "for",
+        "untracked",
+        "files"
+      ]
+    },
+    {
+      "commit": "c0cfbfbb989ff80c4027c8ea86a15d411d1d5214",
+      "subject": "Extend memory extension resource retention to 14 days (#54033)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/memories/write/src/extensions/prune_tests.rs",
+        "codex-rs/memories/write/src/lib.rs",
+        "codex-rs/memories/write/src/startup_tests.rs"
+      ],
+      "keywords": [
+        "Extend",
+        "memory",
+        "extension",
+        "resource",
+        "retention",
+        "to",
+        "days"
+      ]
+    },
+    {
+      "commit": "538858165396ecf77861cadfeb1c2840287131c9",
+      "subject": "Return async Guardian approvals before review cleanup finishes (#54039)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-reviewer/src/outcome.rs",
+        "codex-rs/ext/guardian-reviewer/src/pool_tests.rs",
+        "codex-rs/ext/guardian-reviewer/src/review.rs",
+        "codex-rs/ext/guardian-reviewer/src/review_tests.rs"
+      ],
+      "keywords": [
+        "Return",
+        "async",
+        "Guardian",
+        "approvals",
+        "before",
+        "review",
+        "cleanup",
+        "finishes"
+      ]
+    },
+    {
+      "commit": "cec8c6fb876e90b20250ec740e970e3f33b7396f",
+      "subject": "Keep fork lineage ahead of paginated transcript history (#54044)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/history_pagination.rs",
+        "codex-rs/tui/src/app/history_pagination_tests.rs",
+        "codex-rs/tui/src/chatwidget/session_flow.rs",
+        "codex-rs/tui/src/history_cell/session.rs",
+        "codex-rs/tui/src/pager_overlay/transcript.rs",
+        "codex-rs/tui/src/pager_overlay/transcript_tests.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "fork",
+        "lineage",
+        "ahead",
+        "of",
+        "paginated",
+        "transcript",
+        "history"
+      ]
+    },
+    {
+      "commit": "3ee99cde7074a09f57b8cd1c4b42a3dbc06ca023",
+      "subject": "Track approval cancellation sources and Guardian context changes (#54046)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/analytics/src/events.rs",
+        "codex-rs/core/src/guardian/review_request.rs",
+        "codex-rs/core/src/guardian/review_session_setup.rs",
+        "codex-rs/core/src/mcp_tool_call.rs",
+        "codex-rs/core/src/mcp_tool_call/telemetry.rs",
+        "codex-rs/core/src/mcp_tool_call/telemetry_tests.rs",
+        "codex-rs/core/src/mcp_tool_call_tests.rs",
+        "codex-rs/core/src/tools/approvals.rs",
+        "codex-rs/core/src/tools/mod.rs",
+        "codex-rs/core/src/tools/network_approval.rs",
+        "codex-rs/core/src/tools/orchestrator.rs",
+        "codex-rs/core/src/unified_exec/process_manager.rs",
+        "codex-rs/ext/guardian-reviewer/src/metrics.rs",
+        "codex-rs/ext/guardian-reviewer/src/retry.rs"
+      ],
+      "keywords": [
+        "Track",
+        "approval",
+        "cancellation",
+        "sources",
+        "and",
+        "Guardian",
+        "context",
+        "changes"
+      ]
+    },
+    {
+      "commit": "764a70fc113d494c38e7874c01efba15a5e4e6d8",
+      "subject": "Restore elapsed time for replayed in-progress turns (#54047)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/chatwidget/protocol.rs",
+        "codex-rs/tui/src/chatwidget/replay.rs",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__replayed_in_progress_turn.snap",
+        "codex-rs/tui/src/chatwidget/tests/history_replay.rs",
+        "codex-rs/tui/src/chatwidget/turn_runtime.rs"
+      ],
+      "keywords": [
+        "Restore",
+        "elapsed",
+        "time",
+        "for",
+        "replayed",
+        "in-progress",
+        "turns"
+      ]
+    },
+    {
+      "commit": "534c70863c107e2bdedfa25b72bc1b035cb3208f",
+      "subject": "Defer folder trust checks until starting a task from agents overview (#54048)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/tests/daemon_startup.rs",
+        "codex-rs/cli/tests/snapshots/daemon_startup__agents_overview_before_folder_consent.snap",
+        "codex-rs/tui/src/app/resume_config.rs",
+        "codex-rs/tui/src/app/session_lifecycle.rs",
+        "codex-rs/tui/src/app/tests/new_session_tests.rs",
+        "codex-rs/tui/src/lib.rs"
+      ],
+      "keywords": [
+        "Defer",
+        "folder",
+        "trust",
+        "checks",
+        "until",
+        "starting",
+        "task",
+        "from",
+        "agents"
+      ]
+    },
+    {
+      "commit": "9671d20fc82ea269d49ecc70b29a8630b29c1a32",
+      "subject": "Scope TUI skill refreshes and workspace commands to explicit directories (#54050)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/app/thread_routing.rs",
+        "codex-rs/tui/src/app_event_sender.rs",
+        "codex-rs/tui/src/bottom_pane/skills_toggle_view.rs",
+        "codex-rs/tui/src/branch_summary.rs",
+        "codex-rs/tui/src/chatwidget/skills.rs",
+        "codex-rs/tui/src/chatwidget/tests/history_replay.rs",
+        "codex-rs/tui/src/get_git_diff.rs",
+        "codex-rs/tui/src/workspace_command.rs"
+      ],
+      "keywords": [
+        "Scope",
+        "TUI",
+        "skill",
+        "refreshes",
+        "and",
+        "workspace",
+        "commands",
+        "to",
+        "explicit"
+      ]
+    },
+    {
+      "commit": "2b21129c6b8120e63f9ac510fe99e8b02ef43292",
+      "subject": "Add Responses API client metadata patches for turn start and steer (#54053)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/analytics/src/client_tests.rs",
+        "codex-rs/analytics/src/tests/suite/turns/requests_tests.rs",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst",
+        "codex-rs/app-server-protocol/src/protocol/v2/tests.rs",
+        "codex-rs/app-server-protocol/src/protocol/v2/turn.rs",
+        "codex-rs/app-server/src/message_processor_tracing_tests.rs",
+        "codex-rs/app-server/src/request_processors/turn_processor.rs",
+        "codex-rs/app-server/tests/suite/v2/client_metadata.rs",
+        "codex-rs/app-server/tests/suite/v2/realtime_conversation.rs",
+        "codex-rs/app-server/tests/suite/v2/turn_start.rs",
+        "codex-rs/app-server/tests/suite/v2/turn_steer.rs",
+        "codex-rs/core/src/mcp_tool_call_tests.rs",
+        "codex-rs/core/src/session/turn_input.rs",
+        "codex-rs/core/src/turn_metadata.rs",
+        "codex-rs/core/src/turn_metadata_tests.rs",
+        "codex-rs/exec/src/lib.rs",
+        "codex-rs/protocol/src/turn_input.rs",
+        "codex-rs/tui/src/app_server_session.rs"
+      ],
+      "keywords": [
+        "Add",
+        "Responses",
+        "API",
+        "client",
+        "metadata",
+        "patches",
+        "for",
+        "turn",
+        "start"
+      ]
+    },
+    {
+      "commit": "80ad49e3b7ca466cd35fc012bf1e23bed836de72",
+      "subject": "Coalesce overlapping native TLS root certificate loads (#54056)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/http-client/src/custom_ca.rs",
+        "codex-rs/http-client/src/custom_ca_tls_tests.rs",
+        "codex-rs/http-client/src/lib.rs",
+        "codex-rs/http-client/src/native_roots.rs",
+        "codex-rs/http-client/src/native_roots_tests.rs"
+      ],
+      "keywords": [
+        "Coalesce",
+        "overlapping",
+        "native",
+        "TLS",
+        "root",
+        "certificate",
+        "loads"
+      ]
+    },
+    {
+      "commit": "1f7fe9b0afb301f895b2d56ae8c05c2cfb19e440",
+      "subject": "Distinguish unsupported evidence in Decisions comparison metrics (#54057)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_lifecycle_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs",
+        "codex-rs/guardian-context/src/trusted_skills.rs"
+      ],
+      "keywords": [
+        "Distinguish",
+        "unsupported",
+        "evidence",
+        "in",
+        "Decisions",
+        "comparison",
+        "metrics"
+      ]
+    },
+    {
+      "commit": "9e7b2a577f4ab1a098194126555e82869e9bb473",
+      "subject": "Forward turn metadata to image generation and edit requests (#54058)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/imagegen_extension.rs",
+        "codex-rs/core/src/tools/handlers/extension_tools.rs",
+        "codex-rs/core/src/turn_metadata.rs",
+        "codex-rs/core/src/turn_metadata_tests.rs",
+        "codex-rs/ext/image-generation/src/backend.rs",
+        "codex-rs/ext/image-generation/src/tool.rs"
+      ],
+      "keywords": [
+        "Forward",
+        "turn",
+        "metadata",
+        "to",
+        "image",
+        "generation",
+        "and",
+        "edit",
+        "requests"
+      ]
+    },
+    {
+      "commit": "b7ba02f88095cd3c039709157618c03909d47a26",
+      "subject": "Support store-owned preparation when resuming threads (#54059)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/codex_delegate.rs",
+        "codex-rs/core/src/session/mod.rs",
+        "codex-rs/core/src/session/session.rs",
+        "codex-rs/core/src/session/tests.rs",
+        "codex-rs/core/src/session/tests/guardian_tests.rs",
+        "codex-rs/core/src/thread_manager.rs",
+        "codex-rs/core/tests/suite/resume.rs",
+        "codex-rs/thread-store/src/lib.rs",
+        "codex-rs/thread-store/src/live_thread.rs",
+        "codex-rs/thread-store/src/local/mod.rs",
+        "codex-rs/thread-store/src/store.rs"
+      ],
+      "keywords": [
+        "Support",
+        "store-owned",
+        "preparation",
+        "when",
+        "resuming",
+        "threads"
+      ]
+    },
+    {
+      "commit": "9d3ae38e13aecaf018c03d5c1331c91f8c985e0f",
+      "subject": "Limit unarchive scans to the requested thread's archived rollouts (#54060)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/rollout/src/rollout_reference_index.rs",
+        "codex-rs/rollout/src/rollout_reference_index_tests.rs",
+        "codex-rs/thread-store/src/local/helpers.rs",
+        "codex-rs/thread-store/src/local/unarchive_thread.rs"
+      ],
+      "keywords": [
+        "Limit",
+        "unarchive",
+        "scans",
+        "to",
+        "the",
+        "requested",
+        "thread",
+        "archived",
+        "rollouts"
+      ]
+    },
+    {
+      "commit": "0fd85b075288c4fee50f0df3e4e4f98f80c693fe",
+      "subject": "Fix Windows environment handling for remote MCP servers (#54069)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/rmcp-client/src/stdio_server_launcher.rs"
+      ],
+      "keywords": [
+        "Fix",
+        "Windows",
+        "environment",
+        "handling",
+        "for",
+        "remote",
+        "MCP",
+        "servers"
+      ]
+    },
+    {
+      "commit": "ae110493973d5b72f60d42efe2fae91d51ca9c0e",
+      "subject": "Expose gateway authentication as a reusable OAuth session API (#54070)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/login/src/gateway_auth.rs",
+        "codex-rs/login/src/gateway_auth_callback.rs",
+        "codex-rs/login/src/gateway_auth_login.rs",
+        "codex-rs/login/src/gateway_auth_login_tests.rs",
+        "codex-rs/login/src/gateway_auth_storage.rs",
+        "codex-rs/login/src/gateway_auth_storage_tests.rs",
+        "codex-rs/login/src/gateway_auth_tests.rs",
+        "codex-rs/login/src/gateway_auth_token.rs",
+        "codex-rs/login/src/lib.rs",
+        "codex-rs/login/src/oauth_session.rs",
+        "codex-rs/login/src/oauth_session_callback.rs",
+        "codex-rs/login/src/oauth_session_login.rs",
+        "codex-rs/login/src/oauth_session_login_tests.rs",
+        "codex-rs/login/src/oauth_session_storage.rs",
+        "codex-rs/login/src/oauth_session_storage_tests.rs",
+        "codex-rs/login/src/oauth_session_tests.rs",
+        "codex-rs/login/src/oauth_session_token.rs"
+      ],
+      "keywords": [
+        "Expose",
+        "gateway",
+        "authentication",
+        "as",
+        "reusable",
+        "OAuth",
+        "session",
+        "API"
+      ]
+    },
+    {
+      "commit": "80b88a700e4300022fe1893ecca9b8376d0c85d9",
+      "subject": "Avoid false URL-launch detections in literal PowerShell commands (#54076)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/exec_policy.rs",
+        "codex-rs/core/src/exec_policy/executable_identity.rs",
+        "codex-rs/core/src/exec_policy_tests.rs",
+        "codex-rs/core/src/exec_policy_windows_tests.rs",
+        "codex-rs/core/tests/suite/exec_policy.rs",
+        "codex-rs/shell-command/src/command_safety/is_dangerous_command.rs",
+        "codex-rs/shell-command/src/command_safety/windows_dangerous_commands.rs"
+      ],
+      "keywords": [
+        "Avoid",
+        "false",
+        "URL-launch",
+        "detections",
+        "in",
+        "literal",
+        "PowerShell",
+        "commands"
+      ]
+    },
+    {
+      "commit": "71923ba3051dc99d3a617c256f686d7415fc1cfc",
+      "subject": "Update `gix` to 0.89.0 and `gix-url` to 0.40.0 (#54078)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml"
+      ],
+      "keywords": [
+        "Update",
+        "gix",
+        "to",
+        "and",
+        "gix-url",
+        "to"
+      ]
+    },
+    {
+      "commit": "4ae6016a93880877f8f5f79a64e462c466d6b3f9",
+      "subject": "Retire rejected MCP OAuth refresh tokens (#54079)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/tests/suite/mcp_oauth_refresh_tests.rs",
+        "codex-rs/rmcp-client/src/oauth.rs",
+        "codex-rs/rmcp-client/src/oauth/credential_store.rs",
+        "codex-rs/rmcp-client/src/oauth/resolved_store.rs",
+        "codex-rs/rmcp-client/src/oauth/tests/credential_store_tests.rs",
+        "codex-rs/rmcp-client/src/oauth/tests/persistor_tests.rs"
+      ],
+      "keywords": [
+        "Retire",
+        "rejected",
+        "MCP",
+        "OAuth",
+        "refresh",
+        "tokens"
+      ]
+    },
+    {
+      "commit": "57b5e89be8efbf72bdf9f4502d1d046e369cd85d",
+      "subject": "Extract TUI user-turn submission into a dedicated module (#54080)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/tui/src/app.rs",
+        "codex-rs/tui/src/app/thread_routing.rs",
+        "codex-rs/tui/src/app/user_turn_submission.rs"
+      ],
+      "keywords": [
+        "Extract",
+        "TUI",
+        "user-turn",
+        "submission",
+        "into",
+        "dedicated",
+        "module"
+      ]
+    },
+    {
+      "commit": "01ff831ce9c1c9d3ae98f271014b22401308ec06",
+      "subject": "Centralize vertical navigation in TUI list views (#54081)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/tui/src/bottom_pane/experimental_features_view.rs",
+        "codex-rs/tui/src/bottom_pane/hooks_browser_view.rs",
+        "codex-rs/tui/src/bottom_pane/memories_settings_view.rs",
+        "codex-rs/tui/src/bottom_pane/multi_select_picker.rs",
+        "codex-rs/tui/src/bottom_pane/scroll_state.rs",
+        "codex-rs/tui/src/bottom_pane/skills_toggle_view.rs",
+        "codex-rs/tui/src/keymap.rs"
+      ],
+      "keywords": [
+        "Centralize",
+        "vertical",
+        "navigation",
+        "in",
+        "TUI",
+        "list",
+        "views"
+      ]
+    },
+    {
+      "commit": "8094365e6a2da38be1cd37d58f308c496e3f7ac9",
+      "subject": "Stabilize the Guardian network review timeout test (#54082)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/tests/suite/network_approval.rs"
+      ],
+      "keywords": [
+        "Stabilize",
+        "the",
+        "Guardian",
+        "network",
+        "review",
+        "timeout",
+        "test"
+      ]
+    },
+    {
+      "commit": "cd8d61b223d95fd540bb646d627e7f0e7cfa6146",
+      "subject": "Upgrade Bazel's `rules_python` to 2.4.2 (#54087)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".bazelrc",
+        "MODULE.bazel",
+        "MODULE.bazel.lock"
+      ],
+      "keywords": [
+        "Upgrade",
+        "Bazel",
+        "rules_python",
+        "to"
+      ]
+    },
+    {
+      "commit": "12fd621f6278f3ca97451718578c29385a884fe4",
+      "subject": "Preserve specific MCP failure codes in metrics and spans (#54094)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-mcp/src/binding.rs",
+        "codex-rs/codex-mcp/src/connection_manager_tests.rs",
+        "codex-rs/core/src/mcp_tool_call.rs",
+        "codex-rs/core/src/mcp_tool_call/telemetry.rs",
+        "codex-rs/core/src/mcp_tool_call/telemetry_tests.rs",
+        "codex-rs/core/src/mcp_tool_call_tests.rs",
+        "codex-rs/rmcp-client/src/lib.rs",
+        "codex-rs/rmcp-client/src/service_error.rs",
+        "codex-rs/rmcp-client/src/service_error_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "specific",
+        "MCP",
+        "failure",
+        "codes",
+        "in",
+        "metrics",
+        "and",
+        "spans"
+      ]
+    },
+    {
+      "commit": "bc13ff239cefb986e74d7b87b038c857c6137964",
+      "subject": "Add Bazel targets for on-demand schemas and Python SDK generation (#54096)",
+      "group": "CI",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "MODULE.bazel",
+        "bazel/rules/schema_bundle.bzl",
+        "bazel/schema/BUILD.bazel",
+        "bazel/schema/tools/BUILD.bazel",
+        "bazel/schema/tools/python_codegen.py",
+        "codex-rs/app-server-protocol/BUILD.bazel",
+        "sdk/python/BUILD.bazel",
+        "sdk/python/scripts/update_sdk_artifacts.py",
+        "sdk/python/tests/test_contract_generation.py"
+      ],
+      "keywords": [
+        "Add",
+        "Bazel",
+        "targets",
+        "for",
+        "on-demand",
+        "schemas",
+        "and",
+        "Python",
+        "SDK"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "f10ec115b73ef7d153deb986b347f6ab4a170241",
+      "subject": "Show Daybreak notices after the session header (#54097)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/chatwidget/session_flow.rs",
+        "codex-rs/tui/src/chatwidget/tests/history_replay.rs",
+        "codex-rs/tui/src/chatwidget/tests/snapshots/codex_tui__chatwidget__tests__history_replay__resumed_daybreak_banner.snap"
+      ],
+      "keywords": [
+        "Show",
+        "Daybreak",
+        "notices",
+        "after",
+        "the",
+        "session",
+        "header"
+      ]
+    },
+    {
+      "commit": "0c5720ea0fd2af84d7b6743a6686750fb8570ab7",
+      "subject": "Keep environment tools stable across readiness changes (#54098)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/tools/handlers/apply_patch.rs",
+        "codex-rs/core/src/tools/handlers/mod.rs",
+        "codex-rs/core/src/tools/handlers/request_permissions.rs",
+        "codex-rs/core/src/tools/handlers/shell_spec.rs",
+        "codex-rs/core/src/tools/handlers/shell_spec_tests.rs",
+        "codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs",
+        "codex-rs/core/src/tools/handlers/unified_exec/write_stdin.rs",
+        "codex-rs/core/src/tools/handlers/view_image.rs",
+        "codex-rs/core/src/tools/spec_plan.rs",
+        "codex-rs/core/tests/suite/remote_env.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/skills_extension.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__skill_catalog_dedup__dedup_before_budgeting.snap",
+        "codex-rs/core/tests/suite/tools.rs",
+        "codex-rs/features/src/lib.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "environment",
+        "tools",
+        "stable",
+        "across",
+        "readiness",
+        "changes"
+      ]
+    },
+    {
+      "commit": "1ffa95ee8a02ec68f6ccd758998bcb7d4b32bcdb",
+      "subject": "Wait for readiness in the SIGTERM cancellation test (#54099)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/exec_tests.rs"
+      ],
+      "keywords": [
+        "Wait",
+        "for",
+        "readiness",
+        "in",
+        "the",
+        "SIGTERM",
+        "cancellation",
+        "test"
+      ]
+    },
+    {
+      "commit": "e1e2257e29724a54b84f58145597fd5ebea2ff70",
+      "subject": "Embed generated app-server schema bundles in Bazel builds (#54113)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "bazel/rules/schema_bundle.bzl",
+        "codex-rs/app-server-protocol/BUILD.bazel"
+      ],
+      "keywords": [
+        "Embed",
+        "generated",
+        "app-server",
+        "schema",
+        "bundles",
+        "in",
+        "Bazel",
+        "builds"
+      ]
+    },
+    {
+      "commit": "dec54912f9dbd307ebbe8beeb3509a6da30dbf96",
+      "subject": "Report terminal completion states and blocking reasons (#54114)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/bottom_pane/app_link_view.rs",
+        "codex-rs/tui/src/bottom_pane/approval_overlay.rs",
+        "codex-rs/tui/src/bottom_pane/bottom_pane_view.rs",
+        "codex-rs/tui/src/bottom_pane/mcp_server_elicitation.rs",
+        "codex-rs/tui/src/bottom_pane/mod.rs",
+        "codex-rs/tui/src/bottom_pane/request_user_input/mod.rs",
+        "codex-rs/tui/src/bottom_pane/user_verification.rs",
+        "codex-rs/tui/src/chatwidget/input_restore.rs",
+        "codex-rs/tui/src/chatwidget/status_state.rs",
+        "codex-rs/tui/src/chatwidget/status_surfaces.rs",
+        "codex-rs/tui/src/chatwidget/tests.rs",
+        "codex-rs/tui/src/chatwidget/tests/program_status.rs",
+        "codex-rs/tui/src/chatwidget/tests/status_and_layout.rs",
+        "codex-rs/tui/src/chatwidget/tests/terminal_program_status.rs",
+        "codex-rs/tui/src/chatwidget/turn_runtime.rs",
+        "codex-rs/tui/src/iterm_session_status_tests.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__terminal_program_status__tests__iterm_session_status_fields.snap",
+        "codex-rs/tui/src/terminal_program_status.rs"
+      ],
+      "keywords": [
+        "Report",
+        "terminal",
+        "completion",
+        "states",
+        "and",
+        "blocking",
+        "reasons"
+      ]
+    },
+    {
+      "commit": "d292f721242ef355ce5a38da90e0e33edc4790e6",
+      "subject": "Allow stdin review under active grants with sandbox prompts disabled (#54119)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/tools/approvals.rs",
+        "codex-rs/core/src/unified_exec/stdin_approval.rs",
+        "codex-rs/core/tests/suite/unified_exec_stdin_approval.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "stdin",
+        "review",
+        "under",
+        "active",
+        "grants",
+        "with",
+        "sandbox",
+        "prompts"
+      ]
+    },
+    {
+      "commit": "348ef773eec1a42d6b3cede64a50aeb3e0448e71",
+      "subject": "Record per-tool incremental update and description size metrics (#54133)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/context/world_state/top_level_tools.rs",
+        "codex-rs/core/src/context/world_state/top_level_tools_tests.rs",
+        "codex-rs/core/tests/suite/scenarios_incremental_tools.rs",
+        "codex-rs/otel/src/metrics/names.rs"
+      ],
+      "keywords": [
+        "Record",
+        "per-tool",
+        "incremental",
+        "update",
+        "and",
+        "description",
+        "size",
+        "metrics"
+      ]
+    },
+    {
+      "commit": "4ca84a10696623fcd7c200db3df9c41671d3bad0",
+      "subject": "Allow large file writes over direct exec-server WebSockets (#54135)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/connection.rs",
+        "codex-rs/exec-server/src/remote/direct.rs",
+        "codex-rs/exec-server/src/remote/direct_tests.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "large",
+        "file",
+        "writes",
+        "over",
+        "direct",
+        "exec-server",
+        "WebSockets"
+      ]
+    },
+    {
+      "commit": "ac9db7d8b556c7c34a73793aed34b1f980a4fe39",
+      "subject": "Generate keymap descriptors and binding accessors from one catalog (#54151)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/tui/src/keymap_setup/actions.rs"
+      ],
+      "keywords": [
+        "Generate",
+        "keymap",
+        "descriptors",
+        "and",
+        "binding",
+        "accessors",
+        "from",
+        "one",
+        "catalog"
+      ]
+    },
+    {
+      "commit": "7943713993c2220b7616b5fc71f2de0e503282e8",
+      "subject": "Reload the model catalog after account changes (#54169)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/config_manager.rs",
+        "codex-rs/app-server/src/config_manager_provider_tests.rs",
+        "codex-rs/app-server/src/in_process.rs",
+        "codex-rs/app-server/src/in_process_bootstrap.rs",
+        "codex-rs/app-server/src/lib.rs",
+        "codex-rs/app-server/src/message_processor.rs",
+        "codex-rs/app-server/src/message_processor_tracing_tests.rs",
+        "codex-rs/app-server/src/message_processor_workspace_routing_tests.rs",
+        "codex-rs/app-server/src/model_catalog.rs",
+        "codex-rs/app-server/src/models_refresh_worker_tests.rs",
+        "codex-rs/app-server/src/request_processors/account_processor.rs",
+        "codex-rs/app-server/src/request_processors/account_processor/workspace_routing_tests.rs",
+        "codex-rs/app-server/src/request_processors/catalog_processor.rs",
+        "codex-rs/app-server/src/request_processors/config_processor.rs",
+        "codex-rs/app-server/src/user_verification_test_support.rs",
+        "codex-rs/app-server/tests/suite/v2/account.rs",
+        "codex-rs/app-server/tests/suite/v2/gateway_oauth_tests.rs",
+        "codex-rs/app-server/tests/suite/v2/model_list.rs",
+        "codex-rs/app-server/tests/suite/v2/model_list_requirements_tests.rs",
+        "codex-rs/tui/src/startup_orchestration.rs"
+      ],
+      "keywords": [
+        "Reload",
+        "the",
+        "model",
+        "catalog",
+        "after",
+        "account",
+        "changes"
+      ]
+    },
+    {
+      "commit": "160b2b1ef62114eeb41e41e5e3be0000d944b713",
+      "subject": "Preserve ChatGPT authentication for Gov MCP servers (#54170)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-mcp/src/connection_manager_tests.rs",
+        "codex-rs/codex-mcp/src/mcp/mod.rs",
+        "codex-rs/codex-mcp/src/mcp/mod_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "ChatGPT",
+        "authentication",
+        "for",
+        "Gov",
+        "MCP",
+        "servers"
+      ]
+    },
+    {
+      "commit": "bb64b894fd67158be0f874872e6d7bfe717e7368",
+      "subject": "Retire worktree and voice feature flags (#54175)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/config/config_tests.rs",
+        "codex-rs/core/src/config/managed_features.rs",
+        "codex-rs/exec/src/lib.rs",
+        "codex-rs/exec/tests/suite/worktree.rs",
+        "codex-rs/features/src/lib.rs",
+        "codex-rs/features/src/tests.rs",
+        "codex-rs/tui/src/app/agent_center_tests.rs",
+        "codex-rs/tui/src/app/agents_overview.rs",
+        "codex-rs/tui/src/app/agents_overview_new.rs",
+        "codex-rs/tui/src/app/agents_overview_tests.rs",
+        "codex-rs/tui/src/app/managed_worktree_creation.rs",
+        "codex-rs/tui/src/app/snapshots/codex_tui__app__agents_overview__tests__command_center__live_center_custom_help.snap",
+        "codex-rs/tui/src/app/tests/background_task_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/app/tests/turn_submission.rs",
+        "codex-rs/tui/src/app_server_session.rs",
+        "codex-rs/tui/src/bottom_pane/experimental_features_view.rs",
+        "codex-rs/tui/src/bottom_pane/experimental_features_view_tests.rs",
+        "codex-rs/tui/src/bottom_pane/snapshots/codex_tui__bottom_pane__experimental_features_view__tests__voice_runtime_available.snap",
+        "codex-rs/tui/src/chatwidget/realtime.rs",
+        "codex-rs/tui/src/chatwidget/realtime_settings_tests.rs",
+        "codex-rs/tui/src/chatwidget/realtime_tests/lifecycle.rs",
+        "codex-rs/tui/src/chatwidget/session_flow.rs",
+        "codex-rs/tui/src/chatwidget/settings.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/tests/popups_and_settings.rs",
+        "codex-rs/tui/src/chatwidget/tests/slash_commands.rs",
+        "codex-rs/tui/src/chatwidget/tests/worktree_picker_tests.rs",
+        "codex-rs/tui/src/chatwidget/worktree_picker.rs",
+        "codex-rs/tui/src/daemon_startup.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/managed_worktree_tools_tests.rs",
+        "codex-rs/tui/src/resume_picker.rs",
+        "codex-rs/tui/src/resume_picker/page_loading.rs",
+        "codex-rs/tui/src/resume_picker/page_loading_tests.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__experimental_voice_tooltip.snap",
+        "codex-rs/tui/src/tooltips.rs",
+        "codex-rs/tui/src/worktree_startup.rs"
+      ],
+      "keywords": [
+        "Retire",
+        "worktree",
+        "and",
+        "voice",
+        "feature",
+        "flags"
+      ]
+    },
+    {
+      "commit": "dffa0deb69268ed4ac31578794c9ea897b336ae3",
+      "subject": "Show image previews in the fullscreen transcript (#54216)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/owned_transcript.rs",
+        "codex-rs/tui/src/app/owned_transcript_tests.rs",
+        "codex-rs/tui/src/chatwidget/pets.rs",
+        "codex-rs/tui/src/chatwidget/rendering_tests.rs",
+        "codex-rs/tui/src/chatwidget/replay.rs",
+        "codex-rs/tui/src/chatwidget/tool_lifecycle.rs",
+        "codex-rs/tui/src/custom_terminal.rs",
+        "codex-rs/tui/src/history_cell/mod.rs",
+        "codex-rs/tui/src/history_cell/patches.rs",
+        "codex-rs/tui/src/history_cell/patches_tests.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/pets/image_protocol.rs",
+        "codex-rs/tui/src/pets/mod.rs",
+        "codex-rs/tui/src/thread_transcript/other_items.rs",
+        "codex-rs/tui/src/transcript_image.rs",
+        "codex-rs/tui/src/transcript_view.rs",
+        "codex-rs/tui/src/transcript_view/layout.rs",
+        "codex-rs/tui/src/transcript_view/layout_tests.rs",
+        "codex-rs/tui/src/transcript_view/snapshots/codex_tui__transcript_view__footer__tests__activity_focus_keeps_controls_without_passive_hints.snap",
+        "codex-rs/tui/src/transcript_view/snapshots/codex_tui__transcript_view__layout__tests__fullscreen_image_artifact_rows.snap",
+        "codex-rs/tui/src/transcript_view/snapshots/codex_tui__transcript_view__search__tests__find_selective_expansion.snap",
+        "codex-rs/tui/src/transcript_view/text.rs",
+        "codex-rs/tui/src/tui.rs",
+        "codex-rs/tui/src/tui/size_monitor_tests.rs"
+      ],
+      "keywords": [
+        "Show",
+        "image",
+        "previews",
+        "in",
+        "the",
+        "fullscreen",
+        "transcript"
+      ]
+    },
+    {
+      "commit": "e89b7c442c0433ad5167e72a5a25bb6d0712766a",
+      "subject": "Apply syntax theme colors to Markdown prose in the TUI (#54217)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/owned_transcript_tests.rs",
+        "codex-rs/tui/src/inline_visualization_tests.rs",
+        "codex-rs/tui/src/markdown_render.rs",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__bare_urls_are_styled_without_coloring_surrounding_prose.snap",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__bare_urls_keep_link_style_when_wrapped_in_tables.snap",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__label_only_and_fallback_presentations_snapshot.snap",
+        "codex-rs/tui/src/markdown_render/web_links_tests.rs",
+        "codex-rs/tui/src/markdown_render_tests.rs",
+        "codex-rs/tui/src/markdown_stream.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__markdown_render__markdown_render_tests__ordered_list_markers_use_terminal_palette_snapshot.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__markdown_render__markdown_render_tests__web_link_labels_have_a_visible_underline_snapshot.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_linux.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_macos.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_windows.snap",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__render__tests__incremental_file_citations.snap",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__render__tests__incremental_render_representative_stream.snap",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__render__tests__inline_visualizations_without_context_use_canonical_full_render.snap",
+        "codex-rs/tui/src/tooltips/snapshots/codex_tui__tooltips__keybinding_tests__configured_shortcut_tips_render_at_narrow_width.snap"
+      ],
+      "keywords": [
+        "Apply",
+        "syntax",
+        "theme",
+        "colors",
+        "to",
+        "Markdown",
+        "prose",
+        "in",
+        "the"
+      ]
+    },
+    {
+      "commit": "7c152d468447244583f5013887a4bc1371cf1f4c",
+      "subject": "Add regression tests for case-variant metadata protection (#54250)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/tests/suite/apply_patch_system_aliases.rs",
+        "codex-rs/sandboxing/src/seatbelt_tests.rs"
+      ],
+      "keywords": [
+        "Add",
+        "regression",
+        "tests",
+        "for",
+        "case-variant",
+        "metadata",
+        "protection"
+      ]
+    },
+    {
+      "commit": "2a6ecbb93c42c3eea835126c0c332517968ab2f4",
+      "subject": "Preserve recent speech when trimming realtime transcripts (#54257)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/tests/suite/v2/realtime_transcript_tests.rs",
+        "codex-rs/codex-api/src/endpoint/realtime_websocket/methods.rs",
+        "codex-rs/codex-api/src/endpoint/realtime_websocket/transcript_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "recent",
+        "speech",
+        "when",
+        "trimming",
+        "realtime",
+        "transcripts"
+      ]
+    },
+    {
+      "commit": "4b9c24f98c6d886134fd2fc237355064708ff21f",
+      "subject": "Require fresh Guardian approval for escalated tool retries (#54263)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/src/tools/orchestrator.rs"
+      ],
+      "keywords": [
+        "Require",
+        "fresh",
+        "Guardian",
+        "approval",
+        "for",
+        "escalated",
+        "tool",
+        "retries"
+      ]
+    },
+    {
+      "commit": "b687844674bdd8c800f342089c0fae2ae2a96447",
+      "subject": "Track Guardian transcript admission across failed reviews (#54264)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/guardian/review_session.rs",
+        "codex-rs/core/tests/suite/guardian_retry.rs",
+        "codex-rs/core/tests/suite/guardian_review.rs",
+        "codex-rs/ext/guardian-reviewer/src/conversation.rs",
+        "codex-rs/ext/guardian-reviewer/src/conversation_tests.rs"
+      ],
+      "keywords": [
+        "Track",
+        "Guardian",
+        "transcript",
+        "admission",
+        "across",
+        "failed",
+        "reviews"
+      ]
+    },
+    {
+      "commit": "6fbd7be1518d259e30e6fef48f05f433d2461a20",
+      "subject": "Add regression coverage for Guardian sandbox retry approvals (#54265)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/core/tests/suite/guardian_sandbox_retry.rs",
+        "codex-rs/core/tests/suite/unified_exec_process_events.rs"
+      ],
+      "keywords": [
+        "Add",
+        "regression",
+        "coverage",
+        "for",
+        "Guardian",
+        "sandbox",
+        "retry",
+        "approvals"
+      ]
+    },
+    {
+      "commit": "3bae578af33e43268e7bc2d6d5d0266f704bb554",
+      "subject": "Protect metadata writes through macOS case aliases (#54273)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/core/tests/suite/apply_patch_system_aliases.rs",
+        "codex-rs/protocol/Cargo.toml",
+        "codex-rs/protocol/src/permissions/local_aliases.rs",
+        "codex-rs/protocol/src/permissions/local_aliases_tests.rs"
+      ],
+      "keywords": [
+        "Protect",
+        "metadata",
+        "writes",
+        "through",
+        "macOS",
+        "case",
+        "aliases"
+      ]
+    },
+    {
+      "commit": "5fff6378d6ab9730bc7cfbd5eb58f1867a5f14c0",
+      "subject": "Share Guardian image deduplication and checkpoint restoration (#54278)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/guardian/review_session.rs",
+        "codex-rs/core/src/guardian/review_session_setup.rs",
+        "codex-rs/ext/guardian-reviewer/src/conversation.rs",
+        "codex-rs/ext/guardian-reviewer/src/conversation_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/conversation.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/request.rs",
+        "codex-rs/guardian-context/src/enforcement_tests.rs",
+        "codex-rs/guardian-context/src/images.rs"
+      ],
+      "keywords": [
+        "Share",
+        "Guardian",
+        "image",
+        "deduplication",
+        "and",
+        "checkpoint",
+        "restoration"
+      ]
+    },
+    {
+      "commit": "3ee47c10513f1bb57d869ea650aba28638e3d11c",
+      "subject": "Attribute compaction summaries to the assistant in Guardian transcripts (#54281)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/tests/suite/guardian_history.rs",
+        "codex-rs/guardian-context/src/transcript.rs",
+        "codex-rs/guardian-context/src/transcript_tests.rs"
+      ],
+      "keywords": [
+        "Attribute",
+        "compaction",
+        "summaries",
+        "to",
+        "the",
+        "assistant",
+        "in",
+        "Guardian",
+        "transcripts"
+      ]
+    },
+    {
+      "commit": "7d33d0d93f9c751281e0f5e8e9e76353eee87ea8",
+      "subject": "Enable credential masking for remote exec-server commands (#54309)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/config/network_proxy_spec_tests.rs",
+        "codex-rs/core/src/tools/runtimes/unified_exec.rs",
+        "codex-rs/core/tests/common/exec_server.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/scenarios_credential_masking.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__credential_masking__remote_credential_masking.snap",
+        "codex-rs/core/tests/suite/unified_exec_process_events.rs",
+        "codex-rs/exec-server-protocol/src/protocol.rs",
+        "codex-rs/exec-server/src/local_process.rs",
+        "codex-rs/exec-server/src/process_sandbox.rs",
+        "codex-rs/exec-server/src/process_sandbox_tests.rs",
+        "codex-rs/exec-server/src/shell_snapshot_tests.rs",
+        "codex-rs/exec-server/tests/chatgpt_cloudflare_affinity.rs",
+        "codex-rs/exec-server/tests/common/tls_proxy.rs",
+        "codex-rs/exec-server/tests/exec_process.rs",
+        "codex-rs/network-proxy/src/credential_broker.rs",
+        "codex-rs/network-proxy/src/credential_broker_tests.rs",
+        "codex-rs/network-proxy/src/lib.rs",
+        "codex-rs/network-proxy/src/proxy.rs",
+        "codex-rs/network-proxy/src/remote_config.rs",
+        "codex-rs/network-proxy/src/remote_config_tests.rs",
+        "codex-rs/network-proxy/src/runtime.rs"
+      ],
+      "keywords": [
+        "Enable",
+        "credential",
+        "masking",
+        "for",
+        "remote",
+        "exec-server",
+        "commands"
+      ]
+    },
+    {
+      "commit": "86ee40c3801a8c4fbb35b1159c32da1447cf09d9",
+      "subject": "Keep TUI Markdown colors readable against their backgrounds (#54315)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/history_cell/plans.rs",
+        "codex-rs/tui/src/history_cell/snapshots/codex_tui__history_cell__tests__proposed_plan_cell_renders_markdown_table.snap",
+        "codex-rs/tui/src/history_cell/tests.rs",
+        "codex-rs/tui/src/inline_visualization_tests.rs",
+        "codex-rs/tui/src/markdown_render.rs",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__bare_urls_are_styled_without_coloring_surrounding_prose.snap",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__bare_urls_keep_link_style_when_wrapped_in_tables.snap",
+        "codex-rs/tui/src/markdown_render/snapshots/codex_tui__markdown_render__web_links__tests__label_only_and_fallback_presentations_snapshot.snap",
+        "codex-rs/tui/src/markdown_render_tests.rs",
+        "codex-rs/tui/src/markdown_stream.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__markdown_render__markdown_render_tests__inline_code_and_file_paths_follow_syntax_theme.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__markdown_render__markdown_render_tests__ordered_list_markers_use_terminal_palette_snapshot.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__markdown_render__markdown_render_tests__web_link_labels_have_a_visible_underline_snapshot.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_linux.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_macos.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__tooltips__tests__desktop_app_tip_windows.snap",
+        "codex-rs/tui/src/streaming/controller.rs",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__controller__tests__finalized_plan_stream_preserves_semantic_url_fragments.snap",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__render__tests__inline_visualizations_without_context_use_canonical_full_render.snap",
+        "codex-rs/tui/src/tooltips/snapshots/codex_tui__tooltips__keybinding_tests__configured_shortcut_tips_render_at_narrow_width.snap"
+      ],
+      "keywords": [
+        "Keep",
+        "TUI",
+        "Markdown",
+        "colors",
+        "readable",
+        "against",
+        "their",
+        "backgrounds"
+      ]
+    },
+    {
+      "commit": "f0c5077c34ec7a76b4ad9134835925e6ae3d72ec",
+      "subject": "Centralize context fragment kind constants (#54316)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/context-fragments/src/lib.rs",
+        "codex-rs/core/src/agent/control/spawn.rs",
+        "codex-rs/core/src/context/compaction_summary.rs",
+        "codex-rs/core/src/context/contextual_user_message.rs",
+        "codex-rs/core/src/context/guardian_approved_action.rs",
+        "codex-rs/core/src/context/memory.rs",
+        "codex-rs/core/src/context/multi_agent_usage_hint.rs",
+        "codex-rs/core/src/context/unsupported_media.rs",
+        "codex-rs/core/src/context/user_goal.rs",
+        "codex-rs/core/src/image_preparation.rs",
+        "codex-rs/ext/memories/src/extension.rs",
+        "codex-rs/guardian-context/src/history.rs",
+        "codex-rs/guardian-context/src/history_tests.rs",
+        "codex-rs/prompts/src/multi_agent_instructions.rs"
+      ],
+      "keywords": [
+        "Centralize",
+        "context",
+        "fragment",
+        "kind",
+        "constants"
+      ]
+    },
+    {
+      "commit": "0003732489a514748e61a0f76a652ac992a5f4f5",
+      "subject": "Add scoped executor credential auth for remote exec-server (#54346)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/remote.rs",
+        "codex-rs/exec-server/src/remote/direct.rs",
+        "codex-rs/exec-server/src/remote/direct_tests.rs"
+      ],
+      "keywords": [
+        "Add",
+        "scoped",
+        "executor",
+        "credential",
+        "auth",
+        "for",
+        "remote",
+        "exec-server"
+      ]
+    },
+    {
+      "commit": "922510f4d7570b42838e015787ed53abfa8761a1",
+      "subject": "Use the turn index for turn-scoped item pagination (#54351)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/thread-store/src/local/thread_history/segment_paging.rs"
+      ],
+      "keywords": [
+        "Use",
+        "the",
+        "turn",
+        "index",
+        "for",
+        "turn-scoped",
+        "item",
+        "pagination"
+      ]
+    },
+    {
+      "commit": "3df96b085c666b33d3775aa4e77219ec1ed828a0",
+      "subject": "Filter uninspectable network roots from implicit MXC read grants (#54363)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/mxc-sandbox/Cargo.toml",
+        "codex-rs/mxc-sandbox/src/lib.rs",
+        "codex-rs/mxc-sandbox/src/policy.rs",
+        "codex-rs/mxc-sandbox/src/policy_tests.rs",
+        "codex-rs/mxc-sandbox/src/windows.rs"
+      ],
+      "keywords": [
+        "Filter",
+        "uninspectable",
+        "network",
+        "roots",
+        "from",
+        "implicit",
+        "MXC",
+        "read",
+        "grants"
+      ]
+    },
+    {
+      "commit": "c313eb75fd932f9a3b05461a2a227d7a7f7f06f0",
+      "subject": "Prevent duplicate assistant messages around interleaved commands (#54365)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/streaming_interleave_e2e.rs",
+        "codex-rs/tui/src/chatwidget/protocol.rs",
+        "codex-rs/tui/src/chatwidget/streaming.rs",
+        "codex-rs/tui/src/chatwidget/tests/app_server.rs",
+        "codex-rs/tui/src/chatwidget/transcript.rs"
+      ],
+      "keywords": [
+        "Prevent",
+        "duplicate",
+        "assistant",
+        "messages",
+        "around",
+        "interleaved",
+        "commands"
+      ]
+    },
+    {
+      "commit": "7ae831991792744434027c431dfbc7e81dd5c12c",
+      "subject": "Retry SQLite operations on transient writer contention (#54369)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/agent-message-board/src/local/lifecycle.rs",
+        "codex-rs/ext/agent-message-board/src/local/pool.rs",
+        "codex-rs/state/src/lib.rs",
+        "codex-rs/state/src/migrations.rs",
+        "codex-rs/state/src/runtime.rs",
+        "codex-rs/state/src/runtime/backfill.rs",
+        "codex-rs/state/src/runtime/external_agent_config_imports.rs",
+        "codex-rs/state/src/runtime/goals.rs",
+        "codex-rs/state/src/runtime/memories.rs",
+        "codex-rs/state/src/runtime/projects.rs",
+        "codex-rs/state/src/runtime/queued_items.rs",
+        "codex-rs/state/src/runtime/remote_control.rs",
+        "codex-rs/state/src/runtime/rollout_migration.rs",
+        "codex-rs/state/src/runtime/thread_attachments.rs",
+        "codex-rs/state/src/runtime/thread_section_order.rs",
+        "codex-rs/state/src/runtime/thread_sections.rs",
+        "codex-rs/state/src/runtime/threads.rs",
+        "codex-rs/state/src/sqlite.rs",
+        "codex-rs/state/src/sqlite/busy_retry.rs",
+        "codex-rs/state/src/sqlite/retry_tests.rs",
+        "codex-rs/thread-store/src/local/thread_history.rs"
+      ],
+      "keywords": [
+        "Retry",
+        "SQLite",
+        "operations",
+        "on",
+        "transient",
+        "writer",
+        "contention"
+      ]
+    },
+    {
+      "commit": "0884c8047af8b02df31da8c622110a724c6b3cbc",
+      "subject": "Support inline model, reasoning, and speed selection in `/model` (#54378)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/agents_overview.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/model_defaults.rs",
+        "codex-rs/tui/src/app/new_session.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/advanced_reasoning_tests.rs",
+        "codex-rs/tui/src/app/tests/background_task_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/local_command_scroll_tests.rs",
+        "codex-rs/tui/src/app/tests/model_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/snapshots/codex_tui__app__tests__model_defaults__session_only_model_confirmation.snap",
+        "codex-rs/tui/src/app/thread_settings.rs",
+        "codex-rs/tui/src/app/working_directory.rs",
+        "codex-rs/tui/src/app_event.rs",
+        "codex-rs/tui/src/app_server_session.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer/slash_input.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer/sparkle_tests.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/model_command.rs",
+        "codex-rs/tui/src/chatwidget/session_flow.rs",
+        "codex-rs/tui/src/chatwidget/session_model_selection.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/tests/session_model_selection_tests.rs",
+        "codex-rs/tui/src/slash_command.rs"
+      ],
+      "keywords": [
+        "Support",
+        "inline",
+        "model",
+        "reasoning",
+        "and",
+        "speed",
+        "selection",
+        "in",
+        "model"
+      ]
+    },
+    {
+      "commit": "1544ffc79d60d29d492ca432fc0a5b2f3745ddce",
+      "subject": "Add configuration support for TUI input presets (#54379)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/types.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/config/config_tests.rs",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/thread-manager-sample/src/main.rs",
+        "codex-rs/tui/src/local_settings.rs"
+      ],
+      "keywords": [
+        "Add",
+        "configuration",
+        "support",
+        "for",
+        "TUI",
+        "input",
+        "presets"
+      ]
+    },
+    {
+      "commit": "dcd9e954598cd5e9f80570204896d779c60c1ecd",
+      "subject": "Add `/presets` for reusable prompts and slash commands (#54380)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/model_defaults.rs",
+        "codex-rs/tui/src/app/quick_dials.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/model_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/quick_dials_tests.rs",
+        "codex-rs/tui/src/app_event.rs",
+        "codex-rs/tui/src/bottom_pane/custom_prompt_view.rs",
+        "codex-rs/tui/src/bottom_pane/custom_prompt_view/picker.rs",
+        "codex-rs/tui/src/bottom_pane/list_selection_view.rs",
+        "codex-rs/tui/src/bottom_pane/snapshots/codex_tui__bottom_pane__chat_composer__tests__vim_empty_normal_slash.snap",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/input_flow.rs",
+        "codex-rs/tui/src/chatwidget/quick_dials.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__custom_model_display_name_all_models.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__custom_model_display_name_quick_picker.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__model_picker_refreshes_auto_models.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__model_selection_popup.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_clear.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_confirm_delete.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_confirm_replace.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_confirm_save.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_editor.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_recall.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_save.snap",
+        "codex-rs/tui/src/chatwidget/tests.rs",
+        "codex-rs/tui/src/chatwidget/tests/quick_dials_tests.rs",
+        "codex-rs/tui/src/slash_command.rs"
+      ],
+      "keywords": [
+        "Add",
+        "presets",
+        "for",
+        "reusable",
+        "prompts",
+        "and",
+        "slash",
+        "commands"
+      ]
+    },
+    {
+      "commit": "111362a6a0a92d08885b1ae62d3760714907ad94",
+      "subject": "Add a keyboard shortcut menu for presets (#54381)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/tui_keymap.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/tui/assets/tooltips.txt",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/input.rs",
+        "codex-rs/tui/src/app/tests/key_chords.rs",
+        "codex-rs/tui/src/app_event.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer.rs",
+        "codex-rs/tui/src/bottom_pane/mod.rs",
+        "codex-rs/tui/src/bottom_pane/shortcut_hud.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/constructor.rs",
+        "codex-rs/tui/src/chatwidget/interaction.rs",
+        "codex-rs/tui/src/chatwidget/quick_dials.rs",
+        "codex-rs/tui/src/chatwidget/rendering.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__quick_dial_shortcuts.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__quick_dial_shortcuts_empty.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__quick_dial_shortcuts_narrow.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_clear.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_recall.snap",
+        "codex-rs/tui/src/chatwidget/tests/quick_dials_tests.rs",
+        "codex-rs/tui/src/keymap.rs",
+        "codex-rs/tui/src/keymap/bindings.rs",
+        "codex-rs/tui/src/keymap/chords.rs",
+        "codex-rs/tui/src/keymap/chords/quick_dial_defaults.rs",
+        "codex-rs/tui/src/keymap_setup.rs",
+        "codex-rs/tui/src/keymap_setup/actions.rs",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_custom.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_fast_mode_enabled.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_first_actions.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_global_chord.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_narrow.snap",
+        "codex-rs/tui/src/snapshots/codex_tui__keymap_setup__tests__keymap_picker_wide.snap",
+        "codex-rs/tui/src/tooltips/keybinding_tests.rs",
+        "codex-rs/tui/src/tooltips/snapshots/codex_tui__tooltips__keybinding_tests__configured_shortcut_tips_render_at_narrow_width.snap"
+      ],
+      "keywords": [
+        "Add",
+        "keyboard",
+        "shortcut",
+        "menu",
+        "for",
+        "presets"
+      ]
+    },
+    {
+      "commit": "b095b2ef236d8f45f85a9d5526bfbf2618ab2d63",
+      "subject": "Support inline permission profile selection with `/permissions` (#54383)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/app_server_events.rs",
+        "codex-rs/tui/src/app/config_persistence.rs",
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/tests/permission_selection_tests.rs",
+        "codex-rs/tui/src/app/tests/startup.rs",
+        "codex-rs/tui/src/app/thread_routing.rs",
+        "codex-rs/tui/src/app_event.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/constructor.rs",
+        "codex-rs/tui/src/chatwidget/input_flow.rs",
+        "codex-rs/tui/src/chatwidget/permission_discovery.rs",
+        "codex-rs/tui/src/chatwidget/permissions_menu.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/tests/permissions.rs",
+        "codex-rs/tui/src/chatwidget/tests/slash_commands.rs",
+        "codex-rs/tui/src/chatwidget/tests/snapshots/codex_tui__chatwidget__tests__permissions__permissions_command_disabled_profile.snap",
+        "codex-rs/tui/src/chatwidget/tests/snapshots/codex_tui__chatwidget__tests__permissions__permissions_command_unknown_profile.snap",
+        "codex-rs/tui/src/slash_command.rs"
+      ],
+      "keywords": [
+        "Support",
+        "inline",
+        "permission",
+        "profile",
+        "selection",
+        "with",
+        "permissions"
+      ]
+    },
+    {
+      "commit": "36803b180a50e611331b75ff2b4c475c02846b53",
+      "subject": "Allow saving current permission settings as presets (#54385)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/event_dispatch.rs",
+        "codex-rs/tui/src/app/tests/permission_selection_tests.rs",
+        "codex-rs/tui/src/app/tests/snapshots/codex_tui__app__tests__model_defaults__session_only_model_confirmation.snap",
+        "codex-rs/tui/src/app/tests/startup.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/model_command.rs",
+        "codex-rs/tui/src/chatwidget/permission_discovery.rs",
+        "codex-rs/tui/src/chatwidget/permission_popups.rs",
+        "codex-rs/tui/src/chatwidget/permissions_menu.rs",
+        "codex-rs/tui/src/chatwidget/quick_dials.rs",
+        "codex-rs/tui/src/chatwidget/slash_command_args.rs",
+        "codex-rs/tui/src/chatwidget/slash_command_args_tests.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_source.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_source_unavailable_model.snap",
+        "codex-rs/tui/src/chatwidget/tests/permissions.rs",
+        "codex-rs/tui/src/chatwidget/tests/quick_dials_tests.rs",
+        "codex-rs/tui/src/tooltips/keybinding_tests.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "saving",
+        "current",
+        "permission",
+        "settings",
+        "as",
+        "presets"
+      ]
+    },
+    {
+      "commit": "141bf7680d7721ba8271b91473323fb6b58ebdd0",
+      "subject": "Add session-only arguments to `/title` and `/statusline` (#54387)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/bottom_pane/chat_composer.rs",
+        "codex-rs/tui/src/bottom_pane/chat_composer/agents_navigation_tests.rs",
+        "codex-rs/tui/src/chatwidget.rs",
+        "codex-rs/tui/src/chatwidget/config_panel.rs",
+        "codex-rs/tui/src/chatwidget/constructor.rs",
+        "codex-rs/tui/src/chatwidget/input_restore.rs",
+        "codex-rs/tui/src/chatwidget/model_command.rs",
+        "codex-rs/tui/src/chatwidget/permission_discovery.rs",
+        "codex-rs/tui/src/chatwidget/slash_command_args.rs",
+        "codex-rs/tui/src/chatwidget/slash_command_args_tests.rs",
+        "codex-rs/tui/src/chatwidget/slash_dispatch.rs",
+        "codex-rs/tui/src/chatwidget/status_controls.rs",
+        "codex-rs/tui/src/chatwidget/status_surface_commands.rs",
+        "codex-rs/tui/src/chatwidget/tests.rs",
+        "codex-rs/tui/src/chatwidget/tests/composer_submission.rs",
+        "codex-rs/tui/src/chatwidget/tests/review_mode.rs",
+        "codex-rs/tui/src/chatwidget/tests/status_surface_command_tests.rs",
+        "codex-rs/tui/src/chatwidget/tests/status_surface_previews.rs",
+        "codex-rs/tui/src/chatwidget/user_messages.rs",
+        "codex-rs/tui/src/slash_command.rs"
+      ],
+      "keywords": [
+        "Add",
+        "session-only",
+        "arguments",
+        "to",
+        "title",
+        "and",
+        "statusline"
+      ]
+    },
+    {
+      "commit": "f847a4bd3c6ca3d8474a6e0dace1ed39f7ec0067",
+      "subject": "Add quick dial presets for terminal title and status line layouts (#54388)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/chatwidget/quick_dials.rs",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_source.snap",
+        "codex-rs/tui/src/chatwidget/snapshots/codex_tui__chatwidget__tests__saved_quick_dials_source_unavailable_model.snap",
+        "codex-rs/tui/src/chatwidget/tests/quick_dials_tests.rs"
+      ],
+      "keywords": [
+        "Add",
+        "quick",
+        "dial",
+        "presets",
+        "for",
+        "terminal",
+        "title",
+        "and",
+        "status"
+      ]
+    },
+    {
+      "commit": "1ef30bcbe784f1006548adc1542985be32b05109",
+      "subject": "Preserve existing SQLite journal modes on startup (#54389)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/state/src/runtime/reclamation.rs",
+        "codex-rs/state/src/sqlite.rs",
+        "codex-rs/state/src/sqlite_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "existing",
+        "SQLite",
+        "journal",
+        "modes",
+        "on",
+        "startup"
+      ]
+    },
+    {
+      "commit": "aabf13307a044706d4da0b73dfdffcfe136528a5",
+      "subject": "Store generated image items as attachment references (#54398)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/analytics/src/tests/suite/tools_tests.rs",
+        "codex-rs/analytics/src/tests/suite/turns/events_tests.rs",
+        "codex-rs/app-server-protocol/schema/json/ServerNotification.json",
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ItemCompletedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ItemStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ReviewStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadForkResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadItemsListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadMetadataUpdateResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadReadResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadResumeResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadRevertResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadTurnsListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadUnarchiveResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnCompletedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-stable.json.zst",
+        "codex-rs/app-server-protocol/schema/typescript/ImageGenerationItem.ts",
+        "codex-rs/app-server-protocol/src/protocol/thread_history.rs",
+        "codex-rs/app-server-protocol/src/protocol/v2/item.rs",
+        "codex-rs/app-server/src/notification_media.rs",
+        "codex-rs/app-server/src/request_processors/thread_resume_redaction.rs",
+        "codex-rs/app-server/tests/suite/v2/imagegen_extension.rs",
+        "codex-rs/app-server/tests/suite/v2/thread_resume.rs",
+        "codex-rs/attachment-store/src/lib.rs",
+        "codex-rs/attachment-store/src/lib_tests.rs",
+        "codex-rs/core/src/image_preparation.rs",
+        "codex-rs/core/src/tools/handlers/extension_tools.rs",
+        "codex-rs/core/tests/suite/extension_sandbox.rs",
+        "codex-rs/ext/agent-message-board/Cargo.toml",
+        "codex-rs/ext/agent-message-board/tests/local_board.rs",
+        "codex-rs/ext/goal/tests/goal_extension_backend.rs",
+        "codex-rs/ext/history-notes/tests/history_notes_extension.rs",
+        "codex-rs/ext/image-generation/Cargo.toml",
+        "codex-rs/ext/image-generation/src/tool.rs",
+        "codex-rs/ext/items/src/image_generation.rs",
+        "codex-rs/ext/items/src/tests.rs",
+        "codex-rs/ext/memories/src/tests.rs",
+        "codex-rs/ext/skills/Cargo.toml",
+        "codex-rs/ext/skills/tests/skills_extension.rs",
+        "codex-rs/ext/skills/tests/skills_extension/presentation_dedup_tests.rs",
+        "codex-rs/protocol/src/legacy_events.rs",
+        "codex-rs/protocol/src/protocol.rs",
+        "codex-rs/rollout/src/policy.rs",
+        "codex-rs/rollout/src/policy_tests.rs",
+        "codex-rs/thread-store/src/local/rollout_migration/legacy_event.rs",
+        "codex-rs/thread-store/src/local/rollout_migration_tests.rs",
+        "codex-rs/tools/Cargo.toml",
+        "codex-rs/tools/src/tool_call.rs",
+        "codex-rs/tui/src/chatwidget/tests/helpers.rs",
+        "codex-rs/tui/src/dynamic_tools.rs",
+        "codex-rs/tui/src/dynamic_tools_tests.rs",
+        "codex-rs/tui/src/thread_transcript/other_items_tests.rs",
+        "sdk/python/scripts/update_sdk_artifacts.py",
+        "sdk/python/src/openai_codex/generated/v2_all.py",
+        "sdk/python/tests/test_artifact_workflow_and_binaries.py"
+      ],
+      "keywords": [
+        "Store",
+        "generated",
+        "image",
+        "items",
+        "as",
+        "attachment",
+        "references"
+      ]
+    },
+    {
+      "commit": "97ebf2d94d62e2ff2045f3ea17b6e11eae9a21fb",
+      "subject": "Run managed daemon processes at background priority on macOS (#54401)",
+      "group": "Windows-macOS-only",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/app-server-daemon/Cargo.toml",
+        "codex-rs/app-server-daemon/src/backend/pid_start.rs",
+        "codex-rs/app-server-daemon/src/background_command.rs",
+        "codex-rs/app-server-daemon/src/background_command_tests.rs",
+        "codex-rs/app-server-daemon/src/lib.rs",
+        "codex-rs/cli/tests/daemon_startup.rs"
+      ],
+      "keywords": [
+        "Run",
+        "managed",
+        "daemon",
+        "processes",
+        "at",
+        "background",
+        "priority",
+        "on",
+        "macOS"
+      ]
+    },
+    {
+      "commit": "341de32c33fb00b88b5dd50be70610dc59dad045",
+      "subject": "Allow root turn suspension with live descendants (#54414)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/codex_thread.rs",
+        "codex-rs/core/src/session/turn_suspension.rs",
+        "codex-rs/core/tests/suite/abort_tasks.rs",
+        "codex-rs/protocol/src/turn_input.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "root",
+        "turn",
+        "suspension",
+        "with",
+        "live",
+        "descendants"
+      ]
+    },
+    {
+      "commit": "9c84e89ce0893a552058d26dc6746ff6a40ea6e6",
+      "subject": "Skip SQLite page reclamation on Linux NFS mounts (#54417)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/file-system/Cargo.toml",
+        "codex-rs/file-system/src/lib.rs",
+        "codex-rs/file-system/src/nfs.rs",
+        "codex-rs/state/Cargo.toml",
+        "codex-rs/state/src/runtime/reclamation.rs",
+        "codex-rs/state/src/runtime/reclamation_tests.rs",
+        "codex-rs/state/src/sqlite.rs",
+        "codex-rs/state/src/sqlite_tests.rs"
+      ],
+      "keywords": [
+        "Skip",
+        "SQLite",
+        "page",
+        "reclamation",
+        "on",
+        "Linux",
+        "NFS",
+        "mounts"
+      ]
+    },
+    {
+      "commit": "9fcb1f5ed49c938b6fa5a9b4c8f897f3ddfd734c",
+      "subject": "Support line breaks in Mermaid flowchart node labels (#54419)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/mermaid/README.md",
+        "codex-rs/mermaid/src/draw.rs",
+        "codex-rs/mermaid/src/parse.rs",
+        "codex-rs/mermaid/src/snapshots/codex_mermaid__tests__stadiums_with_other_shapes_in_every_direction.snap",
+        "codex-rs/mermaid/src/tests.rs",
+        "codex-rs/tui/src/streaming/mermaid_tests.rs",
+        "codex-rs/tui/src/streaming/snapshots/codex_tui__streaming__mermaid_tests__mermaid_stream_closes_resizes_and_preserves_raw_source.snap"
+      ],
+      "keywords": [
+        "Support",
+        "line",
+        "breaks",
+        "in",
+        "Mermaid",
+        "flowchart",
+        "node",
+        "labels"
+      ]
+    },
+    {
+      "commit": "592964c0cb4d8f1b0c32d2a81f2bc602e7ae88cc",
+      "subject": "Record local image inputs on completed image-generation items (#54420)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/analytics/src/tests/suite/tools_tests.rs",
+        "codex-rs/analytics/src/tests/suite/turns/events_tests.rs",
+        "codex-rs/app-server-protocol/schema/json/ServerNotification.json",
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ItemCompletedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ItemStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ReviewStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadForkResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadItemsListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadMetadataUpdateResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadReadResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadResumeResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadRevertResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadTurnsListResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ThreadUnarchiveResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnCompletedNotification.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnStartResponse.json",
+        "codex-rs/app-server-protocol/schema/json/v2/TurnStartedNotification.json",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-stable.json.zst",
+        "codex-rs/app-server-protocol/schema/typescript/ImageGenerationInputImage.ts",
+        "codex-rs/app-server-protocol/schema/typescript/ImageGenerationItem.ts",
+        "codex-rs/app-server-protocol/schema/typescript/index.ts",
+        "codex-rs/app-server-protocol/src/protocol/thread_history.rs",
+        "codex-rs/app-server-protocol/src/protocol/v2/item.rs",
+        "codex-rs/app-server/src/request_processors/thread_resume_redaction.rs",
+        "codex-rs/app-server/tests/suite/v2/imagegen_extension.rs",
+        "codex-rs/app-server/tests/suite/v2/thread_resume.rs",
+        "codex-rs/core/src/tools/handlers/extension_tools.rs",
+        "codex-rs/ext/image-generation/Cargo.toml",
+        "codex-rs/ext/image-generation/src/tests.rs",
+        "codex-rs/ext/image-generation/src/tool.rs",
+        "codex-rs/ext/items/src/image_generation.rs",
+        "codex-rs/ext/items/src/tests.rs",
+        "codex-rs/protocol/src/legacy_events.rs",
+        "codex-rs/protocol/src/protocol.rs",
+        "codex-rs/rollout/src/policy_tests.rs",
+        "codex-rs/thread-store/src/local/rollout_migration/legacy_event.rs",
+        "codex-rs/thread-store/src/local/rollout_migration_tests.rs",
+        "codex-rs/tui/src/chatwidget/tests/helpers.rs",
+        "codex-rs/tui/src/thread_transcript/other_items_tests.rs",
+        "sdk/python/src/openai_codex/generated/v2_all.py"
+      ],
+      "keywords": [
+        "Record",
+        "local",
+        "image",
+        "inputs",
+        "on",
+        "completed",
+        "image-generation",
+        "items"
+      ]
+    },
+    {
+      "commit": "e90f49a2692e94e8b11be0263093547e1a74abd6",
+      "subject": "Treat explicit connections to the verified default daemon as local (#54421)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-client/src/lib.rs",
+        "codex-rs/app-server-transport/src/lib.rs",
+        "codex-rs/app-server-transport/src/transport/mod.rs",
+        "codex-rs/app-server-transport/src/transport/unix_socket.rs",
+        "codex-rs/app-server-transport/src/transport/unix_socket_tests.rs",
+        "codex-rs/app-server/src/lib.rs",
+        "codex-rs/app-server/src/transport.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/startup_orchestration.rs"
+      ],
+      "keywords": [
+        "Treat",
+        "explicit",
+        "connections",
+        "to",
+        "the",
+        "verified",
+        "default",
+        "daemon",
+        "as"
+      ]
+    },
+    {
+      "commit": "aff92080f2b8d5f63a63b4ada7b92054287f237c",
+      "subject": "Add remote plugin metadata to plugin configuration (#54424)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/config/src/types.rs",
+        "codex-rs/config/src/types_tests.rs",
+        "codex-rs/core-plugins/src/loader.rs",
+        "codex-rs/core-plugins/src/loader_tests.rs",
+        "codex-rs/core-plugins/src/manager_tests.rs",
+        "codex-rs/core/config.schema.json"
+      ],
+      "keywords": [
+        "Add",
+        "remote",
+        "plugin",
+        "metadata",
+        "to",
+        "plugin",
+        "configuration"
+      ]
+    },
+    {
+      "commit": "1c5ca2a9791ded685e94233ee07832e619ec2af2",
+      "subject": "Support remote credential masking with Zsh shell snapshots (#54432)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/tools/runtimes/mod.rs",
+        "codex-rs/core/src/tools/runtimes/unified_exec.rs",
+        "codex-rs/core/tests/suite/scenarios_credential_masking.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__credential_masking__remote_credential_masking_zsh.snap",
+        "codex-rs/exec-server-protocol/src/protocol.rs",
+        "codex-rs/exec-server/src/local_process.rs",
+        "codex-rs/exec-server/src/process_sandbox.rs",
+        "codex-rs/exec-server/src/shell_snapshot.rs",
+        "codex-rs/exec-server/src/shell_snapshot_credentials.rs",
+        "codex-rs/exec-server/src/shell_snapshot_tests.rs",
+        "codex-rs/exec-server/tests/exec_process.rs",
+        "codex-rs/network-proxy/src/proxy.rs",
+        "codex-rs/network-proxy/src/remote_config_tests.rs",
+        "codex-rs/network-proxy/src/runtime.rs",
+        "codex-rs/shell-command/src/shell_snapshot.rs",
+        "codex-rs/shell-command/src/shell_snapshot_credentials.rs",
+        "codex-rs/shell-command/src/shell_snapshot_render.rs",
+        "codex-rs/shell-command/src/shell_snapshot_restore.rs"
+      ],
+      "keywords": [
+        "Support",
+        "remote",
+        "credential",
+        "masking",
+        "with",
+        "Zsh",
+        "shell",
+        "snapshots"
+      ]
+    },
+    {
+      "commit": "98fd26206d96a4a2f7aee7258fc60c4ec3f1a566",
+      "subject": "Use neutral labels for nonzero exits in compact TUI output (#54433)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/chatwidget/tests/snapshots/codex_tui__chatwidget__tests__exec_flow__compact_exploration_with_failures.snap",
+        "codex-rs/tui/src/exec_cell/compact.rs",
+        "codex-rs/tui/src/exec_cell/render.rs",
+        "codex-rs/tui/src/exec_cell/snapshots/codex_tui__exec_cell__render__tests__truncated_live_output_preview_and_transcript.snap"
+      ],
+      "keywords": [
+        "Use",
+        "neutral",
+        "labels",
+        "for",
+        "nonzero",
+        "exits",
+        "in",
+        "compact",
+        "TUI"
+      ]
+    },
+    {
+      "commit": "16e578dd1ddaf4f5db9cd1f3dbfea0958fd74339",
+      "subject": "Add rotating stdin credentials for remote exec-server (#54434)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/cli/src/exec_server_args_tests.rs",
+        "codex-rs/cli/src/exec_server_command.rs",
+        "codex-rs/cli/src/exec_server_credential.rs",
+        "codex-rs/cli/src/exec_server_credential_tests.rs",
+        "codex-rs/cli/src/exec_server_telemetry.rs",
+        "codex-rs/cli/src/main.rs",
+        "codex-rs/cli/src/snapshots/codex__exec_server_args_tests__exec_server_help_documents_remote_options.snap",
+        "codex-rs/cli/tests/exec_server.rs"
+      ],
+      "keywords": [
+        "Add",
+        "rotating",
+        "stdin",
+        "credentials",
+        "for",
+        "remote",
+        "exec-server"
+      ]
+    },
+    {
+      "commit": "6b991972c5b539198dcea9bac4fc14e57559c3af",
+      "subject": "Remove obsolete protected-path monitoring from the Linux sandbox (#54445)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/linux-sandbox/src/bwrap.rs",
+        "codex-rs/linux-sandbox/src/linux_run_main.rs",
+        "codex-rs/linux-sandbox/src/linux_run_main_tests.rs"
+      ],
+      "keywords": [
+        "Remove",
+        "obsolete",
+        "protected-path",
+        "monitoring",
+        "from",
+        "the",
+        "Linux",
+        "sandbox"
+      ]
+    },
+    {
+      "commit": "e790ce271749ce431e446a9e2cc66485fe60f931",
+      "subject": "Use a synchronous mutex for remote metadata request tracking (#54475)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/remote_file_system.rs",
+        "codex-rs/exec-server/src/remote_file_system_path_uri_tests.rs"
+      ],
+      "keywords": [
+        "Use",
+        "synchronous",
+        "mutex",
+        "for",
+        "remote",
+        "metadata",
+        "request",
+        "tracking"
+      ]
+    },
+    {
+      "commit": "a45b8ccb016fb74f63a6bc29e701568e387cbe38",
+      "subject": "Add streaming file replacement to filesystem abstractions (#54505)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/client.rs",
+        "codex-rs/exec-server/src/local_file_system.rs",
+        "codex-rs/exec-server/src/remote_file_system.rs",
+        "codex-rs/exec-server/tests/file_stream.rs",
+        "codex-rs/file-system/src/environment_accessor.rs",
+        "codex-rs/file-system/src/lib.rs"
+      ],
+      "keywords": [
+        "Add",
+        "streaming",
+        "file",
+        "replacement",
+        "to",
+        "filesystem",
+        "abstractions"
+      ]
+    },
+    {
+      "commit": "6ae8b8aa7c608730d4315d59c5c081897ae02780",
+      "subject": "Upgrade V8 to 152.2.0 and backport Array.sort safety guards (#54519)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        ".gitattributes",
+        ".github/scripts/test_v8_canary_changes.py",
+        ".github/scripts/v8_canary_changes.py",
+        ".github/workflows/rusty-v8-release.yml",
+        ".github/workflows/v8-canary.yml",
+        "MODULE.bazel",
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml",
+        "codex-rs/code-mode-runtime/src/v8_init.rs",
+        "codex-rs/v8-poc/BUILD.bazel",
+        "patches/BUILD.bazel",
+        "patches/v8_array_sort_elements_kind.patch",
+        "patches/v8_bazel_rules.patch",
+        "patches/v8_module_deps.patch",
+        "scripts/codex_package/test_v8.py",
+        "third_party/v8/BUILD.bazel",
+        "third_party/v8/README.md",
+        "third_party/v8/libcxx.BUILD.bazel",
+        "third_party/v8/rusty_v8_150_4_0.sha256",
+        "third_party/v8/rusty_v8_150_4_0_release_manifests.sha256",
+        "third_party/v8/rusty_v8_152_2_0.sha256",
+        "third_party/v8/rusty_v8_152_2_0_release_manifests.sha256"
+      ],
+      "keywords": [
+        "Upgrade",
+        "V8",
+        "to",
+        "and",
+        "backport",
+        "Array",
+        "sort",
+        "safety",
+        "guards"
+      ]
+    },
+    {
+      "commit": "144779cd243d395af79c6e7a0d5d0ae9ed344efc",
+      "subject": "Preserve evidence message structure in Guardian Decisions requests (#54589)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_lifecycle_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/decisions_tests.rs",
+        "codex-rs/ext/guardian-v2/src/async_scorer/metrics.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "evidence",
+        "message",
+        "structure",
+        "in",
+        "Guardian",
+        "Decisions",
+        "requests"
+      ]
+    },
+    {
+      "commit": "4eb4a65407d98cebc4c83bf13be440b9fbc78a7c",
+      "subject": "Capture sender context for `codex_app.create_thread` deliveries (#54590)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/agent/control/sender_context.rs",
+        "codex-rs/core/tests/suite/guardian_sender_messages_tests.rs"
+      ],
+      "keywords": [
+        "Capture",
+        "sender",
+        "context",
+        "for",
+        "codex_app",
+        "create_thread",
+        "deliveries"
+      ]
+    },
+    {
+      "commit": "2bf2bdf82c33f4c66ba3f0767b8e4b6a933aac40",
+      "subject": "Bind plugin hook approval to plugin contents (#54619)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/app-server/src/config_manager_service.rs",
+        "codex-rs/app-server/src/effective_plugin_change.rs",
+        "codex-rs/app-server/src/request_processors/catalog_processor.rs",
+        "codex-rs/app-server/tests/suite/v2/hooks_list.rs",
+        "codex-rs/app-server/tests/suite/v2/plugin_list.rs",
+        "codex-rs/config/src/hook_config.rs",
+        "codex-rs/config/src/hooks_tests.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/tests/suite/hooks.rs",
+        "codex-rs/hooks/Cargo.toml",
+        "codex-rs/hooks/src/config_rules.rs",
+        "codex-rs/hooks/src/engine/command_runner.rs",
+        "codex-rs/hooks/src/engine/command_runner_tests.rs",
+        "codex-rs/hooks/src/engine/discovery.rs",
+        "codex-rs/hooks/src/engine/dispatcher.rs",
+        "codex-rs/hooks/src/engine/mcp_runner.rs",
+        "codex-rs/hooks/src/engine/mcp_runner_tests.rs",
+        "codex-rs/hooks/src/engine/mod.rs",
+        "codex-rs/hooks/src/engine/mod_tests.rs",
+        "codex-rs/hooks/src/engine/plugin_fingerprint.rs",
+        "codex-rs/hooks/src/engine/plugin_trust.rs",
+        "codex-rs/hooks/src/events/compact.rs",
+        "codex-rs/hooks/src/events/interrupt_tests.rs",
+        "codex-rs/hooks/src/events/post_tool_use.rs",
+        "codex-rs/hooks/src/events/pre_tool_use.rs",
+        "codex-rs/hooks/src/events/session_end_tests.rs",
+        "codex-rs/hooks/src/events/session_start.rs",
+        "codex-rs/hooks/src/events/stop.rs",
+        "codex-rs/hooks/src/events/user_prompt_submit.rs",
+        "codex-rs/hooks/src/registry.rs"
+      ],
+      "keywords": [
+        "Bind",
+        "plugin",
+        "hook",
+        "approval",
+        "to",
+        "plugin",
+        "contents"
+      ]
+    },
+    {
+      "commit": "b5115cdd669d37a8635a9742851e97ba4fb1d42c",
+      "subject": "Resolve stable releases dynamically for exec-server compatibility tests (#54623)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".github/actions/run-argument-comment-lint/action.yml",
+        ".github/scripts/contract_releases.py",
+        ".github/scripts/resolve_exec_server_releases.py",
+        ".github/scripts/test_contract_releases.py",
+        ".github/workflows/bazel.yml",
+        ".github/workflows/rust-ci-full.yml",
+        "MODULE.bazel",
+        "bazel/extensions/codex_release_archive.bzl",
+        "codex-rs/exec-server/BUILD.bazel"
+      ],
+      "keywords": [
+        "Resolve",
+        "stable",
+        "releases",
+        "dynamically",
+        "for",
+        "exec-server",
+        "compatibility",
+        "tests"
+      ],
+      "classification_basis": "Manual subject/diff-path audit, including inline tests, test-only manifest support, and build/release automation."
+    },
+    {
+      "commit": "34420d42648f627f766bd347532dcaad5475a68b",
+      "subject": "Preserve disconnect reasons in Noise handshake errors (#54637)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/exec-server/src/client_transport.rs",
+        "codex-rs/exec-server/src/client_transport_tests.rs"
+      ],
+      "keywords": [
+        "Preserve",
+        "disconnect",
+        "reasons",
+        "in",
+        "Noise",
+        "handshake",
+        "errors"
+      ]
+    },
+    {
+      "commit": "4491caf1ad063f753381500454b599d750e50848",
+      "subject": "Stream rollout records during thread history materialization (#54639)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/thread-store/src/local/thread_history_materialization.rs",
+        "codex-rs/thread-store/src/local/thread_history_materialization_tests.rs"
+      ],
+      "keywords": [
+        "Stream",
+        "rollout",
+        "records",
+        "during",
+        "thread",
+        "history",
+        "materialization"
+      ]
+    },
+    {
+      "commit": "b3cc59afcf28bf8f8cc35023be67b9e2f62fc066",
+      "subject": "Retry npm release publishing and match macOS verification runners (#54641)",
+      "group": "releases",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".github/workflows/rust-release-provisioned-macos.yml",
+        ".github/workflows/rust-release.yml"
+      ],
+      "keywords": [
+        "Retry",
+        "npm",
+        "release",
+        "publishing",
+        "and",
+        "match",
+        "macOS",
+        "verification",
+        "runners"
+      ]
+    },
+    {
+      "commit": "fa46ef3af641f21d0facc69bd11e562fce6a3f9a",
+      "subject": "Make remote-control conflict retry tests deterministic (#54647)",
+      "group": "docs/tests-only",
+      "mixed_tests_runtime": false,
+      "paths": [
+        "codex-rs/app-server-transport/src/transport/remote_control/websocket_retry_tests.rs"
+      ],
+      "keywords": [
+        "Make",
+        "remote-control",
+        "conflict",
+        "retry",
+        "tests",
+        "deterministic"
+      ]
+    },
+    {
+      "commit": "b26b0a7a777bd9c153da2e1e86f00ee1600476bd",
+      "subject": "Prefer resource-specific scopes during MCP OAuth discovery (#54653)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "MODULE.bazel.lock",
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml",
+        "codex-rs/cli/tests/mcp_login.rs",
+        "codex-rs/rmcp-client/src/auth_status.rs",
+        "codex-rs/rmcp-client/tests/mcp_2026_oauth_discovery.rs"
+      ],
+      "keywords": [
+        "Prefer",
+        "resource-specific",
+        "scopes",
+        "during",
+        "MCP",
+        "OAuth",
+        "discovery"
+      ]
+    },
+    {
+      "commit": "beae473be8564d884a8cfe9704194a5c803d2ac1",
+      "subject": "Allow dynamic tool calls to execute in parallel (#54654)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/core/src/tools/handlers/dynamic.rs",
+        "codex-rs/core/tests/suite/code_mode.rs",
+        "codex-rs/core/tests/suite/code_mode_dynamic_tools_tests.rs"
+      ],
+      "keywords": [
+        "Allow",
+        "dynamic",
+        "tool",
+        "calls",
+        "to",
+        "execute",
+        "in",
+        "parallel"
+      ]
+    },
+    {
+      "commit": "0df4aa67781ae45a3c97befa4db48b734afe46d9",
+      "subject": "Honor MCP tool-list changes within a turn (#54656)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/codex-mcp/src/client_tool_catalog.rs",
+        "codex-rs/codex-mcp/src/connection_manager.rs",
+        "codex-rs/codex-mcp/src/connection_manager/tool_catalog.rs",
+        "codex-rs/codex-mcp/src/connection_manager_tests.rs",
+        "codex-rs/codex-mcp/src/mcp/mod.rs",
+        "codex-rs/codex-mcp/src/mcp/mod_tests.rs",
+        "codex-rs/codex-mcp/src/rmcp_client.rs",
+        "codex-rs/codex-mcp/src/tool_catalog_cache.rs",
+        "codex-rs/core/config.schema.json",
+        "codex-rs/core/src/config/mod.rs",
+        "codex-rs/core/tests/suite/rmcp_client.rs",
+        "codex-rs/core/tests/suite/scenarios.rs",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__mcp_tool_discovery_CodeModeOnly.snap",
+        "codex-rs/core/tests/suite/snapshots/all__suite__scenarios__mcp_tool_discovery_Direct.snap",
+        "codex-rs/features/src/lib.rs",
+        "codex-rs/rmcp-client/src/bin/test_stdio_server.rs",
+        "codex-rs/rmcp-client/src/lib.rs",
+        "codex-rs/rmcp-client/src/rmcp_client.rs",
+        "codex-rs/rmcp-client/src/tool_list_changes.rs"
+      ],
+      "keywords": [
+        "Honor",
+        "MCP",
+        "tool-list",
+        "changes",
+        "within",
+        "turn"
+      ]
+    },
+    {
+      "commit": "96eb400d1231f0199e96f640c740096087cf3e9b",
+      "subject": "Distinguish retryable thread-store errors from unknown write outcomes (#54664)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/request_processors/thread_attachments.rs",
+        "codex-rs/app-server/src/request_processors/thread_processor_tests.rs",
+        "codex-rs/app-server/src/request_processors/thread_sections.rs",
+        "codex-rs/core/src/agent/control/runtime_tests.rs",
+        "codex-rs/core/src/session_rollout_init_error.rs",
+        "codex-rs/core/src/session_rollout_init_error_tests.rs",
+        "codex-rs/core/src/thread_manager/shutdown.rs",
+        "codex-rs/thread-store/src/error.rs",
+        "codex-rs/thread-store/src/error_tests.rs"
+      ],
+      "keywords": [
+        "Distinguish",
+        "retryable",
+        "thread-store",
+        "errors",
+        "from",
+        "unknown",
+        "write",
+        "outcomes"
+      ]
+    },
+    {
+      "commit": "088c7a1e75462caec9ec87e93caa8c4616a0c447",
+      "subject": "Use shared Bazel CI preparation for lint and V8 jobs (#54672)",
+      "group": "CI",
+      "mixed_tests_runtime": false,
+      "paths": [
+        ".github/actions/run-argument-comment-lint/action.yml",
+        ".github/scripts/v8_canary_changes.py",
+        ".github/workflows/bazel.yml",
+        ".github/workflows/rusty-v8-release.yml",
+        ".github/workflows/v8-canary.yml"
+      ],
+      "keywords": [
+        "Use",
+        "shared",
+        "Bazel",
+        "CI",
+        "preparation",
+        "for",
+        "lint",
+        "and",
+        "V8"
+      ]
+    },
+    {
+      "commit": "e7de1f444089c29ac002e3df08d940f6de8a2613",
+      "subject": "Add an opt-in tool for copying files between environments (#54674)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/Cargo.lock",
+        "codex-rs/Cargo.toml",
+        "codex-rs/ext/multi-env-copy-file/BUILD.bazel",
+        "codex-rs/ext/multi-env-copy-file/Cargo.toml",
+        "codex-rs/ext/multi-env-copy-file/src/extension.rs",
+        "codex-rs/ext/multi-env-copy-file/src/lib.rs",
+        "codex-rs/ext/multi-env-copy-file/src/tool.rs",
+        "codex-rs/ext/multi-env-copy-file/tests/copy_file.rs",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/connectivity.rs",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/mod.rs",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__connectivity__disconnected_executor.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__connectivity__unavailable_endpoints.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__endpoint_errors@unix.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__endpoint_errors@windows.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__permission_errors.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/snapshots/copy_file__suite__transfers__multi_env_copy_file.snap",
+        "codex-rs/ext/multi-env-copy-file/tests/suite/transfers.rs"
+      ],
+      "keywords": [
+        "Add",
+        "an",
+        "opt-in",
+        "tool",
+        "for",
+        "copying",
+        "files",
+        "between",
+        "environments"
+      ]
+    },
+    {
+      "commit": "a083a1e49ea499b0dd37afa36f4d8c70d5536056",
+      "subject": "Distinguish MCP approval cancellation reasons (#54679)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server/src/bespoke_event_handling.rs",
+        "codex-rs/core/src/mcp_tool_call.rs",
+        "codex-rs/core/src/mcp_tool_call_tests.rs",
+        "codex-rs/core/src/tools/approvals.rs",
+        "codex-rs/core/src/tools/approvals_tests.rs",
+        "codex-rs/core/src/tools/mod.rs",
+        "codex-rs/exec/src/lib.rs",
+        "codex-rs/exec/src/lib_tests.rs",
+        "codex-rs/protocol/src/mcp_approval_meta.rs",
+        "codex-rs/tui/src/bottom_pane/mcp_server_elicitation.rs"
+      ],
+      "keywords": [
+        "Distinguish",
+        "MCP",
+        "approval",
+        "cancellation",
+        "reasons"
+      ]
+    },
+    {
+      "commit": "440312f11396a58b312dd31798ec3393810d8ff8",
+      "subject": "Keep TUI session selections bound to their backend (#54681)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/tui/src/app/agents_overview.rs",
+        "codex-rs/tui/src/app/agents_overview_actions_tests.rs",
+        "codex-rs/tui/src/app/agents_overview_discovery_tests.rs",
+        "codex-rs/tui/src/app/agents_overview_tests.rs",
+        "codex-rs/tui/src/app/background_requests.rs",
+        "codex-rs/tui/src/app/experimental_features_tests.rs",
+        "codex-rs/tui/src/app/input.rs",
+        "codex-rs/tui/src/app/reconnect.rs",
+        "codex-rs/tui/src/app/resume_config.rs",
+        "codex-rs/tui/src/app/retained_reply_tests.rs",
+        "codex-rs/tui/src/app/session_lifecycle.rs",
+        "codex-rs/tui/src/app/session_picker.rs",
+        "codex-rs/tui/src/app/startup.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/app/tests/active_reconnect_tests.rs",
+        "codex-rs/tui/src/app/tests/backend_banner_fallback_tests.rs",
+        "codex-rs/tui/src/app/tests/backend_ownership_tests.rs",
+        "codex-rs/tui/src/app/tests/background_task_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/disconnect_tests.rs",
+        "codex-rs/tui/src/app/tests/history_hydration_tests.rs",
+        "codex-rs/tui/src/app/tests/model_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/navigation_reconnect_tests.rs",
+        "codex-rs/tui/src/app/tests/permission_shortcuts_tests.rs",
+        "codex-rs/tui/src/app/tests/projectless_tests.rs",
+        "codex-rs/tui/src/app/tests/realtime_requests.rs",
+        "codex-rs/tui/src/app/tests/resume_shutdown_tests.rs",
+        "codex-rs/tui/src/app/tests/security_setup_tests.rs",
+        "codex-rs/tui/src/app/tests/session_lifecycle_requests.rs",
+        "codex-rs/tui/src/app/tests/startup.rs",
+        "codex-rs/tui/src/app/tests/startup_defaults_tests.rs",
+        "codex-rs/tui/src/app/tests/startup_frame_tests.rs",
+        "codex-rs/tui/src/app/user_verification_tests.rs",
+        "codex-rs/tui/src/app_server_session.rs",
+        "codex-rs/tui/src/app_server_session/collaboration_catalog_tests.rs",
+        "codex-rs/tui/src/app_server_session/external_agent_config_tests.rs",
+        "codex-rs/tui/src/app_server_session/thread_list_tests.rs",
+        "codex-rs/tui/src/backend_id.rs",
+        "codex-rs/tui/src/daemon_startup_tests.rs",
+        "codex-rs/tui/src/lib.rs",
+        "codex-rs/tui/src/named_session_lookup_tests.rs",
+        "codex-rs/tui/src/permission_discovery_tests.rs",
+        "codex-rs/tui/src/resume_picker.rs",
+        "codex-rs/tui/src/resume_picker/archive_tests.rs",
+        "codex-rs/tui/src/resume_picker_color_tests.rs",
+        "codex-rs/tui/src/resume_picker_pagination_error_tests.rs",
+        "codex-rs/tui/src/session_archive_commands.rs",
+        "codex-rs/tui/src/session_archive_commands_tests.rs",
+        "codex-rs/tui/src/session_start.rs",
+        "codex-rs/tui/src/session_start_tests.rs",
+        "codex-rs/tui/src/startup_draft_submission_tests.rs",
+        "codex-rs/tui/src/status/tests.rs",
+        "codex-rs/tui/src/worktree_startup.rs"
+      ],
+      "keywords": [
+        "Keep",
+        "TUI",
+        "session",
+        "selections",
+        "bound",
+        "to",
+        "their",
+        "backend"
+      ]
+    },
+    {
+      "commit": "0e67502123b4c6952b9fa5d672d2907fe4059f56",
+      "subject": "Preserve MCP tool-list metadata in server status (#54686)",
+      "group": "common-runtime",
+      "mixed_tests_runtime": true,
+      "paths": [
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/codex_app_server_protocol.v2.schemas.json",
+        "codex-rs/app-server-protocol/schema/json/v2/ListMcpServerStatusResponse.json",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-experimental.json.zst",
+        "codex-rs/app-server-protocol/schema/precomputed/app-server-exports-stable.json.zst",
+        "codex-rs/app-server-protocol/schema/typescript/v2/McpServerStatus.ts",
+        "codex-rs/app-server-protocol/src/protocol/v2/mcp.rs",
+        "codex-rs/app-server-protocol/src/protocol/v2/tests.rs",
+        "codex-rs/app-server/src/request_processors/mcp_processor.rs",
+        "codex-rs/codex-mcp/src/binding_tests.rs",
+        "codex-rs/codex-mcp/src/client_tool_catalog.rs",
+        "codex-rs/codex-mcp/src/connection_manager.rs",
+        "codex-rs/codex-mcp/src/connection_manager/tool_catalog.rs",
+        "codex-rs/codex-mcp/src/connection_manager_tests.rs",
+        "codex-rs/codex-mcp/src/mcp/mod.rs",
+        "codex-rs/codex-mcp/src/rmcp_client.rs",
+        "codex-rs/codex-mcp/src/server_tests.rs",
+        "codex-rs/codex-mcp/src/tool_catalog_cache.rs",
+        "codex-rs/connectors/src/connector_runtime/mod.rs",
+        "codex-rs/connectors/src/connector_runtime/persistence.rs",
+        "codex-rs/connectors/src/connector_runtime/tests.rs",
+        "codex-rs/rmcp-client/src/rmcp_client.rs",
+        "codex-rs/tui/src/app/background_requests.rs",
+        "codex-rs/tui/src/app/tests.rs",
+        "codex-rs/tui/src/history_cell/mcp_tests.rs",
+        "codex-rs/tui/src/history_cell/tests.rs",
+        "sdk/python/src/openai_codex/generated/v2_all.py"
+      ],
+      "keywords": [
+        "Preserve",
+        "MCP",
+        "tool-list",
+        "metadata",
+        "in",
+        "server",
+        "status"
+      ]
+    }
+  ]
+}

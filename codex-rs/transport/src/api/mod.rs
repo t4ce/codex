@@ -40,6 +40,7 @@ pub use crate::api::common::ReasoningSummaryDelivery;
 pub use crate::api::common::ResponseCreateWsRequest;
 pub use crate::api::common::ResponseEvent;
 pub use crate::api::common::ResponseId;
+pub use crate::api::common::ResponseInterrupt;
 pub use crate::api::common::ResponseStream;
 pub use crate::api::common::ResponsesApiRequest;
 pub use crate::api::common::ResponsesApiTools;

@@ -1,4 +1,3 @@
-#[cfg(feature = "external-reporting")]
 use crate::config::OtelExporter;
 #[cfg(feature = "external-reporting")]
 use crate::config::OtelHttpProtocol;
@@ -51,6 +50,10 @@ use std::sync::RwLock;
 use std::sync::Weak;
 use std::time::Duration;
 use tracing::debug;
+
+#[cfg(test)]
+#[path = "client_tests.rs"]
+mod tests;
 
 const ENV_ATTRIBUTE: &str = "env";
 const METER_NAME: &str = "codex";
@@ -118,6 +121,7 @@ pub(super) struct MetricsClientInner {
     histograms: Mutex<HashMap<String, Histogram<f64>>>,
     duration_histograms: Mutex<HashMap<InstrumentKey, Histogram<f64>>>,
     runtime_reader: Option<Arc<ManualReader>>,
+    requires_analytics_consent: bool,
     statsig_disabled_metrics: &'static [&'static str],
     default_tags: BTreeMap<String, String>,
 }
@@ -367,6 +371,8 @@ impl MetricsClient {
             )
         });
 
+        let requires_analytics_consent =
+            matches!(exporter, MetricsExporter::Otlp(OtelExporter::Statsig));
         let (meter_provider, meter) = match exporter {
             MetricsExporter::InMemory(exporter) => {
                 build_provider(resource, exporter, export_interval, runtime_reader.clone())
@@ -408,6 +414,7 @@ impl MetricsClient {
                 histograms: Mutex::new(HashMap::new()),
                 duration_histograms: Mutex::new(HashMap::new()),
                 runtime_reader,
+                requires_analytics_consent,
                 statsig_disabled_metrics,
                 default_tags,
             }),
@@ -429,6 +436,22 @@ impl MetricsClient {
     pub fn counter(&self, name: &str, inc: i64, tags: &[(&str, &str)]) -> Result<()> {
         self.active_inner()
             .counter(name, /*description*/ None, inc, tags)
+    }
+
+    /// Record a counter while applying analytics consent only to the built-in exporter.
+    /// The consent check and recording use the same exporter even during provider replacement.
+    pub fn counter_with_analytics_consent(
+        &self,
+        name: &str,
+        inc: i64,
+        tags: &[(&str, &str)],
+        analytics_enabled: bool,
+    ) -> Result<()> {
+        let inner = self.active_inner();
+        if inner.requires_analytics_consent && !analytics_enabled {
+            return Ok(());
+        }
+        inner.counter(name, /*description*/ None, inc, tags)
     }
 
     /// Send a single counter increment with an instrument description.
@@ -699,7 +722,9 @@ fn build_otlp_metric_exporter(
                     message: err.to_string(),
                 })?;
                 exporter_builder = exporter_builder.with_http_client(client);
-            } else if let Some(tls) = tls.as_ref() {
+            } else {
+                let default_tls = crate::config::OtelTlsConfig::default();
+                let tls = tls.as_ref().unwrap_or(&default_tls);
                 let client =
                     crate::otlp::build_http_client(tls, OTEL_EXPORTER_OTLP_METRICS_TIMEOUT)
                         .map_err(|err| MetricsError::InvalidConfig {

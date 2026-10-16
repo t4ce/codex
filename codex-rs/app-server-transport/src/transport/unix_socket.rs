@@ -49,6 +49,27 @@ pub async fn start_control_socket_acceptor(
     shutdown_token: CancellationToken,
     daemon_shutdown_access: DaemonShutdownAccess,
 ) -> IoResult<JoinHandle<()>> {
+    let (listener, socket_guard) = bind_private_daemon_socket(socket_path.as_path()).await?;
+    info!(
+        socket_path = %socket_guard.socket_path.display(),
+        "app-server control socket listening"
+    );
+
+    Ok(tokio::spawn(run_control_socket_acceptor(
+        listener,
+        transport_event_tx,
+        shutdown_token,
+        socket_guard,
+        daemon_shutdown_access,
+    )))
+}
+
+/// Binds a private daemon socket, retaining its advertised path as a rendezvous
+/// alias on Unix. Keep the guard alive for as long as the listener is in use.
+pub async fn bind_private_daemon_socket(
+    socket_path: &Path,
+) -> IoResult<(UnixListener, DaemonSocketFileGuard)> {
+    let socket_path = AbsolutePathBuf::from_absolute_path(socket_path)?;
     #[cfg(unix)]
     let (socket_path, rendezvous_path, mut startup_lock) = {
         use std::os::unix::fs::MetadataExt;
@@ -102,7 +123,7 @@ pub async fn start_control_socket_acceptor(
     {
         startup_lock.remove_on_drop = true;
     }
-    let socket_guard = ControlSocketPathGuard {
+    let socket_guard = DaemonSocketFileGuard {
         socket_path,
         #[cfg(unix)]
         rendezvous_path,
@@ -119,25 +140,14 @@ pub async fn start_control_socket_acceptor(
     )?;
     #[cfg(unix)]
     socket_guard._startup_lock._file.unlock()?;
-    info!(
-        socket_path = %socket_guard.socket_path.display(),
-        "app-server control socket listening"
-    );
-
-    Ok(tokio::spawn(run_control_socket_acceptor(
-        listener,
-        transport_event_tx,
-        shutdown_token,
-        socket_guard,
-        daemon_shutdown_access,
-    )))
+    Ok((listener, socket_guard))
 }
 
 async fn run_control_socket_acceptor(
     mut listener: UnixListener,
     transport_event_tx: mpsc::Sender<TransportEvent>,
     shutdown_token: CancellationToken,
-    socket_guard: ControlSocketPathGuard,
+    socket_guard: DaemonSocketFileGuard,
     daemon_shutdown_access: DaemonShutdownAccess,
 ) {
     let _socket_guard = socket_guard;
@@ -287,6 +297,36 @@ async fn prepare_control_socket_path(socket_path: &Path) -> IoResult<()> {
         ));
     }
     tokio::fs::remove_file(socket_path).await
+}
+
+/// Return a verified local socket endpoint, independent of the advertised Unix alias.
+/// A socket bound directly at the advertised path (e.g. SSH forwarding) is not ours on Unix.
+pub fn verified_local_daemon_socket(socket_path: &Path) -> IoResult<Option<AbsolutePathBuf>> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+
+        let protected = protected_socket_path(socket_path)?;
+        if std::fs::read_link(socket_path).ok().as_deref() != Some(protected.as_path()) {
+            return Ok(None);
+        }
+        let directory = std::fs::symlink_metadata(codex_uds::shared_daemon_socket_directory()?)?;
+        // Match the daemon's bind-time check without creating or repairing the directory.
+        if directory.is_dir()
+            && directory.uid() == unsafe { libc::geteuid() }
+            && directory.mode() & 0o777 == 0o700
+        {
+            return AbsolutePathBuf::from_absolute_path(protected).map(Some);
+        }
+        Ok(None)
+    }
+    #[cfg(windows)]
+    {
+        // The TUI revalidates this directory and verifies the peer at connection time,
+        // using the same connect_local_daemon path as implicit startup.
+        let (path, _directory) = codex_uds::validate_private_socket_path(socket_path)?;
+        AbsolutePathBuf::from_absolute_path_checked(path).map(Some)
+    }
 }
 
 #[cfg(unix)]
@@ -448,7 +488,8 @@ async fn set_control_socket_permissions(_socket_path: &Path) -> IoResult<()> {
     Ok(())
 }
 
-struct ControlSocketPathGuard {
+/// Owns the socket files and startup lock until the listener is shut down.
+pub struct DaemonSocketFileGuard {
     socket_path: AbsolutePathBuf,
     #[cfg(unix)]
     rendezvous_path: AbsolutePathBuf,
@@ -459,7 +500,7 @@ struct ControlSocketPathGuard {
     _directory_guard: std::os::windows::io::OwnedHandle,
 }
 
-impl Drop for ControlSocketPathGuard {
+impl Drop for DaemonSocketFileGuard {
     fn drop(&mut self) {
         #[cfg(unix)]
         if std::fs::read_link(self.rendezvous_path.as_path())
