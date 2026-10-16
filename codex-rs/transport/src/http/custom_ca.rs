@@ -6,6 +6,8 @@
 //! `reqwest::ClientBuilder` or rustls client config, layer in custom CA support, and either get
 //! back a configured transport or a user-facing error that explains how to fix a misconfigured CA
 //! bundle.
+//! Concurrent native-root reads may share one in-flight load; later builds reload trust, and
+//! custom CA files are read independently for every build.
 //!
 //! The module intentionally has a narrow responsibility:
 //!
@@ -48,6 +50,7 @@ use std::sync::Arc;
 
 use codex_network_foundation::ensure_rustls_crypto_provider;
 use rustls::ClientConfig;
+#[cfg(any(target_os = "trueos", test))]
 use rustls::RootCertStore;
 use rustls_pki_types::CertificateDer;
 use rustls_pki_types::pem::PemObject;
@@ -148,23 +151,13 @@ fn build_rustls_client_config(
     // Start from the platform roots so websocket callers keep the same baseline trust behavior
     // they would get from tungstenite's default rustls connector, then layer in the Codex custom
     // CA bundle on top when configured.
-    let mut root_store = RootCertStore::empty();
+    let mut root_store = (*crate::http::native_roots::load()).clone();
     // TRUEOS cannot rely on a Unix CA certificate directory. Match reqwest's
-    // bundled Mozilla trust roots while retaining native and custom roots below.
+    // bundled Mozilla trust roots while retaining native and custom roots.
     #[cfg(target_os = "trueos")]
     add_bundled_webpki_roots(&mut root_store);
-    let rustls_native_certs::CertificateResult { certs, errors, .. } =
-        rustls_native_certs::load_native_certs();
-    if !errors.is_empty() {
-        warn!(
-            native_root_error_count = errors.len(),
-            "encountered errors while loading native root certificates"
-        );
-    }
-    let (_native_parsed_root_count, _) = root_store.add_parsable_certificates(certs);
     #[cfg(target_os = "trueos")]
     tracing::info!(
-        native_parsed_root_count = _native_parsed_root_count,
         bundled_root_count = webpki_roots::TLS_SERVER_ROOTS.len(),
         "configured TRUEOS websocket trust roots"
     );

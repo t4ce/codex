@@ -55,6 +55,9 @@ wildmatch = { workspace = true }
 landlock = { workspace = true }
 seccompiler = { workspace = true }
 
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = { workspace = true }
+
 [dev-dependencies]
 reqwest = { workspace = true }
 anyhow = { workspace = true }

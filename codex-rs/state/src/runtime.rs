@@ -19,6 +19,7 @@ use crate::model::datetime_to_epoch_millis;
 use crate::model::datetime_to_epoch_seconds;
 use crate::model::epoch_millis_to_datetime;
 use crate::paths::file_modified_time_utc;
+use crate::sqlite::SqliteWriteQueryExt;
 use crate::telemetry::DbKind;
 use crate::telemetry::DbTelemetry;
 use chrono::DateTime;
@@ -151,7 +152,9 @@ impl StateRuntime {
         let goals_path = sqlite.goals_db_path();
         let memories_path = sqlite.memories_db_path();
         let queue_path = sqlite.queue_db_path();
-        let has_memories_v2 = sqlite.database_exists(&sqlite.memories_v2_db_path()).await?;
+        let has_memories_v2 = sqlite
+            .database_exists(&sqlite.memories_v2_db_path())
+            .await?;
         let pool = match sqlite
             .open_state_db(&state_migrator, telemetry_override)
             .await
@@ -395,7 +398,7 @@ ON CONFLICT(id) DO NOTHING
     .bind(1_i64)
     .bind(crate::BackfillStatus::Pending.as_str())
     .bind(Utc::now().timestamp())
-    .execute(pool)
+    .execute_with_busy_retry(pool)
     .await?;
     Ok(())
 }
