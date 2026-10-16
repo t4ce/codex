@@ -61,30 +61,6 @@ pub(super) struct FreshStartupDefaults {
     pub(super) prompt_windows_sandbox: bool,
 }
 
-// Temporary TRUEOS bring-up probe. The normal initial-message path displays
-// this user turn and submits it once the new session is configured.
-pub(super) fn trueos_diagnostic_initial_prompt(
-    selection: &SessionSelection,
-    authenticated: bool,
-    initial_prompt: Option<String>,
-    has_initial_images: bool,
-    for_trueos: bool,
-) -> Option<String> {
-    if for_trueos
-        && matches!(selection, SessionSelection::StartFresh)
-        && authenticated
-        && initial_prompt.is_none()
-        && !has_initial_images
-    {
-        Some(
-            "Run exactly `gri` through native Shell3 to open Gridpaper in UI4. Use the execution tool and report its actual result."
-                .to_owned(),
-        )
-    } else {
-        initial_prompt
-    }
-}
-
 pub(super) async fn prepare_fresh_startup_config(
     config: &mut Config,
     app_server: &AppServerSession,
@@ -508,7 +484,6 @@ impl App {
         );
         let feedback_audience = bootstrap.feedback_audience;
         let auth_mode = bootstrap.auth_mode;
-        let authenticated_for_diagnostic_prompt = auth_mode.is_some();
         let has_chatgpt_account = bootstrap.has_chatgpt_account;
         let has_codex_backend_auth = matches!(auth_mode, Some(TelemetryAuthMode::Chatgpt));
         let requires_openai_auth = bootstrap.requires_openai_auth;
@@ -559,13 +534,6 @@ impl App {
             matches!(&session_selection, SessionSelection::AgentsOverview);
         let mut read_only_thread = false;
         let mut history_notice = None;
-        let fresh_initial_prompt = trueos_diagnostic_initial_prompt(
-            &session_selection,
-            authenticated_for_diagnostic_prompt,
-            initial_prompt.clone(),
-            !initial_images.is_empty(),
-            cfg!(target_os = "trueos"),
-        );
         let (mut chat_widget, initial_started_thread) = match session_selection {
             SessionSelection::StartFresh
             | SessionSelection::Exit
@@ -606,7 +574,7 @@ impl App {
                     app_event_tx: app_event_tx.clone(),
                     workspace_command_runner: Some(workspace_command_runner.clone()),
                     initial_user_message: crate::chatwidget::create_initial_user_message(
-                        fresh_initial_prompt,
+                        initial_prompt.clone(),
                         initial_images.clone(),
                         // CLI prompt args are plain strings, so they don't provide element ranges.
                         Vec::new(),

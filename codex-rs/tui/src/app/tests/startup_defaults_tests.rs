@@ -3,51 +3,8 @@
 use super::*;
 use crate::app::startup::prepare_fresh_startup_config;
 use crate::app::startup::startup_model;
-use crate::app::startup::trueos_diagnostic_initial_prompt;
 use crate::app::startup_bootstrap::bootstrap_server_owned_start;
 use pretty_assertions::assert_eq;
-
-#[test]
-fn trueos_diagnostic_prompt_only_queues_for_authenticated_fresh_session() {
-    let fresh = SessionSelection::StartFresh;
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&fresh, true, None, false, true),
-        Some(
-            "Run exactly `gri` through native Shell3 to open Gridpaper in UI4. Use the execution tool and report its actual result."
-                .into()
-        )
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&fresh, false, None, false, true),
-        None
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&fresh, true, None, true, true),
-        None
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&fresh, true, None, false, false),
-        None
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&fresh, true, Some("my prompt".into()), false, true),
-        Some("my prompt".into())
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(&SessionSelection::Exit, true, None, false, true),
-        None
-    );
-    assert_eq!(
-        trueos_diagnostic_initial_prompt(
-            &SessionSelection::AgentsOverview,
-            true,
-            None,
-            false,
-            true,
-        ),
-        None
-    );
-}
 
 fn remote_target() -> AppServerTarget {
     AppServerTarget::Remote {
