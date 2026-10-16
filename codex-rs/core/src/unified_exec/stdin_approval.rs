@@ -194,7 +194,7 @@ impl ProcessEntry {
         strict_auto_review: bool,
     ) -> Result<Option<(ApprovalAction, String)>, UnifiedExecError> {
         if input.is_empty()
-            || (!self.tty && input == "\u{3}")
+            || (!self.process.stdin_open() && input == "\u{3}")
             || !context
                 .session
                 .features()

@@ -93,7 +93,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
             "Native Shell3 input/script for local execution. Tab changes mode; § selects a Matrix slot. The final line is submitted with Enter. No bash interpretation. Remote environments use their reported command language.".into(),
         )));
         properties.insert("tty".into(), JsonSchema::boolean(Some(
-            "True requests terminal geometry for the Shell3 session; both modes capture its console output.".into(),
+            "True requests terminal geometry for the local Shell3 session; both modes capture console output and keep input open for write_stdin. Remote environments retain their own stdin policy.".into(),
         )));
         if !include_environment_id {
             for key in ["shell", "login", "workdir"] {
@@ -108,7 +108,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     ToolSpec::Function(ResponsesApiTool {
         name: "exec_command".to_string(),
         description: if cfg!(target_os = "trueos") {
-            "Submits native input to a dedicated local Shell3 session, returning output and a session ID. Use write_stdin for further input. A prompt does not end the session; `exit` returns to completion when entered at Shell3. Remote environments retain their own shell semantics.".into()
+            "Submits native input to a dedicated local Shell3 session, returning output and a session ID. Use write_stdin for further input. A prompt does not end the session. At the Shell3 prompt, `exit` closes that shell session; it does not free an unrelated selected app slot. Use the native `§<slot>§` operator to free a named Matrix slot and retire its attachments. Remote environments retain their own shell semantics.".into()
         } else if include_windows_shell_guidance {
             format!(
                 "Runs a command in a PTY, returning output or a session ID for ongoing interaction.\n\n{}",

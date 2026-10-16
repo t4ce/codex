@@ -265,7 +265,6 @@ struct PreparedProcessHandles {
     call_id: String,
     hook_command: String,
     process_id: i32,
-    tty: bool,
 }
 
 struct InitialExecCommandGuard {
@@ -974,7 +973,6 @@ impl UnifiedExecProcessManager {
             call_id,
             hook_command,
             process_id,
-            tty,
             ..
         } = self
             .prepare_process_handles(process_id, &locked_process)
@@ -982,7 +980,7 @@ impl UnifiedExecProcessManager {
         let mut status_after_write = None;
 
         if !request.input.is_empty() {
-            if !tty {
+            if !process.stdin_open() {
                 if request.input == INTERRUPT {
                     process.interrupt().await?;
                 } else {
@@ -1182,7 +1180,6 @@ impl UnifiedExecProcessManager {
             call_id: entry.call_id.clone(),
             hook_command: entry.hook_command.clone(),
             process_id: entry.process_id,
-            tty: entry.tty,
         })
     }
 
@@ -1329,14 +1326,16 @@ impl UnifiedExecProcessManager {
                     "Shell3 accepts one native launch script, without a Unix argv wrapper".into(),
                 ));
             };
+            // Shell3 accepts keyboard input independently of terminal formatting.
+            let stdin_open = true;
             let spawned = codex_utils_pty::spawn_shell3_script(
                 script,
                 tty.then_some(codex_utils_pty::TerminalSize::default()),
-                true,
+                stdin_open,
             )
             .await
             .map_err(|error| UnifiedExecError::create_process(error.to_string()))?;
-            return UnifiedExecProcess::from_spawned(spawned, request.sandbox).await;
+            return UnifiedExecProcess::from_spawned(spawned, request.sandbox, stdin_open).await;
         }
         if environment.is_remote() || request.exec_server_shell_snapshot.is_some() {
             let backend = environment.get_exec_backend();
@@ -1356,6 +1355,7 @@ impl UnifiedExecProcessManager {
                 unified_exec_process_id = process_id,
                 process.id = params.process_id.as_str(),
             );
+            let stdin_open = params.tty || params.pipe_stdin;
             let started = match network_policy_decider {
                 Some(decider) => {
                     backend
@@ -1370,8 +1370,12 @@ impl UnifiedExecProcessManager {
             } else {
                 OutputDrainPolicy::BoundedAfterExit
             };
-            return UnifiedExecProcess::from_exec_server_started(started, output_drain_policy)
-                .await;
+            return UnifiedExecProcess::from_exec_server_started(
+                started,
+                output_drain_policy,
+                stdin_open,
+            )
+            .await;
         }
 
         // TODO(anp): Keep PathUri through the local PTY/process launch boundary.
@@ -1428,6 +1432,7 @@ impl UnifiedExecProcessManager {
             } else {
                 None
             };
+        let stdin_open = tty;
         let spawn_result = codex_sandboxing::spawn_process(codex_sandboxing::SpawnRequest {
             command: &request.command,
             cwd: native_cwd.as_path(),
@@ -1436,13 +1441,13 @@ impl UnifiedExecProcessManager {
             sandbox: request.sandbox,
             windows_sandbox,
             tty,
-            stdin_open: tty,
+            stdin_open,
             inherited_fds: codex_utils_pty::ChildFds::Inherited(&[]),
         })
         .await;
         let spawned =
             spawn_result.map_err(|err| UnifiedExecError::create_process(err.to_string()))?;
-        UnifiedExecProcess::from_spawned(spawned, request.sandbox).await
+        UnifiedExecProcess::from_spawned(spawned, request.sandbox, stdin_open).await
     }
 
     #[tracing::instrument(

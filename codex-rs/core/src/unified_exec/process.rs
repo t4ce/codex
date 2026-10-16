@@ -101,6 +101,8 @@ pub(crate) struct UnifiedExecProcess {
     state_rx: watch::Receiver<ProcessState>,
     output_task: Option<JoinHandle<()>>,
     sandbox_type: Option<SandboxType>,
+    // Input capability is independent of terminal formatting (for example Shell3).
+    stdin_open: bool,
     timed_out: AtomicBool,
     // The shell may still need to replay this file after process startup returns.
     pub(crate) _shell_snapshot: Option<Arc<ShellSnapshotFile>>,
@@ -117,7 +119,11 @@ impl std::fmt::Debug for UnifiedExecProcess {
 }
 
 impl UnifiedExecProcess {
-    fn new(process_handle: ProcessHandle, sandbox_type: Option<SandboxType>) -> Self {
+    fn new(
+        process_handle: ProcessHandle,
+        sandbox_type: Option<SandboxType>,
+        stdin_open: bool,
+    ) -> Self {
         let output = OutputHandles {
             output_buffer: Arc::new(Mutex::new(OutputBuffers::default())),
             output_notify: Arc::new(Notify::new()),
@@ -139,9 +145,14 @@ impl UnifiedExecProcess {
             state_rx,
             output_task: None,
             sandbox_type,
+            stdin_open,
             timed_out: AtomicBool::new(false),
             _shell_snapshot: None,
         }
+    }
+
+    pub(super) fn stdin_open(&self) -> bool {
+        self.stdin_open
     }
 
     pub(super) async fn write(&self, data: &[u8]) -> Result<(), UnifiedExecError> {
@@ -340,6 +351,7 @@ impl UnifiedExecProcess {
     pub(super) async fn from_spawned(
         spawned: SpawnedPty,
         sandbox_type: SandboxType,
+        stdin_open: bool,
     ) -> Result<Self, UnifiedExecError> {
         let SpawnedPty {
             session: process_handle,
@@ -351,6 +363,7 @@ impl UnifiedExecProcess {
         let mut managed = Self::new(
             ProcessHandle::Local(Box::new(process_handle)),
             Some(sandbox_type),
+            stdin_open,
         );
         managed.output_task = Some(Self::spawn_local_output_task(
             output_rx,
@@ -395,12 +408,13 @@ impl UnifiedExecProcess {
     pub(super) async fn from_exec_server_started(
         started: StartedExecProcess,
         output_drain_policy: OutputDrainPolicy,
+        stdin_open: bool,
     ) -> Result<Self, UnifiedExecError> {
         let process_handle = ProcessHandle::ExecServer(Arc::clone(&started.process));
         // Older peers do not report this field. In that case, skip local
         // classification rather than attributing a violation to a guessed backend.
         let sandbox_type = started.sandbox_type;
-        let mut managed = Self::new(process_handle, sandbox_type);
+        let mut managed = Self::new(process_handle, sandbox_type, stdin_open);
         let output_handles = managed.output_handles().clone();
         managed.output_task = Some(Self::spawn_exec_server_output_task(
             started,

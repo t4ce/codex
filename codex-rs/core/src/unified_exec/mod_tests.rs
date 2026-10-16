@@ -303,6 +303,7 @@ async fn blocking_terminate_unified_process(
                 sandbox_type: Some(codex_sandboxing::SandboxType::None),
             },
             OutputDrainPolicy::WaitForOutputClosure,
+            /*stdin_open*/ true,
         )
         .await?,
     ))
@@ -1053,5 +1054,107 @@ async fn stdin_approval_observes_strict_review_enabled_while_queued() -> anyhow:
             if reason.contains("NUL byte")
     ));
     assert!(session.terminate_background_terminal(process_id).await);
+    Ok(())
+}
+
+#[test_case::test_case(true; "writable_input_without_terminal")]
+#[test_case::test_case(false; "closed_input_stays_closed")]
+#[tokio::test]
+async fn retained_session_uses_actual_stdin_capability(stdin_open: bool) -> anyhow::Result<()> {
+    let (session, turn, _events) =
+        crate::session::tests::make_session_and_context_with_auth_and_config_and_rx(
+            codex_login::CodexAuth::from_api_key("Test API Key"),
+            Vec::new(),
+            |config| {
+                config
+                    .features
+                    .enable(codex_features::Feature::WriteStdinApproval)
+                    .unwrap();
+            },
+        )
+        .await;
+    let manager = &session.services.unified_exec_manager;
+    let process_id = manager.allocate_process_id().await;
+    // A driver may expose keyboard input without PTY geometry, as native Shell3 does.
+    let (writer_tx, mut writer_rx) = tokio::sync::mpsc::channel(4);
+    let (_stdout_tx, stdout_rx) = tokio::sync::broadcast::channel(4);
+    let (_exit_tx, exit_rx) = tokio::sync::oneshot::channel();
+    let spawned = codex_utils_pty::spawn_from_driver(codex_utils_pty::ProcessDriver {
+        writer_tx,
+        stdout_rx,
+        stderr_rx: None,
+        exit_rx,
+        terminator: None,
+        writer_handle: None,
+        resizer: None,
+        #[cfg(windows)]
+        tty: false,
+    });
+    let process =
+        Arc::new(UnifiedExecProcess::from_spawned(spawned, SandboxType::None, stdin_open).await?);
+    #[allow(deprecated)]
+    let cwd = turn.cwd.clone();
+    manager.process_store.lock().await.processes.insert(
+        process_id,
+        ProcessEntry {
+            process: Arc::clone(&process),
+            plugin_metrics_sidecar: None,
+            call_id: "capability-test".to_string(),
+            process_id,
+            cwd: cwd.into(),
+            initial_exec_command_active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            hook_command: "status".to_string(),
+            tty: false,
+            environment_id: codex_exec_server::LOCAL_ENVIRONMENT_ID.to_string(),
+            permissions: TerminalPermissions::for_launch(
+                turn.initial_environments
+                    .primary()
+                    .expect("turn environment"),
+                &turn,
+                TerminalSandboxSource::Native,
+                SandboxPermissions::UseDefault,
+                /*additional_permissions*/ None,
+                /*internal_permissions*/ None,
+            ),
+            network_approval: None,
+            session: Arc::downgrade(&session),
+            last_used: Instant::now(),
+        },
+    );
+    // Closed input uses a process signal for Ctrl-C. Writable non-TTY input sends
+    // the byte to the application, so strict review must still cover that input.
+    let context = UnifiedExecContext::new(
+        Arc::clone(&session),
+        crate::session::step_context::StepContext::for_test(Arc::clone(&turn)),
+        tokio_util::sync::CancellationToken::new(),
+        "capability-review".to_string(),
+    );
+    let approval = manager
+        .process_store
+        .lock()
+        .await
+        .processes
+        .get(&process_id)
+        .unwrap()
+        .stdin_approval(&context, "\u{3}", /*strict_auto_review*/ true)?;
+    assert_eq!(approval.is_some(), stdin_open);
+    // Polling and separate writes must retain the same session and input capability.
+    let polled = write_stdin(&session, &turn, process_id, "", 1).await?;
+    assert_eq!(polled.process_id, Some(process_id));
+    for input in ["status\n", "exit\n"] {
+        let written = write_stdin(&session, &turn, process_id, input, 1).await;
+        if stdin_open {
+            assert_eq!(written?.process_id, Some(process_id));
+            assert_eq!(writer_rx.recv().await, Some(input.as_bytes().to_vec()));
+        } else {
+            assert!(matches!(written, Err(UnifiedExecError::StdinClosed)));
+            assert!(matches!(
+                writer_rx.try_recv(),
+                Err(tokio::sync::mpsc::error::TryRecvError::Empty)
+            ));
+        }
+    }
+    manager.release_process_id(process_id).await;
+    process.terminate();
     Ok(())
 }

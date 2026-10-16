@@ -9,6 +9,7 @@ struct Observed {
     script: String,
     input: Vec<u8>,
     geometry: Option<Geometry>,
+    stdin_open: bool,
     signals: Vec<Signal>,
     stdin_closed: usize,
     closed: usize,
@@ -25,6 +26,7 @@ impl Backend for FakeBackend {
         let mut observed = self.0.lock().unwrap();
         observed.script = launch.script;
         observed.geometry = launch.terminal;
+        observed.stdin_open = launch.stdin_open;
         drop(observed);
         Ok(Box::new(FakeTransport {
             observed: Arc::clone(&self.0),
@@ -180,4 +182,75 @@ async fn rejected_script_does_not_allocate_a_session() {
 async fn missing_backend_is_an_explicit_error() {
     let error = spawn_script("\tstatus", None, false).await.unwrap_err();
     assert!(error.to_string().contains("not installed"));
+}
+
+#[tokio::test]
+async fn native_input_survives_separate_writes_without_terminal_geometry() {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        let observed = Arc::new(Mutex::new(Observed::default()));
+        let backend = FakeBackend(Arc::clone(&observed));
+        let spawned = spawn_with_backend(&backend, "status", None, true)
+            .await
+            .unwrap();
+        assert_eq!(observed.lock().unwrap().geometry, None);
+        assert!(observed.lock().unwrap().stdin_open);
+        for input in [b"status\n".as_slice(), b"exit\n".as_slice()] {
+            // Per-call senders go away after yielding; the retained session owns input.
+            spawned
+                .session
+                .writer_sender()
+                .send(input.to_vec())
+                .await
+                .unwrap();
+            tokio::time::sleep(Duration::from_millis(50)).await;
+            assert_eq!(observed.lock().unwrap().stdin_closed, 0);
+        }
+        assert_eq!(observed.lock().unwrap().input, b"status\nexit\n");
+        spawned.session.close_stdin();
+        loop {
+            if observed.lock().unwrap().stdin_closed == 1 {
+                break;
+            }
+            tokio::task::yield_now().await;
+        }
+        assert!(
+            spawned
+                .session
+                .writer_sender()
+                .send(b"later".to_vec())
+                .await
+                .is_err()
+        );
+        assert!(observed.lock().unwrap().signals.is_empty());
+        observed.lock().unwrap().finish = true;
+        assert_eq!(spawned.exit_rx.await.unwrap(), 7);
+        drop(spawned.session);
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
+async fn native_closed_stdin_rejects_writes_without_terminating_session() {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        let observed = Arc::new(Mutex::new(Observed::default()));
+        let backend = FakeBackend(Arc::clone(&observed));
+        let spawned = spawn_with_backend(&backend, "status", None, false)
+            .await
+            .unwrap();
+        assert!(!observed.lock().unwrap().stdin_open);
+        assert_eq!(observed.lock().unwrap().stdin_closed, 1);
+        let writer = spawned.session.writer_sender();
+        while !writer.is_closed() {
+            tokio::task::yield_now().await;
+        }
+        assert!(writer.send(b"later".to_vec()).await.is_err());
+        assert!(observed.lock().unwrap().signals.is_empty());
+        assert!(observed.lock().unwrap().input.is_empty());
+        observed.lock().unwrap().finish = true;
+        assert_eq!(spawned.exit_rx.await.unwrap(), 7);
+        drop(spawned.session);
+    })
+    .await
+    .unwrap();
 }

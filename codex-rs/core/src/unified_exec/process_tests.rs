@@ -105,9 +105,13 @@ pub(super) async fn remote_process(
         sandbox_type: sandbox_type.into(),
     };
 
-    UnifiedExecProcess::from_exec_server_started(started, OutputDrainPolicy::WaitForOutputClosure)
-        .await
-        .expect("remote process should start")
+    UnifiedExecProcess::from_exec_server_started(
+        started,
+        OutputDrainPolicy::WaitForOutputClosure,
+        /*stdin_open*/ true,
+    )
+    .await
+    .expect("remote process should start")
 }
 
 #[tokio::test]
