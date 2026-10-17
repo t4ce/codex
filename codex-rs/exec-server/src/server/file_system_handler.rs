@@ -207,6 +207,8 @@ impl FileSystemHandler {
                 &params.path,
                 bytes,
                 WriteFileOptions {
+                    create_new: params.create_new.unwrap_or(false),
+                    expected_sha256: params.expected_sha256,
                     follow_symlinks: params.follow_symlinks.unwrap_or(true),
                 },
                 params.sandbox.as_ref(),
@@ -251,6 +253,7 @@ impl FileSystemHandler {
             .await
             .map_err(map_fs_error)?;
         Ok(FsGetMetadataResponse {
+            content_type: metadata.content_type,
             is_directory: metadata.is_directory,
             is_file: metadata.is_file,
             is_symlink: metadata.is_symlink,
@@ -411,6 +414,8 @@ mod tests {
 
             handler
                 .write_file(FsWriteFileParams {
+                    create_new: None,
+                    expected_sha256: None,
                     path: path.clone(),
                     follow_symlinks: None,
                     data_base64: STANDARD.encode("ok"),

@@ -72,12 +72,18 @@ impl Default for ReadFileOptions {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct WriteFileOptions {
     pub follow_symlinks: bool,
+    /// Atomically fail if the destination already exists.
+    pub create_new: bool,
+    /// Replace only when the current bytes have this SHA-256. Unsupported backends fail closed.
+    pub expected_sha256: Option<[u8; 32]>,
 }
 
 impl Default for WriteFileOptions {
     fn default() -> Self {
         Self {
             follow_symlinks: true,
+            create_new: false,
+            expected_sha256: None,
         }
     }
 }
@@ -115,6 +121,8 @@ pub struct CopyOptions {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct FileMetadata {
+    /// Stored native content identity, when exposed by the backend; never inferred from a filename.
+    pub content_type: Option<u32>,
     pub is_directory: bool,
     pub is_file: bool,
     pub is_symlink: bool,

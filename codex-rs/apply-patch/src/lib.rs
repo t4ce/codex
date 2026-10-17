@@ -659,7 +659,11 @@ async fn apply_hunks_to_files(
                         fs.write_file(
                             &path_uri,
                             new_contents.clone().into_bytes(),
-                            WriteFileOptions { follow_symlinks },
+                            WriteFileOptions {
+                                create_new: false,
+                                expected_sha256: None,
+                                follow_symlinks
+                            },
                             sandbox,
                         )
                         .await
@@ -773,7 +777,11 @@ async fn write_file_with_missing_parent_retry(
         .write_file(
             path,
             contents.clone(),
-            WriteFileOptions { follow_symlinks },
+            WriteFileOptions {
+                create_new: false,
+                expected_sha256: None,
+                follow_symlinks,
+            },
             sandbox,
         )
         .await
@@ -800,7 +808,11 @@ async fn write_file_with_missing_parent_retry(
             fs.write_file(
                 path,
                 contents,
-                WriteFileOptions { follow_symlinks },
+                WriteFileOptions {
+                    create_new: false,
+                    expected_sha256: None,
+                    follow_symlinks,
+                },
                 sandbox,
             )
             .await

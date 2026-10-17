@@ -188,6 +188,8 @@ impl SandboxedFileSystem {
         self.run_sandboxed(
             sandbox,
             FsHelperRequest::WriteFile(FsWriteFileParams {
+                create_new: options.create_new.then_some(true),
+                expected_sha256: options.expected_sha256,
                 path: path.clone(),
                 data_base64: STANDARD.encode(contents),
                 follow_symlinks: (!options.follow_symlinks).then_some(false),
@@ -244,6 +246,7 @@ impl SandboxedFileSystem {
             .expect_get_metadata()
             .map_err(map_sandbox_error)?;
         Ok(FileMetadata {
+            content_type: response.content_type,
             is_directory: response.is_directory,
             is_file: response.is_file,
             is_symlink: response.is_symlink,

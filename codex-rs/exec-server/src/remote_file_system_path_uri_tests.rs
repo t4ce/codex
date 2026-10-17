@@ -393,6 +393,7 @@ async fn concurrent_remote_metadata_requests_share_only_in_flight_results() {
         file_system.get_metadata(&path, Default::default(), /*sandbox*/ None),
     );
     let expected = FileMetadata {
+        content_type: None,
         is_directory: false,
         is_file: true,
         is_symlink: false,
@@ -783,6 +784,7 @@ enum MetadataResponse {
 
 fn metadata_response(size: u64) -> FsGetMetadataResponse {
     FsGetMetadataResponse {
+        content_type: None,
         is_directory: false,
         is_file: true,
         is_symlink: false,

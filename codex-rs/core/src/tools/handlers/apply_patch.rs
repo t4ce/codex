@@ -223,7 +223,7 @@ fn file_paths_for_action(action: &ApplyPatchAction) -> Vec<PathUri> {
     keys
 }
 
-fn write_permissions_for_paths(
+pub(super) fn write_permissions_for_paths(
     file_paths: &[PathUri],
     matching: &PatchPolicyMatcher<'_>,
 ) -> io::Result<Option<AdditionalPermissionProfile>> {

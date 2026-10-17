@@ -2792,6 +2792,8 @@ mod tests {
             PathUri::parse("file:///tmp")?,
         );
         let expected_write = WireFsWriteFileParams::from(FsWriteFileParams {
+            create_new: None,
+            expected_sha256: None,
             path: read_open.path.clone(),
             data_base64: "AP9oaQ==".to_string(),
             follow_symlinks: None,

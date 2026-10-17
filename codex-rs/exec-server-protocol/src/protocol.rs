@@ -291,7 +291,7 @@ impl EnvironmentInfo {
                 environment_config_read: true,
                 http_header_env_vars: true,
                 sandboxed_file_streaming: true,
-                file_write_streaming: true,
+                file_write_streaming: !cfg!(target_os = "trueos"),
                 shell_snapshot_v2: cfg!(unix),
                 windows_mxc,
                 linux_root_write_preserves_devices: cfg!(target_os = "linux"),
@@ -671,6 +671,10 @@ pub struct FsWriteFileParams {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub follow_symlinks: Option<bool>,
     pub sandbox: Option<FileSystemSandboxContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub create_new: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_sha256: Option<[u8; 32]>,
 }
 
 /// Filesystem RPC wire request with legacy optional sandbox policy cwd.
@@ -682,6 +686,10 @@ pub struct WireFsWriteFileParams {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     follow_symlinks: Option<bool>,
     sandbox: Option<WireFileSystemSandboxContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    create_new: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    expected_sha256: Option<[u8; 32]>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -741,6 +749,8 @@ pub struct FsGetMetadataResponse {
     pub size: u64,
     pub created_at_ms: i64,
     pub modified_at_ms: i64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_type: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -924,7 +934,7 @@ macro_rules! impl_wire_filesystem_request {
 impl_wire_filesystem_request! {
     WireFsReadFileParams => FsReadFileParams { path, follow_symlinks },
     WireFsOpenParams => FsOpenParams { handle_id, path, mode },
-    WireFsWriteFileParams => FsWriteFileParams { path, data_base64, follow_symlinks },
+    WireFsWriteFileParams => FsWriteFileParams { path, data_base64, follow_symlinks, create_new, expected_sha256 },
     WireFsCreateDirectoryParams => FsCreateDirectoryParams { path, recursive, follow_symlinks },
     WireFsGetMetadataParams => FsGetMetadataParams { path, follow_symlinks },
     WireFsCanonicalizeParams => FsCanonicalizeParams { path },
@@ -2026,5 +2036,34 @@ mod tests {
             (unknown.sandbox_type, unsandboxed.sandbox_type),
             (None, Some(ProcessSandboxType::None))
         );
+    }
+}
+
+#[cfg(test)]
+mod checked_file_protocol_tests {
+    #[test]
+    fn checked_writes_and_native_metadata_are_backward_compatible() -> serde_json::Result<()> {
+        let legacy: super::FsWriteFileParams = serde_json::from_value(serde_json::json!({
+            "path": "file:///tmp/file.rs", "dataBase64": "", "sandbox": null
+        }))?;
+        assert_eq!(legacy.create_new, None);
+        assert_eq!(legacy.expected_sha256, None);
+        let checked = super::FsWriteFileParams {
+            create_new: Some(false),
+            expected_sha256: Some([7; 32]),
+            ..legacy
+        };
+        let wire = super::WireFsWriteFileParams::from(checked.clone());
+        let value = serde_json::to_value(wire)?;
+        assert_eq!(value["expectedSha256"], serde_json::json!(vec![7; 32]));
+        let restored: super::FsWriteFileParams = serde_json::from_value(value)?;
+        assert_eq!(restored, checked);
+        let legacy_metadata: super::FsGetMetadataResponse =
+            serde_json::from_value(serde_json::json!({
+                "isDirectory": false, "isFile": true, "isSymlink": false,
+                "size": 0, "createdAtMs": 0, "modifiedAtMs": 0
+            }))?;
+        assert_eq!(legacy_metadata.content_type, None);
+        Ok(())
     }
 }

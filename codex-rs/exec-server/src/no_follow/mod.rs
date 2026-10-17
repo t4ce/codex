@@ -20,8 +20,8 @@ pub(crate) fn open_file(path: &Path) -> io::Result<std::fs::File> {
     imp::open_file_sync(path)
 }
 
-pub(crate) async fn write_file(path: &Path, contents: Vec<u8>) -> io::Result<()> {
-    imp::write_file(path.to_path_buf(), contents).await
+pub(crate) async fn write_file(path: &Path, contents: Vec<u8>, create_new: bool) -> io::Result<()> {
+    imp::write_file(path.to_path_buf(), contents, create_new).await
 }
 
 #[cfg(unix)]
@@ -34,6 +34,7 @@ pub(crate) async fn metadata(path: &Path) -> io::Result<FileMetadata> {
     imp::metadata(path.to_path_buf())
         .await
         .map(|metadata| FileMetadata {
+            content_type: None,
             is_directory: metadata.is_dir(),
             is_file: metadata.is_file(),
             is_symlink: false,

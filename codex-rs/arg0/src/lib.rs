@@ -1,5 +1,8 @@
 pub mod startup_timing;
 
+#[cfg(test)]
+mod runtime_tests;
+
 use std::ffi::OsString;
 use std::fs::File;
 use std::future::Future;
@@ -271,9 +274,22 @@ fn linux_sandbox_exe_path(
 }
 
 fn build_runtime() -> anyhow::Result<tokio::runtime::Runtime> {
+    build_runtime_for_platform(cfg!(target_os = "trueos"))
+}
+
+const TRUEOS_MAX_BLOCKING_THREADS: usize = 8;
+
+fn build_runtime_for_platform(trueos: bool) -> anyhow::Result<tokio::runtime::Runtime> {
     let mut builder = tokio::runtime::Builder::new_multi_thread();
     builder.enable_all();
     builder.thread_stack_size(THREAD_STACK_SIZE_BYTES);
+    if trueos {
+        // TRUEOS eagerly backs each 16 MiB stack from the Blueprint's heap.
+        // Tokio's default of 512 blocking workers can exhaust the 1 GiB
+        // Codex guest during filesystem/plugin fanout. Queue excess work
+        // while leaving room for the executable, async workers and data.
+        builder.max_blocking_threads(TRUEOS_MAX_BLOCKING_THREADS);
+    }
     Ok(builder.build()?)
 }
 

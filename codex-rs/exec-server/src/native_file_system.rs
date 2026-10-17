@@ -111,7 +111,13 @@ pub(crate) async fn run(
 
 fn validate(sandbox: &FileSystemSandboxContext, request: &FsHelperRequest) -> io::Result<()> {
     match request {
-        FsHelperRequest::WriteFile(params) => check_path(sandbox, &params.path, true),
+        FsHelperRequest::WriteFile(params) => {
+            check_path(sandbox, &params.path, true)?;
+            if params.expected_sha256.is_some() {
+                check_path(sandbox, &params.path, false)?;
+            }
+            Ok(())
+        }
         FsHelperRequest::CreateDirectory(params) => check_directory_creation(sandbox, &params.path),
         FsHelperRequest::ReadFile(params) => check_path(sandbox, &params.path, false),
         FsHelperRequest::GetMetadata(params) => check_path(sandbox, &params.path, false),

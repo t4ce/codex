@@ -322,6 +322,8 @@ pub(crate) async fn run_direct_request(
                     &params.path,
                     bytes,
                     WriteFileOptions {
+                        create_new: params.create_new.unwrap_or(false),
+                        expected_sha256: params.expected_sha256,
                         follow_symlinks: params.follow_symlinks.unwrap_or(true),
                     },
                     /*sandbox*/ None,
@@ -358,6 +360,7 @@ pub(crate) async fn run_direct_request(
                 .await
                 .map_err(map_fs_error)?;
             Ok(FsHelperPayload::GetMetadata(FsGetMetadataResponse {
+                content_type: metadata.content_type,
                 is_directory: metadata.is_directory,
                 is_file: metadata.is_file,
                 is_symlink: metadata.is_symlink,
@@ -462,6 +465,8 @@ mod tests {
             let expected_path = path.to_string();
 
             let request = serde_json::to_value(FsHelperRequest::WriteFile(FsWriteFileParams {
+                create_new: None,
+                expected_sha256: None,
                 path: path.clone(),
                 data_base64: String::new(),
                 follow_symlinks: None,

@@ -113,7 +113,11 @@ pub(super) fn open_file_sync(path: &Path) -> io::Result<std::fs::File> {
     Ok(file)
 }
 
-pub(super) async fn write_file(path: PathBuf, contents: Vec<u8>) -> io::Result<()> {
+pub(super) async fn write_file(
+    path: PathBuf,
+    contents: Vec<u8>,
+    create_new: bool,
+) -> io::Result<()> {
     tokio::task::spawn_blocking(move || {
         let (parent, leaf) = parent(&path)?;
         // Prevent FIFOs and devices from blocking during open before the
@@ -121,7 +125,16 @@ pub(super) async fn write_file(path: PathBuf, contents: Vec<u8>) -> io::Result<(
         let file = openat(
             &parent,
             leaf,
-            OFlags::WRONLY | OFlags::CREATE | OFlags::NOFOLLOW | OFlags::NONBLOCK | OFlags::CLOEXEC,
+            OFlags::WRONLY
+                | OFlags::CREATE
+                | OFlags::NOFOLLOW
+                | OFlags::NONBLOCK
+                | OFlags::CLOEXEC
+                | if create_new {
+                    OFlags::EXCL
+                } else {
+                    OFlags::empty()
+                },
             Mode::from_raw_mode(0o666),
         )
         .map_err(io::Error::from)?;
@@ -201,6 +214,7 @@ fn file_metadata_linux(metadata: Statx) -> io::Result<FileMetadata> {
         unix_time_ms(metadata.stx_btime.tv_sec, metadata.stx_btime.tv_nsec)
     };
     Ok(FileMetadata {
+        content_type: None,
         is_directory: kind == libc::S_IFDIR,
         is_file: kind == libc::S_IFREG,
         is_symlink: false,
@@ -219,6 +233,7 @@ fn file_metadata(metadata: Stat, created_at_ms: i64) -> io::Result<FileMetadata>
         ));
     }
     Ok(FileMetadata {
+        content_type: None,
         is_directory: kind == libc::S_IFDIR,
         is_file: kind == libc::S_IFREG,
         is_symlink: false,

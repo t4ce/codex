@@ -130,6 +130,13 @@ impl LocalFileSystem {
         mode: FsOpenMode,
         sandbox: Option<&FileSystemSandboxContext>,
     ) -> FileSystemResult<tokio::fs::File> {
+        #[cfg(target_os = "trueos")]
+        if mode == FsOpenMode::Replace {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "TRUEOS streamed handles cannot declare a native content identity; use write_file",
+            ));
+        }
         if let Some(sandbox) = sandbox {
             sandbox.validate_file_system_paths_for_current_host()?;
             let needs_sandbox = match mode {
@@ -265,25 +272,51 @@ impl ExecutorFileSystem for LocalFileSystem {
         sandbox: Option<&'a FileSystemSandboxContext>,
     ) -> ExecutorFileSystemFuture<'a, u64> {
         Box::pin(async move {
-            let mut file = self.open_file(path, FsOpenMode::Replace, sandbox).await?;
-            let mut written = 0_u64;
-            while let Some(chunk) = contents.next().await {
-                let chunk = chunk?;
-                if !(1..=FILE_WRITE_CHUNK_SIZE).contains(&chunk.len()) {
-                    return Err(io::Error::new(
-                        io::ErrorKind::InvalidData,
-                        "invalid file stream block length",
-                    ));
+            #[cfg(target_os = "trueos")]
+            {
+                // A native typed upload declares its length and content identity up front.
+                // Buffer bounded input, then commit it through the same writer as apply_patch.
+                const MAX_NATIVE_STREAM_BYTES: usize = 64 * 1024 * 1024;
+                let mut bytes = Vec::new();
+                while let Some(chunk) = contents.next().await {
+                    let chunk = chunk?;
+                    if !(1..=FILE_WRITE_CHUNK_SIZE).contains(&chunk.len())
+                        || bytes.len().saturating_add(chunk.len()) > MAX_NATIVE_STREAM_BYTES
+                    {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidData,
+                            "invalid native file stream block or stream exceeds 64 MiB",
+                        ));
+                    }
+                    bytes.extend_from_slice(&chunk);
                 }
-                let next_offset = written.checked_add(chunk.len() as u64).ok_or_else(|| {
-                    io::Error::new(io::ErrorKind::InvalidData, "file stream offset overflow")
-                })?;
-                file.write_all(&chunk).await?;
-                // Tokio can return before its blocking write finishes; finish this block before reading another.
-                file.flush().await?;
-                written = next_offset;
+                let written = bytes.len() as u64;
+                self.write_file(path, bytes, WriteFileOptions::default(), sandbox)
+                    .await?;
+                return Ok(written);
             }
-            Ok(written)
+            #[cfg(not(target_os = "trueos"))]
+            {
+                let mut file = self.open_file(path, FsOpenMode::Replace, sandbox).await?;
+                let mut written = 0_u64;
+                while let Some(chunk) = contents.next().await {
+                    let chunk = chunk?;
+                    if !(1..=FILE_WRITE_CHUNK_SIZE).contains(&chunk.len()) {
+                        return Err(io::Error::new(
+                            io::ErrorKind::InvalidData,
+                            "invalid file stream block length",
+                        ));
+                    }
+                    let next_offset = written.checked_add(chunk.len() as u64).ok_or_else(|| {
+                        io::Error::new(io::ErrorKind::InvalidData, "file stream offset overflow")
+                    })?;
+                    file.write_all(&chunk).await?;
+                    // Tokio can return before its blocking write finishes; finish this block before reading another.
+                    file.flush().await?;
+                    written = next_offset;
+                }
+                Ok(written)
+            }
         })
     }
 
@@ -662,10 +695,38 @@ impl DirectFileSystem {
     ) -> FileSystemResult<()> {
         reject_sandbox_context(sandbox)?;
         let path = path.to_abs_path()?;
-        if options.follow_symlinks {
-            tokio::fs::write(path.as_path(), contents).await
-        } else {
-            no_follow::write_file(path.as_path(), contents).await
+        if options.create_new && options.expected_sha256.is_some() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "create_new and expected_sha256 cannot be combined",
+            ));
+        }
+        #[cfg(target_os = "trueos")]
+        {
+            return crate::typed_file_system::write_file(path.as_path(), &contents, options).await;
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            if options.expected_sha256.is_some() {
+                return Err(io::Error::new(
+                    io::ErrorKind::Unsupported,
+                    "this backend cannot atomically compare SHA-256 before replacing a file",
+                ));
+            }
+            if !options.follow_symlinks {
+                return no_follow::write_file(path.as_path(), contents, options.create_new).await;
+            }
+            if options.create_new {
+                let mut file = tokio::fs::OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(path.as_path())
+                    .await?;
+                file.write_all(&contents).await?;
+                file.flush().await
+            } else {
+                tokio::fs::write(path.as_path(), contents).await
+            }
         }
     }
 
@@ -696,17 +757,28 @@ impl DirectFileSystem {
     ) -> FileSystemResult<FileMetadata> {
         reject_sandbox_context(sandbox)?;
         let path = path.to_abs_path()?;
-        if !options.follow_symlinks {
-            return no_follow::metadata(path.as_path()).await;
+        #[cfg(target_os = "trueos")]
+        {
+            // TRUEOS has no link nodes, so both follow policies select this same native record.
+            let _ = options;
+            let mut metadata = file_metadata(tokio::fs::metadata(path.as_path()).await?, false);
+            metadata.content_type = crate::typed_file_system::content_type(path.as_path()).await?;
+            return Ok(metadata);
         }
-        let symlink_metadata = tokio::fs::symlink_metadata(path.as_path()).await?;
-        let is_symlink = symlink_metadata.is_symlink();
-        let metadata = if is_symlink {
-            tokio::fs::metadata(path.as_path()).await?
-        } else {
-            symlink_metadata
-        };
-        Ok(file_metadata(metadata, is_symlink))
+        #[cfg(not(target_os = "trueos"))]
+        {
+            if !options.follow_symlinks {
+                return no_follow::metadata(path.as_path()).await;
+            }
+            let symlink_metadata = tokio::fs::symlink_metadata(path.as_path()).await?;
+            let is_symlink = symlink_metadata.is_symlink();
+            let metadata = if is_symlink {
+                tokio::fs::metadata(path.as_path()).await?
+            } else {
+                symlink_metadata
+            };
+            Ok(file_metadata(metadata, is_symlink))
+        }
     }
 
     async fn read_directory(
@@ -1216,6 +1288,7 @@ metadata_view!(tokio::fs::Metadata);
 
 fn file_metadata(metadata: impl MetadataView, is_symlink: bool) -> FileMetadata {
     FileMetadata {
+        content_type: None,
         is_directory: metadata.is_dir(),
         is_file: metadata.is_file(),
         is_symlink,
@@ -1336,6 +1409,74 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
     use std::os::unix::fs::symlink;
+
+    #[cfg(not(target_os = "trueos"))]
+    #[tokio::test]
+    async fn create_only_writes_preserve_existing_bytes_for_both_link_policies() -> io::Result<()> {
+        let temp = tempfile::TempDir::new()?;
+        let file_system = LocalFileSystem::unsandboxed();
+        for follow_symlinks in [true, false] {
+            let path = PathUri::from_host_native_path(
+                temp.path().join(format!("draft-{follow_symlinks}.rs")),
+            )?;
+            let options = WriteFileOptions {
+                follow_symlinks,
+                create_new: true,
+                expected_sha256: None,
+            };
+            let original = b"fn unfinished(\r\n".to_vec();
+            file_system
+                .write_file(&path, original.clone(), options, None)
+                .await?;
+            let error = file_system
+                .write_file(&path, b"replacement".to_vec(), options, None)
+                .await
+                .expect_err("existing destination must reject create-only mutation");
+            assert_eq!(error.kind(), io::ErrorKind::AlreadyExists);
+            assert_eq!(
+                file_system
+                    .read_file(&path, ReadFileOptions::default(), None)
+                    .await?,
+                original
+            );
+        }
+        Ok(())
+    }
+
+    #[cfg(not(target_os = "trueos"))]
+    #[tokio::test]
+    async fn unsupported_atomic_digest_guard_never_changes_the_destination() -> io::Result<()> {
+        let temp = tempfile::TempDir::new()?;
+        let native_path = temp.path().join("index.html");
+        std::fs::write(&native_path, "original")?;
+        let path = PathUri::from_host_native_path(native_path.clone())?;
+        let file_system = LocalFileSystem::unsandboxed();
+        let options = WriteFileOptions {
+            expected_sha256: Some([0; 32]),
+            ..Default::default()
+        };
+        let error = file_system
+            .write_file(&path, b"replacement".to_vec(), options, None)
+            .await
+            .expect_err("unsupported compare-and-write must fail closed");
+        assert_eq!(error.kind(), io::ErrorKind::Unsupported);
+        assert_eq!(std::fs::read(&native_path)?, b"original");
+        let error = file_system
+            .write_file(
+                &path,
+                b"replacement".to_vec(),
+                WriteFileOptions {
+                    create_new: true,
+                    ..options
+                },
+                None,
+            )
+            .await
+            .expect_err("incompatible preconditions must fail before storage");
+        assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+        assert_eq!(std::fs::read(&native_path)?, b"original");
+        Ok(())
+    }
 
     #[test]
     fn resolve_existing_path_handles_symlink_parent_dotdot_escape() -> io::Result<()> {

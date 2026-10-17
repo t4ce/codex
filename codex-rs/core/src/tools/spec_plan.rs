@@ -19,6 +19,8 @@ use crate::tools::handlers::ListMcpResourceTemplatesHandler;
 use crate::tools::handlers::ListMcpResourcesHandler;
 use crate::tools::handlers::NewContextWindowHandler;
 use crate::tools::handlers::PlanHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::ReadFileHandler;
 use crate::tools::handlers::ReadMcpResourceHandler;
 use crate::tools::handlers::RequestPermissionsHandler;
 use crate::tools::handlers::RequestPluginInstallHandler;
@@ -30,6 +32,8 @@ use crate::tools::handlers::TestSyncHandler;
 use crate::tools::handlers::ToolSearchHandlerCache;
 use crate::tools::handlers::ViewImageHandler;
 use crate::tools::handlers::WaitForEnvironmentHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::WriteFileHandler;
 use crate::tools::handlers::WriteStdinHandler;
 use crate::tools::handlers::extension_tools::ExtensionToolAdapter;
 use crate::tools::handlers::multi_agents::CloseAgentHandler;
@@ -1403,6 +1407,13 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
             candidates.tools.clone(),
             candidates.presentation,
         ));
+    }
+
+    #[cfg(target_os = "trueos")]
+    {
+        let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
+        registry.add(ReadFileHandler::new(include_environment_id));
+        registry.add(WriteFileHandler::new(include_environment_id));
     }
 
     if context.model_info.apply_patch_tool_type.is_some() {

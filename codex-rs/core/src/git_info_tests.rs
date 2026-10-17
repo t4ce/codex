@@ -161,6 +161,7 @@ impl ExecutorFileSystem for MetadataOverrideFileSystem {
             if let Some(entry) = self.entry(path) {
                 let contents = entry?;
                 return Ok(FileMetadata {
+                    content_type: None,
                     is_directory: contents.is_none(),
                     is_file: contents.is_some(),
                     is_symlink: false,

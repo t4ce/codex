@@ -530,6 +530,7 @@ impl ExecutorFileSystem for TestFileSystem {
             let path = path.to_abs_path()?;
             let metadata = tokio::fs::symlink_metadata(path.as_path()).await?;
             Ok(FileMetadata {
+                content_type: None,
                 is_directory: metadata.is_dir(),
                 is_file: metadata.is_file(),
                 is_symlink: metadata.file_type().is_symlink(),

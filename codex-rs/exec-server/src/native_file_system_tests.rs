@@ -25,6 +25,8 @@ fn context(root: &std::path::Path) -> FileSystemSandboxContext {
 
 fn write(path: PathUri, data: &str) -> FsHelperRequest {
     FsHelperRequest::WriteFile(FsWriteFileParams {
+        create_new: None,
+        expected_sha256: None,
         path,
         data_base64: STANDARD.encode(data),
         follow_symlinks: Some(false),
@@ -181,4 +183,26 @@ fn native_adapter_rejects_foreign_paths_and_unchecked_recursive_mutation() {
         .is_err()
     );
     assert!(require_recursive_access(&sandbox, true).is_err());
+}
+
+#[tokio::test]
+async fn create_only_guard_survives_permission_adapter_and_helper_protocol() {
+    let temp = tempfile::tempdir().expect("workspace");
+    let sandbox = context(temp.path());
+    let path = uri(&temp.path().join("draft.rs"));
+    let create = |content: &str| {
+        let mut request = write(path.clone(), content);
+        if let FsHelperRequest::WriteFile(params) = &mut request {
+            params.create_new = Some(true);
+        }
+        request
+    };
+    run(&sandbox, create("fn unfinished("))
+        .await
+        .expect("first create-only write");
+    assert!(run(&sandbox, create("replacement")).await.is_err());
+    assert_eq!(
+        std::fs::read(temp.path().join("draft.rs")).expect("bytes"),
+        b"fn unfinished("
+    );
 }

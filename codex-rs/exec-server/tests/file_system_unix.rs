@@ -156,6 +156,8 @@ async fn file_system_operations_can_reject_symlinks_in_any_path_component(
         follow_symlinks: false,
     };
     let no_follow_write = WriteFileOptions {
+        create_new: false,
+        expected_sha256: None,
         follow_symlinks: false,
     };
     let no_follow_metadata = GetMetadataOptions {
@@ -389,6 +391,8 @@ async fn file_system_no_follow_operations_support_search_only_ancestors(
                 &uri(&existing)?,
                 b"after".to_vec(),
                 WriteFileOptions {
+                    create_new: false,
+                    expected_sha256: None,
                     follow_symlinks: false,
                 },
                 /*sandbox*/ None,
@@ -465,6 +469,8 @@ async fn file_system_no_follow_write_rejects_fifo_without_blocking(
             &PathUri::from_host_native_path(&fifo)?,
             b"must not be written".to_vec(),
             WriteFileOptions {
+                create_new: false,
+                expected_sha256: None,
                 follow_symlinks: false,
             },
             /*sandbox*/ None,
@@ -676,6 +682,7 @@ async fn file_system_metadata_and_directory_listing_follow_symlinks(
     assert_eq!(
         symlink_metadata,
         FileMetadata {
+            content_type: None,
             is_directory: false,
             is_file: true,
             is_symlink: true,
@@ -701,6 +708,7 @@ async fn file_system_metadata_and_directory_listing_follow_symlinks(
     assert_eq!(
         dir_symlink_metadata,
         FileMetadata {
+            content_type: None,
             is_directory: true,
             is_file: false,
             is_symlink: true,

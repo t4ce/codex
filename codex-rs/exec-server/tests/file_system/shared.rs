@@ -100,6 +100,7 @@ async fn file_system_get_metadata_reports_files_and_directories(
     assert_eq!(
         file_metadata,
         FileMetadata {
+            content_type: None,
             is_directory: false,
             is_file: true,
             is_symlink: false,
@@ -121,6 +122,7 @@ async fn file_system_get_metadata_reports_files_and_directories(
     assert_eq!(
         directory_metadata,
         FileMetadata {
+            content_type: None,
             is_directory: true,
             is_file: false,
             is_symlink: false,
@@ -197,7 +199,11 @@ async fn file_system_write_file_writes_bytes(
         .write_file(
             &PathUri::from_host_native_path(&file_path)?,
             b"hello from trait".to_vec(),
-            WriteFileOptions { follow_symlinks },
+            WriteFileOptions {
+                create_new: false,
+                expected_sha256: None,
+                follow_symlinks,
+            },
             sandbox.as_ref(),
         )
         .await;
@@ -214,7 +220,11 @@ async fn file_system_write_file_writes_bytes(
         .write_file(
             &PathUri::from_host_native_path(&file_path)?,
             b"after".to_vec(),
-            WriteFileOptions { follow_symlinks },
+            WriteFileOptions {
+                create_new: false,
+                expected_sha256: None,
+                follow_symlinks,
+            },
             sandbox.as_ref(),
         )
         .await
@@ -888,6 +898,7 @@ async fn file_system_sandboxed_metadata_and_read_allow_readable_root(
     assert_eq!(
         metadata,
         FileMetadata {
+            content_type: None,
             is_directory: false,
             is_file: true,
             is_symlink: false,
@@ -958,6 +969,7 @@ async fn file_system_full_disk_read_skips_sandbox_only_for_reads() -> Result<()>
     assert_eq!(
         metadata,
         FileMetadata {
+            content_type: None,
             is_directory: false,
             is_file: true,
             is_symlink: false,

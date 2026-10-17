@@ -76,6 +76,21 @@ pub fn assess_patch_safety(
         });
     }
 
+    assess_write_safety(
+        is_write_patch_constrained_to_writable_paths(action, matching)?,
+        policy,
+        permission_profile,
+        matching,
+    )
+}
+
+/// Share the mutation approval policy between patch edits and exact text writes.
+pub(crate) fn assess_write_safety(
+    constrained_to_writable_paths: bool,
+    policy: AskForApproval,
+    permission_profile: &PermissionProfile,
+    matching: &PatchPolicyMatcher<'_>,
+) -> io::Result<SafetyCheck> {
     match policy {
         AskForApproval::Never | AskForApproval::OnRequest | AskForApproval::Granular(_) => {
             // Continue to see if this can be auto-approved.
@@ -103,7 +118,7 @@ pub fn assess_patch_safety(
     // possible that paths in the patch are hard links to files outside the
     // writable roots, so we should still run `apply_patch` in a sandbox in that case.
     // Disabled and External profiles intentionally do not apply an outer sandbox.
-    if is_write_patch_constrained_to_writable_paths(action, matching)?
+    if constrained_to_writable_paths
         && (matches!(
             permission_profile,
             PermissionProfile::Disabled | PermissionProfile::External { .. }

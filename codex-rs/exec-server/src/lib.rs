@@ -23,6 +23,8 @@ mod fs_helper_main;
 mod fs_sandbox;
 #[cfg(any(target_os = "trueos", test))]
 mod native_file_system;
+#[cfg(any(target_os = "trueos", test))]
+mod typed_file_system;
 
 /// TRUEOS filesystem operations are checked inside its link-free app namespace.
 pub const fn uses_native_file_system_sandbox() -> bool {

@@ -116,6 +116,8 @@ async fn forwarder_runs_commands_and_transfers_files() -> Result<()> {
     timeout(
         TEST_TIMEOUT,
         client.fs_write_file(FsWriteFileParams {
+            create_new: None,
+            expected_sha256: None,
             path: PathUri::from_host_native_path(&path)?,
             follow_symlinks: None,
             data_base64: STANDARD.encode(&contents),

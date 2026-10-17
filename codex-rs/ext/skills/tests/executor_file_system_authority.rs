@@ -131,6 +131,7 @@ impl SyntheticFileSystem {
             return Err(io::Error::new(io::ErrorKind::NotFound, "not found"));
         };
         Ok(FileMetadata {
+            content_type: None,
             is_directory,
             is_file,
             is_symlink: false,
