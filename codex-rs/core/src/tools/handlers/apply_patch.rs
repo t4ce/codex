@@ -482,7 +482,9 @@ async fn execute_verified_patch(
     let cwd = action.cwd.clone();
     let sandbox_context = turn_environment.sandbox_context(/*additional_permissions*/ None);
     let policy_context = file_system_sandbox_policy_context_for_cwd(&sandbox_context, &cwd);
-    let sandbox_route = if turn_environment.environment.is_remote() {
+    let sandbox_route = if turn_environment.environment.is_remote()
+        || codex_exec_server::uses_native_file_system_sandbox()
+    {
         PatchSandboxRoute::ExecutorManaged
     } else {
         PatchSandboxRoute::Platform(windows_sandbox_level_for_legacy_checks(

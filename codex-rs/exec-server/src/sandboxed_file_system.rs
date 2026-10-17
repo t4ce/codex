@@ -89,14 +89,23 @@ impl SandboxedFileSystem {
     ) -> FileSystemResult<tokio::fs::File> {
         let sandbox = require_platform_sandbox(sandbox)?;
         validate_native_path(path)?;
+        #[cfg(target_os = "trueos")]
+        {
+            crate::native_file_system::check_path(sandbox, path, mode == FsOpenMode::Replace)?;
+            return crate::regular_file::open(path.to_abs_path()?.as_path(), mode).await;
+        }
+        #[cfg(not(target_os = "trueos"))]
         let command = self
             .sandbox_runner
             .sandbox_command(sandbox)
             .map_err(map_sandbox_error)?;
-        crate::run_integrity_checks(&command).await;
-        crate::sandboxed_file_open::open(command, path.clone(), mode)
-            .await
-            .map_err(map_sandbox_error)
+        #[cfg(not(target_os = "trueos"))]
+        {
+            crate::run_integrity_checks(&command).await;
+            crate::sandboxed_file_open::open(command, path.clone(), mode)
+                .await
+                .map_err(map_sandbox_error)
+        }
     }
 
     pub fn new(runtime_paths: ExecServerRuntimeOptions) -> Self {

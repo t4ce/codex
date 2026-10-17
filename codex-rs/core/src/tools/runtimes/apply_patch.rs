@@ -161,6 +161,7 @@ impl ToolRuntime<ApplyPatchRequest, ApplyPatchRuntimeOutput> for ApplyPatchRunti
 
     fn uses_executor_managed_process_sandbox(&self, req: &ApplyPatchRequest) -> bool {
         req.turn_environment.environment.is_remote()
+            || codex_exec_server::uses_native_file_system_sandbox()
     }
 
     fn sandbox_cwd<'a>(&self, req: &'a ApplyPatchRequest) -> Option<&'a PathUri> {

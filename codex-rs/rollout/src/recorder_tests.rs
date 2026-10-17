@@ -1962,3 +1962,17 @@ async fn resume_candidate_matches_cwd_reads_latest_turn_context() -> std::io::Re
     );
     Ok(())
 }
+
+#[test]
+fn unsupported_timestamp_does_not_block_transcript_but_storage_errors_propagate() {
+    assert!(ignore_unsupported_timestamp(Ok(())).is_ok());
+    assert!(
+        ignore_unsupported_timestamp(Err(std::io::Error::from(std::io::ErrorKind::Unsupported)))
+            .is_ok()
+    );
+    for errno in [5, 13, 28] {
+        let error = ignore_unsupported_timestamp(Err(std::io::Error::from_raw_os_error(errno)))
+            .expect_err("real failure");
+        assert_eq!(error.raw_os_error(), Some(errno));
+    }
+}

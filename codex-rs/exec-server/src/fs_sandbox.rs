@@ -87,10 +87,17 @@ impl FileSystemSandboxRunner {
         sandbox: &FileSystemSandboxContext,
         request: FsHelperRequest,
     ) -> Result<FsHelperPayload, JSONRPCErrorError> {
-        let command = self.sandbox_command(sandbox)?;
-        crate::run_integrity_checks(&command).await;
-        let request_json = serde_json::to_vec(&request).map_err(json_error)?;
-        run_command(command, request_json).await
+        #[cfg(target_os = "trueos")]
+        {
+            crate::native_file_system::run(sandbox, request).await
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            let command = self.sandbox_command(sandbox)?;
+            crate::run_integrity_checks(&command).await;
+            let request_json = serde_json::to_vec(&request).map_err(json_error)?;
+            run_command(command, request_json).await
+        }
     }
 
     #[tracing::instrument(

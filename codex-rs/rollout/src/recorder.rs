@@ -1760,6 +1760,16 @@ fn precompute_new_rollout_path(
     Ok((path, timestamp))
 }
 
+// Timestamps are an optional sorting hint on filesystems that expose logical
+// revisions. Keep unsupported timestamp updates from discarding transcript data;
+// permission, capacity and actual I/O failures still propagate.
+fn ignore_unsupported_timestamp(result: std::io::Result<()>) -> std::io::Result<()> {
+    match result {
+        Err(error) if error.kind() == std::io::ErrorKind::Unsupported => Ok(()),
+        result => result,
+    }
+}
+
 fn open_log_file(path: &Path) -> std::io::Result<File> {
     let refresh_modified_time = !compression::plain_rollout_path(path).try_exists()?;
     let path = compression::materialize_rollout_for_append_blocking(path)?;
@@ -1776,7 +1786,9 @@ fn open_log_file(path: &Path) -> std::io::Result<File> {
         .create(true)
         .open(path)?;
     if refresh_modified_time {
-        file.set_times(std::fs::FileTimes::new().set_modified(std::time::SystemTime::now()))?;
+        ignore_unsupported_timestamp(
+            file.set_times(std::fs::FileTimes::new().set_modified(std::time::SystemTime::now())),
+        )?;
     }
     ensure_rollout_is_newline_terminated(&mut file)?;
     Ok(file)
@@ -2038,21 +2050,24 @@ async fn open_rollout_for_append(
         !tokio::fs::try_exists(compression::plain_rollout_path(path)).await?;
     let path = compression::materialize_rollout_for_append(path, writer_lock.clone()).await?;
     let path_for_open = path.clone();
-    let (file, ordinal_state) = tokio::task::spawn_blocking(move || {
-        let _writer_lock = writer_lock;
-        let mut file = File::options()
-            .read(true)
-            .append(true)
-            .open(path_for_open.as_path())?;
-        if refresh_modified_time {
-            file.set_times(std::fs::FileTimes::new().set_modified(std::time::SystemTime::now()))?;
-        }
-        ensure_rollout_is_newline_terminated(&mut file)?;
-        let ordinal_state = ordinal_state_for_rollout(&mut file, path_for_open.as_path())?;
-        Ok::<_, std::io::Error>((file, ordinal_state))
-    })
-    .await
-    .map_err(IoError::other)??;
+    let (file, ordinal_state) =
+        tokio::task::spawn_blocking(move || {
+            let _writer_lock = writer_lock;
+            let mut file = File::options()
+                .read(true)
+                .append(true)
+                .open(path_for_open.as_path())?;
+            if refresh_modified_time {
+                ignore_unsupported_timestamp(file.set_times(
+                    std::fs::FileTimes::new().set_modified(std::time::SystemTime::now()),
+                ))?;
+            }
+            ensure_rollout_is_newline_terminated(&mut file)?;
+            let ordinal_state = ordinal_state_for_rollout(&mut file, path_for_open.as_path())?;
+            Ok::<_, std::io::Error>((file, ordinal_state))
+        })
+        .await
+        .map_err(IoError::other)??;
     Ok((path, tokio::fs::File::from_std(file), ordinal_state))
 }
 
