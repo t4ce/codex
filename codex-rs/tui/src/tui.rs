@@ -93,6 +93,8 @@ mod size_monitor;
 #[cfg(all(test, unix))]
 #[path = "tui_startup_tests.rs"]
 mod startup_tests;
+#[cfg(target_os = "trueos")]
+mod terminal_reentry;
 mod terminal_stderr;
 #[cfg(test)]
 pub(crate) mod test_support;
@@ -704,6 +706,8 @@ pub struct Tui {
     pending_history_lines: Vec<PendingHistoryLines>,
     clear_thread_switch_on_draw: bool,
     screen_size: ScreenSizePolicy,
+    #[cfg(target_os = "trueos")]
+    terminal_generation: Option<u64>,
     ambient_pet_image_state: crate::pets::PetImageRenderState,
     pet_picker_preview_image_state: crate::pets::PetImageRenderState,
     pub(crate) transcript_images: Vec<crate::transcript_image::ImagePlacement>,
@@ -783,6 +787,8 @@ impl Tui {
             pending_history_lines: vec![],
             clear_thread_switch_on_draw: false,
             screen_size: ScreenSizePolicy::default(),
+            #[cfg(target_os = "trueos")]
+            terminal_generation: terminal_reentry::current_generation().ok().flatten(),
             ambient_pet_image_state: crate::pets::PetImageRenderState::default(),
             pet_picker_preview_image_state: crate::pets::PetImageRenderState::default(),
             transcript_images: Vec::new(),

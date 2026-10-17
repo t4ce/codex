@@ -21,6 +21,8 @@ impl Tui {
     /// Resolve event geometry while avoiding backend queries on ordinary repaint frames.
     pub(crate) fn screen_size_for_event(&mut self, event: &TuiEvent) -> io::Result<Size> {
         if matches!(event, TuiEvent::Resize(_)) {
+            #[cfg(target_os = "trueos")]
+            self.restore_terminal_surface()?;
             self.schedule_screen_size_recheck(TRANSCRIPT_REFLOW_DEBOUNCE);
         } else if matches!(event, TuiEvent::Draw | TuiEvent::FocusGained)
             && let Some(deadline) = self.screen_size.pending_recheck_at
