@@ -363,6 +363,29 @@ pub(crate) enum AppEvent {
         thread_id: ThreadId,
         request_id: Uuid,
     },
+    /// Generate an optional next user message after a live turn completes.
+    SuggestNextPrompt {
+        thread_id: ThreadId,
+        request_id: Uuid,
+    },
+    DismissNextPrompt {
+        request_id: Uuid,
+    },
+    NextPromptStarted {
+        thread_id: ThreadId,
+        request_id: Uuid,
+        cancellation: CancellationToken,
+        prompt: String,
+        effort: Option<ReasoningEffort>,
+        result: Result<String, String>,
+    },
+    GeneratedNextPrompt {
+        thread_id: ThreadId,
+        request_id: Uuid,
+        temporary_thread_id: ThreadId,
+        cancellation: CancellationToken,
+        result: Result<String, String>,
+    },
     /// Register a hidden title-generation thread started in the background.
     ThreadTitleStarted {
         cancellation: CancellationToken,

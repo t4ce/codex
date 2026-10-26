@@ -44,6 +44,10 @@
 //! # Completion and Popup Dismissal
 //!
 //! All completion suggestions render above the composer and preserve its footer.
+//! After a completed turn, a next-prompt suggestion may appear as dim placeholder text in an
+//! empty composer. Tab accepts it into the editable draft without submitting; Escape or typing
+//! dismisses it. Suggestions never enter history or recovery snapshots until accepted, and any
+//! input invalidates pending generation so late results cannot replace a user's draft.
 //! Owned transcript frames overlay suggestions with blank rows above and below, without reserving
 //! layout space. Those rows show scroll arrows when suggestions extend beyond the visible menu.
 //! Warning and transcript views hide suggestions without losing the draft, query, or selection.
@@ -386,6 +390,7 @@ mod footer_state;
 mod history_search;
 mod inline_input;
 mod mouse;
+mod next_prompt;
 pub(crate) use mouse::ClipboardPasteTarget;
 mod paste_input;
 mod popup_state;
@@ -624,6 +629,7 @@ pub(crate) struct ChatComposer {
     luna_reserve_active: bool,
     attachments: AttachmentState,
     placeholder_text: String,
+    next_prompt: next_prompt::NextPromptState,
     blocks_direct_input: bool,
     is_task_running: bool,
     queue_submissions: bool,
@@ -801,6 +807,7 @@ impl ChatComposer {
             luna_reserve_active: false,
             attachments: AttachmentState::default(),
             placeholder_text,
+            next_prompt: next_prompt::NextPromptState::default(),
             blocks_direct_input: false,
             is_task_running: false,
             queue_submissions: false,
@@ -1257,6 +1264,7 @@ impl ChatComposer {
     /// are renumbered to `[Image #M+1]..[Image #N]` (where `M` is the number of
     /// remote images). Cursor is placed at the end after rebuilding elements.
     pub(crate) fn apply_external_edit(&mut self, text: String) {
+        self.dismiss_next_prompt();
         self.note_sparkle_replaced_text(&text);
         self.vim_history = VimHistory::default();
         self.draft.pending_pastes.clear();
@@ -1484,6 +1492,7 @@ impl ChatComposer {
     }
 
     pub(crate) fn set_remote_image_urls(&mut self, urls: Vec<String>) {
+        self.dismiss_next_prompt();
         if !self.sparkle.history_preview && !urls.is_empty() {
             self.dismiss_sparkle();
         }
@@ -1537,6 +1546,7 @@ impl ChatComposer {
         local_image_paths: Vec<PathBuf>,
         mention_bindings: Vec<MentionBinding>,
     ) {
+        self.dismiss_next_prompt();
         if !self.sparkle.history_preview {
             if local_image_paths.is_empty() {
                 self.note_sparkle_replaced_text(&text);
@@ -1817,6 +1827,7 @@ impl ChatComposer {
 
     /// Insert an attachment placeholder and track it for the next submission.
     pub fn attach_image(&mut self, path: PathBuf) {
+        self.dismiss_next_prompt();
         self.dismiss_sparkle();
         let started_vim_edit = self.begin_direct_vim_edit();
         let elements_before = self.draft.textarea.element_payloads();
@@ -1927,6 +1938,10 @@ impl ChatComposer {
 
         if matches!(key_event.kind, KeyEventKind::Release) {
             return (InputResult::None, false);
+        }
+
+        if let Some(result) = self.handle_next_prompt_key(key_event) {
+            return result;
         }
 
         if self.history_search.is_none()
@@ -4261,6 +4276,9 @@ impl ChatComposer {
     }
 
     pub fn set_task_running(&mut self, running: bool) {
+        if running {
+            self.dismiss_next_prompt();
+        }
         self.is_task_running = running;
     }
 
@@ -4909,7 +4927,8 @@ impl ChatComposer {
         }
         if !self.draft.input_enabled || textarea_is_empty {
             let text = if self.draft.input_enabled {
-                self.placeholder_text.as_str().to_string()
+                self.next_prompt_placeholder()
+                    .unwrap_or_else(|| self.placeholder_text.clone())
             } else {
                 self.draft
                     .input_disabled_placeholder
@@ -4919,7 +4938,14 @@ impl ChatComposer {
             };
             if !textarea_rect.is_empty() {
                 let placeholder = Span::from(text).dim();
-                Line::from(vec![placeholder]).render(textarea_rect.inner(Margin::new(0, 0)), buf);
+                if self.next_prompt_text().is_some() {
+                    ratatui::widgets::Paragraph::new(placeholder)
+                        .wrap(ratatui::widgets::Wrap { trim: false })
+                        .render(textarea_rect, buf);
+                } else {
+                    Line::from(vec![placeholder])
+                        .render(textarea_rect.inner(Margin::new(0, 0)), buf);
+                }
             }
         }
         // The reserved right margin indicates hidden rows without changing wrapping.

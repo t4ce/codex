@@ -485,6 +485,9 @@ impl ChatWidget {
                     completion,
                     replay_kind.is_some(),
                 );
+                if replay_kind.is_none() {
+                    self.maybe_suggest_next_prompt();
+                }
             }
             TurnStatus::Interrupted => {
                 if replay_kind.is_none() {

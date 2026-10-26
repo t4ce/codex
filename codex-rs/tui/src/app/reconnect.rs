@@ -386,6 +386,8 @@ impl App {
         self.pending_plugin_enabled_writes.clear();
         self.pending_hook_enabled_writes.clear();
         self.temporary_structured_requests.clear();
+        self.cancel_next_prompt();
+        self.chat_widget.dismiss_next_prompt();
         for (_, cancellation) in self.pending_thread_titles.drain() {
             cancellation.cancel();
         }

@@ -17,6 +17,7 @@ impl ChatComposer {
     }
 
     fn insert_str_at_target(&mut self, target: EditTarget, text: &str) {
+        self.dismiss_next_prompt();
         if !text.is_empty() && self.sparkle.draft.get() == sparkle::SparkleDraft::Untouched {
             self.dismiss_sparkle();
         }
@@ -68,6 +69,7 @@ impl ChatComposer {
 
     /// Classify an explicit paste before integrating text shared with the buffered key path.
     pub fn handle_paste(&mut self, pasted: String) -> bool {
+        self.dismiss_next_prompt();
         self.flush_pending_paste_burst();
         self.note_sparkle_paste(&pasted);
         self.apply_paste(pasted)

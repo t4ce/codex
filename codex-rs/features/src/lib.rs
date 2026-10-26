@@ -271,6 +271,8 @@ pub enum Feature {
     NonPrefixedMcpToolNames,
     /// Enable discoverable tool suggestions for apps.
     ToolSuggest,
+    /// Suggest an editable next user prompt in the idle TUI composer.
+    NextPromptSuggestions,
     /// Include recommended plugins in model-visible context.
     RecommendedPlugins,
     /// Enable plugins.
@@ -1617,6 +1619,12 @@ pub const FEATURES: &[FeatureSpec] = &[
     FeatureSpec {
         id: Feature::ToolSuggest,
         key: "tool_suggest",
+        stage: Stage::Stable,
+        default_enabled: true,
+    },
+    FeatureSpec {
+        id: Feature::NextPromptSuggestions,
+        key: "next_prompt_suggestions",
         stage: Stage::Stable,
         default_enabled: true,
     },

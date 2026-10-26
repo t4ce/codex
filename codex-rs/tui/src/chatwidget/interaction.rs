@@ -15,6 +15,64 @@ pub(crate) enum KeyEventAction {
 }
 
 impl ChatWidget {
+    pub(crate) fn has_next_prompt(&self) -> bool {
+        self.bottom_pane.has_next_prompt()
+    }
+
+    pub(crate) fn dismiss_next_prompt(&mut self) {
+        self.bottom_pane.dismiss_next_prompt();
+    }
+
+    pub(crate) fn next_prompt_request_matches(
+        &self,
+        thread_id: ThreadId,
+        request_id: uuid::Uuid,
+    ) -> bool {
+        self.thread_id() == Some(thread_id)
+            && self.bottom_pane.next_prompt_request_matches(request_id)
+    }
+
+    pub(crate) fn apply_next_prompt(
+        &mut self,
+        thread_id: ThreadId,
+        request_id: uuid::Uuid,
+        text: Option<String>,
+    ) {
+        if self.next_prompt_request_matches(thread_id, request_id) {
+            self.bottom_pane.apply_next_prompt(request_id, text);
+        }
+    }
+
+    pub(super) fn maybe_suggest_next_prompt(&mut self) {
+        if !self.config.features.enabled(Feature::NextPromptSuggestions)
+            || self.turn_lifecycle.agent_turn_running
+            || self.input_queue.user_turn_pending_start
+            || self.has_queued_follow_up_messages()
+            || !self.input_queue.pending_steers.is_empty()
+            || self.review.is_review_mode
+            || self
+                .current_goal_status
+                .as_ref()
+                .is_some_and(GoalStatusState::is_active)
+            || self.is_external_writer_view()
+            || self
+                .transcript
+                .last_agent_markdown
+                .as_ref()
+                .is_none_or(|text| text.trim().is_empty())
+        {
+            return;
+        }
+        if let Some(thread_id) = self.thread_id()
+            && let Some(request_id) = self.bottom_pane.begin_next_prompt()
+        {
+            self.app_event_tx.send(AppEvent::SuggestNextPrompt {
+                thread_id,
+                request_id,
+            });
+        }
+    }
+
     pub(crate) fn clear_composer_selection(&mut self) {
         self.bottom_pane.clear_composer_selection();
     }

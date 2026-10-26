@@ -782,6 +782,8 @@ impl App {
     }
 
     pub(super) fn reset_for_thread_switch(&mut self, tui: &mut tui::Tui) -> Result<()> {
+        self.cancel_next_prompt();
+        self.chat_widget.dismiss_next_prompt();
         self.reset_transcript_state_after_clear();
         tui.clear_pending_history_lines();
         Ok(tui.clear_for_thread_switch()?)

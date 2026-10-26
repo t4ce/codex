@@ -183,8 +183,15 @@ impl ChatComposer {
             .try_into()
             .unwrap_or(u16::MAX);
         let remote_images_separator = u16::from(remote_images_height > 0);
-        self.draft.textarea.desired_height(inner_width)
-            + remote_images_height
+        self.next_prompt_placeholder().map_or_else(
+            || self.draft.textarea.desired_height(inner_width),
+            |text| {
+                ratatui::widgets::Paragraph::new(text)
+                    .wrap(ratatui::widgets::Wrap { trim: false })
+                    .line_count(inner_width.max(1))
+                    .min(4) as u16
+            },
+        ) + remote_images_height
             + remote_images_separator
             + self.status_surface_height(options)
             + if self.shortcuts_above_composer(options) {

@@ -1793,6 +1793,31 @@ impl BottomPane {
         self.composer.is_empty()
     }
 
+    pub(crate) fn begin_next_prompt(&mut self) -> Option<uuid::Uuid> {
+        if !self.no_modal_or_popup_active() {
+            return None;
+        }
+        self.composer.begin_next_prompt()
+    }
+
+    pub(crate) fn next_prompt_request_matches(&self, request_id: uuid::Uuid) -> bool {
+        self.no_modal_or_popup_active() && self.composer.next_prompt_request_matches(request_id)
+    }
+
+    pub(crate) fn apply_next_prompt(&mut self, request_id: uuid::Uuid, text: Option<String>) {
+        self.composer.apply_next_prompt(request_id, text);
+        self.request_redraw();
+    }
+
+    pub(crate) fn has_next_prompt(&self) -> bool {
+        self.composer.has_next_prompt()
+    }
+
+    pub(crate) fn dismiss_next_prompt(&mut self) {
+        self.composer.dismiss_next_prompt();
+        self.request_redraw();
+    }
+
     pub(crate) fn composer_is_vim_enabled(&self) -> bool {
         self.composer.is_vim_enabled()
     }

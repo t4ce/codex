@@ -3006,6 +3006,18 @@ impl App {
                 self.suggest_thread_name(app_server, thread_id, request_id)
                     .await;
             }
+            AppEvent::SuggestNextPrompt { thread_id, request_id } => {
+                self.suggest_next_prompt(app_server, thread_id, request_id).await;
+            }
+            AppEvent::DismissNextPrompt { request_id } => {
+                self.dismiss_next_prompt_request(request_id);
+            }
+            AppEvent::NextPromptStarted { thread_id, request_id, cancellation, prompt, effort, result } => {
+                self.on_next_prompt_started(app_server, thread_id, request_id, cancellation, prompt, effort, result);
+            }
+            AppEvent::GeneratedNextPrompt { thread_id, request_id, temporary_thread_id, cancellation, result } => {
+                self.on_generated_next_prompt(thread_id, request_id, temporary_thread_id, cancellation, result);
+            }
             AppEvent::ThreadTitleStarted {
                 cancellation,
                 thread_id,

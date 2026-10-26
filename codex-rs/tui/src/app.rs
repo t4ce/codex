@@ -260,6 +260,7 @@ mod resize_reflow;
 mod resume_config;
 mod right_click_paste;
 pub(crate) use right_click_paste::PasteEnvironment;
+mod next_prompt;
 mod safety_buffering;
 mod server_version_notice;
 mod session_lifecycle;
@@ -634,6 +635,7 @@ pub(crate) struct App {
     temporary_structured_requests: HashMap<ThreadId, mpsc::UnboundedSender<ServerNotification>>,
     /// Track title generation across thread switches and deduplicate automatic requests.
     pending_thread_titles: HashMap<(ThreadId, ThreadTitleDestination), CancellationToken>,
+    pending_next_prompt: Option<(uuid::Uuid, CancellationToken)>,
     thread_event_listener_tasks: HashMap<ThreadId, JoinHandle<()>>,
     agent_navigation: AgentNavigationState,
     agents_overview: agents_overview::AgentsOverviewState,
