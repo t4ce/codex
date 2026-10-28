@@ -139,6 +139,7 @@ whoami = { workspace = true }
 # TRUEOS uses its native, non-JIT JavaScript runtime for Code Mode sessions.
 [target.'cfg(target_os = "trueos")'.dependencies]
 codex-code-mode-quickjs = { workspace = true }
+trueos = { workspace = true, features = ["spirit"] }
 trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
 
 # Build OpenSSL from source for musl builds.

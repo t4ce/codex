@@ -1,0 +1,18 @@
+[package]
+name = "codex-spirit-tool-validation"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# Keep this small host fixture independent of the full Codex dependency graph.
+[workspace]
+
+[dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+base64 = "0.22.1"
+futures = "0.3"
+trueos = { path = "../../../TRUEOS-Blueprints/api", features = ["spirit"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"

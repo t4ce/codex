@@ -36,6 +36,8 @@ use crate::tools::handlers::RequestUserInputAsyncHandler;
 use crate::tools::handlers::RequestUserInputHandler;
 use crate::tools::handlers::SendMessageToUserAsyncHandler;
 use crate::tools::handlers::SleepHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::SpiritHandler;
 use crate::tools::handlers::TestSyncHandler;
 use crate::tools::handlers::ToolSearchHandlerCache;
 use crate::tools::handlers::ViewImageHandler;
@@ -1422,6 +1424,7 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
         registry.add(HelpHandler::new(include_environment_id));
         registry.add(CalculatorHandler::new(include_environment_id));
+        registry.add(SpiritHandler::new(include_environment_id));
         registry.add(ListDirectoryHandler::new(include_environment_id));
         registry.add(FileInfoHandler::new(include_environment_id));
         registry.add(ReadFileHandler::new(include_environment_id));

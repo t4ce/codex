@@ -37,6 +37,8 @@ pub(crate) mod tool_search_spec;
 mod trueos_calculator;
 #[cfg(any(target_os = "trueos", test))]
 pub(crate) mod trueos_help;
+#[cfg(target_os = "trueos")]
+mod trueos_spirit;
 pub(crate) mod unified_exec;
 mod view_image;
 pub(crate) mod view_image_spec;
@@ -94,6 +96,8 @@ pub(crate) use tool_search::ToolSearchHandlerCache;
 pub use trueos_calculator::CalculatorHandler;
 #[cfg(target_os = "trueos")]
 pub use trueos_help::HelpHandler;
+#[cfg(target_os = "trueos")]
+pub use trueos_spirit::SpiritHandler;
 pub use unified_exec::ExecCommandHandler;
 pub(crate) use unified_exec::ExecCommandHandlerOptions;
 pub use unified_exec::WriteStdinHandler;

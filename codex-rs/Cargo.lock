@@ -3044,6 +3044,7 @@ dependencies = [
  "tracing-opentelemetry",
  "tracing-subscriber",
  "tracing-test",
+ "trueos",
  "url",
  "uuid",
  "v",
