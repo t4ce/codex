@@ -17,23 +17,26 @@ impl ThreadManager {
     /// Snapshot actual loaded agents and known unloaded children without interpreting UI state.
     /// Runtime attention flags are filled by the app server's existing thread watch manager.
     pub async fn spirit_agent_entries(&self) -> Vec<AgentEntry> {
-        let controller = self.agent_control();
-        let registered = controller.registered_spirit_agents();
-        let identities: HashMap<_, _> = registered
-            .iter()
-            .filter_map(|metadata| {
-                Some((
-                    metadata.agent_path.as_ref()?.to_string(),
-                    metadata.agent_id?,
-                ))
-            })
-            .collect();
+        let mut controllers = Vec::new();
         let mut seen = HashSet::new();
         let mut entries = Vec::new();
         for thread_id in self.list_thread_ids().await {
             let Ok(thread) = self.get_thread(thread_id).await else {
                 continue;
             };
+            // ThreadManager::agent_control() constructs a fresh tree. Read each live
+            // session's existing registry instead, including children evicted by V2.
+            let controller = thread
+                .session
+                .services
+                .local_agent_runtime
+                .control(thread.session.session_id());
+            if !controllers
+                .iter()
+                .any(|existing| controller.shares_spirit_tree(existing))
+            {
+                controllers.push(controller.clone());
+            }
             let config = thread.config_snapshot().await;
             seen.insert(thread_id);
             if !is_presented_agent(&config) {
@@ -73,22 +76,35 @@ impl ThreadManager {
                 loaded: true,
             });
         }
-        for metadata in registered {
-            let Some(thread_id) = metadata.agent_id else {
-                continue;
-            };
-            if seen.insert(thread_id)
-                && let Some(parent_id) = metadata
-                    .agent_path
-                    .as_ref()
-                    .and_then(|path| path.as_str().rsplit_once('/'))
-                    .and_then(|(parent, _)| identities.get(parent))
-            {
-                entries.push(unloaded_entry(
-                    thread_id.to_string(),
-                    parent_id.to_string(),
-                    metadata,
-                ));
+        for controller in controllers {
+            let registered = controller.registered_spirit_agents();
+            // Paths are local to a tree: different roots may both have /root/joker.
+            let identities: HashMap<_, _> = registered
+                .iter()
+                .filter_map(|metadata| {
+                    Some((
+                        metadata.agent_path.as_ref()?.to_string(),
+                        metadata.agent_id?,
+                    ))
+                })
+                .collect();
+            for metadata in registered {
+                let Some(thread_id) = metadata.agent_id else {
+                    continue;
+                };
+                if seen.insert(thread_id)
+                    && let Some(parent_id) = metadata
+                        .agent_path
+                        .as_ref()
+                        .and_then(|path| path.as_str().rsplit_once('/'))
+                        .and_then(|(parent, _)| identities.get(parent))
+                {
+                    entries.push(unloaded_entry(
+                        thread_id.to_string(),
+                        parent_id.to_string(),
+                        metadata,
+                    ));
+                }
             }
         }
         entries.sort_by(|left, right| left.id.cmp(&right.id));

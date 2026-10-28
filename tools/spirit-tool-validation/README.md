@@ -18,6 +18,11 @@ strict per-action fields, schema registration, image output and safe logging,
 local-environment/image-model guards, and exactly-once dispatch when native input
 returns Busy or transport errors. The shared schema's own test runs too.
 
+The same fixture imports the production native agent snapshot projection. It
+checks canonical nicknames from live session registries and startup sources,
+unloaded V2 children, and parent paths scoped to separate agent trees. The small
+runtime inputs do not spawn agents or require a live model connection.
+
 This standalone workspace avoids the full Codex host dependency graph. A native
 Codex package build still verifies the handler against the complete runtime.
 The runner defaults to `nightly-2026-07-10`; set `CODEX_SPIRIT_TEST_TOOLCHAIN` to

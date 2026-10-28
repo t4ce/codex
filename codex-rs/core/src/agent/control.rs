@@ -392,6 +392,12 @@ impl LocalAgentControl {
         agents
     }
 
+    /// Deduplicate read-only native projections of the same existing agent tree.
+    #[cfg(target_os = "trueos")]
+    pub(crate) fn shares_spirit_tree(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.runtime.registry, &other.runtime.registry)
+    }
+
     pub(crate) async fn list_agents(
         &self,
         current_session_source: &SessionSource,

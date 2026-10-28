@@ -10,6 +10,13 @@
 extern crate self as codex_protocol;
 extern crate self as codex_tools;
 extern crate self as codex_utils_image;
+extern crate self as trueos_v;
+
+mod agent_projection_fixture;
+pub use agent_projection_fixture::{ThreadManager, agent, codex_thread, protocol};
+#[path = "../../../codex-rs/core/src/thread_manager/trueos_spirit_agents.rs"]
+mod spirit_agent_projection;
+pub use trueos::spirit::spirit_agents;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
