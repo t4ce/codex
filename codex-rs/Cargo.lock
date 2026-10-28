@@ -2178,8 +2178,10 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
+ "trueos",
  "url",
  "uuid",
+ "v",
  "wiremock",
 ]
 

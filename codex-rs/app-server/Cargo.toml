@@ -131,6 +131,10 @@ tikv-jemallocator = { workspace = true }
 [target.'cfg(unix)'.dependencies]
 libc = { workspace = true }
 
+[target.'cfg(target_os = "trueos")'.dependencies]
+trueos = { workspace = true, features = ["spirit"] }
+trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
+
 [target.'cfg(windows)'.dependencies]
 codex-windows-sandbox = { workspace = true }
 

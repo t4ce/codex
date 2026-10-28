@@ -143,6 +143,8 @@ mod server_request_error;
 mod skills_watcher;
 mod thread_state;
 mod thread_status;
+#[cfg(target_os = "trueos")]
+mod trueos_spirit_agents;
 mod transport;
 mod turn_admission;
 mod turn_cost_worker;

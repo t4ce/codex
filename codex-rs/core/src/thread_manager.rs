@@ -1,6 +1,8 @@
 mod managed;
 mod shared_instructions;
 mod shutdown;
+#[cfg(target_os = "trueos")]
+mod trueos_spirit_agents;
 
 pub use shutdown::AgentTreeShutdown;
 pub use shutdown::AgentTreeShutdownFailure;

@@ -20,6 +20,8 @@ pub(crate) struct ThreadWatchManager {
     state: Arc<Mutex<ThreadWatchState>>,
     outgoing: Option<Arc<OutgoingMessageSender>>,
     running_turn_count_tx: watch::Sender<usize>,
+    #[cfg(target_os = "trueos")]
+    spirit_changes_tx: watch::Sender<u64>,
 }
 
 pub(crate) struct ThreadWatchActiveGuard {
@@ -76,6 +78,8 @@ impl ThreadWatchManager {
             state: Arc::new(Mutex::new(ThreadWatchState::default())),
             outgoing: None,
             running_turn_count_tx,
+            #[cfg(target_os = "trueos")]
+            spirit_changes_tx: watch::channel(0).0,
         }
     }
 
@@ -85,6 +89,8 @@ impl ThreadWatchManager {
             state: Arc::new(Mutex::new(ThreadWatchState::default())),
             outgoing: Some(outgoing),
             running_turn_count_tx,
+            #[cfg(target_os = "trueos")]
+            spirit_changes_tx: watch::channel(0).0,
         }
     }
 
@@ -142,6 +148,12 @@ impl ThreadWatchManager {
 
     pub(crate) fn subscribe_running_turn_count(&self) -> watch::Receiver<usize> {
         self.running_turn_count_tx.subscribe()
+    }
+
+    /// Wake the native projection after existing lifecycle or attention facts change.
+    #[cfg(target_os = "trueos")]
+    pub(crate) fn subscribe_spirit_changes(&self) -> watch::Receiver<u64> {
+        self.spirit_changes_tx.subscribe()
     }
 
     pub(crate) async fn note_turn_started(&self, thread_id: &str) {
@@ -238,6 +250,10 @@ impl ThreadWatchManager {
             });
             notification
         };
+
+        #[cfg(target_os = "trueos")]
+        self.spirit_changes_tx
+            .send_modify(|revision| *revision = revision.wrapping_add(1));
 
         if let Some(notification) = notification
             && let Some(outgoing) = &self.outgoing

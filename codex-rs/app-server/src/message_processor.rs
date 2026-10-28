@@ -172,6 +172,8 @@ pub(crate) struct MessageProcessor {
     turn_processor: TurnRequestProcessor,
     windows_sandbox_processor: WindowsSandboxRequestProcessor,
     request_serialization_queues: RequestSerializationQueues,
+    #[cfg(target_os = "trueos")]
+    spirit_agent_publisher: crate::trueos_spirit_agents::SpiritAgentPublisher,
 }
 
 #[derive(Debug)]
@@ -404,6 +406,11 @@ impl MessageProcessor {
         let pending_thread_unloads = Arc::new(Mutex::new(HashMap::new()));
         let thread_watch_manager =
             crate::thread_status::ThreadWatchManager::new_with_outgoing(outgoing.clone());
+        #[cfg(target_os = "trueos")]
+        let spirit_agent_publisher = crate::trueos_spirit_agents::SpiritAgentPublisher::spawn(
+            Arc::clone(&thread_manager),
+            thread_watch_manager.clone(),
+        );
         let thread_list_state_permit = Arc::new(Semaphore::new(/*permits*/ 1));
         let app_list_shutdown_token = CancellationToken::new();
         let request_serialization_queues = RequestSerializationQueues::default();
@@ -625,10 +632,14 @@ impl MessageProcessor {
             turn_processor,
             windows_sandbox_processor,
             request_serialization_queues,
+            #[cfg(target_os = "trueos")]
+            spirit_agent_publisher,
         }
     }
 
     pub(crate) fn clear_runtime_references(&self) {
+        #[cfg(target_os = "trueos")]
+        self.spirit_agent_publisher.shutdown();
         self.account_processor.clear_external_auth();
         self.apps_processor.shutdown();
         self.models_refresh_worker.shutdown();

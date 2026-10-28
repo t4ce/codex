@@ -377,6 +377,21 @@ impl LocalAgentControl {
         self.runtime.registry.agent_metadata_for_thread(agent_id)
     }
 
+    /// Read existing registry membership, including identities whose runtime was evicted.
+    #[cfg(target_os = "trueos")]
+    pub(crate) fn registered_spirit_agents(&self) -> Vec<AgentMetadata> {
+        let mut agents = self.runtime.registry.live_agents();
+        if let Some(root) = self
+            .runtime
+            .registry
+            .agent_id_for_path(&codex_protocol::AgentPath::root())
+            .and_then(|id| self.runtime.registry.agent_metadata_for_thread(id))
+        {
+            agents.push(root);
+        }
+        agents
+    }
+
     pub(crate) async fn list_agents(
         &self,
         current_session_source: &SessionSource,
