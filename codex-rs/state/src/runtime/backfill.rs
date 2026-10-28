@@ -3,17 +3,43 @@ use crate::sqlite::SqliteWriteQueryExt;
 
 impl StateRuntime {
     pub async fn get_backfill_state(&self) -> anyhow::Result<crate::BackfillState> {
-        self.ensure_backfill_state_row().await?;
-        let row = sqlx::query(
-            r#"
+        let query = || {
+            sqlx::query(
+                r#"
 SELECT status, last_watermark, last_success_at
 FROM backfill_state
 WHERE id = 1
             "#,
-        )
-        .fetch_one(self.pool.as_ref())
-        .await?;
+            )
+        };
+        let row = match query().fetch_optional(self.pool.as_ref()).await? {
+            Some(row) => row,
+            None => {
+                self.ensure_backfill_state_row().await?;
+                query().fetch_one(self.pool.as_ref()).await?
+            }
+        };
         crate::BackfillState::try_from_row(&row)
+    }
+
+    /// Complete a new backfill after its owner confirms there is no rollout history.
+    /// An existing worker or checkpoint must retain ownership if startup races it.
+    pub async fn complete_pending_backfill_without_history(&self) -> anyhow::Result<bool> {
+        let now = Utc::now().timestamp();
+        let result = sqlx::query(
+            r#"
+UPDATE backfill_state
+SET status = ?, last_success_at = ?, updated_at = ?
+WHERE id = 1 AND status = ? AND last_watermark IS NULL
+            "#,
+        )
+        .bind(crate::BackfillStatus::Complete.as_str())
+        .bind(now)
+        .bind(now)
+        .bind(crate::BackfillStatus::Pending.as_str())
+        .execute_with_busy_retry(self.pool.as_ref())
+        .await?;
+        Ok(result.rows_affected() == 1)
     }
 
     /// Attempt to claim ownership of rollout metadata backfill.
@@ -116,6 +142,84 @@ mod tests {
     use codex_utils_paths::absolute_path::test_support::PathExt;
     use pretty_assertions::assert_eq;
     use sqlx::Connection;
+
+    #[tokio::test]
+    async fn empty_history_completion_is_durable_without_a_worker_lease() {
+        let codex_home = unique_temp_dir();
+        let sqlite = crate::SqliteConfig::new_for_testing(codex_home.as_path().abs());
+        let runtime = StateRuntime::init(sqlite.clone(), "test-provider".to_string())
+            .await
+            .expect("initialize runtime");
+
+        assert!(
+            runtime
+                .complete_pending_backfill_without_history()
+                .await
+                .expect("complete empty backfill")
+        );
+        runtime.close().await;
+        let reopened = StateRuntime::init(sqlite, "test-provider".to_string())
+            .await
+            .expect("reopen runtime");
+        let state = reopened
+            .get_backfill_state()
+            .await
+            .expect("read completion");
+        assert_eq!(state.status, crate::BackfillStatus::Complete);
+        assert_eq!(state.last_watermark, None);
+        assert!(state.last_success_at.is_some());
+        assert!(
+            !reopened
+                .try_claim_backfill(/*lease_seconds*/ 60)
+                .await
+                .expect("completed backfill rejects a worker")
+        );
+        reopened.close().await;
+        let _ = tokio::fs::remove_dir_all(codex_home).await;
+    }
+
+    #[tokio::test]
+    async fn empty_history_completion_preserves_worker_leases_and_checkpoints() {
+        let codex_home = unique_temp_dir();
+        let runtime = StateRuntime::init(
+            crate::SqliteConfig::new_for_testing(codex_home.as_path().abs()),
+            "test-provider".to_string(),
+        )
+        .await
+        .expect("initialize runtime");
+        assert!(runtime.try_claim_backfill(60).await.expect("claim worker"));
+        let running = runtime
+            .get_backfill_state()
+            .await
+            .expect("read worker state");
+        assert!(
+            !runtime
+                .complete_pending_backfill_without_history()
+                .await
+                .expect("preserve active worker")
+        );
+        assert_eq!(runtime.get_backfill_state().await.unwrap(), running);
+
+        runtime
+            .checkpoint_backfill("sessions/rollout.jsonl")
+            .await
+            .expect("checkpoint worker");
+        sqlx::query("UPDATE backfill_state SET status = ? WHERE id = 1")
+            .bind(crate::BackfillStatus::Pending.as_str())
+            .execute(runtime.pool.as_ref())
+            .await
+            .expect("reset worker with checkpoint");
+        let checkpointed = runtime.get_backfill_state().await.expect("read checkpoint");
+        assert!(
+            !runtime
+                .complete_pending_backfill_without_history()
+                .await
+                .expect("preserve checkpoint")
+        );
+        assert_eq!(runtime.get_backfill_state().await.unwrap(), checkpointed);
+        runtime.close().await;
+        let _ = tokio::fs::remove_dir_all(codex_home).await;
+    }
 
     #[tokio::test]
     async fn backfill_state_persists_progress_and_completion() {

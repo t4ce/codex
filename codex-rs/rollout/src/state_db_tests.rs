@@ -95,6 +95,73 @@ async fn list_threads_db_rejects_mismatched_sqlite_config_without_cleanup() -> a
 }
 
 #[tokio::test]
+async fn try_init_completes_a_fresh_profile_without_creating_history_directories()
+-> anyhow::Result<()> {
+    let home = TempDir::new().expect("temp dir");
+    let sqlite = codex_state::SqliteConfig::new_for_testing(home.path().abs());
+    let runtime = try_init_with_roots(
+        home.path().to_path_buf(),
+        sqlite.clone(),
+        "test-provider".to_string(),
+    )
+    .await?;
+    let state = runtime.get_backfill_state().await?;
+    assert_eq!(state.status, codex_state::BackfillStatus::Complete);
+    assert_eq!(state.last_watermark, None);
+    assert!(state.last_success_at.is_some());
+    assert!(!home.path().join(crate::SESSIONS_SUBDIR).exists());
+    assert!(!home.path().join(crate::ARCHIVED_SESSIONS_SUBDIR).exists());
+    runtime.close().await;
+
+    let reopened = try_init_with_roots(
+        home.path().to_path_buf(),
+        sqlite,
+        "test-provider".to_string(),
+    )
+    .await?;
+    assert_eq!(reopened.get_backfill_state().await?, state);
+    reopened.close().await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn try_init_backfills_existing_active_and_archived_history() -> anyhow::Result<()> {
+    for archived in [false, true] {
+        let home = TempDir::new().expect("temp dir");
+        let thread_id = ThreadId::new();
+        let rollout = write_rollout_with_user_message(
+            home.path(),
+            thread_id,
+            "Existing history",
+            ThreadHistoryMode::Legacy,
+        )?;
+        if archived {
+            let archived_root = home.path().join(crate::ARCHIVED_SESSIONS_SUBDIR);
+            std::fs::create_dir_all(&archived_root)?;
+            std::fs::rename(&rollout, archived_root.join(rollout.file_name().unwrap()))?;
+            std::fs::remove_dir_all(home.path().join(crate::SESSIONS_SUBDIR))?;
+        }
+        let runtime = try_init_with_roots(
+            home.path().to_path_buf(),
+            codex_state::SqliteConfig::new_for_testing(home.path().abs()),
+            "test-provider".to_string(),
+        )
+        .await?;
+        let thread = runtime
+            .get_thread(thread_id)
+            .await?
+            .expect("imported history");
+        assert_eq!(thread.title, "Existing history");
+        assert_eq!(thread.archived_at.is_some(), archived);
+        let state = runtime.get_backfill_state().await?;
+        assert_eq!(state.status, codex_state::BackfillStatus::Complete);
+        assert!(state.last_watermark.is_some());
+        runtime.close().await;
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn try_init_waits_for_concurrent_startup_backfill() -> anyhow::Result<()> {
     let home = TempDir::new().expect("temp dir");
     let runtime = codex_state::StateRuntime::init(

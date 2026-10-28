@@ -146,6 +146,25 @@ async fn wait_for_backfill_gate(
             return Ok(());
         }
 
+        // A fresh profile has no legacy metadata to import. Persist completion
+        // directly instead of claiming a worker and repeatedly reading its state.
+        // Probe failures use the normal backfill path, and the conditional update
+        // cannot override another process's lease or an existing checkpoint.
+        if backfill_state.status == codex_state::BackfillStatus::Pending
+            && backfill_state.last_watermark.is_none()
+            && matches!(
+                tokio::fs::try_exists(codex_home.join(crate::SESSIONS_SUBDIR)).await,
+                Ok(false)
+            )
+            && matches!(
+                tokio::fs::try_exists(codex_home.join(crate::ARCHIVED_SESSIONS_SUBDIR)).await,
+                Ok(false)
+            )
+            && runtime.complete_pending_backfill_without_history().await?
+        {
+            return Ok(());
+        }
+
         if let Some(backfill_lease_seconds) = backfill_lease_seconds {
             metadata::backfill_sessions_with_lease(
                 runtime,

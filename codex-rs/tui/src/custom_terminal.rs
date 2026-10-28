@@ -157,6 +157,9 @@ where
     pub last_known_cursor_pos: Position,
     /// Count of visible history rows rendered above the viewport in inline mode.
     visible_history_rows: u16,
+    /// Reuse ANSI encoding storage rather than locking stdout for every cell on TRUEOS.
+    #[cfg(target_os = "trueos")]
+    draw_buffer: Vec<u8>,
     #[cfg(test)]
     screen_size_override: Option<Size>,
 }
@@ -237,6 +240,8 @@ where
             last_known_screen_size: screen_size,
             last_known_cursor_pos: cursor_pos,
             visible_history_rows: 0,
+            #[cfg(target_os = "trueos")]
+            draw_buffer: Vec::new(),
             #[cfg(test)]
             screen_size_override: None,
         }
@@ -307,6 +312,15 @@ where
         if let Some(&DrawCommand::Put { x, y, .. }) = last_put_command {
             self.last_known_cursor_pos = Position { x, y };
         }
+        #[cfg(target_os = "trueos")]
+        {
+            draw_buffered(
+                &mut self.backend,
+                updates.into_iter(),
+                &mut self.draw_buffer,
+            )
+        }
+        #[cfg(not(target_os = "trueos"))]
         draw(&mut self.backend, updates.into_iter())
     }
 
@@ -689,6 +703,22 @@ fn diff_buffers(a: &Buffer, b: &Buffer) -> Vec<DrawCommand> {
     updates
 }
 
+/// Encode a text diff before entering stdout or the guest terminal transport.
+///
+/// Each cell can produce several small formatting writes. On TRUEOS these also acquire
+/// the guest's stdout mutex, so submit the encoded bytes together and retain the storage
+/// for the next frame. Keep flushing with the caller's frame boundary; a failed write
+/// propagates immediately without a buffered writer retrying it during drop.
+#[cfg(any(target_os = "trueos", test))]
+fn draw_buffered<I>(writer: &mut impl Write, commands: I, buffer: &mut Vec<u8>) -> io::Result<()>
+where
+    I: Iterator<Item = DrawCommand>,
+{
+    buffer.clear();
+    draw(buffer, commands)?;
+    writer.write_all(buffer)
+}
+
 fn draw<I>(writer: &mut impl Write, commands: I) -> io::Result<()>
 where
     I: Iterator<Item = DrawCommand>,
@@ -861,6 +891,10 @@ mod tests {
 
     #[path = "cursor_tests.rs"]
     mod cursor;
+
+    #[cfg(not(windows))]
+    #[path = "buffered_tests.rs"]
+    mod buffered;
 
     struct CaptureBackend {
         output: Vec<u8>,
