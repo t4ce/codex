@@ -383,13 +383,13 @@ where
             // Remove old graphics before text painting, including when switching to overlays.
             for (index, placement) in retained_images.iter().enumerate() {
                 match placement.image.protocol {
-                    crate::pets::ImageProtocol::Kitty
-                    | crate::pets::ImageProtocol::KittyLocalFile => {
+                    crate::terminal_image::ImageProtocol::Kitty
+                    | crate::terminal_image::ImageProtocol::KittyLocalFile => {
                         let id = crate::transcript_image::FIRST_IMAGE_ID + index as u32;
                         self.backend
-                            .write_all(crate::pets::kitty_delete_image(id).as_bytes())?;
+                            .write_all(crate::terminal_image::kitty_delete_image(id).as_bytes())?;
                     }
-                    crate::pets::ImageProtocol::Sixel => self.invalidate_viewport(),
+                    crate::terminal_image::ImageProtocol::Sixel => self.invalidate_viewport(),
                 }
             }
         }
@@ -903,8 +903,8 @@ mod tests {
             .save(&path)
             .unwrap();
         for protocol in [
-            crate::pets::ImageProtocol::Kitty,
-            crate::pets::ImageProtocol::KittyLocalFile,
+            crate::terminal_image::ImageProtocol::Kitty,
+            crate::terminal_image::ImageProtocol::KittyLocalFile,
         ] {
             let image = std::sync::Arc::new(
                 crate::transcript_image::TranscriptImage::load(&path, /*width*/ 40, protocol)
@@ -952,7 +952,7 @@ mod tests {
             let output = terminal.backend().output();
             assert_eq!(output.matches("_Ga=T").count(), 2);
             assert_eq!(output.matches("_Ga=d").count(), 0);
-            if protocol == crate::pets::ImageProtocol::KittyLocalFile {
+            if protocol == crate::terminal_image::ImageProtocol::KittyLocalFile {
                 assert!(output.contains("t=f") && output.contains("C=1"));
                 assert!(retained[0].file.as_ref().unwrap().path().exists());
             } else {

@@ -301,6 +301,7 @@ impl ChatWidget {
         });
         self.bottom_pane
             .push_approval_request(request, &self.config.features);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -322,6 +323,7 @@ impl ChatWidget {
         });
         self.bottom_pane
             .push_approval_request(request, &self.config.features);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -401,6 +403,7 @@ impl ChatWidget {
                 }
             }
         }
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -411,6 +414,7 @@ impl ChatWidget {
     pub(crate) fn push_approval_request(&mut self, request: ApprovalRequest) {
         self.bottom_pane
             .push_approval_request(request, &self.config.features);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -426,6 +430,7 @@ impl ChatWidget {
         // Inactive-thread prompts must leave the foreground stream and command activity intact.
         self.bottom_pane
             .push_user_verification_request(thread_id, request);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -439,6 +444,7 @@ impl ChatWidget {
     ) {
         self.bottom_pane
             .push_mcp_server_elicitation_request(request);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -457,6 +463,7 @@ impl ChatWidget {
         };
         self.notify(Notification::PlanModePrompt { title });
         self.bottom_pane.push_user_input_request(ev);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,
@@ -476,6 +483,7 @@ impl ChatWidget {
         });
         self.bottom_pane
             .push_approval_request(request, &self.config.features);
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Waiting,
             /*body*/ None,

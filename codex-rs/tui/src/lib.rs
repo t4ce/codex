@@ -139,8 +139,10 @@ mod daybreak;
 mod experimental_features;
 mod markdown_copy;
 mod permission_discovery;
+#[cfg(not(target_os = "trueos"))]
 mod pets;
 mod security_setup;
+mod terminal_image;
 mod worktree_browser;
 pub use custom_terminal::Terminal;
 mod assistant_directives;

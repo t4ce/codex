@@ -19,11 +19,11 @@ mod ambient;
 mod asset_pack;
 mod catalog;
 mod frames;
-mod image_protocol;
+use crate::terminal_image::image_protocol;
 mod model;
 mod picker;
 mod preview;
-mod sixel;
+use crate::terminal_image::sixel;
 
 use anyhow::Context;
 use anyhow::Result;

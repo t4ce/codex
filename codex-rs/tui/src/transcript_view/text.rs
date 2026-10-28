@@ -289,7 +289,7 @@ impl TextLayout {
     ) -> Option<&std::sync::Arc<crate::transcript_image::TranscriptImage>> {
         self.image.as_ref().filter(|image| {
             image.columns + 2 <= self.width
-                && (image.protocol != crate::pets::ImageProtocol::Sixel
+                && (image.protocol != crate::terminal_image::ImageProtocol::Sixel
                     || crate::transcript_image::terminal_cell_size()
                         == Some((image.cell_width, image.cell_height)))
         })

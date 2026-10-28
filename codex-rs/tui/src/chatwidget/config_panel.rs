@@ -108,6 +108,7 @@ impl ChatWidget {
             | ConfigToggle::StartInVimMode
             | ConfigToggle::Tips => {}
         }
+        #[cfg(not(target_os = "trueos"))]
         if setting == ConfigToggle::Animations
             && let Some(pet) = self.ambient_pet.as_mut()
         {

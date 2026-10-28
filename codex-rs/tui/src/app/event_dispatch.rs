@@ -1355,18 +1355,23 @@ impl App {
             AppEvent::OpenDesktopThread { thread_id } => {
                 self.open_desktop_thread(thread_id);
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::PetSelected { pet_id } => {
                 self.handle_pet_selected(tui, pet_id);
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::PetDisabled => {
                 self.handle_pet_disabled(tui).await;
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::PetPreviewRequested { pet_id } => {
                 self.chat_widget.start_pet_picker_preview(pet_id);
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::PetPreviewLoaded { request_id, result } => {
                 self.handle_pet_preview_loaded(tui, request_id, result);
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::PetSelectionLoaded {
                 request_id,
                 pet_id,
@@ -1376,6 +1381,7 @@ impl App {
                     .handle_pet_selection_loaded(tui, request_id, pet_id, result)
                     .await;
             }
+            #[cfg(not(target_os = "trueos"))]
             AppEvent::ConfiguredPetLoaded {
                 generation,
                 pet_id,

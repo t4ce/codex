@@ -554,6 +554,7 @@ async fn owned_details_keep_the_composer_cursor_and_screen() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 async fn owned_transcript_keeps_text_out_of_the_pet_columns() -> Result<()> {
     let mut app = crate::app::test_support::make_test_app().await;

@@ -90,7 +90,7 @@ pub(super) struct CellPresentation {
     expanded: bool,
     disclosure: bool,
     detailed: bool,
-    image_protocol: Option<crate::pets::ImageProtocol>,
+    image_protocol: Option<crate::terminal_image::ImageProtocol>,
 }
 
 impl TranscriptView {

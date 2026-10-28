@@ -84,10 +84,12 @@ impl ChatWidget {
             .as_ref()
             .map(|keymap| keymap.chat.clone())
             .unwrap_or_else(|| default_keymap.chat.clone());
+        #[cfg(not(target_os = "trueos"))]
         let pet_http_client = codex_transport::http::RouteAwareClientPool::new(
             config.http_client_factory(),
             codex_transport::http::ClientRouteClass::Other,
         );
+        #[cfg(not(target_os = "trueos"))]
         let configured_pet_load_generation = pets::start_configured_pet_load_if_needed(
             &local_settings,
             /*ambient_pet_missing*/ true,
@@ -221,15 +223,24 @@ impl ChatWidget {
             status_state: StatusState::default(),
             review: ReviewState::default(),
             active_hook_cell: None,
+            #[cfg(not(target_os = "trueos"))]
             pet_http_client,
+            #[cfg(not(target_os = "trueos"))]
             ambient_pet: None,
+            #[cfg(not(target_os = "trueos"))]
             configured_pet_load_generation,
+            #[cfg(not(target_os = "trueos"))]
             pet_picker_preview_state: crate::pets::PetPickerPreviewState::default(),
+            #[cfg(not(target_os = "trueos"))]
             pet_picker_preview_pet: None,
+            #[cfg(not(target_os = "trueos"))]
             pet_picker_preview_request_id: 0,
+            #[cfg(not(target_os = "trueos"))]
             pet_picker_preview_image_visible: std::cell::Cell::new(/*value*/ false),
+            #[cfg(not(target_os = "trueos"))]
             pet_selection_load_request_id: 0,
             #[cfg(test)]
+            #[cfg(not(target_os = "trueos"))]
             pet_image_support_override: None,
             thread_id: None,
             thread_name: None,

@@ -4,24 +4,28 @@ use crate::bottom_pane::slash_commands::ServiceTierCommand;
 use pretty_assertions::assert_eq;
 use serial_test::serial;
 
+#[cfg(not(target_os = "trueos"))]
 fn force_pet_image_support(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Supported(
         crate::pets::ImageProtocol::Kitty,
     ));
 }
 
+#[cfg(not(target_os = "trueos"))]
 fn force_tmux_pet_image_unsupported(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Unsupported(
         crate::pets::PetImageUnsupportedReason::Tmux,
     ));
 }
 
+#[cfg(not(target_os = "trueos"))]
 fn force_terminal_pet_image_unsupported(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Unsupported(
         crate::pets::PetImageUnsupportedReason::Terminal,
     ));
 }
 
+#[cfg(not(target_os = "trueos"))]
 fn force_old_iterm2_pet_image_unsupported(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Unsupported(
         crate::pets::PetImageUnsupportedReason::Iterm2TooOld,
@@ -3111,6 +3115,7 @@ async fn slash_resume_with_arg_requests_named_session_while_mcp_startup_is_runni
     assert_matches!(op_rx.try_recv(), Err(TryRecvError::Empty));
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_opens_picker() {
@@ -3126,6 +3131,7 @@ async fn slash_pets_opens_picker() {
     assert_chatwidget_snapshot!("slash_pets_picker", popup);
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_with_arg_selects_named_pet() {
@@ -3144,6 +3150,7 @@ async fn slash_pets_with_arg_selects_named_pet() {
     assert_matches!(op_rx.try_recv(), Err(TryRecvError::Empty));
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pet_disable_aliases_work_on_unsupported_terminal() {
@@ -3161,6 +3168,7 @@ async fn slash_pet_disable_aliases_work_on_unsupported_terminal() {
     }
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_in_tmux_shows_notice_and_preserves_draft() {
@@ -3190,6 +3198,7 @@ async fn slash_pets_in_tmux_shows_notice_and_preserves_draft() {
     assert_eq!(chat.bottom_pane.composer_text(), "Keep this draft");
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_with_arg_on_unsupported_terminal_shows_notice_without_selection() {
@@ -3218,6 +3227,7 @@ async fn slash_pets_with_arg_on_unsupported_terminal_shows_notice_without_select
     assert_matches!(op_rx.try_recv(), Err(TryRecvError::Empty));
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_on_unsupported_terminal_shows_terminal_warning() {
@@ -3241,6 +3251,7 @@ async fn slash_pets_on_unsupported_terminal_shows_terminal_warning() {
     assert!(rendered.contains("Kitty graphics or Sixel support"));
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn slash_pets_on_old_iterm2_shows_upgrade_warning() {

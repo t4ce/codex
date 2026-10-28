@@ -246,6 +246,7 @@ mod native_history;
 mod owned_transcript;
 mod pending_interactive_replay;
 mod permission_shortcuts;
+#[cfg(not(target_os = "trueos"))]
 mod pets;
 mod platform_actions;
 mod plugin_mentions;
@@ -1165,7 +1166,7 @@ impl App {
                     }
                     self.chat_widget.pre_draw_tick();
                     self.refresh_agents_overview_usage(app_server, tui.frame_requester());
-                    let rendered_area = self.render_chat_widget_frame(tui, screen_size)?;
+                    let _rendered_area = self.render_chat_widget_frame(tui, screen_size)?;
                     if self.primary_session_configured.is_some()
                         && !self.pending_startup_thread_start
                         && !self.chat_widget.has_active_modal()
@@ -1185,6 +1186,7 @@ impl App {
                     {
                         self.discard_startup_modal_input(tui)?;
                     }
+                    #[cfg(not(target_os = "trueos"))]
                     if self.chat_widget.ambient_pet_image_enabled() {
                         let ambient_pet_area = Rect::new(
                             /*x*/ 0,
@@ -1194,11 +1196,12 @@ impl App {
                         );
                         if let Err(err) = tui.draw_ambient_pet_image(
                             self.chat_widget
-                                .ambient_pet_draw(ambient_pet_area, rendered_area.bottom()),
+                                .ambient_pet_draw(ambient_pet_area, _rendered_area.bottom()),
                         ) {
                             self.handle_ambient_pet_image_render_error(tui, err)?;
                         }
                     }
+                    #[cfg(not(target_os = "trueos"))]
                     if let Some(request) = self.chat_widget.pet_picker_preview_draw() {
                         if let Err(err) = tui.draw_pet_picker_preview_image(Some(request)) {
                             self.handle_pet_picker_preview_image_render_error(tui, err)?;
@@ -1226,6 +1229,7 @@ impl App {
     }
 
     pub(super) fn show_shutdown_feedback(&mut self, tui: &mut tui::Tui) -> Result<()> {
+        #[cfg(not(target_os = "trueos"))]
         self.disable_ambient_pet_before_shutdown(tui)?;
         self.chat_widget.show_shutdown_in_progress();
         let screen_size = tui.terminal.last_known_screen_size;

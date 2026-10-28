@@ -1173,11 +1173,13 @@ impl App {
     }
 
     #[cfg(test)]
+    #[cfg(not(target_os = "trueos"))]
     pub(super) fn sync_tui_pet_selection(&mut self, pet: String) {
         self.local_settings.tui.pet = Some(pet.clone());
         self.chat_widget.set_tui_pet(Some(pet));
     }
 
+    #[cfg(not(target_os = "trueos"))]
     pub(super) fn sync_tui_pet_disabled(&mut self) {
         let pet = crate::pets::DISABLED_PET_ID.to_string();
         self.local_settings.tui.pet = Some(pet.clone());
@@ -2110,6 +2112,7 @@ theme = "dracula"
         Ok(())
     }
 
+    #[cfg(not(target_os = "trueos"))]
     #[tokio::test]
     async fn sync_tui_pet_selection_updates_chat_widget_config_copy() {
         let mut app = make_test_app().await;
@@ -2123,6 +2126,7 @@ theme = "dracula"
         );
     }
 
+    #[cfg(not(target_os = "trueos"))]
     #[tokio::test]
     async fn sync_tui_pet_disabled_updates_chat_widget_config_copy() {
         let mut app = make_test_app().await;

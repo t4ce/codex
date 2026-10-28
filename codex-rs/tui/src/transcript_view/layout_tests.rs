@@ -149,7 +149,7 @@ fn recent_entries_are_reused_and_old_entries_are_evicted() {
 fn fullscreen_image_previews_follow_layout_without_entering_text_surfaces() {
     use crate::history_cell::new_image_generation_call;
     use crate::history_cell::new_view_image_tool_call;
-    use crate::pets::ImageProtocol;
+    use crate::terminal_image::ImageProtocol;
     use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use codex_utils_paths::path_uri::LegacyAppPathString;
 

@@ -177,7 +177,9 @@ const PLAN_MODE_REASONING_SCOPE_TITLE: &str = "Apply reasoning change";
 const PLAN_MODE_REASONING_SCOPE_PLAN_ONLY: &str = "Apply to Plan mode override";
 const PLAN_MODE_REASONING_SCOPE_ALL_MODES: &str = "Apply to global default and Plan mode override";
 const CONNECTORS_SELECTION_VIEW_ID: &str = "connectors-selection";
+#[cfg(not(target_os = "trueos"))]
 const PET_SELECTION_LOADING_VIEW_ID: &str = "pet-selection-loading";
+#[cfg(not(target_os = "trueos"))]
 const AMBIENT_PET_WRAP_GAP_COLUMNS: u16 = 2;
 const TUI_STUB_MESSAGE: &str = "Not available in TUI yet.";
 const PARENT_OWNED_INPUT_MESSAGE: &str =
@@ -297,7 +299,12 @@ use self::mcp_startup::McpStartupStatus;
 mod misalignment_policy;
 pub(crate) use misalignment_policy::MisalignmentReview;
 pub(crate) use misalignment_policy::MisalignmentTurnSource;
+#[cfg(not(target_os = "trueos"))]
 mod pets;
+#[cfg(target_os = "trueos")]
+#[path = "chatwidget/pets_trueos.rs"]
+mod pets_trueos;
+#[cfg(not(target_os = "trueos"))]
 pub(crate) use self::pets::ConfiguredPetLoadGeneration;
 mod session_flow;
 mod session_header;
@@ -665,16 +672,25 @@ pub(crate) struct ChatWidget {
     // Active hook runs render in a dedicated live cell so they can run alongside tools.
     active_hook_cell: Option<HookCell>,
     // Reused for built-in pet CDN requests so redirects remain route-aware.
+    #[cfg(not(target_os = "trueos"))]
     pub(crate) pet_http_client: codex_transport::http::RouteAwareClientPool,
     // Ambient companion rendered over the transcript area, never inside the footer rows.
+    #[cfg(not(target_os = "trueos"))]
     ambient_pet: Option<crate::pets::AmbientPet>,
+    #[cfg(not(target_os = "trueos"))]
     configured_pet_load_generation: ConfiguredPetLoadGeneration,
+    #[cfg(not(target_os = "trueos"))]
     pet_picker_preview_state: crate::pets::PetPickerPreviewState,
+    #[cfg(not(target_os = "trueos"))]
     pet_picker_preview_pet: Option<crate::pets::AmbientPet>,
+    #[cfg(not(target_os = "trueos"))]
     pet_picker_preview_request_id: u64,
+    #[cfg(not(target_os = "trueos"))]
     pet_picker_preview_image_visible: std::cell::Cell<bool>,
+    #[cfg(not(target_os = "trueos"))]
     pet_selection_load_request_id: u64,
     #[cfg(test)]
+    #[cfg(not(target_os = "trueos"))]
     pet_image_support_override: Option<crate::pets::PetImageSupport>,
     thread_id: Option<ThreadId>,
     thread_name: Option<String>,
@@ -1186,6 +1202,7 @@ impl ChatWidget {
         self.bottom_pane.pre_draw_tick();
         self.flush_realtime_transcript_history();
         self.refresh_realtime_microphone_level();
+        #[cfg(not(target_os = "trueos"))]
         if let Some(pet) = self.ambient_pet.as_ref() {
             pet.schedule_next_frame();
         }

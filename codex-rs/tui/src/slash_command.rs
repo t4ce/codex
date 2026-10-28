@@ -127,7 +127,10 @@ impl SlashCommand {
             SlashCommand::Title => "configure which items appear in the terminal title",
             SlashCommand::Statusline => "configure which items appear in the status line",
             SlashCommand::Theme => "choose a syntax highlighting theme",
+            #[cfg(not(target_os = "trueos"))]
             SlashCommand::Pets => "choose or hide the terminal pet",
+            #[cfg(target_os = "trueos")]
+            SlashCommand::Pets => "show how Lilly follows this session through Spirit",
             SlashCommand::Ps => "list background terminals",
             SlashCommand::Stop => "stop all background terminals",
             SlashCommand::MemoryDrop => "DO NOT USE",

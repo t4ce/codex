@@ -54,6 +54,7 @@ use crate::bottom_pane::ApprovalRequest;
 use crate::bottom_pane::StatusLineItem;
 use crate::bottom_pane::TerminalTitleItem;
 use crate::chatwidget::AstraModelPickerAction;
+#[cfg(not(target_os = "trueos"))]
 use crate::chatwidget::ConfiguredPetLoadGeneration;
 use crate::chatwidget::ConnectorScopeGeneration;
 use crate::chatwidget::ThreadUsageOutcome;
@@ -905,25 +906,30 @@ pub(crate) enum AppEvent {
     },
 
     /// Persist a pet selection and reload the ambient pet.
+    #[cfg(not(target_os = "trueos"))]
     PetSelected {
         pet_id: String,
     },
 
     /// Persist terminal pets as disabled and remove the ambient pet.
+    #[cfg(not(target_os = "trueos"))]
     PetDisabled,
 
     /// Start loading the side preview for the pet picker.
+    #[cfg(not(target_os = "trueos"))]
     PetPreviewRequested {
         pet_id: String,
     },
 
     /// Result of loading the side preview for the pet picker.
+    #[cfg(not(target_os = "trueos"))]
     PetPreviewLoaded {
         request_id: u64,
         result: Result<crate::pets::AmbientPet, String>,
     },
 
     /// Result of loading the selected ambient pet before config persistence.
+    #[cfg(not(target_os = "trueos"))]
     PetSelectionLoaded {
         request_id: u64,
         pet_id: String,
@@ -931,6 +937,7 @@ pub(crate) enum AppEvent {
     },
 
     /// Result of restoring the configured ambient pet during startup.
+    #[cfg(not(target_os = "trueos"))]
     ConfiguredPetLoaded {
         generation: ConfiguredPetLoadGeneration,
         pet_id: String,

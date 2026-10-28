@@ -1127,6 +1127,7 @@ impl ChatWidget {
                 self.app_event_tx
                     .send(AppEvent::ResumeSessionByIdOrName(args));
             }
+            #[cfg(not(target_os = "trueos"))]
             SlashCommand::Pets
                 if matches!(
                     args.trim().to_ascii_lowercase().as_str(),
@@ -1135,6 +1136,7 @@ impl ChatWidget {
             {
                 self.app_event_tx.send(AppEvent::PetDisabled);
             }
+            #[cfg(not(target_os = "trueos"))]
             SlashCommand::Pets if !trimmed.is_empty() => {
                 self.select_pet_by_id(args);
             }

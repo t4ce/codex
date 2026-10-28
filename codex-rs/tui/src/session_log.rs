@@ -188,6 +188,7 @@ fn log_inbound_app_event_with(logger: &SessionLogger, event: &AppEvent) {
             });
             logger.write_json_line(value);
         }
+        #[cfg(not(target_os = "trueos"))]
         AppEvent::PetPreviewLoaded { request_id, result } => {
             let value = json!({
                 "ts": now_ts(),
@@ -199,6 +200,7 @@ fn log_inbound_app_event_with(logger: &SessionLogger, event: &AppEvent) {
             });
             logger.write_json_line(value);
         }
+        #[cfg(not(target_os = "trueos"))]
         AppEvent::PetSelectionLoaded {
             request_id,
             pet_id,

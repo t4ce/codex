@@ -110,6 +110,7 @@ impl ChatWidget {
         self.reasoning_header = None;
         self.status_state.reasoning_item_id = None;
         self.status_state.reasoning_resume_turn_id = None;
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Running,
             /*body*/ None,
@@ -201,8 +202,10 @@ impl ChatWidget {
         self.suppressed_exec_calls.clear();
         self.last_unified_wait = None;
         self.unified_exec_wait_streak = None;
+        #[cfg(not(target_os = "trueos"))]
         if !from_replay {
             let body = Notification::agent_turn_preview(&notification_response);
+            #[cfg(not(target_os = "trueos"))]
             self.set_ambient_pet_notification(crate::pets::PetNotificationKind::Review, body);
         }
         self.request_redraw();
@@ -397,6 +400,7 @@ impl ChatWidget {
         self.input_queue.submit_pending_steers_after_interrupt = false;
         self.finalize_turn();
         self.add_to_history(history_cell::new_error_event(message));
+        #[cfg(not(target_os = "trueos"))]
         self.set_ambient_pet_notification(
             crate::pets::PetNotificationKind::Failed,
             /*body*/ None,

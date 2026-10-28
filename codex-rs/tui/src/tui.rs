@@ -708,7 +708,9 @@ pub struct Tui {
     screen_size: ScreenSizePolicy,
     #[cfg(target_os = "trueos")]
     terminal_generation: Option<u64>,
+    #[cfg(not(target_os = "trueos"))]
     ambient_pet_image_state: crate::pets::PetImageRenderState,
+    #[cfg(not(target_os = "trueos"))]
     pet_picker_preview_image_state: crate::pets::PetImageRenderState,
     pub(crate) transcript_images: Vec<crate::transcript_image::ImagePlacement>,
     alt_saved_viewport: Option<ratatui::layout::Rect>,
@@ -789,7 +791,9 @@ impl Tui {
             screen_size: ScreenSizePolicy::default(),
             #[cfg(target_os = "trueos")]
             terminal_generation: terminal_reentry::current_generation().ok().flatten(),
+            #[cfg(not(target_os = "trueos"))]
             ambient_pet_image_state: crate::pets::PetImageRenderState::default(),
+            #[cfg(not(target_os = "trueos"))]
             pet_picker_preview_image_state: crate::pets::PetImageRenderState::default(),
             transcript_images: Vec::new(),
             alt_saved_viewport: None,
@@ -1415,6 +1419,7 @@ impl Tui {
         Ok(())
     }
 
+    #[cfg(not(target_os = "trueos"))]
     pub fn draw_ambient_pet_image(
         &mut self,
         request: Option<crate::pets::AmbientPetDraw>,
@@ -1434,6 +1439,7 @@ impl Tui {
         })??
     }
 
+    #[cfg(not(target_os = "trueos"))]
     pub fn draw_pet_picker_preview_image(
         &mut self,
         request: Option<crate::pets::AmbientPetDraw>,
@@ -1457,6 +1463,7 @@ impl Tui {
         })??
     }
 
+    #[cfg(not(target_os = "trueos"))]
     pub fn clear_ambient_pet_image(
         &mut self,
     ) -> std::result::Result<(), crate::pets::PetImageRenderError> {
@@ -1469,6 +1476,12 @@ impl Tui {
             &mut self.ambient_pet_image_state,
             /*request*/ None,
         )
+    }
+
+    // Spirit owns the resident avatar on TRUEOS; cleanup has no terminal image.
+    #[cfg(target_os = "trueos")]
+    pub fn clear_ambient_pet_image(&mut self) -> std::io::Result<()> {
+        Ok(())
     }
 
     /// Draw a frame using the resize-reflow viewport and history insertion rules.

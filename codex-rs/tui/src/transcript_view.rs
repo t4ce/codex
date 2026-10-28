@@ -89,7 +89,7 @@ struct VisibleRow {
 
 /// Shared scrolling and interaction state for compact and detailed transcript presentations.
 pub(crate) struct TranscriptView {
-    pub(crate) image_protocol: Option<crate::pets::ImageProtocol>,
+    pub(crate) image_protocol: Option<crate::terminal_image::ImageProtocol>,
     pub(crate) mouse_scroll_speed: f64,
     pending_mouse_scroll: f64,
     pub(crate) copy_on_select: bool,

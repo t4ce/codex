@@ -40,6 +40,7 @@ async fn finalized_voice_transcript_renders_beside_the_streamed_cell() {
     }
 }
 
+#[cfg(not(target_os = "trueos"))]
 fn enable_test_ambient_pet(chat: &mut ChatWidget) {
     chat.set_pet_image_support_for_tests(crate::pets::PetImageSupport::Supported(
         crate::pets::ImageProtocol::Kitty,
@@ -570,6 +571,7 @@ async fn completed_plan_table_tail_skips_provisional_history_insert() {
     );
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[cfg_attr(target_os = "windows", ignore = "disabled on windows")]
 async fn configured_pet_load_is_deferred_until_after_construction() {
@@ -2535,6 +2537,7 @@ async fn ui_small_heights_hide_running_state() {
     }
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_stays_hidden_until_a_pet_is_selected() {
@@ -2576,6 +2579,7 @@ async fn ambient_pet_stays_hidden_until_a_pet_is_selected() {
     );
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_screen_bottom_anchor_uses_terminal_bottom() {
@@ -2601,6 +2605,7 @@ async fn ambient_pet_screen_bottom_anchor_uses_terminal_bottom() {
     assert_eq!(screen_bottom_draw.y, 18);
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_can_be_disabled() {
@@ -2611,6 +2616,7 @@ async fn ambient_pet_can_be_disabled() {
     assert!(chat.ambient_pet.is_none());
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 async fn added_history_uses_pet_adjusted_terminal_width() {
     #[derive(Debug)]
@@ -2665,6 +2671,7 @@ width-sensitive history
     assert_eq!(width.load(std::sync::atomic::Ordering::Relaxed), 0);
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_reserves_history_wrap_width() {
@@ -2678,6 +2685,7 @@ async fn ambient_pet_reserves_history_wrap_width() {
     assert_eq!(chat.history_wrap_width(/*width*/ 80), 80);
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_reduces_stream_width_and_composer_text_width() {
@@ -2749,6 +2757,7 @@ fn row_tail_is_blank(row: &str, start_col: usize) -> bool {
     row.chars().skip(start_col).all(char::is_whitespace)
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_draw_uses_terminal_screen_area_not_short_inline_viewport() {
@@ -2780,6 +2789,7 @@ async fn ambient_pet_draw_uses_terminal_screen_area_not_short_inline_viewport() 
     assert_eq!(draw.y, 18);
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 #[serial]
 async fn ambient_pet_hides_notification_text_overlay() {

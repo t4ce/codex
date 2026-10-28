@@ -7069,6 +7069,7 @@ async fn uncapped_resize_reflow_renders_all_cells_when_row_cap_absent() {
     assert_eq!(rendered_line_text(&rendered.lines[38]), "cell 19");
 }
 
+#[cfg(not(target_os = "trueos"))]
 #[tokio::test]
 async fn resize_reflow_wraps_transcript_early_when_pet_is_enabled() {
     let (mut app, _rx, _op_rx) = make_test_app_with_channels().await;
