@@ -13,8 +13,12 @@ use crate::tools::handlers::CurrentTimeHandler;
 use crate::tools::handlers::DynamicToolHandler;
 use crate::tools::handlers::ExecCommandHandler;
 use crate::tools::handlers::ExecCommandHandlerOptions;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::FileInfoHandler;
 use crate::tools::handlers::GetContextRemainingHandler;
 use crate::tools::handlers::ListAvailablePluginsToInstallHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::ListDirectoryHandler;
 use crate::tools::handlers::ListMcpResourceTemplatesHandler;
 use crate::tools::handlers::ListMcpResourcesHandler;
 use crate::tools::handlers::NewContextWindowHandler;
@@ -1412,6 +1416,8 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
     #[cfg(target_os = "trueos")]
     {
         let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
+        registry.add(ListDirectoryHandler::new(include_environment_id));
+        registry.add(FileInfoHandler::new(include_environment_id));
         registry.add(ReadFileHandler::new(include_environment_id));
         registry.add(WriteFileHandler::new(include_environment_id));
     }

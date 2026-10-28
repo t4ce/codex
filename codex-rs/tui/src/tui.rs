@@ -643,7 +643,7 @@ fn set_panic_hook() {
     let hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic_info| {
         #[cfg(target_os = "trueos")]
-        eprintln!("[codex-startup] panic before terminal restore: {panic_info}");
+        tracing::error!(target: "codex_startup", panic = %panic_info, "panic before terminal restore");
         let _ = restore_after_exit(); // ignore any errors as we are already failing
         hook(panic_info);
     }));

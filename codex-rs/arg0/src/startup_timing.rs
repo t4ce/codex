@@ -1,6 +1,7 @@
 //! Opt-in, process-local startup milestones for terminal bring-up measurements.
 //! Set CODEX_STARTUP_TIMING_FILE for TSV rows, or CODEX_STARTUP_TIMING_STDERR=1
-//! for visible diagnostics during terminal bring-up.
+//! for diagnostics during terminal bring-up. On TRUEOS, diagnostics go to the
+//! resident logger so milestones emitted after drawing cannot overwrite the TUI.
 
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -48,18 +49,25 @@ pub fn mark(stage: &str) {
         return;
     }
     let now = Instant::now();
-    let row = format!(
-        "{}\t{:.3}\t{:.3}\t{}\n",
-        std::process::id(),
-        now.duration_since(timing.start).as_secs_f64() * 1000.0,
-        now.duration_since(timing.previous).as_secs_f64() * 1000.0,
-        stage,
-    );
+    let pid = std::process::id();
+    let elapsed_ms = now.duration_since(timing.start).as_secs_f64() * 1000.0;
+    let delta_ms = now.duration_since(timing.previous).as_secs_f64() * 1000.0;
+    let row = format!("{pid}\t{elapsed_ms:.3}\t{delta_ms:.3}\t{stage}\n");
     timing.previous = now;
     if let Some(file) = timing.file.as_mut() {
         let _ = file.write_all(row.as_bytes());
     }
     if timing.stderr {
+        #[cfg(target_os = "trueos")]
+        tracing::info!(
+            target: "codex_startup",
+            pid,
+            elapsed_ms,
+            delta_ms,
+            stage,
+            "startup milestone"
+        );
+        #[cfg(not(target_os = "trueos"))]
         let _ = std::io::stderr()
             .write_all(format!("[codex-startup] {}\r\n", row.trim_end()).as_bytes());
     }

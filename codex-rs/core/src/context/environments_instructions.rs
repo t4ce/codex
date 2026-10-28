@@ -27,12 +27,17 @@ impl ContextualUserFragment for EnvironmentsInstructions {
     }
 
     fn body(&self) -> String {
-        "\n## Execution environments\n\
+        let body = "\n## Execution environments\n\
 Execution environments are separate machines or workspaces with their own files, shell, and installed capabilities. `<environment_context>` lists the environments selected for this task.\n\
 \n\
 An environment marked `starting` is not yet usable. Its files, commands, AGENTS.md instructions, skills, plugins, and MCP tools may become available when startup completes.\n\
 \n\
 Wait only when the current task needs that environment. Continue using tools that are already available for unrelated work.\n"
-            .to_string()
+            .to_string();
+        #[cfg(target_os = "trueos")]
+        let body = format!(
+            "{body}\nThe local runtime is TRUEOS. For filesystem discovery, call `list_directory` with no path to start at the environment cwd, then use the returned paths with `file_info`, `read_file`, and `write_file`. These tools use the selected environment's filesystem and permissions. Build-host checkout paths are not automatically present in this runtime. Local `exec_command` sends native interactive Shell3 input; use the direct filesystem tools for file operations. Remote environments retain their reported filesystem and shell semantics.\n"
+        );
+        body
     }
 }

@@ -302,10 +302,11 @@ impl Session {
         }
         world_state.add_section(EnvironmentsInstructionsState::new(
             turn_context.config.include_environment_context
-                && turn_context
-                    .config
-                    .features
-                    .enabled(Feature::DeferredExecutor),
+                && (cfg!(target_os = "trueos")
+                    || turn_context
+                        .config
+                        .features
+                        .enabled(Feature::DeferredExecutor)),
         ));
         let apps_available =
             if turn_context.config.include_apps_instructions && turn_context.apps_enabled() {

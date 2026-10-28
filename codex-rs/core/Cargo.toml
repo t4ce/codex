@@ -13,6 +13,12 @@ voice = ["dep:codex-utils-audio"]
 name = "codex_core"
 path = "src/lib.rs"
 
+[build-dependencies]
+syn = { version = "2", features = ["full"] }
+
+[target.'cfg(target_os = "trueos")'.dependencies]
+trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
+
 [lints]
 workspace = true
 

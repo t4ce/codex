@@ -8,6 +8,7 @@ use std::time::Duration;
 use codex_exec_server::ExecutorFileSystem;
 use codex_exec_server::FileSystemSandboxContext;
 use codex_exec_server::GetMetadataOptions;
+use codex_exec_server::ReadDirectoryEntry;
 use codex_exec_server::WriteFileOptions;
 use codex_protocol::models::AdditionalPermissionProfile;
 use codex_protocol::protocol::AskForApproval;
@@ -57,8 +58,18 @@ use crate::windows_sandbox::windows_sandbox_level_for_legacy_checks;
 
 const DEFAULT_READ_BYTES: usize = 64 * 1024;
 const MAX_TEXT_BYTES: usize = 1024 * 1024;
+const DEFAULT_DIRECTORY_ENTRIES: usize = 100;
+const MAX_DIRECTORY_ENTRIES: usize = 1000;
 
 pub struct ReadFileHandler {
+    include_environment_id: bool,
+}
+
+pub struct ListDirectoryHandler {
+    include_environment_id: bool,
+}
+
+pub struct FileInfoHandler {
     include_environment_id: bool,
 }
 
@@ -67,6 +78,22 @@ pub struct WriteFileHandler {
 }
 
 impl ReadFileHandler {
+    pub(crate) fn new(include_environment_id: bool) -> Self {
+        Self {
+            include_environment_id,
+        }
+    }
+}
+
+impl ListDirectoryHandler {
+    pub(crate) fn new(include_environment_id: bool) -> Self {
+        Self {
+            include_environment_id,
+        }
+    }
+}
+
+impl FileInfoHandler {
     pub(crate) fn new(include_environment_id: bool) -> Self {
         Self {
             include_environment_id,
@@ -94,6 +121,28 @@ struct ReadArgs {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+struct DirectoryArgs {
+    #[serde(default = "default_dot_path")]
+    path: String,
+    #[serde(default)]
+    offset: usize,
+    #[serde(default)]
+    max_entries: Option<usize>,
+    #[serde(default)]
+    environment_id: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FileInfoArgs {
+    #[serde(default = "default_dot_path")]
+    path: String,
+    #[serde(default)]
+    environment_id: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct WriteArgs {
     path: String,
     content: String,
@@ -111,11 +160,15 @@ fn text_error(error: impl std::fmt::Display) -> FunctionCallError {
     FunctionCallError::RespondToModel(error.to_string())
 }
 
+fn default_dot_path() -> String {
+    ".".to_string()
+}
+
 fn parameters(include_environment_id: bool) -> BTreeMap<String, JsonSchema> {
     let mut properties = BTreeMap::from([(
         "path".into(),
         JsonSchema::string(Some(
-            "Absolute path, or path relative to the environment cwd.".into(),
+            "Path in the visible target runtime filesystem, absolute or relative to the environment cwd. This does not refer to host checkout paths.".into(),
         )),
     )]);
     if include_environment_id {
@@ -137,7 +190,7 @@ fn read_spec(include_environment_id: bool) -> ToolSpec {
     )));
     ToolSpec::Function(ResponsesApiTool {
         name: "read_file".into(),
-        description: "Read an entire UTF-8 text file directly, without a shell or terminal. Works for Rust, HTML, JSON, CSV, plain text and any other extension. Returns exact content, byte count, SHA-256 and native content type when available; rejects invalid UTF-8 or oversized files.".into(),
+        description: "Read an entire UTF-8 text file directly from the visible target runtime filesystem, without a shell or terminal. Paths are resolved against the selected environment cwd; this does not expose host checkout paths. Works for any extension and returns exact content, byte count, SHA-256 and native content type when available; rejects invalid UTF-8 or oversized files.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(vec!["path".into()]), Some(false.into())),
@@ -146,6 +199,83 @@ fn read_spec(include_environment_id: bool) -> ToolSpec {
             "sha256":{"type":"string"},"content_type":{"type":["integer","null"]},"truncated":{"type":"boolean"}
         },"required":["path","content","bytes","sha256","content_type","truncated"],"additionalProperties":false}).into()),
     })
+}
+
+fn directory_spec(include_environment_id: bool) -> ToolSpec {
+    let mut properties = parameters(include_environment_id);
+    properties.remove("path");
+    properties.insert(
+        "path".into(),
+        JsonSchema::string(Some(
+            "Directory in the visible target runtime namespace. Defaults to the environment cwd; use list_directory to discover available paths.".into(),
+        )),
+    );
+    properties.insert(
+        "offset".into(),
+        JsonSchema::integer(Some(
+            "Zero-based entry offset after sorting by file_name; defaults to 0.".into(),
+        )),
+    );
+    properties.insert(
+        "max_entries".into(),
+        JsonSchema::integer(Some(
+            "Entries to return, 1 through 1000; defaults to 100.".into(),
+        )),
+    );
+    ToolSpec::Function(ResponsesApiTool {
+        name: "list_directory".into(),
+        description: "List one directory in the visible target runtime filesystem directly, without a shell or terminal. Paths are resolved against the selected environment cwd; this tool does not expose host checkout paths. Entries are sorted by name and paged with offset and max_entries.".into(),
+        strict: false,
+        defer_loading: None,
+        parameters: JsonSchema::object(properties, Some(Vec::new()), Some(false.into())),
+        output_schema: Some(json!({"type":"object","properties":{
+            "path":{"type":"string"},"cwd":{"type":"string"},"total":{"type":"integer"},
+            "offset":{"type":"integer"},"max_entries":{"type":"integer"},"entries":{"type":"array","items":{"type":"object","properties":{
+                "file_name":{"type":"string"},"path":{"type":"string"},"is_directory":{"type":"boolean"},"is_file":{"type":"boolean"}
+            },"required":["file_name","path","is_directory","is_file"],"additionalProperties":false}},
+            "truncated":{"type":"boolean"},"next_offset":{"type":["integer","null"]}
+        },"required":["path","cwd","total","offset","max_entries","entries","truncated","next_offset"],"additionalProperties":false}).into()),
+    })
+}
+
+fn file_info_spec(include_environment_id: bool) -> ToolSpec {
+    let mut properties = parameters(include_environment_id);
+    properties.remove("path");
+    properties.insert(
+        "path".into(),
+        JsonSchema::string(Some(
+            "File or directory in the visible target runtime namespace. Defaults to the environment cwd; use list_directory to discover available paths.".into(),
+        )),
+    );
+    ToolSpec::Function(ResponsesApiTool {
+        name: "file_info".into(),
+        description: "Get metadata for one path in the visible target runtime filesystem directly, without a shell or terminal. Paths are resolved against the selected environment cwd; this tool does not expose host checkout paths.".into(),
+        strict: false,
+        defer_loading: None,
+        parameters: JsonSchema::object(properties, Some(Vec::new()), Some(false.into())),
+        output_schema: Some(json!({"type":"object","properties":{
+            "path":{"type":"string"},"cwd":{"type":"string"},"metadata":{"type":"object","properties":{
+                "content_type":{"type":["integer","null"]},"is_directory":{"type":"boolean"},"is_file":{"type":"boolean"},
+                "is_symlink":{"type":"boolean"},"size":{"type":"integer"},"created_at_ms":{"type":"integer"},"modified_at_ms":{"type":"integer"}
+            },"required":["content_type","is_directory","is_file","is_symlink","size","created_at_ms","modified_at_ms"],"additionalProperties":false}
+        },"required":["path","cwd","metadata"],"additionalProperties":false}).into()),
+    })
+}
+
+fn paged_directory_entries(
+    mut entries: Vec<ReadDirectoryEntry>,
+    offset: usize,
+    max_entries: usize,
+) -> (Vec<ReadDirectoryEntry>, usize, Option<usize>) {
+    entries.sort_by(|left, right| left.file_name.cmp(&right.file_name));
+    let total = entries.len();
+    let page = entries
+        .into_iter()
+        .skip(offset)
+        .take(max_entries)
+        .collect::<Vec<_>>();
+    let next_offset = offset.checked_add(page.len()).filter(|next| *next < total);
+    (page, total, next_offset)
 }
 
 fn write_spec(include_environment_id: bool) -> ToolSpec {
@@ -158,7 +288,7 @@ fn write_spec(include_environment_id: bool) -> ToolSpec {
     ]);
     ToolSpec::Function(ResponsesApiTool {
         name: "write_file".into(),
-        description: "Create or explicitly replace a UTF-8 text file directly, without a shell or terminal. Works with any extension, including .rs and .html. Preserves exact bytes and existing native content identity; reads back to verify before returning a SHA-256 receipt. For targeted edits, use apply_patch. Files in temporary storage are not promised to survive reboot.".into(),
+        description: "Create or explicitly replace a UTF-8 text file directly in the visible target runtime filesystem, without a shell or terminal. Paths are resolved against the selected environment cwd; this does not expose host checkout paths. Works with any extension and preserves exact bytes and existing native content identity; reads back to verify before returning a SHA-256 receipt. For targeted edits, use apply_patch.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(vec!["path".into(), "content".into()]), Some(false.into())),
@@ -291,7 +421,9 @@ impl ToolExecutor<ToolInvocation> for ReadFileHandler {
                 .await
                 .map_err(text_error)?;
             if !metadata.is_file {
-                return Err(text_error("read_file path is not a regular file"));
+                return Err(text_error(
+                    "read_file path is not a regular file; use list_directory to inspect directories",
+                ));
             }
             if metadata.size > max_bytes as u64 {
                 return Err(text_error(format!(
@@ -310,6 +442,129 @@ impl ToolExecutor<ToolInvocation> for ReadFileHandler {
                 "sha256":hash,"content_type":metadata.content_type,"truncated":false,
             }))))
         })
+    }
+}
+
+impl ToolExecutor<ToolInvocation> for ListDirectoryHandler {
+    fn tool_name(&self) -> ToolName {
+        ToolName::plain("list_directory")
+    }
+    fn spec(&self) -> ToolSpec {
+        directory_spec(self.include_environment_id)
+    }
+    fn supports_parallel_tool_calls(&self) -> bool {
+        true
+    }
+    fn handle<'a>(&'a self, invocation: ToolInvocation) -> codex_tools::ToolExecutorFuture<'a>
+    where
+        ToolInvocation: 'a,
+    {
+        Box::pin(async move {
+            let ToolPayload::Function { arguments } = &invocation.payload else {
+                return Err(text_error("list_directory requires function arguments"));
+            };
+            let args: DirectoryArgs = parse_arguments(arguments)?;
+            let max_entries = args.max_entries.unwrap_or(DEFAULT_DIRECTORY_ENTRIES);
+            if !(1..=MAX_DIRECTORY_ENTRIES).contains(&max_entries) {
+                return Err(text_error("max_entries must be between 1 and 1000"));
+            }
+            let environment = resolve_tool_environment(
+                &invocation.step_context.environments,
+                args.environment_id.as_deref(),
+            )?;
+            let path = environment.cwd().join(&args.path).map_err(text_error)?;
+            let cwd = environment.cwd().inferred_native_path_string();
+            let granted_permissions = invocation
+                .step_context
+                .turn
+                .granted_permissions(&environment.selection.environment_id);
+            let sandbox = environment.sandbox_context(granted_permissions);
+            let fs = environment.environment.get_filesystem();
+            let entries = fs
+                .read_directory(&path, Some(&sandbox))
+                .await
+                .map_err(text_error)?;
+            let (page, total, next_offset) =
+                paged_directory_entries(entries, args.offset, max_entries);
+            let display_path = path.inferred_native_path_string();
+            let entries = page
+                .into_iter()
+                .map(|entry| {
+                    let entry_path = path
+                        .join(&entry.file_name)
+                        .map_err(text_error)?
+                        .inferred_native_path_string();
+                    Ok::<_, FunctionCallError>(json!({
+                        "file_name":entry.file_name,"path":entry_path,
+                        "is_directory":entry.is_directory,"is_file":entry.is_file,
+                    }))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(boxed_tool_output(JsonToolOutput::new(json!({
+                "path":display_path,"cwd":cwd,"total":total,"offset":args.offset,
+                "max_entries":max_entries,"entries":entries,
+                "truncated":next_offset.is_some(),"next_offset":next_offset,
+            }))))
+        })
+    }
+}
+
+impl CoreToolRuntime for ListDirectoryHandler {
+    fn is_builtin_control_tool(&self) -> bool {
+        true
+    }
+}
+
+impl ToolExecutor<ToolInvocation> for FileInfoHandler {
+    fn tool_name(&self) -> ToolName {
+        ToolName::plain("file_info")
+    }
+    fn spec(&self) -> ToolSpec {
+        file_info_spec(self.include_environment_id)
+    }
+    fn supports_parallel_tool_calls(&self) -> bool {
+        true
+    }
+    fn handle<'a>(&'a self, invocation: ToolInvocation) -> codex_tools::ToolExecutorFuture<'a>
+    where
+        ToolInvocation: 'a,
+    {
+        Box::pin(async move {
+            let ToolPayload::Function { arguments } = &invocation.payload else {
+                return Err(text_error("file_info requires function arguments"));
+            };
+            let args: FileInfoArgs = parse_arguments(arguments)?;
+            let environment = resolve_tool_environment(
+                &invocation.step_context.environments,
+                args.environment_id.as_deref(),
+            )?;
+            let path = environment.cwd().join(&args.path).map_err(text_error)?;
+            let cwd = environment.cwd().inferred_native_path_string();
+            let granted_permissions = invocation
+                .step_context
+                .turn
+                .granted_permissions(&environment.selection.environment_id);
+            let sandbox = environment.sandbox_context(granted_permissions);
+            let fs = environment.environment.get_filesystem();
+            let metadata = fs
+                .get_metadata(&path, GetMetadataOptions::default(), Some(&sandbox))
+                .await
+                .map_err(text_error)?;
+            Ok(boxed_tool_output(JsonToolOutput::new(json!({
+                "path":path.inferred_native_path_string(),"cwd":cwd,
+                "metadata":{
+                    "content_type":metadata.content_type,"is_directory":metadata.is_directory,
+                    "is_file":metadata.is_file,"is_symlink":metadata.is_symlink,"size":metadata.size,
+                    "created_at_ms":metadata.created_at_ms,"modified_at_ms":metadata.modified_at_ms,
+                }
+            }))))
+        })
+    }
+}
+
+impl CoreToolRuntime for FileInfoHandler {
+    fn is_builtin_control_tool(&self) -> bool {
+        true
     }
 }
 
@@ -598,6 +853,61 @@ impl CoreToolRuntime for WriteFileHandler {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn directory_arguments_default_to_cwd_and_first_page() {
+        let arguments: DirectoryArgs = parse_arguments("{}").unwrap();
+        assert_eq!(arguments.path, ".");
+        assert_eq!(arguments.offset, 0);
+        assert_eq!(arguments.max_entries, None);
+        assert_eq!(arguments.environment_id, None);
+
+        let info: FileInfoArgs = parse_arguments("{}").unwrap();
+        assert_eq!(info.path, ".");
+        assert_eq!(info.environment_id, None);
+    }
+
+    #[test]
+    fn directory_pagination_sorts_and_reports_continuation() {
+        let entry = |file_name: &str| ReadDirectoryEntry {
+            file_name: file_name.into(),
+            is_directory: false,
+            is_file: true,
+        };
+        let (page, total, next_offset) =
+            paged_directory_entries(vec![entry("z"), entry("a"), entry("m")], 1, 1);
+        assert_eq!(total, 3);
+        assert_eq!(page[0].file_name, "m");
+        assert_eq!(next_offset, Some(2));
+
+        let (page, total, next_offset) =
+            paged_directory_entries(vec![entry("z"), entry("a"), entry("m")], 2, 10);
+        assert_eq!(total, 3);
+        assert_eq!(page[0].file_name, "z");
+        assert_eq!(next_offset, None);
+    }
+
+    #[test]
+    fn discovery_tool_specs_name_the_visible_runtime_namespace() {
+        let directory = directory_spec(false);
+        let info = file_info_spec(false);
+        let directory = serde_json::to_value(directory).unwrap();
+        let info = serde_json::to_value(info).unwrap();
+        assert_eq!(directory["name"], "list_directory");
+        assert!(
+            directory["description"]
+                .as_str()
+                .unwrap()
+                .contains("visible target runtime")
+        );
+        assert_eq!(info["name"], "file_info");
+        assert!(
+            info["description"]
+                .as_str()
+                .unwrap()
+                .contains("visible target runtime")
+        );
+    }
 
     fn args(content: &str) -> WriteArgs {
         WriteArgs {

@@ -1057,7 +1057,7 @@ fn stage_str(stage: Stage) -> &'static str {
 
 fn main() -> anyhow::Result<()> {
     #[cfg(target_os = "trueos")]
-    eprintln!("[codex-startup] main entered");
+    tracing::info!(target: "codex_startup", "main entered");
     codex_arg0::startup_timing::mark("process_main");
     codex_build_info::initialize!();
     let remote_control_disabled = codex_app_server::take_remote_control_disabled_env();
@@ -1067,7 +1067,7 @@ fn main() -> anyhow::Result<()> {
         Ok(())
     });
     #[cfg(target_os = "trueos")]
-    eprintln!("[codex-startup] main returned: {result:?}");
+    tracing::info!(target: "codex_startup", result = ?result, "main returned");
     result
 }
 

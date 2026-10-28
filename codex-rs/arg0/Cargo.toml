@@ -26,6 +26,9 @@ dotenvy = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 
+[target.'cfg(target_os = "trueos")'.dependencies]
+tracing = { workspace = true }
+
 [target.'cfg(windows)'.dependencies]
 codex-windows-sandbox = { workspace = true }
 pathdiff = { workspace = true }

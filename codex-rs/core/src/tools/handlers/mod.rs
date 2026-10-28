@@ -28,9 +28,9 @@ mod send_message_to_user_async;
 pub(crate) mod shell_spec;
 mod sleep;
 mod test_sync;
+pub(crate) mod test_sync_spec;
 #[cfg(any(target_os = "trueos", test))]
 mod text_files;
-pub(crate) mod test_sync_spec;
 mod tool_search;
 pub(crate) mod tool_search_spec;
 pub(crate) mod unified_exec;
@@ -77,6 +77,10 @@ pub use request_user_input_async::RequestUserInputAsyncHandler;
 pub use send_message_to_user_async::SendMessageToUserAsyncHandler;
 pub use sleep::SleepHandler;
 pub use test_sync::TestSyncHandler;
+#[cfg(target_os = "trueos")]
+pub use text_files::FileInfoHandler;
+#[cfg(target_os = "trueos")]
+pub use text_files::ListDirectoryHandler;
 #[cfg(target_os = "trueos")]
 pub use text_files::ReadFileHandler;
 #[cfg(target_os = "trueos")]

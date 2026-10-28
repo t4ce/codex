@@ -73,6 +73,28 @@ pub(crate) async fn content_type(path: &Path) -> io::Result<Option<u32>> {
         .then_some(metadata.content_type.raw()))
 }
 
+#[cfg(target_os = "trueos")]
+pub(crate) async fn read_directory(path: &Path) -> io::Result<Vec<crate::ReadDirectoryEntry>> {
+    let listing = trueos_v::vfs_async::list_dir_typed(native_path(path)?)
+        .await
+        .map_err(native_error)?;
+    if listing.truncated {
+        return Err(io::Error::other(
+            "TRUEOS directory listing was truncated; complete enumeration is unavailable",
+        ));
+    }
+
+    Ok(listing
+        .entries
+        .into_iter()
+        .map(|entry| crate::ReadDirectoryEntry {
+            file_name: entry.name,
+            is_directory: entry.kind == trueos_v::vfs_async::NodeKind::Directory,
+            is_file: entry.kind == trueos_v::vfs_async::NodeKind::File,
+        })
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use super::new_content_type;

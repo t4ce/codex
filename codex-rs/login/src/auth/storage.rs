@@ -227,6 +227,8 @@ impl AuthStorageBackend for FileAuthStorage {
         let mut file = options.open(auth_file)?;
         file.write_all(json_data.as_bytes())?;
         file.flush()?;
+        #[cfg(target_os = "trueos")]
+        file.sync_all()?;
         Ok(())
     }
 

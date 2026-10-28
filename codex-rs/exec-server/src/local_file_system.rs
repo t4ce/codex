@@ -788,25 +788,32 @@ impl DirectFileSystem {
     ) -> FileSystemResult<Vec<ReadDirectoryEntry>> {
         reject_sandbox_context(sandbox)?;
         let path = path.to_abs_path()?;
-        let mut entries = Vec::new();
-        let mut read_dir = tokio::fs::read_dir(path.as_path()).await?;
-        while let Some(entry) = read_dir.next_entry().await? {
-            let Ok(mut file_type) = entry.file_type().await else {
-                continue;
-            };
-            if file_type.is_symlink() {
-                let Ok(metadata) = tokio::fs::metadata(entry.path()).await else {
+        #[cfg(target_os = "trueos")]
+        {
+            return crate::typed_file_system::read_directory(path.as_path()).await;
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            let mut entries = Vec::new();
+            let mut read_dir = tokio::fs::read_dir(path.as_path()).await?;
+            while let Some(entry) = read_dir.next_entry().await? {
+                let Ok(mut file_type) = entry.file_type().await else {
                     continue;
                 };
-                file_type = metadata.file_type();
+                if file_type.is_symlink() {
+                    let Ok(metadata) = tokio::fs::metadata(entry.path()).await else {
+                        continue;
+                    };
+                    file_type = metadata.file_type();
+                }
+                entries.push(ReadDirectoryEntry {
+                    file_name: entry.file_name().to_string_lossy().into_owned(),
+                    is_directory: file_type.is_dir(),
+                    is_file: file_type.is_file(),
+                });
             }
-            entries.push(ReadDirectoryEntry {
-                file_name: entry.file_name().to_string_lossy().into_owned(),
-                is_directory: file_type.is_dir(),
-                is_file: file_type.is_file(),
-            });
+            Ok(entries)
         }
-        Ok(entries)
     }
 
     fn sync_walk(
