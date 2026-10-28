@@ -1,12 +1,12 @@
-//! TRUEOS delegates companion presentation to resident Spirit via lifecycle OSC.
+//! TRUEOS resident Spirit integration information.
 //! Conversation image transport remains independent of that presentation.
 
 use super::ChatWidget;
 
 impl ChatWidget {
-    pub(crate) fn open_pets_picker(&mut self) {
+    pub(crate) fn show_spirit_info(&mut self) {
         self.add_info_message(
-            "Lilly is managed by TRUEOS Spirit and follows this session’s activity automatically."
+            "Spirit is configured automatically at TRUEOS boot, with Lilly as her avatar. This Codex session uses Spirit for native OS interaction and reports its activity to her. Spirit owns avatar presentation, transitions, and the paired cursor and keyboard."
                 .to_string(),
             None,
         );

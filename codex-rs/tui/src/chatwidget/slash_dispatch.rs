@@ -595,7 +595,10 @@ impl ChatWidget {
                 self.open_theme_picker();
             }
             SlashCommand::Pets => {
+                #[cfg(not(target_os = "trueos"))]
                 self.open_pets_picker();
+                #[cfg(target_os = "trueos")]
+                self.show_spirit_info();
             }
             SlashCommand::Ps => {
                 self.add_ps_output();

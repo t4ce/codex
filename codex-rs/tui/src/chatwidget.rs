@@ -302,8 +302,8 @@ pub(crate) use misalignment_policy::MisalignmentTurnSource;
 #[cfg(not(target_os = "trueos"))]
 mod pets;
 #[cfg(target_os = "trueos")]
-#[path = "chatwidget/pets_trueos.rs"]
-mod pets_trueos;
+#[path = "chatwidget/spirit_trueos.rs"]
+mod spirit_trueos;
 #[cfg(not(target_os = "trueos"))]
 pub(crate) use self::pets::ConfiguredPetLoadGeneration;
 mod session_flow;

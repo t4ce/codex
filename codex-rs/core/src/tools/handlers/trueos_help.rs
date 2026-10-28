@@ -133,7 +133,7 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
             "calculator=calculate with no arguments lists the native operation registry; calculate with operation=\"add\" and arguments=[20,22] returns 42 through the synchronous TRUEOS calculator ABI",
         ),
         String::from(
-            "spirit=resident Lilly and native UI4 access: action=windows lists live targets; focus then observe returns a PNG and target grid; pointer/type/key operate the observed target; pointer uses 0..1000 window coordinates while move uses 0..1 hardware-avatar scanout coordinates; emotion selects an expression",
+            "spirit=automatically configured at TRUEOS boot, with Lilly as her avatar; /spirit shows integration information; use the spirit tool for native OS interaction, with presentation and input sequencing managed by Spirit: action=windows lists live targets; focus then observe returns a PNG and target grid; pointer/type/key operate the observed target; pointer uses 0..1000 window coordinates while move uses 0..1 hardware-avatar scanout coordinates; emotion selects an expression",
         ),
         String::from(
             "shell=TRUEOS Shell3 native input, not POSIX argv or bash; type one exact name and it runs directly; commands take no arguments",

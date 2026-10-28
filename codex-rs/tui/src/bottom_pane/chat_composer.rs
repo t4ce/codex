@@ -9369,7 +9369,10 @@ mod tests {
             ("/mo", "model"),
             ("/res", "resume"),
             ("/ar", "archive"),
+            #[cfg(not(target_os = "trueos"))]
             ("/pet", "pets"),
+            #[cfg(target_os = "trueos")]
+            ("/spi", "spirit"),
             ("/bt", "btw"),
             ("/si", "side"),
         ] {

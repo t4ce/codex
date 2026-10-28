@@ -64,7 +64,11 @@ pub enum SlashCommand {
     Title,
     Statusline,
     Theme,
-    #[strum(to_string = "pets", serialize = "pet")]
+    #[cfg_attr(
+        not(target_os = "trueos"),
+        strum(to_string = "pets", serialize = "pet")
+    )]
+    #[cfg_attr(target_os = "trueos", strum(to_string = "spirit"))]
     Pets,
     Mcp,
     Apps,
@@ -130,7 +134,7 @@ impl SlashCommand {
             #[cfg(not(target_os = "trueos"))]
             SlashCommand::Pets => "choose or hide the terminal pet",
             #[cfg(target_os = "trueos")]
-            SlashCommand::Pets => "show how Lilly follows this session through Spirit",
+            SlashCommand::Pets => "show Spirit's native OS integration",
             SlashCommand::Ps => "list background terminals",
             SlashCommand::Stop => "stop all background terminals",
             SlashCommand::MemoryDrop => "DO NOT USE",
@@ -173,6 +177,9 @@ impl SlashCommand {
 
     /// Whether this command supports inline args (for example `/review ...`).
     pub fn supports_inline_args(self) -> bool {
+        if self == SlashCommand::Pets {
+            return !cfg!(target_os = "trueos");
+        }
         matches!(
             self,
             SlashCommand::Review
@@ -195,7 +202,6 @@ impl SlashCommand {
                 | SlashCommand::Cd
                 | SlashCommand::Pwd
                 | SlashCommand::Usage
-                | SlashCommand::Pets
                 | SlashCommand::Side
                 | SlashCommand::Btw
                 | SlashCommand::Resume
@@ -312,7 +318,8 @@ impl SlashCommand {
             SlashCommand::Rollout => true,
             SlashCommand::TestApproval => true,
             SlashCommand::Agents | SlashCommand::MultiAgents => true,
-            SlashCommand::Config | SlashCommand::Theme | SlashCommand::Pets => false,
+            SlashCommand::Pets => cfg!(target_os = "trueos"),
+            SlashCommand::Config | SlashCommand::Theme => false,
         }
     }
 
@@ -353,9 +360,29 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(target_os = "trueos"))]
     fn pet_alias_parses_to_pets_command() {
         assert_eq!(SlashCommand::Pets.command(), "pets");
         assert_eq!(SlashCommand::from_str("pet"), Ok(SlashCommand::Pets));
+    }
+
+    #[test]
+    #[cfg(target_os = "trueos")]
+    fn spirit_is_the_only_native_companion_command() {
+        assert_eq!(SlashCommand::Pets.command(), "spirit");
+        assert_eq!(SlashCommand::from_str("spirit"), Ok(SlashCommand::Pets));
+        for removed in ["pet", "pets", "spirits"] {
+            assert!(SlashCommand::from_str(removed).is_err());
+        }
+        assert!(!SlashCommand::Pets.supports_inline_args());
+        assert!(SlashCommand::Pets.available_during_task());
+        let commands = super::built_in_slash_commands();
+        assert!(commands.iter().any(|(name, _)| *name == "spirit"));
+        assert!(
+            commands
+                .iter()
+                .all(|(name, _)| !["pet", "pets", "spirits"].contains(name))
+        );
     }
 
     #[test]
