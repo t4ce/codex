@@ -325,6 +325,7 @@ mod tests {
             until(|s| s.agents.len() == 1 && child(s).lifecycle == Some(Life::PendingInit)).await;
         assert_eq!(child(&initialized).parent_id.as_deref(), Some("agent-1"));
         assert_eq!(child(&initialized).name.as_deref(), Some("/root/scout"));
+        assert_eq!(child(&initialized).nickname.as_deref(), Some("Scout"));
         assert_eq!(child(&initialized).role.as_deref(), Some("explorer"));
         for (source, expected) in [
             (agent::AgentStatus::Running, Life::Running),
@@ -342,6 +343,82 @@ mod tests {
         }
         publisher.shutdown();
         until(|s| !s.connected && s.agents.is_empty()).await;
+    }
+
+    #[tokio::test]
+    async fn nickname_uses_canonical_registry_then_session_source_without_changing_task_path() {
+        let manager = ThreadManager::new();
+        manager.insert(1, None, "/root", agent::AgentStatus::Running);
+        manager.insert(2, Some(1), "/root/scout", agent::AgentStatus::Running);
+        {
+            let mut registry = manager.metadata.lock().unwrap();
+            registry
+                .iter_mut()
+                .find(|entry| entry.agent_id == Some(ThreadId(2)))
+                .unwrap()
+                .agent_nickname = Some("Lovelace".into());
+        }
+        let entries = manager.spirit_agent_entries().await;
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].id, "agent-2");
+        assert_eq!(entries[0].name.as_deref(), Some("/root/scout"));
+        assert_eq!(entries[0].nickname.as_deref(), Some("Lovelace"));
+        {
+            let mut registry = manager.metadata.lock().unwrap();
+            let entry = registry
+                .iter_mut()
+                .find(|entry| entry.agent_id == Some(ThreadId(2)))
+                .unwrap();
+            entry.agent_nickname = None;
+            entry.agent_path = None;
+        }
+        let entries = manager.spirit_agent_entries().await;
+        assert_eq!(entries[0].name.as_deref(), Some("/root/scout"));
+        assert_eq!(entries[0].nickname.as_deref(), Some("Scout"));
+        {
+            let mut loaded = manager.loaded.write().unwrap();
+            let thread = Arc::get_mut(loaded.get_mut(&ThreadId(2)).unwrap()).unwrap();
+            let protocol::SessionSource::SubAgent(protocol::SubAgentSource::ThreadSpawn {
+                agent_nickname,
+                ..
+            }) = &mut thread.config.session_source
+            else {
+                panic!("expected spawned child");
+            };
+            *agent_nickname = None;
+        }
+        let entries = manager.spirit_agent_entries().await;
+        assert_eq!(entries[0].name.as_deref(), Some("/root/scout"));
+        assert_eq!(
+            entries[0].nickname, None,
+            "a missing nickname must not be invented"
+        );
+    }
+
+    #[tokio::test]
+    async fn unloaded_agents_keep_registry_nickname_without_inventing_runtime_or_name() {
+        let manager = ThreadManager::new();
+        manager.insert(1, None, "/root", agent::AgentStatus::Running);
+        manager.insert(2, Some(1), "/root/scout", agent::AgentStatus::Running);
+        manager.loaded.write().unwrap().remove(&ThreadId(2));
+        let entries = manager.spirit_agent_entries().await;
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].name.as_deref(), Some("/root/scout"));
+        assert_eq!(entries[0].nickname.as_deref(), Some("Scout"));
+        assert!(!entries[0].loaded);
+        assert_eq!(entries[0].lifecycle, None);
+        assert_eq!(entries[0].runtime, Some(Runtime::NotLoaded));
+        {
+            let mut registry = manager.metadata.lock().unwrap();
+            registry
+                .iter_mut()
+                .find(|entry| entry.agent_id == Some(ThreadId(2)))
+                .unwrap()
+                .agent_nickname = None;
+        }
+        let entries = manager.spirit_agent_entries().await;
+        assert_eq!(entries[0].nickname, None);
+        assert_eq!(entries[0].name.as_deref(), Some("/root/scout"));
     }
 
     #[tokio::test]
@@ -392,6 +469,7 @@ mod tests {
         assert_eq!(child(&unloaded).lifecycle, None);
         assert_eq!(child(&unloaded).runtime, Some(Runtime::NotLoaded));
         assert_eq!(child(&unloaded).parent_id.as_deref(), Some("agent-1"));
+        assert_eq!(child(&unloaded).nickname.as_deref(), Some("Scout"));
         manager.insert(2, Some(1), "/root/scout", agent::AgentStatus::Running);
         watch.note_turn_started("agent-2").await;
         until(|s| child(s).loaded && child(s).lifecycle == Some(Life::Running)).await;

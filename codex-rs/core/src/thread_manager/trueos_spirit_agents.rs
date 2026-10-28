@@ -63,9 +63,8 @@ impl ThreadManager {
                     .agent_path
                     .as_ref()
                     .map(ToString::to_string)
-                    .or(source_path)
-                    .or(metadata.agent_nickname)
-                    .or(source_name),
+                    .or(source_path),
+                nickname: metadata.agent_nickname.or(source_name),
                 role: metadata.agent_role.or(source_role),
                 lifecycle: Some(lifecycle(&thread.agent_status().await)),
                 runtime: None,
@@ -126,11 +125,8 @@ fn unloaded_entry(id: String, parent_id: String, metadata: AgentMetadata) -> Age
     AgentEntry {
         id,
         parent_id: Some(parent_id),
-        name: metadata
-            .agent_path
-            .as_ref()
-            .map(ToString::to_string)
-            .or(metadata.agent_nickname),
+        name: metadata.agent_path.as_ref().map(ToString::to_string),
+        nickname: metadata.agent_nickname,
         role: metadata.agent_role,
         lifecycle: None,
         runtime: Some(AgentRuntime::NotLoaded),

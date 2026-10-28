@@ -1,5 +1,8 @@
 pub mod startup_timing;
 
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_threads;
+
 #[cfg(test)]
 mod runtime_tests;
 
@@ -203,6 +206,9 @@ where
     F: FnOnce(Arg0DispatchPaths) -> Fut + Send + 'static,
     Fut: Future<Output = anyhow::Result<()>>,
 {
+    #[cfg(target_os = "trueos")]
+    trueos_threads::configure_from_env()?;
+
     // Retain the TempDir so it exists for the lifetime of the invocation of
     // this executable. Admittedly, we could invoke `keep()` on it, but it
     // would be nice to avoid leaving temporary directories behind, if possible.
@@ -214,20 +220,30 @@ where
     // stack budget as Tokio workers; `Runtime::block_on` otherwise runs the
     // top-level future on the caller's OS stack.
     startup_timing::mark("main_thread_spawn_begin");
-    let handle = std::thread::Builder::new()
-        .name("codex-main".to_string())
-        .stack_size(THREAD_STACK_SIZE_BYTES)
-        .spawn(move || {
-            startup_timing::mark("main_thread_entered");
-            startup_timing::mark("runtime_begin");
-            let runtime = build_runtime()?;
-            startup_timing::mark("runtime_done");
-            runtime.block_on(run_main_with_arg0_guard(
-                path_entry_guard,
-                current_exe,
-                main_fn,
-            ))
-        })?;
+    let handle = {
+        // TRUEOS must see the foreground role before admitting the thread;
+        // setting its name after entry is too late to choose a carrier.
+        #[cfg(target_os = "trueos")]
+        let _role = trueos_threads::ChildRoleGuard::foreground();
+
+        std::thread::Builder::new()
+            .name("codex-main".to_string())
+            .stack_size(THREAD_STACK_SIZE_BYTES)
+            .spawn(move || {
+                #[cfg(target_os = "trueos")]
+                let _activity = trueos_threads::ActivityGuard::foreground();
+
+                startup_timing::mark("main_thread_entered");
+                startup_timing::mark("runtime_begin");
+                let runtime = build_runtime()?;
+                startup_timing::mark("runtime_done");
+                runtime.block_on(run_main_with_arg0_guard(
+                    path_entry_guard,
+                    current_exe,
+                    main_fn,
+                ))
+            })
+    }?;
     startup_timing::mark("main_thread_spawn_done");
     match handle.join() {
         Ok(result) => result,
