@@ -232,6 +232,31 @@ impl ExecCommandHandler {
                 parse_arguments(&arguments)?
             }
         };
+        #[cfg(target_os = "trueos")]
+        if is_local_help_command(&args.cmd, environment.is_remote()) {
+            if !can_handle_local_help(&args, environment_args.workdir.as_deref()) {
+                return Err(FunctionCallError::RespondToModel(
+                    "Local TRUEOS help is handled by Codex. Call the `help` tool, or use `exec_command` with only `cmd: \"help\"`; omit shell, login, workdir, and permission options.".into(),
+                ));
+            }
+            let help = crate::tools::handlers::trueos_help::help_text(
+                &turn_environment.cwd().inferred_native_path_string(),
+            )
+            .await;
+            return Ok(boxed_tool_output(ExecCommandToolOutput {
+                event_call_id: String::new(),
+                chunk_id: generate_chunk_id(),
+                wall_time: Duration::ZERO,
+                raw_output: help.into_bytes(),
+                truncation_policy: step_context.settings.model_info.truncation_policy.into(),
+                max_output_tokens: args.max_output_tokens,
+                process_id: None,
+                exit_code: Some(0),
+                original_token_count: None,
+                output_omitted_bytes: None,
+                hook_command: Some(args.cmd.clone()),
+            }));
+        }
         if args.tty && !session.features().enabled(Feature::UnifiedExecTty) {
             return Err(FunctionCallError::RespondToModel(
                 "TTY execution is disabled by config; omit `tty` or set it to false.".to_string(),
@@ -544,6 +569,66 @@ impl CoreToolRuntime for ExecCommandHandler {
         result: &dyn crate::tools::context::ToolOutput,
     ) -> Option<PostToolUsePayload> {
         post_unified_exec_tool_use_payload(invocation, result)
+    }
+}
+
+#[cfg(any(target_os = "trueos", test))]
+fn is_local_help_command(command: &str, environment_is_remote: bool) -> bool {
+    !environment_is_remote && command.trim() == "help"
+}
+
+#[cfg(any(target_os = "trueos", test))]
+fn can_handle_local_help(args: &ExecCommandArgs, workdir: Option<&str>) -> bool {
+    args.shell.is_none()
+        && args.login.is_none()
+        && workdir.is_none()
+        && args.sandbox_permissions.is_none()
+        && args.additional_permissions.is_none()
+        && args.justification.is_none()
+        && args.prefix_rule.is_none()
+}
+
+#[cfg(test)]
+mod local_help_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn args(value: serde_json::Value) -> ExecCommandArgs {
+        serde_json::from_value(value).expect("test exec command args should deserialize")
+    }
+
+    #[test]
+    fn recognizes_only_standalone_help_for_local_default_shell() {
+        let args = args(json!({"cmd": "  help  "}));
+        assert!(is_local_help_command(&args.cmd, false));
+        assert!(!is_local_help_command(&args.cmd, true));
+        assert!(can_handle_local_help(&args, None));
+        assert!(!can_handle_local_help(&args, Some("")));
+    }
+
+    #[test]
+    fn leaves_commands_and_explicit_shell_or_permission_options_untouched() {
+        for command in ["helpful", "help status", "help;status", "help\nstatus"] {
+            let args = args(json!({"cmd": command}));
+            assert!(!is_local_help_command(&args.cmd, false), "{command:?}");
+        }
+        for extra in [
+            json!({"shell": "sh"}),
+            json!({"login": false}),
+            json!({"sandbox_permissions": "use_default"}),
+            json!({"additional_permissions": {}}),
+            json!({"justification": "please"}),
+            json!({"prefix_rule": ["help"]}),
+        ] {
+            let mut input = json!({"cmd": "help"});
+            input
+                .as_object_mut()
+                .unwrap()
+                .extend(extra.as_object().unwrap().clone());
+            let args = args(input);
+            assert!(is_local_help_command(&args.cmd, false));
+            assert!(!can_handle_local_help(&args, None));
+        }
     }
 }
 

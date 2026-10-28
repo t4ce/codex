@@ -36,7 +36,7 @@ Wait only when the current task needs that environment. Continue using tools tha
             .to_string();
         #[cfg(target_os = "trueos")]
         let body = format!(
-            "{body}\nThe local runtime is TRUEOS. For filesystem discovery, call `list_directory` with no path to start at the environment cwd, then use the returned paths with `file_info`, `read_file`, and `write_file`. These tools use the selected environment's filesystem and permissions. Build-host checkout paths are not automatically present in this runtime. Local `exec_command` sends native interactive Shell3 input; use the direct filesystem tools for file operations. Remote environments retain their reported filesystem and shell semantics.\n"
+            "{body}\nThe local runtime is TRUEOS. Call `help` for local capabilities and native command groups before opening a command session; Codex answers it locally. For small numeric computations, use `calculate` to call TRUEOS's synchronous calculator ABI directly; call it with no arguments to discover operations. For filesystem discovery, call `list_directory` with no path to start at the environment cwd, then use the returned paths with `file_info`, `read_file`, and `write_file`. These tools use the selected environment's filesystem and permissions. Build-host checkout paths are not automatically present in this runtime. Local `exec_command` sends native interactive Shell3 input; use the direct filesystem tools for file operations. Remote environments retain their reported filesystem and shell semantics.\n"
         );
         body
     }

@@ -7,6 +7,8 @@ use crate::session::turn_context::TurnContext;
 use crate::tools::code_mode::execute_spec::create_code_mode_tool;
 use crate::tools::effective_tool_mode;
 use crate::tools::handlers::ApplyPatchHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::CalculatorHandler;
 use crate::tools::handlers::CodeModeExecuteHandler;
 use crate::tools::handlers::CodeModeWaitHandler;
 use crate::tools::handlers::CurrentTimeHandler;
@@ -16,6 +18,8 @@ use crate::tools::handlers::ExecCommandHandlerOptions;
 #[cfg(target_os = "trueos")]
 use crate::tools::handlers::FileInfoHandler;
 use crate::tools::handlers::GetContextRemainingHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::HelpHandler;
 use crate::tools::handlers::ListAvailablePluginsToInstallHandler;
 #[cfg(target_os = "trueos")]
 use crate::tools::handlers::ListDirectoryHandler;
@@ -1416,6 +1420,8 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
     #[cfg(target_os = "trueos")]
     {
         let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
+        registry.add(HelpHandler::new(include_environment_id));
+        registry.add(CalculatorHandler::new(include_environment_id));
         registry.add(ListDirectoryHandler::new(include_environment_id));
         registry.add(FileInfoHandler::new(include_environment_id));
         registry.add(ReadFileHandler::new(include_environment_id));

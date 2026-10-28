@@ -33,6 +33,10 @@ pub(crate) mod test_sync_spec;
 mod text_files;
 mod tool_search;
 pub(crate) mod tool_search_spec;
+#[cfg(target_os = "trueos")]
+mod trueos_calculator;
+#[cfg(any(target_os = "trueos", test))]
+pub(crate) mod trueos_help;
 pub(crate) mod unified_exec;
 mod view_image;
 pub(crate) mod view_image_spec;
@@ -86,6 +90,10 @@ pub use text_files::ReadFileHandler;
 #[cfg(target_os = "trueos")]
 pub use text_files::WriteFileHandler;
 pub(crate) use tool_search::ToolSearchHandlerCache;
+#[cfg(target_os = "trueos")]
+pub use trueos_calculator::CalculatorHandler;
+#[cfg(target_os = "trueos")]
+pub use trueos_help::HelpHandler;
 pub use unified_exec::ExecCommandHandler;
 pub(crate) use unified_exec::ExecCommandHandlerOptions;
 pub use unified_exec::WriteStdinHandler;

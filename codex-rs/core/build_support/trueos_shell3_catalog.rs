@@ -1,6 +1,16 @@
-use std::{collections::HashMap, fs, path::Path};
+use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
 
-use syn::{Expr, ExprArray, ExprCall, ExprLit, ExprReference, ExprStruct, Item, Lit, Member};
+use syn::Expr;
+use syn::ExprArray;
+use syn::ExprCall;
+use syn::ExprLit;
+use syn::ExprReference;
+use syn::ExprStruct;
+use syn::Item;
+use syn::Lit;
+use syn::Member;
 
 #[derive(Clone)]
 struct Group {
@@ -65,7 +75,7 @@ fn parse_group(
             return Err(format!(
                 "expected NameGroup struct, got {}",
                 syntax_kind(other)
-            ))
+            ));
         }
     };
     let mut label = None;
