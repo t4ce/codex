@@ -13,6 +13,67 @@ use trueos_ide::protocol::IdeResponse;
 use trueos_ide::protocol::OwnerReply;
 use trueos_ide::protocol::{self};
 
+const DEFAULT_DATABASE: &str = "/apps/common/ide/projects.redb";
+
+#[derive(Debug, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct OpenOptions {
+    pub project: String,
+    pub database: Option<String>,
+    pub compiler: Option<String>,
+    pub entry: Option<String>,
+}
+
+impl OpenOptions {
+    fn database(&self) -> &str {
+        self.database.as_deref().unwrap_or(DEFAULT_DATABASE)
+    }
+
+    fn script(&self) -> Result<String, String> {
+        fn literal(value: &str) -> bool {
+            !value.is_empty() && !value.contains(['\0', '\n', '\r'])
+        }
+        if !literal(&self.project) || !literal(self.database()) {
+            return Err(
+                "project and database must be nonempty literal values without newline or NUL"
+                    .into(),
+            );
+        }
+        if let Some(compiler) = &self.compiler {
+            if !matches!(compiler.as_str(), "odin-son" | "rustc-min") {
+                return Err("compiler must be odin-son or rustc-min".into());
+            }
+        }
+        if let Some(entry) = &self.entry {
+            if !literal(entry)
+                || entry.starts_with('/')
+                || entry.contains(['\\', ':'])
+                || entry.split('/').any(|part| matches!(part, "" | "." | ".."))
+            {
+                return Err(
+                    "entry must be a relative project source path without newline or NUL".into(),
+                );
+            }
+        }
+        let mut script = String::new();
+        let db = self.database();
+        if db != DEFAULT_DATABASE && (db.starts_with('/') || db.starts_with("trueosfs:")) {
+            script.push_str("fs-scope trueosfs\n");
+        }
+        script.push_str(&format!("ide-project {}\n", self.project));
+        if let Some(database) = &self.database {
+            script.push_str(&format!("ide-db {database}\n"));
+        }
+        if let Some(compiler) = &self.compiler {
+            script.push_str(&format!("ide-compiler {compiler}\n"));
+        }
+        if let Some(entry) = &self.entry {
+            script.push_str(&format!("ide-entry {entry}\n"));
+        }
+        Ok(script)
+    }
+}
+
 static REQUEST_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 #[cfg(target_os = "trueos")]
 static NEXT_REQUEST_ID: AtomicU64 = AtomicU64::new(1);
@@ -56,6 +117,93 @@ async fn discover_impl<T: Transport>(transport: &T) -> Result<Vec<Endpoint>, Str
 pub async fn discover() -> Result<Vec<Endpoint>, String> {
     discover_impl(&NativeTransport).await
 }
+
+/// Attach to an existing workspace or launch Edit using its startup script.
+#[cfg(target_os = "trueos")]
+pub async fn open(options: OpenOptions) -> Result<(u64, IdeResponse), String> {
+    let _guard = REQUEST_LOCK.lock().await;
+    open_impl(
+        &NativeTransport,
+        &options,
+        |script| {
+            trueos_v::vshell::launch_with_destination(
+                "edit",
+                script,
+                trueos_v::vshell::LaunchDestination::NewShell3,
+            )
+            .map_err(|status| format!("Could not launch Edit ({status})"))
+        },
+        NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed),
+        Duration::from_secs(15),
+    )
+    .await
+}
+
+async fn open_impl<T: Transport>(
+    transport: &T,
+    options: &OpenOptions,
+    launch: impl FnOnce(&str) -> Result<(), String>,
+    request_id: u64,
+    timeout: Duration,
+) -> Result<(u64, IdeResponse), String> {
+    let script = options.script()?;
+    let mut launch = Some(launch);
+    let deadline = Instant::now() + timeout;
+    let mut launched = false;
+    loop {
+        let endpoints = discover_impl(transport).await?;
+        let matches: Vec<_> = endpoints
+            .iter()
+            .filter(|endpoint| {
+                endpoint.project == options.project && endpoint.database == options.database()
+            })
+            .collect();
+        if matches.len() > 1 {
+            return Err(
+                "Multiple matching Edit workspaces are open; discover and select an endpoint"
+                    .into(),
+            );
+        }
+        if let Some(endpoint) = matches.first() {
+            let (id, reply) = request_impl(
+                transport,
+                Some(endpoint.endpoint),
+                IdeRequest::Context {},
+                request_id,
+                REQUEST_CONTEXT_TIMEOUT,
+            )
+            .await?;
+            if let IdeResponse::Context { context } = &reply {
+                let compiler = match context.compiler {
+                    protocol::CompilerBackend::OdinSon => "odin-son",
+                    protocol::CompilerBackend::RustcMin => "rustc-min",
+                };
+                if options
+                    .compiler
+                    .as_deref()
+                    .is_some_and(|requested| requested != compiler)
+                    || options
+                        .entry
+                        .as_deref()
+                        .is_some_and(|requested| requested != context.entry)
+                {
+                    return Err("The matching Edit workspace has a different compiler or entry; use its current context or close it before opening with new settings".into());
+                }
+            }
+            return Ok((id, reply));
+        }
+        if !launched {
+            launch.take().expect("launch called once")(&script)?;
+            launched = true;
+        }
+        if Instant::now() >= deadline {
+            return Err("Edit launch was queued but its workspace did not appear before timeout; discover before retrying".into());
+        }
+        tokio::task::yield_now().await;
+    }
+}
+
+const REQUEST_CONTEXT_TIMEOUT: Duration = Duration::from_secs(5);
 
 #[cfg(target_os = "trueos")]
 pub async fn request(endpoint: Option<u64>, command: IdeRequest) -> Result<IdeResponse, String> {
@@ -174,6 +322,141 @@ mod tests {
     use super::*;
     use std::cell::RefCell;
     use std::collections::VecDeque;
+    fn options() -> OpenOptions {
+        OpenOptions {
+            project: "p".into(),
+            database: Some("d".into()),
+            compiler: None,
+            entry: None,
+        }
+    }
+    #[test]
+    fn startup_script_rejects_injection_and_invalid_entry() {
+        for project in ["", "p\nide-db injected", "p\r", "p\0"] {
+            let mut opt = options();
+            opt.project = project.into();
+            assert!(opt.script().is_err());
+        }
+        for entry in ["../main.rs", "/main.rs", "src//main.rs", "main.rs\nopen x"] {
+            let mut opt = options();
+            opt.entry = Some(entry.into());
+            assert!(opt.script().is_err());
+        }
+        let mut opt = options();
+        opt.database = Some("trueosfs:disc7/path db.redb".into());
+        opt.compiler = Some("rustc-min".into());
+        opt.entry = Some("src/main.rs".into());
+        assert_eq!(
+            opt.script().unwrap(),
+            "fs-scope trueosfs\nide-project p\nide-db trueosfs:disc7/path db.redb\nide-compiler rustc-min\nide-entry src/main.rs\n"
+        );
+    }
+    #[tokio::test]
+    async fn open_attaches_existing_without_relaunch() {
+        let context = protocol::WorkspaceContext {
+            project: "p".into(),
+            database: "d".into(),
+            compiler: protocol::CompilerBackend::OdinSon,
+            entry: "main.odin".into(),
+            revision_id: 1,
+            active_file: None,
+            open_files: vec![],
+            selected_text: String::new(),
+            build: protocol::BuildState::Idle,
+        };
+        let reply = OwnerReply {
+            endpoint: 7,
+            client_token: 12,
+            request_id: 9,
+            reply: IdeResponse::Context { context },
+        };
+        let mock = Mock {
+            reads: RefCell::new(VecDeque::from([
+                endpoints(&[7]),
+                endpoints(&[7]),
+                protocol::encode(&reply).unwrap(),
+            ])),
+            ..Default::default()
+        };
+        let result = open_impl(
+            &mock,
+            &options(),
+            |_| panic!("existing workspace must not launch"),
+            9,
+            Duration::from_secs(1),
+        )
+        .await
+        .unwrap();
+        assert_eq!(result.0, 7);
+        assert!(matches!(result.1, IdeResponse::Context { .. }));
+    }
+    #[tokio::test]
+    async fn open_launches_then_connects_to_registered_workspace() {
+        let context = protocol::WorkspaceContext {
+            project: "p".into(),
+            database: "d".into(),
+            compiler: protocol::CompilerBackend::OdinSon,
+            entry: "main.odin".into(),
+            revision_id: 1,
+            active_file: None,
+            open_files: vec![],
+            selected_text: String::new(),
+            build: protocol::BuildState::Idle,
+        };
+        let reply = OwnerReply {
+            endpoint: 7,
+            client_token: 12,
+            request_id: 9,
+            reply: IdeResponse::Context { context },
+        };
+        let mock = Mock {
+            reads: RefCell::new(VecDeque::from([
+                endpoints(&[]),
+                endpoints(&[7]),
+                endpoints(&[7]),
+                protocol::encode(&reply).unwrap(),
+            ])),
+            ..Default::default()
+        };
+        let launches = std::cell::Cell::new(0);
+        let result = open_impl(
+            &mock,
+            &options(),
+            |script| {
+                launches.set(launches.get() + 1);
+                assert!(script.contains("ide-project p\n"));
+                Ok(())
+            },
+            9,
+            Duration::from_secs(1),
+        )
+        .await
+        .unwrap();
+        assert_eq!(launches.get(), 1);
+        assert_eq!(result.0, 7);
+    }
+    #[tokio::test]
+    async fn open_launches_once_then_reports_unknown_on_timeout() {
+        let mock = Mock {
+            reads: RefCell::new(VecDeque::from([endpoints(&[])])),
+            ..Default::default()
+        };
+        let count = std::cell::Cell::new(0);
+        let error = open_impl(
+            &mock,
+            &options(),
+            |_| {
+                count.set(count.get() + 1);
+                Ok(())
+            },
+            9,
+            Duration::ZERO,
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(count.get(), 1);
+        assert!(error.contains("discover before retrying"));
+    }
     #[test]
     fn synchronous_context_does_not_wait_for_active_tool() {
         let _guard = REQUEST_LOCK.try_lock().unwrap();
