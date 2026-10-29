@@ -22,7 +22,7 @@ struct Prompt {
 
 pub(super) struct PromptInbox {
     task: JoinHandle<()>,
-    scope: watch::Sender<Option<String>>,
+    scope: Option<watch::Sender<Option<String>>>,
     receiver: mpsc::Receiver<Prompt>,
     pending: Option<Prompt>,
 }
@@ -53,6 +53,9 @@ impl PromptInbox {
                 // This await deliberately lives outside select!: it must not
                 // lose a prompt when another UI event wakes the main loop.
                 let result = read(path).await;
+                if scope_rx.has_changed().is_err() {
+                    return;
+                }
                 let delay = match result {
                     Ok(bytes) => {
                         last_error = None;
@@ -61,7 +64,7 @@ impl PromptInbox {
                         {
                             match decode_prompt(bytes) {
                                 Ok(text) => {
-                                    let (accepted, acceptance) = oneshot::channel();
+                                    let (accepted, mut acceptance) = oneshot::channel();
                                     if sender
                                         .send(Prompt {
                                             scope: active_scope,
@@ -76,8 +79,16 @@ impl PromptInbox {
                                     // At most one handed-over prompt exists.
                                     // While its original view is unavailable,
                                     // stop reading and let kernel readiness expire.
-                                    if acceptance.await.is_err() {
-                                        return;
+                                    loop {
+                                        tokio::select! {
+                                            result = &mut acceptance => {
+                                                if result.is_err() { return; }
+                                                break;
+                                            },
+                                            changed = scope_rx.changed() => {
+                                                if changed.is_err() { return; }
+                                            },
+                                        }
                                     }
                                 }
                                 Err(()) => tracing::warn!("invalid native Codex input frame"),
@@ -105,15 +116,34 @@ impl PromptInbox {
         });
         Self {
             task,
-            scope,
+            scope: Some(scope),
             receiver,
             pending: None,
         }
     }
 
     pub(super) fn set_scope(&self, scope: Option<String>) {
-        if *self.scope.borrow() != scope {
-            self.scope.send_replace(scope);
+        if let Some(sender) = self.scope.as_ref()
+            && *sender.borrow() != scope
+        {
+            sender.send_replace(scope);
+        }
+    }
+
+    pub(super) async fn shutdown(mut self) {
+        // Closing the watch stops future reads, and wakes a reader waiting for
+        // UI acceptance. An already-started VFS operation finishes first.
+        self.scope.take();
+        let _ = (&mut self.task).await;
+        #[cfg(target_os = "trueos")]
+        {
+            // Retire host readiness before the embedded server begins its
+            // potentially longer shutdown, while this VM is still running.
+            let _ = tokio::time::timeout(
+                RETRY_INTERVAL,
+                trueos_v::vfs_async::read_file(b"vFile:codex-input/offline"),
+            )
+            .await;
         }
     }
 
@@ -271,6 +301,46 @@ mod tests {
         inbox.receive().await;
         inbox.try_deliver(Some("main"), |text| text == "still here");
         assert!(inbox.can_receive());
+    }
+
+    #[tokio::test]
+    async fn shutdown_retires_a_reader_waiting_for_ui_acceptance() {
+        let (mut inbox, mut paths) = inbox_with_text("one handed-over prompt");
+        inbox.set_scope(Some("main".into()));
+        inbox.receive().await;
+        paths.recv().await.unwrap();
+
+        tokio::time::timeout(Duration::from_secs(1), inbox.shutdown())
+            .await
+            .expect("shutdown must not wait for UI acceptance");
+        assert!(paths.recv().await.is_none());
+    }
+
+    #[tokio::test]
+    async fn shutdown_finishes_an_inflight_read_without_starting_another() {
+        let finish = Arc::new(Notify::new());
+        let read_finish = Arc::clone(&finish);
+        let (started, mut starts) = mpsc::unbounded_channel();
+        let (completed, mut completions) = mpsc::unbounded_channel();
+        let inbox = PromptInbox::spawn_with_reader(move |path| {
+            let finish = Arc::clone(&read_finish);
+            let completed = completed.clone();
+            let _ = started.send(path);
+            async move {
+                finish.notified().await;
+                let _ = completed.send(());
+                Ok(Vec::new())
+            }
+        });
+        inbox.set_scope(Some("main".into()));
+        starts.recv().await.unwrap();
+        let shutdown = tokio::spawn(inbox.shutdown());
+        tokio::task::yield_now().await;
+        assert!(!shutdown.is_finished());
+        finish.notify_one();
+        completions.recv().await.unwrap();
+        shutdown.await.unwrap();
+        assert!(starts.recv().await.is_none());
     }
 
     #[tokio::test(start_paused = true)]

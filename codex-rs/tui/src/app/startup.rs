@@ -1315,6 +1315,7 @@ See the Codex keymap documentation for supported actions and examples."
                         && pending_startup_draft.is_none()
                         && app.primary_thread_id.is_some()
                         && app.current_displayed_thread_id() == app.primary_thread_id
+                        && app.chat_widget.thread_id() == app.primary_thread_id
                         && app.chat_widget.trueos_prompt_ready()
                     {
                         app.primary_thread_id.map(|thread_id| thread_id.to_string())
@@ -1556,6 +1557,8 @@ See the Codex keymap documentation for supported actions and examples."
                 }
             }
         };
+        #[cfg(target_os = "trueos")]
+        native_prompt_inbox.shutdown().await;
         if let Err(err) = app_server.shutdown().await {
             tracing::warn!(error = %err, "failed to shut down embedded app server");
         }

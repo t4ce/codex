@@ -4932,6 +4932,7 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
+ "v",
  "vt100",
  "webbrowser",
  "which 8.0.0",
