@@ -2,6 +2,14 @@
 
 Lightweight helpers for spawning interactive processes either under a PTY (pseudo terminal) or regular pipes. The public API is minimal and mirrors both backends so callers can switch based on their needs (e.g., enabling or disabling TTY).
 
+On TRUEOS, the `sh3` backend uses the local command-session ABI. Absent terminal
+geometry requests captured native command lines, without Shell3's screen redraws;
+explicit geometry requests the interactive terminal. The native unified-exec
+caller closes input for nonempty captured batches. Empty scripts deliberately
+open a reusable plain session, while explicit terminals retain keyboard input.
+Neither route invokes SSH or a POSIX shell. Run the native transport tests with
+`python3 utils/pty/tests/trueos_backend/run.py` from `codex-rs`.
+
 ## API surface
 
 - `spawn_pty_process(program, args, cwd, env, arg0, size)` → `SpawnedProcess`

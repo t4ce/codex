@@ -4,13 +4,13 @@ use crate::render::renderable::Renderable;
 use ratatui::buffer::Buffer;
 
 #[test]
-fn tab_accepts_without_submitting_and_the_draft_can_be_edited() {
+fn platform_accept_key_fills_the_editable_draft_without_submitting() {
     let (mut composer, _events) = new_test_composer();
     let request = composer.begin_next_prompt().unwrap();
     composer.apply_next_prompt(request, Some("Add the CLI feature".into()));
     assert!(composer.current_text().is_empty());
     assert!(composer.draft_snapshot().text.is_empty());
-    let (result, redraw) = composer.handle_key_event(KeyCode::Tab.into());
+    let (result, redraw) = composer.handle_key_event(ACCEPT_KEY.into());
     assert!(matches!(result, InputResult::None));
     assert!(redraw);
     assert_eq!(composer.current_text(), "Add the CLI feature");
@@ -23,7 +23,7 @@ fn tab_accepts_without_submitting_and_the_draft_can_be_edited() {
 
 #[test]
 fn typing_paste_escape_and_new_turn_invalidate_late_results() {
-    for action in 0..5 {
+    for action in 0..6 {
         let (mut composer, _events) = new_test_composer();
         composer.set_disable_paste_burst(true);
         let request = composer.begin_next_prompt().unwrap();
@@ -42,8 +42,11 @@ fn typing_paste_escape_and_new_turn_invalidate_late_results() {
                 composer.set_task_running(true);
                 composer.set_task_running(false);
             }
-            _ => {
+            4 => {
                 composer.apply_external_edit("edited".into());
+            }
+            _ => {
+                composer.handle_key_event(KeyCode::Backspace.into());
             }
         }
         let before = composer.current_text();
@@ -80,7 +83,11 @@ fn enter_never_submits_placeholder_and_existing_drafts_are_preserved() {
         composer.handle_key_event(KeyCode::Enter.into()).0,
         InputResult::None
     ));
-    assert!(composer.is_empty());
+    if cfg!(target_os = "trueos") {
+        assert_eq!(composer.current_text(), "Not yet accepted");
+    } else {
+        assert!(composer.is_empty());
+    }
     composer.apply_external_edit("My draft".into());
     assert!(composer.begin_next_prompt().is_none());
     assert_eq!(composer.current_text(), "My draft");
@@ -105,7 +112,12 @@ fn suggestion_wraps_in_the_composer_without_becoming_draft_text() {
             .collect::<String>();
         assert!(text.contains("Add next prompt"));
         if width >= 80 {
-            assert!(text.contains("Tab to accept"));
+            let label = if cfg!(target_os = "trueos") {
+                "Enter to accept"
+            } else {
+                "Tab to accept"
+            };
+            assert!(text.contains(label));
         }
         assert!(composer.current_text().is_empty());
     }

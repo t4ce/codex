@@ -3,6 +3,13 @@
 use super::*;
 use uuid::Uuid;
 
+// Shell3 reserves Tab for leaving the VM terminal on TRUEOS.
+const ACCEPT_KEY: KeyCode = if cfg!(target_os = "trueos") {
+    KeyCode::Enter
+} else {
+    KeyCode::Tab
+};
+
 #[derive(Default)]
 pub(super) struct NextPromptState {
     request_id: Option<Uuid>,
@@ -67,16 +74,21 @@ impl ChatComposer {
     }
 
     pub(super) fn next_prompt_placeholder(&self) -> Option<String> {
+        let accept = if ACCEPT_KEY == KeyCode::Enter {
+            "Enter"
+        } else {
+            "Tab"
+        };
         self.next_prompt_text()
-            .map(|text| format!("{text}  [Tab to accept · Esc to dismiss]"))
+            .map(|text| format!("{text}  [{accept} to accept · Esc to dismiss]"))
     }
 
-    /// Handle acceptance before normal Tab completion/queueing; never submit a suggestion.
+    /// Accept before normal submit/completion/queueing; never submit a suggestion.
     pub(super) fn handle_next_prompt_key(&mut self, key: KeyEvent) -> Option<(InputResult, bool)> {
         if !self.has_next_prompt() {
             return None;
         }
-        if key.code == KeyCode::Tab
+        if key.code == ACCEPT_KEY
             && key.modifiers.is_empty()
             && let Some(text) = self.next_prompt_text().map(str::to_owned)
         {

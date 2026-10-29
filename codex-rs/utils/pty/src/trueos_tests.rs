@@ -254,3 +254,78 @@ async fn native_closed_stdin_rejects_writes_without_terminating_session() {
     .await
     .unwrap();
 }
+
+#[tokio::test]
+async fn captured_batches_and_explicit_sessions_use_their_actual_input_lifetimes() {
+    tokio::time::timeout(Duration::from_secs(3), async {
+        for (script, tty, input_open) in [
+            ("adm ram\nhv status\n", false, false),
+            ("ram", false, false),
+            (" \n", false, false),
+            ("", false, true),
+            ("ram", true, true),
+            ("", true, true),
+        ] {
+            let observed = Arc::new(Mutex::new(Observed::default()));
+            let backend = FakeBackend(Arc::clone(&observed));
+            let size = tty.then_some(TerminalSize {
+                rows: 40,
+                cols: 120,
+            });
+            // This is the same policy the production unified-exec branch uses.
+            let spawned =
+                spawn_with_backend(&backend, script, size, script_stdin_open(script, tty))
+                    .await
+                    .unwrap();
+            {
+                let state = observed.lock().unwrap();
+                assert_eq!(state.script, script);
+                assert_eq!(state.stdin_open, input_open, "{script:?}, tty={tty}");
+                assert_eq!(state.geometry.is_some(), tty);
+            }
+            if input_open {
+                spawned
+                    .session
+                    .writer_sender()
+                    .send(b"env\n".to_vec())
+                    .await
+                    .unwrap();
+                while observed.lock().unwrap().input != b"env\n" {
+                    tokio::task::yield_now().await;
+                }
+                assert_eq!(observed.lock().unwrap().stdin_closed, 0);
+                spawned.session.close_stdin();
+            }
+            while observed.lock().unwrap().stdin_closed != 1 {
+                tokio::task::yield_now().await;
+            }
+            let writer = spawned.session.writer_sender();
+            while !writer.is_closed() {
+                tokio::task::yield_now().await;
+            }
+            assert!(writer.send(b"later\n".to_vec()).await.is_err());
+            assert!(observed.lock().unwrap().signals.is_empty());
+            let resized = spawned.session.resize(TerminalSize {
+                rows: 50,
+                cols: 160,
+            });
+            assert_eq!(resized.is_ok(), tty);
+            assert_eq!(
+                observed.lock().unwrap().geometry,
+                if tty {
+                    Some(Geometry {
+                        rows: 50,
+                        cols: 160,
+                    })
+                } else {
+                    None
+                }
+            );
+            observed.lock().unwrap().finish = true;
+            assert_eq!(spawned.exit_rx.await.unwrap(), 7);
+            drop(spawned.session);
+        }
+    })
+    .await
+    .unwrap();
+}

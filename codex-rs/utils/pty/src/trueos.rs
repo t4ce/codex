@@ -42,6 +42,12 @@ pub fn conpty_supported() -> bool {
     false
 }
 
+/// Nonempty captured command batches finish at EOF. Empty scripts deliberately
+/// open reusable plain sessions; explicit terminals retain keyboard input.
+pub fn script_stdin_open(script: &str, tty: bool) -> bool {
+    tty || script.is_empty()
+}
+
 /// Legacy Unix launches are rejected; argv must not be silently reinterpreted
 /// as typed Shell3 input, and Unix cwd/env/FD settings must not be discarded.
 pub async fn spawn_process(
@@ -58,8 +64,8 @@ pub async fn spawn_process(
     )
 }
 
-/// Submit native script text unchanged, including Tab mode selection.
-/// None requests captured output without a terminal view.
+/// Submit native script text unchanged. An explicit terminal retains Tab mode
+/// selection; None requests native command lines and captured text output.
 pub async fn spawn_script(
     script: &str,
     size: Option<TerminalSize>,
@@ -170,13 +176,15 @@ async fn spawn_with_backend(
                 }
             })),
             writer_handle: Some(writer_handle),
-            resizer: Some(Box::new(move |size| {
-                lock(&resize_session)?.transport().resize(Geometry {
-                    rows: size.rows,
-                    cols: size.cols,
-                })?;
-                Ok(())
-            })),
+            resizer: size.map(|_| {
+                Box::new(move |size: TerminalSize| {
+                    lock(&resize_session)?.transport().resize(Geometry {
+                        rows: size.rows,
+                        cols: size.cols,
+                    })?;
+                    Ok(())
+                }) as Box<dyn FnMut(TerminalSize) -> Result<()> + Send>
+            }),
             #[cfg(windows)]
             tty: size.is_some(),
         },

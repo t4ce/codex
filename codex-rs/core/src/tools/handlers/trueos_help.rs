@@ -60,7 +60,7 @@ fn help_spec(include_environment_id: bool) -> ToolSpec {
     }
     ToolSpec::Function(ResponsesApiTool {
         name: "help".into(),
-        description: "Show local Codex tools and TRUEOS command guidance for the selected local TRUEOS environment. Reads only live AKA names from vFile:startup when available; AppDB names cannot be enumerated through the current app API. Does not start a shell session or run a process.".into(),
+        description: "Show local Codex tools and TRUEOS command guidance for the selected local TRUEOS environment. Reads live AKA names from vFile:startup when available; this help catalog does not enumerate installed AppDB names. Use exec_command with cmd=\"cmd help\" for the live installed app catalog. Does not start a shell session or run a process.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(Vec::new()), Some(false.into())),
@@ -136,21 +136,27 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
             "spirit=automatically configured at TRUEOS boot, with Lilly as her avatar; /spirit shows integration information; use the spirit tool for native OS interaction, with presentation and input sequencing managed by Spirit: action=windows lists live targets; focus then observe returns a PNG and target grid; pointer/type/key operate the observed target; pointer uses 0..1000 window coordinates while move uses 0..1 hardware-avatar scanout coordinates; emotion selects an expression",
         ),
         String::from(
-            "shell=TRUEOS Shell3 native input, not POSIX argv or bash; type one exact name and it runs directly; commands take no arguments",
+            "shell=TRUEOS native commands, not POSIX argv or bash; default exec_command uses captured text I/O without terminal repaint sequences; submit exact command names separated by newlines",
         ),
         String::from(
-            "modes=fresh sessions start in CMD; Tab cycles HV->CMD->ADM->HV; when a VMX app is selected, the first Tab returns to shell",
+            "captured=use explicit mode-qualified commands such as adm ram or hv status; help, env, ram, smp, net, and gpu also have direct text forms; interactive-only commands require tty=true",
         ),
         String::from(
-            "example=exec_command with cmd=\"\\tnet\" sends Tab then net from a fresh CMD session to show native network information",
+            "example=exec_command with cmd=\"adm ram\\nhv status\" captures both native diagnostics as one finite batch; its input closes after the batch and any session ID is for polling output",
         ),
         String::from(
-            "catalog=group labels describe where names are accepted; they are not command prefixes",
+            "interactive=tty=true explicitly opens a full Shell3 terminal; fresh terminals start in CMD; Tab cycles HV->CMD->ADM->HV; when a VMX app is selected, the first Tab returns to shell; these sessions accept write_stdin until exit or cancellation",
         ),
         String::from(
-            "execution=CMD AppDB names launch in shell context; AKA aliases launch in every mode without Matrix slot selection",
+            "catalog=group labels describe the interactive Shell3 command registry; captured mode supports text forms and reports unsupported interactive-only requests instead of opening their UI",
         ),
-        String::from("appdb=installed names are unavailable through the current app-facing API"),
+        String::from(
+            "session=an empty cmd opens a reusable plain command session for write_stdin; a nonempty captured cmd is a finite batch; neither mode uses POSIX shell syntax",
+        ),
+        String::from(
+            "execution=interactive CMD AppDB names launch in shell context; AKA aliases launch in every interactive mode without Matrix slot selection",
+        ),
+        String::from("appdb=this local help catalog does not enumerate installed apps; exec_command with cmd=\"cmd help\" reads the live installed AppDB and AKA names"),
     ];
 
     let mut static_groups = 0usize;
@@ -306,13 +312,17 @@ mod tests {
             "calculate with no arguments lists the native operation registry",
             "not POSIX argv or bash",
             "HV->CMD->ADM->HV",
-            "fresh sessions start in CMD",
-            "cmd=\"\\tnet\"",
-            "group labels describe where names are accepted",
+            "fresh terminals start in CMD",
+            "cmd=\"adm ram\\nhv status\"",
+            "default exec_command uses captured text I/O",
+            "interactive-only commands require tty=true",
+            "an empty cmd opens a reusable plain command session",
+            "group labels describe the interactive Shell3 command registry",
             "mode=ADM group=System names=[net disc]",
             "group=Aka scope=all live_names=[\"weather\"]",
             "AppDB",
-            "unavailable through the current app-facing API",
+            "this local help catalog does not enumerate installed apps",
+            "cmd=\"cmd help\" reads the live installed AppDB and AKA names",
         ] {
             assert!(text.contains(expected), "missing {expected:?} in {text}");
         }

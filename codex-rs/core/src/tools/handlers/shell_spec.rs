@@ -83,10 +83,10 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     }
     if cfg!(target_os = "trueos") {
         properties.insert("cmd".into(), JsonSchema::string(Some(
-            "Native Shell3 input/script for local execution. Use the local help tool for command groups and syntax. A standalone help request is answered by Codex without opening a shell session. Tab changes mode; the final line is submitted with Enter. No bash interpretation. Remote environments use their reported command language.".into(),
+            "Native TRUEOS command lines for local execution. By default, submit exact commands separated by newlines for captured text output; use help for supported names and mode-qualified forms such as `adm ram` or `hv status`. No Tab navigation or bash interpretation. A standalone help request is answered locally without opening a session. With tty=true, input is a Shell3 keyboard script: Tab changes mode and the final line is submitted with Enter. Remote environments use their reported command language.".into(),
         )));
         properties.insert("tty".into(), JsonSchema::boolean(Some(
-            "True requests terminal geometry for the local Shell3 session; both modes capture console output and keep input open for write_stdin. Remote environments retain their own stdin policy.".into(),
+            "False or omitted uses native captured text I/O without terminal repaint sequences; a nonempty script closes stdin after its batch. True explicitly requests an interactive Shell3 terminal and keeps keyboard input open. An empty script also opens a reusable plain session for write_stdin. Remote environments retain their own stdin policy.".into(),
         )));
         if !include_environment_id {
             for key in ["shell", "login", "workdir"] {
@@ -101,7 +101,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     ToolSpec::Function(ResponsesApiTool {
         name: "exec_command".to_string(),
         description: if cfg!(target_os = "trueos") {
-            "For local TRUEOS discovery, call help first; Codex answers help locally without a shell session. Other requests submit native input to a dedicated Shell3 session, returning output and a session ID. Use write_stdin for further input. A prompt does not end the session. At the Shell3 prompt, `exit` closes that shell session. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
+            "For local TRUEOS discovery, call help first. The default executes a finite batch of native command lines and returns captured text without a terminal UI. A still-running batch may return a session ID for polling with write_stdin; its stdin is closed. To keep accepting input, start with an empty script, or explicitly request tty=true for Shell3's interactive terminal. Interactive sessions remain open until exit or cancellation; a prompt does not end them. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
         } else if include_windows_shell_guidance {
             format!(
                 "Runs a command in a PTY, returning output or a session ID for ongoing interaction.\n\n{}",

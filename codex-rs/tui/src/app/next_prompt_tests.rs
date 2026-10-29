@@ -178,7 +178,8 @@ async fn live_completion_generates_a_tool_free_editable_suggestion() -> color_ey
     assert!(saw_request && saw_started);
     assert!(app.chat_widget.composer_is_empty());
     assert!(render_bottom_popup(&app.chat_widget, 120).contains("Add that feature for Ubuntu and TRUEOS"));
-    app.chat_widget.handle_key_event(KeyCode::Tab.into());
+    let accept = if cfg!(target_os = "trueos") { KeyCode::Enter } else { KeyCode::Tab };
+    app.chat_widget.handle_key_event(accept.into());
     assert!(!app.chat_widget.composer_is_empty());
     assert!(app.pending_next_prompt.is_none());
     assert!(app.temporary_structured_requests.is_empty());

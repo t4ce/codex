@@ -45,9 +45,10 @@
 //!
 //! All completion suggestions render above the composer and preserve its footer.
 //! After a completed turn, a next-prompt suggestion may appear as dim placeholder text in an
-//! empty composer. Tab accepts it into the editable draft without submitting; Escape or typing
-//! dismisses it. Suggestions never enter history or recovery snapshots until accepted, and any
-//! input invalidates pending generation so late results cannot replace a user's draft.
+//! empty composer. Tab (Enter on TRUEOS, where Shell3 reserves Tab) accepts it into the editable
+//! draft without submitting; Escape, Backspace or typing dismisses it. Suggestions never enter
+//! history or recovery snapshots until accepted, and any input invalidates pending generation
+//! so late results cannot replace a user's draft.
 //! Owned transcript frames overlay suggestions with blank rows above and below, without reserving
 //! layout space. Those rows show scroll arrows when suggestions extend beyond the visible menu.
 //! Warning and transcript views hide suggestions without losing the draft, query, or selection.

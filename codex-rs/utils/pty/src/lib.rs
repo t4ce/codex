@@ -27,6 +27,8 @@ pub use pty::ChildFds;
 #[cfg(all(target_os = "trueos", feature = "sh3"))]
 pub use pty::install_shell3_backend;
 #[cfg(all(target_os = "trueos", feature = "sh3"))]
+pub use pty::script_stdin_open as shell3_stdin_open;
+#[cfg(all(target_os = "trueos", feature = "sh3"))]
 pub use pty::spawn_script as spawn_shell3_script;
 #[cfg(test)]
 mod tests;

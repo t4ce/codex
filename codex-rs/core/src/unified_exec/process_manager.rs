@@ -1357,8 +1357,9 @@ impl UnifiedExecProcessManager {
                     "Shell3 accepts one native launch script, without a Unix argv wrapper".into(),
                 ));
             };
-            // Shell3 accepts keyboard input independently of terminal formatting.
-            let stdin_open = true;
+            // Captured commands are finite batches. An empty script opens a
+            // reusable plain session; explicit TTY retains keyboard interaction.
+            let stdin_open = codex_utils_pty::shell3_stdin_open(script, tty);
             let spawned = codex_utils_pty::spawn_shell3_script(
                 script,
                 tty.then_some(codex_utils_pty::TerminalSize::default()),
