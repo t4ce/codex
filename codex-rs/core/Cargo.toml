@@ -140,6 +140,7 @@ whoami = { workspace = true }
 [target.'cfg(target_os = "trueos")'.dependencies]
 codex-code-mode-quickjs = { workspace = true }
 trueos = { workspace = true, features = ["spirit"] }
+trueos-ide = { path = "../../../TRUEOS-Blueprints/crates/trueos-ide", default-features = false }
 trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
 
 # Build OpenSSL from source for musl builds.
@@ -151,6 +152,7 @@ openssl-sys = { workspace = true, features = ["vendored"] }
 openssl-sys = { workspace = true, features = ["vendored"] }
 
 [dev-dependencies]
+trueos-ide = { path = "../../../TRUEOS-Blueprints/crates/trueos-ide", default-features = false }
 assert_cmd = { workspace = true }
 assert_matches = { workspace = true }
 codex-exec-server-test-support = { workspace = true }

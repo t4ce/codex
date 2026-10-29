@@ -15,9 +15,21 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct IdeContext {
+    #[serde(skip)]
+    native_workspace: Option<NativeWorkspace>,
     active_file: Option<ActiveFile>,
     #[serde(default)]
     open_tabs: Vec<FileDescriptor>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct NativeWorkspace {
+    endpoint: u64,
+    project: String,
+    database: String,
+    compiler: String,
+    entry: String,
+    revision_id: i64,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -89,6 +101,7 @@ mod tests {
         assert_eq!(
             context,
             IdeContext {
+                native_workspace: None,
                 active_file: Some(ActiveFile {
                     descriptor: FileDescriptor {
                         label: "lib.rs".to_string(),

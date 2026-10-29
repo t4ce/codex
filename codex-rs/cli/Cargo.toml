@@ -9,9 +9,13 @@ default-run = "codex"
 # Blueprint packing builds this package as a standalone workspace, so this
 # override applies there; normal Codex workspace builds use the root profiles.
 [profile.release]
-opt-level = 1
-incremental = true
-codegen-units = 8
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+incremental = false
+panic = "abort"
+# Keep native symbols and relocations until Blueprint packaging strips debug data.
+strip = "none"
 
 [[bin]]
 name = "codex"

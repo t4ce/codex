@@ -145,6 +145,8 @@ tokio-util = { workspace = true, features = ["time"] }
 libc = { workspace = true }
 
 [target.'cfg(target_os = "trueos")'.dependencies]
+codex-core = { workspace = true }
+trueos-ide = { path = "../../../TRUEOS-Blueprints/crates/trueos-ide", default-features = false }
 trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
 
 [target.'cfg(target_os = "macos")'.dependencies]

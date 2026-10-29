@@ -20,6 +20,8 @@ use crate::tools::handlers::FileInfoHandler;
 use crate::tools::handlers::GetContextRemainingHandler;
 #[cfg(target_os = "trueos")]
 use crate::tools::handlers::HelpHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::IdeHandler;
 use crate::tools::handlers::ListAvailablePluginsToInstallHandler;
 #[cfg(target_os = "trueos")]
 use crate::tools::handlers::ListDirectoryHandler;
@@ -1425,6 +1427,7 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         registry.add(HelpHandler::new(include_environment_id));
         registry.add(CalculatorHandler::new(include_environment_id));
         registry.add(SpiritHandler::new(include_environment_id));
+        registry.add(IdeHandler::new(include_environment_id));
         registry.add(ListDirectoryHandler::new(include_environment_id));
         registry.add(FileInfoHandler::new(include_environment_id));
         registry.add(ReadFileHandler::new(include_environment_id));

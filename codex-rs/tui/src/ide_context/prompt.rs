@@ -96,6 +96,10 @@ fn prefixed_text_input(prefix: String, text: String, text_elements: Vec<TextElem
 fn render_prompt_context(context: &IdeContext) -> Option<String> {
     let mut ide_context_section = String::new();
 
+    if let Some(workspace) = &context.native_workspace {
+        ide_context_section.push_str(&format!("\n## TRUEOS Edit workspace\n- Project: {}\n- Database: {}\n- Compiler: {}\n- Entry: {}\n- Endpoint: {}\n- Revision: {}\nUse this endpoint with the trueos_ide tool.\n", workspace.project, workspace.database, workspace.compiler, workspace.entry, workspace.endpoint, workspace.revision_id));
+    }
+
     if let Some(active_file) = &context.active_file {
         ide_context_section.push_str(&format!(
             "\n## Active file: {}\n",
@@ -203,11 +207,33 @@ mod tests {
     }
 
     #[test]
+    fn native_workspace_identifies_the_tool_endpoint_and_revision() {
+        let context = IdeContext {
+            native_workspace: Some(super::super::NativeWorkspace {
+                endpoint: 42,
+                project: "example".into(),
+                database: "projects.redb".into(),
+                compiler: "OdinSon".into(),
+                entry: "main.odin".into(),
+                revision_id: 7,
+            }),
+            active_file: None,
+            open_tabs: Vec::new(),
+        };
+        let prompt = render_prompt_context(&context).unwrap();
+        assert!(prompt.contains("Project: example"));
+        assert!(prompt.contains("Endpoint: 42"));
+        assert!(prompt.contains("Revision: 7"));
+        assert!(prompt.contains("trueos_ide tool"));
+    }
+
+    #[test]
     fn async_question_reply_stays_recognizable_with_ide_context() {
         use codex_context_fragments::AnsweredQuestion;
         use codex_context_fragments::ContextualUserFragment;
 
         let context = IdeContext {
+            native_workspace: None,
             active_file: None,
             open_tabs: vec![descriptor("lib.rs", "src/lib.rs")],
         };
@@ -251,6 +277,7 @@ mod tests {
     #[test]
     fn render_prompt_context_matches_app_format() {
         let context = IdeContext {
+            native_workspace: None,
             active_file: Some(ActiveFile {
                 descriptor: descriptor("lib.rs", "src/lib.rs"),
                 selection: Range {
@@ -284,6 +311,7 @@ mod tests {
     #[test]
     fn render_prompt_context_omits_empty_context() {
         let context = IdeContext {
+            native_workspace: None,
             active_file: None,
             open_tabs: Vec::new(),
         };
@@ -294,6 +322,7 @@ mod tests {
     #[test]
     fn apply_ide_context_uses_desktop_prompt_request_delimiter() {
         let context = IdeContext {
+            native_workspace: None,
             active_file: Some(ActiveFile {
                 descriptor: descriptor("lib.rs", "src/lib.rs"),
                 selection: Range {
@@ -385,6 +414,7 @@ mod tests {
             },
         };
         let context = IdeContext {
+            native_workspace: None,
             active_file: Some(ActiveFile {
                 descriptor: descriptor("lib.rs", "src/lib.rs"),
                 selection: first_range.clone(),
@@ -406,6 +436,7 @@ mod tests {
     #[test]
     fn render_prompt_context_truncates_large_selection() {
         let context = IdeContext {
+            native_workspace: None,
             active_file: Some(ActiveFile {
                 descriptor: descriptor("large.txt", "large.txt"),
                 selection: Range {
@@ -437,6 +468,7 @@ mod tests {
             .map(|index| descriptor(&format!("file-{index}.rs"), &format!("src/file-{index}.rs")))
             .collect::<Vec<_>>();
         let context = IdeContext {
+            native_workspace: None,
             active_file: None,
             open_tabs,
         };

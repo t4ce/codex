@@ -227,6 +227,8 @@ mod state;
 mod tasks;
 mod user_shell_command;
 pub mod util;
+#[cfg(any(target_os = "trueos", test))]
+pub mod trueos_ide;
 
 pub use attestation::AttestationContext;
 pub use attestation::AttestationProvider;
