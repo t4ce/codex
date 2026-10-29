@@ -108,6 +108,23 @@ async fn spawn_with_backend(
     let writer_handle = tokio::spawn(async move {
         if stdin_open {
             while let Some(bytes) = stdin_rx.recv().await {
+                // Captured input is command text, so Ctrl-C must use the
+                // transport control channel. Explicit terminals consume keys.
+                if size.is_none() && bytes == b"\x03" {
+                    let result = lock(&write_session).and_then(|mut session| {
+                        session
+                            .transport()
+                            .signal(Signal::Interrupt)
+                            .map_err(Into::into)
+                    });
+                    if result.is_err() {
+                        if let Ok(mut session) = lock(&write_session) {
+                            let _ = session.transport().signal(Signal::Terminate);
+                        }
+                        return;
+                    }
+                    continue;
+                }
                 let mut sent = 0;
                 while sent < bytes.len() {
                     let written = lock(&write_session).and_then(|mut session| {

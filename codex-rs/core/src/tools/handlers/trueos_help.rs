@@ -139,7 +139,7 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
             "shell=TRUEOS native commands, not POSIX argv or bash; default exec_command uses captured text I/O without terminal repaint sequences; submit exact command names separated by newlines",
         ),
         String::from(
-            "captured=use explicit mode-qualified commands such as adm ram or hv status; help, env, ram, smp, net, and gpu also have direct text forms; interactive-only commands require tty=true",
+            "captured=use explicit mode-qualified commands such as adm ram or hv status; help, env, ram, smp, net, gpu, and services also have direct text forms; services (or adm services) returns the central service readiness/start snapshot, refreshed about once per second; interactive-only commands require tty=true",
         ),
         String::from(
             "example=exec_command with cmd=\"adm ram\\nhv status\" captures both native diagnostics as one finite batch; its input closes after the batch and any session ID is for polling output",

@@ -167,6 +167,52 @@ async fn native_script_input_controls_and_final_output_survive_the_adapter() {
 }
 
 #[tokio::test]
+async fn captured_ctrl_c_signals_interrupt_while_terminal_keeps_keyboard_bytes() {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        for tty in [false, true] {
+            let observed = Arc::new(Mutex::new(Observed::default()));
+            let backend = FakeBackend(Arc::clone(&observed));
+            let spawned = spawn_with_backend(
+                &backend,
+                "",
+                tty.then_some(TerminalSize::default()),
+                script_stdin_open("", tty),
+            )
+            .await
+            .unwrap();
+            spawned
+                .session
+                .writer_sender()
+                .send(b"\x03".to_vec())
+                .await
+                .unwrap();
+            loop {
+                {
+                    let state = observed.lock().unwrap();
+                    if !state.input.is_empty() || !state.signals.is_empty() {
+                        assert!(state.stdin_open);
+                        if tty {
+                            assert_eq!(state.input, b"\x03");
+                            assert!(state.signals.is_empty());
+                        } else {
+                            assert!(state.input.is_empty());
+                            assert_eq!(state.signals, [Signal::Interrupt]);
+                        }
+                        break;
+                    }
+                }
+                tokio::task::yield_now().await;
+            }
+            observed.lock().unwrap().finish = true;
+            assert_eq!(spawned.exit_rx.await.unwrap(), 7);
+            drop(spawned.session);
+        }
+    })
+    .await
+    .unwrap();
+}
+
+#[tokio::test]
 async fn rejected_script_does_not_allocate_a_session() {
     let observed = Arc::new(Mutex::new(Observed::default()));
     let backend = FakeBackend(Arc::clone(&observed));
