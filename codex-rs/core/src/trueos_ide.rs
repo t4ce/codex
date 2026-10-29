@@ -171,6 +171,7 @@ async fn open_impl<T: Transport>(
                 IdeRequest::Context {},
                 request_id,
                 REQUEST_CONTEXT_TIMEOUT,
+                WaitMode::Async,
             )
             .await?;
             if let IdeResponse::Context { context } = &reply {
@@ -199,11 +200,29 @@ async fn open_impl<T: Transport>(
         if Instant::now() >= deadline {
             return Err("Edit launch was queued but its workspace did not appear before timeout; discover before retrying".into());
         }
-        tokio::task::yield_now().await;
+        tokio::time::sleep(POLL_INTERVAL.min(deadline.saturating_duration_since(Instant::now())))
+            .await;
     }
 }
 
 const REQUEST_CONTEXT_TIMEOUT: Duration = Duration::from_secs(5);
+const POLL_INTERVAL: Duration = Duration::from_millis(25);
+
+#[derive(Clone, Copy)]
+enum WaitMode {
+    Async,
+    #[cfg(target_os = "trueos")]
+    Synchronous,
+}
+
+async fn wait_for_poll(mode: WaitMode, remaining: Duration) {
+    let delay = POLL_INTERVAL.min(remaining);
+    match mode {
+        WaitMode::Async => tokio::time::sleep(delay).await,
+        #[cfg(target_os = "trueos")]
+        WaitMode::Synchronous => trueos_v::vsys::sleep_ms(delay.as_millis().max(1) as u64),
+    }
+}
 
 #[cfg(target_os = "trueos")]
 pub async fn request(endpoint: Option<u64>, command: IdeRequest) -> Result<IdeResponse, String> {
@@ -223,6 +242,7 @@ pub async fn request_with_endpoint(
         command,
         NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed),
         REQUEST_TIMEOUT,
+        WaitMode::Async,
     )
     .await
 }
@@ -243,6 +263,7 @@ pub fn context_now() -> Result<(u64, IdeResponse), String> {
         IdeRequest::Context {},
         NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed),
         REQUEST_TIMEOUT,
+        WaitMode::Synchronous,
     ))
 }
 
@@ -252,6 +273,7 @@ async fn request_impl<T: Transport>(
     command: IdeRequest,
     request_id: u64,
     timeout: Duration,
+    wait_mode: WaitMode,
 ) -> Result<(u64, IdeResponse), String> {
     // Clear any ticket left by a previously dropped future before admission.
     transport
@@ -295,7 +317,11 @@ async fn request_impl<T: Transport>(
             }
         };
         if bytes.is_empty() {
-            tokio::task::yield_now().await;
+            wait_for_poll(
+                wait_mode,
+                deadline.saturating_duration_since(Instant::now()),
+            )
+            .await;
             continue;
         }
         let reply: OwnerReply = match serde_json::from_slice(&bytes) {
@@ -515,7 +541,8 @@ mod tests {
                 None,
                 IdeRequest::Context {},
                 9,
-                Duration::from_secs(1)
+                Duration::from_secs(1),
+                WaitMode::Async,
             )
             .await
             .unwrap(),
@@ -539,7 +566,8 @@ mod tests {
                 None,
                 IdeRequest::Context {},
                 9,
-                Duration::from_secs(1)
+                Duration::from_secs(1),
+                WaitMode::Async,
             )
             .await
             .unwrap_err()
@@ -565,7 +593,8 @@ mod tests {
                 Some(7),
                 IdeRequest::Context {},
                 9,
-                Duration::from_secs(1)
+                Duration::from_secs(1),
+                WaitMode::Async,
             )
             .await
             .unwrap_err()
@@ -579,9 +608,16 @@ mod tests {
             reads: RefCell::new(VecDeque::from([endpoints(&[7])])),
             ..Default::default()
         };
-        let error = request_impl(&mock, None, IdeRequest::Run {}, 9, Duration::ZERO)
-            .await
-            .unwrap_err();
+        let error = request_impl(
+            &mock,
+            None,
+            IdeRequest::Run {},
+            9,
+            Duration::ZERO,
+            WaitMode::Async,
+        )
+        .await
+        .unwrap_err();
         assert!(error.contains("outcome may be unknown"));
         assert_eq!(mock.writes.borrow().last().unwrap().0, protocol::CANCEL);
     }
