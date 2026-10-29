@@ -1,5 +1,76 @@
 # Codex CLI in the TRUEOS Cargo Blueprint pack flow
 
+## Workload verification workflow (2026-10-29)
+
+From the sibling `TRUEOS-Blueprints` checkout, use the normal named app build:
+
+```sh
+cargo bp codex-cli
+```
+
+For a local build that skips the existing apps publication step:
+
+```sh
+TRUEOS_BLUEPRINT_SKIP_APPS_PUBLISH=1 cargo bp codex-cli
+```
+
+The output is `dist/codex.bp` with a local `dist/codex.workload.json` receipt.
+The packer prints `Codex workload verified`, the Blueprint SHA-256, and the
+receipt path. The receipt records the Blueprint and ELF hashes, required kernel
+imports, selected source manifests, and hashes of the relevant Codex and Tokio
+runtime files. It is local build evidence and does not need to be installed on
+TRUEOS.
+
+Packing checks Cargo's resolved graph and the actual compiler artifact manifests
+for the live `codex-arg0` source and the shared Tokio fork selected by the
+Blueprint SDK. It also requires strong undefined ELF imports for
+`trueos_cabi_thread_configure_placement_v1`,
+`trueos_cabi_thread_swap_child_role_v1`, and
+`trueos_cabi_thread_swap_activity_v1`; local stubs fail verification. A change
+to a recorded workload source during packing prevents writing a successful receipt. The complete build
+cache tracks the receipt as an output, and its reuse path checks the Blueprint
+hash and current workload source hashes. A missing or mismatched receipt forces
+a rebuild.
+
+The verified hooks make placement available. **The default runtime policy is
+still `single`.** To run the AP isolation experiment, put this text in
+`$CODEX_HOME/trueos-threads.conf` on TRUEOS, normally
+`/apps/codex/.codex/trueos-threads.conf`, before starting a fresh Codex instance:
+
+```text
+isolated 2
+```
+
+This reserves foreground placement and allows up to two background carriers,
+subject to available APs. Use `single` in that file for a baseline run.
+`CODEX_TRUEOS_THREAD_PLACEMENT` and `CODEX_TRUEOS_BACKGROUND_CARRIERS`, when
+supplied by the launcher, override the profile. The profile is runtime state;
+repacking does not select a policy or change it in an already running process.
+
+For startup evidence, launch with `CODEX_STARTUP_TIMING_STDERR=1` to send
+`codex_startup` milestones directly to the resident logger, including before
+tracing initialization. `CODEX_STARTUP_TIMING_FILE` selects an additional TSV
+file. Correlate `thread_placement_configured mode=0/1/2` with kernel admission
+and timing records; a verified build alone does not establish that work ran on
+separate APs. Compare the launch archive hash with the receipt's
+`blueprint_sha256` to identify the exact build under test.
+
+Start the existing log drain from the TRUEOS checkout before a fresh launch:
+
+```sh
+bash tools/baremetal-log-drain.sh start
+```
+
+Stop it after the capture with `bash tools/baremetal-log-drain.sh stop`. The
+kernel's retained log ring is 256 KiB; ongoing output can evict startup records
+before a later manual read. The drain preserves them using the configured test
+rig connection.
+
+This workflow adds build evidence for the existing runtime work; it does not
+change compiler optimization settings or persist a running Codex image.
+
+## Earlier captured build
+
 Snapshot: 2026-10-13. This describes the effective staged build, not the host Codex workspace graph.
 
 ## Entry and build

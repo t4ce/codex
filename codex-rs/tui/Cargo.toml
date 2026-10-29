@@ -144,6 +144,9 @@ tokio-util = { workspace = true, features = ["time"] }
 [target.'cfg(unix)'.dependencies]
 libc = { workspace = true }
 
+[target.'cfg(target_os = "trueos")'.dependencies]
+trueos-v = { package = "v", path = "../../../TRUEOS-Blueprints/crates/trueos-v" }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2-app-kit = { version = "0.3.2", default-features = false, features = ["std", "NSAccessibility", "NSWorkspace"] }
 objc2-foundation = { version = "0.3.2", default-features = false, features = ["std", "NSDateFormatter", "NSFormatter", "NSLocale", "NSString"] }

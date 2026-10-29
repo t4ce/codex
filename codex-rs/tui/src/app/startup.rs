@@ -1209,6 +1209,9 @@ See the Codex keymap documentation for supported actions and examples."
         #[cfg(any(debug_assertions, not(feature = "install-update")))]
         let pre_loop_exit_reason: Option<ExitReason> = None;
 
+        #[cfg(target_os = "trueos")]
+        let mut native_prompt_inbox = super::trueos_prompt::PromptInbox::spawn();
+
         let exit_reason_result = if let Some(exit_reason) = pre_loop_exit_reason {
             Ok(exit_reason)
         } else {
@@ -1304,7 +1307,34 @@ See the Codex keymap documentation for supported actions and examples."
                     .chat_widget
                     .rate_limit_refresh_interval()
                     .and_then(|interval| app.rate_limit_refresh_state.poll_deadline(interval));
+                #[cfg(target_os = "trueos")]
+                {
+                    let scope = if !app.reconnect.offline
+                        && !app.startup_pending_protected_request
+                        && !app.has_queued_startup_protected_request()
+                        && pending_startup_draft.is_none()
+                        && app.primary_thread_id.is_some()
+                        && app.current_displayed_thread_id() == app.primary_thread_id
+                        && app.chat_widget.trueos_prompt_ready()
+                    {
+                        app.primary_thread_id.map(|thread_id| thread_id.to_string())
+                    } else {
+                        None
+                    };
+                    native_prompt_inbox.set_scope(scope.clone());
+                    native_prompt_inbox.try_deliver(scope.as_deref(), |text| {
+                        app.chat_widget.submit_trueos_prompt(text)
+                    });
+                }
                 let control = select! {
+                    () = async {
+                        #[cfg(target_os = "trueos")]
+                        if native_prompt_inbox.can_receive() {
+                            native_prompt_inbox.receive().await;
+                            return;
+                        }
+                        std::future::pending::<()>().await;
+                    } => AppRunControl::Continue,
                     result = async {
                         match app.daemon_restart.as_mut() {
                             Some(task) => task.await,

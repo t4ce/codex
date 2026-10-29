@@ -279,6 +279,8 @@ mod thread_session_state;
 mod thread_settings;
 mod thread_title;
 mod transcript_export;
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_prompt;
 mod tui_mode_picker;
 mod user_turn_submission;
 mod user_verification;

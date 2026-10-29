@@ -409,6 +409,8 @@ mod tool_lifecycle;
 mod tool_requests;
 mod transcript;
 mod transcript_export;
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_prompt;
 mod tui_mode_picker;
 mod usage_history;
 use self::transcript::TranscriptState;

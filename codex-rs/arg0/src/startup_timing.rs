@@ -1,7 +1,8 @@
 //! Opt-in, process-local startup milestones for terminal bring-up measurements.
 //! Set CODEX_STARTUP_TIMING_FILE for TSV rows, or CODEX_STARTUP_TIMING_STDERR=1
 //! for diagnostics during terminal bring-up. On TRUEOS, diagnostics go to the
-//! resident logger so milestones emitted after drawing cannot overwrite the TUI.
+//! resident logger directly, including before tracing has a subscriber, so
+//! milestones emitted after drawing cannot overwrite the TUI.
 
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -21,8 +22,19 @@ struct Timing {
 
 static TIMING: OnceLock<Option<Mutex<Timing>>> = OnceLock::new();
 
+#[cfg(target_os = "trueos")]
+unsafe extern "C" {
+    fn trueos_cabi_log(
+        level: u32,
+        target_ptr: *const u8,
+        target_len: usize,
+        message_ptr: *const u8,
+        message_len: usize,
+    ) -> i32;
+}
+
 /// Record a milestone once per process, with elapsed and previous-milestone ms.
-/// Disabled unless a sink is explicitly requested; never blocks startup on an error.
+/// Disabled unless a sink is explicitly requested; sink errors are ignored.
 pub fn mark(stage: &str) {
     let timing = TIMING.get_or_init(|| {
         let path = std::env::var_os("CODEX_STARTUP_TIMING_FILE");
@@ -59,14 +71,23 @@ pub fn mark(stage: &str) {
     }
     if timing.stderr {
         #[cfg(target_os = "trueos")]
-        tracing::info!(
-            target: "codex_startup",
-            pid,
-            elapsed_ms,
-            delta_ms,
-            stage,
-            "startup milestone"
-        );
+        {
+            // Placement and arg0 milestones precede tracing initialization.
+            // The resident CABI logger is available from entry and keeps these
+            // records out of the terminal byte stream throughout TUI startup.
+            const INFO: u32 = 3; // trueos_v::vsys::LOG_LEVEL_INFO
+            const TARGET: &[u8] = b"codex_startup";
+            let message = format!("[codex-startup] {}", row.trim_end());
+            let _ = unsafe {
+                trueos_cabi_log(
+                    INFO,
+                    TARGET.as_ptr(),
+                    TARGET.len(),
+                    message.as_ptr(),
+                    message.len(),
+                )
+            };
+        }
         #[cfg(not(target_os = "trueos"))]
         let _ = std::io::stderr()
             .write_all(format!("[codex-startup] {}\r\n", row.trim_end()).as_bytes());

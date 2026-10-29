@@ -14,6 +14,54 @@ use pretty_assertions::assert_eq;
 use std::collections::VecDeque;
 
 #[tokio::test]
+async fn trueos_prompt_preserves_draft_and_submits_multiline_text_literally() {
+    let (mut chat, _events, mut operations) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.thread_id = Some(ThreadId::new());
+    chat.apply_external_edit("existing composer draft".into());
+    let draft = chat.bottom_pane.composer_draft_snapshot();
+    let text = "!not a shell command\n/status\nOne user statement.\n";
+
+    assert!(chat.submit_trueos_prompt(text.into()));
+    assert_eq!(chat.bottom_pane.composer_draft_snapshot(), draft);
+    assert_hidden_shell_payload_is_literal(operations.try_recv(), text.into());
+    assert!(operations.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn trueos_prompt_uses_existing_busy_queue_without_consuming_draft() {
+    let (mut chat, _events, mut operations) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.thread_id = Some(ThreadId::new());
+    handle_turn_started(&mut chat, "running-turn");
+    chat.apply_external_edit("draft for later".into());
+    let draft = chat.bottom_pane.composer_draft_snapshot();
+    let text = "!literal follow-up\nwith another line";
+
+    assert!(chat.submit_trueos_prompt(text.into()));
+    assert!(operations.try_recv().is_err());
+    assert_eq!(chat.queued_user_message_texts(), [text]);
+    assert_eq!(chat.bottom_pane.composer_draft_snapshot(), draft);
+    handle_turn_completed(&mut chat, "running-turn", /*duration_ms*/ None);
+    assert_hidden_shell_payload_is_literal(operations.try_recv(), text.into());
+    assert_eq!(chat.bottom_pane.composer_draft_snapshot(), draft);
+}
+
+#[tokio::test]
+async fn trueos_prompt_does_not_deliver_into_unconfigured_or_parent_owned_views() {
+    let (mut chat, _events, mut operations) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.apply_external_edit("keep this draft".into());
+    let draft = chat.bottom_pane.composer_draft_snapshot();
+    assert!(!chat.trueos_prompt_ready());
+    assert!(!chat.submit_trueos_prompt("not yet".into()));
+    chat.thread_id = Some(ThreadId::new());
+    chat.set_parent_owned_thread();
+    assert!(!chat.trueos_prompt_ready());
+    assert!(!chat.submit_trueos_prompt("parent owns this".into()));
+    assert!(chat.queued_user_message_texts().is_empty());
+    assert!(operations.try_recv().is_err());
+    assert_eq!(chat.bottom_pane.composer_draft_snapshot(), draft);
+}
+
+#[tokio::test]
 async fn composer_submission_sends_once_and_requests_latest() {
     let (mut chat, mut events, mut operations) =
         make_chatwidget_manual(/*model_override*/ None).await;
