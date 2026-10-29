@@ -139,8 +139,27 @@ pub mod agent {
     }
 }
 pub struct FakeThread {
+    session: FakeSession,
     config: codex_thread::ThreadConfigSnapshot,
     status: RwLock<agent::AgentStatus>,
+}
+pub struct FakeSession {
+    id: ThreadId,
+    services: FakeServices,
+}
+impl FakeSession {
+    fn session_id(&self) -> ThreadId {
+        self.id
+    }
+}
+pub struct FakeServices {
+    local_agent_runtime: FakeRuntime,
+}
+pub struct FakeRuntime(Arc<Mutex<Vec<agent::types::AgentMetadata>>>);
+impl FakeRuntime {
+    fn control(&self, _: ThreadId) -> Controller {
+        Controller(Arc::clone(&self.0))
+    }
 }
 impl FakeThread {
     async fn config_snapshot(&self) -> codex_thread::ThreadConfigSnapshot {
@@ -150,8 +169,12 @@ impl FakeThread {
         self.status.read().unwrap().clone()
     }
 }
+#[derive(Clone)]
 pub struct Controller(Arc<Mutex<Vec<agent::types::AgentMetadata>>>);
 impl Controller {
+    fn shares_spirit_tree(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
     fn registered_spirit_agents(&self) -> Vec<agent::types::AgentMetadata> {
         self.0.lock().unwrap().clone()
     }
@@ -178,7 +201,9 @@ impl ThreadManager {
         })
     }
     fn agent_control(&self) -> Controller {
-        Controller(Arc::clone(&self.metadata))
+        // The production manager constructs a fresh tree here. Existing
+        // metadata belongs to the loaded session's runtime, not this handle.
+        Controller(Arc::default())
     }
     async fn list_thread_ids(&self) -> Vec<ThreadId> {
         self.loaded.read().unwrap().keys().copied().collect()
@@ -204,6 +229,12 @@ impl ThreadManager {
         self.loaded.write().unwrap().insert(
             ThreadId(id),
             Arc::new(FakeThread {
+                session: FakeSession {
+                    id: ThreadId(id),
+                    services: FakeServices {
+                        local_agent_runtime: FakeRuntime(Arc::clone(&self.metadata)),
+                    },
+                },
                 config: codex_thread::ThreadConfigSnapshot {
                     ephemeral: false,
                     parent_thread_id: parent.map(ThreadId),
