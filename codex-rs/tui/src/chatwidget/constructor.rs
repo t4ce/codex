@@ -342,6 +342,11 @@ impl ChatWidget {
             .set_token_activity_command_enabled(widget.has_codex_backend_auth);
         widget.refresh_status_surfaces();
 
+        #[cfg(target_os = "trueos")]
+        if codex_core::trueos_ide::startup_endpoint().is_some() {
+            widget.handle_ide_command_args("on");
+        }
+
         widget
     }
 }

@@ -38,7 +38,7 @@ fn spec(include_environment_id: bool) -> ToolSpec {
                 .into_iter().map(|name| json!(name)).collect(),
             Some("Workspace operation.".into()),
         )),
-        ("endpoint".into(), JsonSchema::integer(Some("Endpoint returned by discover. May be omitted only when exactly one workspace is open.".into()))),
+        ("endpoint".into(), JsonSchema::integer(Some("Endpoint returned by discover. Defaults to the workspace that launched Codex, or the sole open workspace for an ordinary Codex launch.".into()))),
         ("path".into(), JsonSchema::string(Some("Project-relative source path for read_file or write_file.".into()))),
         ("expected_revision_id".into(), JsonSchema::integer(Some("Revision returned by context or read_file; required for write_file and compile.".into()))),
         ("expected_text".into(), JsonSchema::string(Some("Previously read live file content; omit only when creating a new file.".into()))),

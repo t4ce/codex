@@ -15,6 +15,30 @@ use trueos_ide::protocol::{self};
 
 const DEFAULT_DATABASE: &str = "/apps/common/ide/projects.redb";
 
+#[cfg(target_os = "trueos")]
+static STARTUP_ENDPOINT: std::sync::OnceLock<u64> = std::sync::OnceLock::new();
+
+/// Consume the launch stream once, before the TUI or embedded app server starts.
+/// This binds implicit tool requests and `/ide` to the launching Edit owner.
+#[cfg(target_os = "trueos")]
+pub async fn initialize_launch_script() -> Result<(), String> {
+    let bytes = match trueos_v::vfs_async::read_file(b"vFile:launch").await {
+        Ok(bytes) => bytes,
+        Err(trueos_v::vfs_async::ERR_NOT_FOUND) => return Ok(()),
+        Err(code) => return Err(format!("Codex launch script read failed ({code})")),
+    };
+    let script = std::str::from_utf8(&bytes).map_err(|error| error.to_string())?;
+    if let Some(endpoint) = protocol::codex_start_endpoint(script)? {
+        STARTUP_ENDPOINT.set(endpoint).map_err(|_| "Codex IDE endpoint is already initialized")?;
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "trueos")]
+pub fn startup_endpoint() -> Option<u64> {
+    STARTUP_ENDPOINT.get().copied()
+}
+
 #[derive(Debug, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct OpenOptions {
@@ -238,7 +262,7 @@ pub async fn request_with_endpoint(
     let _guard = REQUEST_LOCK.lock().await;
     request_impl(
         &NativeTransport,
-        endpoint,
+        endpoint.or(startup_endpoint()),
         command,
         NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed),
         REQUEST_TIMEOUT,
@@ -259,7 +283,7 @@ pub fn context_now() -> Result<(u64, IdeResponse), String> {
     let _guard = try_request_lock()?;
     trueos_v::vfs_async::block_on(request_impl(
         &NativeTransport,
-        None,
+        startup_endpoint(),
         IdeRequest::Context {},
         NEXT_REQUEST_ID.fetch_add(1, Ordering::Relaxed),
         REQUEST_TIMEOUT,
@@ -602,6 +626,31 @@ mod tests {
         );
         assert_eq!(mock.writes.borrow().last().unwrap().0, protocol::CANCEL);
     }
+    #[tokio::test]
+    async fn explicit_launch_endpoint_stays_bound_with_multiple_workspaces() {
+        let reply = OwnerReply {
+            endpoint: 8, client_token: 12, request_id: 9,
+            reply: IdeResponse::Saved { revision_id: 3 },
+        };
+        let mock = Mock {
+            reads: RefCell::new(VecDeque::from([endpoints(&[7, 8]), protocol::encode(&reply).unwrap()])),
+            ..Default::default()
+        };
+        assert_eq!(request_impl(&mock, Some(8), IdeRequest::Context {}, 9,
+            Duration::from_secs(1), WaitMode::Async).await.unwrap().0, 8);
+        let sent: ClientRequest = protocol::decode(&mock.writes.borrow()[1].1).unwrap();
+        assert_eq!(sent.endpoint, 8);
+
+        // Closing the launching Edit must never redirect to the sole survivor.
+        let mock = Mock {
+            reads: RefCell::new(VecDeque::from([endpoints(&[7])])),
+            ..Default::default()
+        };
+        assert!(request_impl(&mock, Some(8), IdeRequest::Context {}, 9,
+            Duration::from_secs(1), WaitMode::Async).await.unwrap_err().contains("no longer available"));
+        assert_eq!(mock.writes.borrow().len(), 1); // cancellation only, no request
+    }
+
     #[tokio::test]
     async fn timeout_cancels_ticket_and_reports_unknown_outcome() {
         let mock = Mock {
