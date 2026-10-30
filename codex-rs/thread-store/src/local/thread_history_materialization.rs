@@ -21,6 +21,47 @@ use crate::ThreadStoreResult;
 const SQLITE_PROJECTION_METRIC: &str = "codex.thread_history.sqlite_projection";
 const SQLITE_PROJECTION_ANOMALY_METRIC: &str = "codex.thread_history.sqlite_projection.anomaly";
 
+#[derive(Clone, Copy)]
+pub(super) struct ProjectionHeader {
+    initial_ordinal: u64,
+    subagent_history_start_ordinal: Option<u64>,
+}
+
+async fn projection_header(
+    store: &LocalThreadStore,
+    rollout_id: ThreadId,
+    rollout_path: &Path,
+) -> ThreadStoreResult<ProjectionHeader> {
+    let cache = store
+        .live_recorders
+        .lock()
+        .await
+        .values()
+        .find(|entry| {
+            entry.rollout_id == rollout_id && entry.recorder.rollout_path() == rollout_path
+        })
+        .map(|entry| entry.projection_header.clone());
+    let read_header = || async {
+        let meta = codex_rollout::read_session_meta_line(rollout_path)
+            .await
+            .map_err(thread_store_io_error)?
+            .meta;
+        Ok(ProjectionHeader {
+            initial_ordinal: meta
+                .history_base
+                .map_or(0, |base| base.end_ordinal_exclusive),
+            subagent_history_start_ordinal: meta.subagent_history_start_ordinal,
+        })
+    };
+    // Scope the cache to an owned live writer, never just a pathname: shutdown,
+    // resume and revert must read the new incarnation's durable header. Failed
+    // reads are retried and offline materialization continues to read from disk.
+    match cache {
+        Some(cache) => cache.get_or_try_init(read_header).await.copied(),
+        None => read_header().await,
+    }
+}
+
 pub(super) async fn materialize_to_sqlite(
     store: &LocalThreadStore,
     thread_id: ThreadId,
@@ -50,14 +91,10 @@ async fn materialize_to_sqlite_with_state_db(
     {
         return Ok(());
     }
-    let session_meta = codex_rollout::read_session_meta_line(rollout_path)
-        .await
-        .map_err(thread_store_io_error)?
-        .meta;
-    let initial_ordinal = session_meta
-        .history_base
-        .map_or(0, |base| base.end_ordinal_exclusive);
-    let subagent_history_start_ordinal = session_meta.subagent_history_start_ordinal;
+    let ProjectionHeader {
+        initial_ordinal,
+        subagent_history_start_ordinal,
+    } = projection_header(store, thread_id, rollout_path).await?;
     let expected_ordinal = projection_state
         .as_ref()
         .map_or(initial_ordinal, |state| state.next_ordinal);

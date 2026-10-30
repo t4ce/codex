@@ -70,6 +70,71 @@ use crate::ThreadSortKey;
 use crate::ThreadStore;
 
 #[tokio::test]
+async fn live_projection_header_is_cached_only_for_its_writer_incarnation() {
+    let home = TempDir::new().expect("temp dir");
+    let store = LocalThreadStore::new(test_config(home.path()), /*state_db*/ None);
+    let thread_id = ThreadId::default();
+    create_paginated_thread(&store, thread_id).await;
+    store
+        .persist_thread(thread_id, PersistContext::Standard)
+        .await
+        .expect("persist session metadata");
+    let path = store
+        .live_rollout_path(thread_id)
+        .await
+        .expect("rollout path");
+    let header = super::projection_header(&store, thread_id, &path)
+        .await
+        .expect("read durable projection header");
+    let hidden = path.with_extension("temporarily-hidden");
+    fs::rename(&path, &hidden).expect("make the header temporarily unavailable");
+    let cached = super::projection_header(&store, thread_id, &path)
+        .await
+        .expect("a live writer must not reopen its immutable header");
+    assert_eq!(cached.initial_ordinal, header.initial_ordinal);
+    assert_eq!(
+        cached.subagent_history_start_ordinal,
+        header.subagent_history_start_ordinal
+    );
+    fs::rename(&hidden, &path).expect("restore the rollout before shutdown");
+    store
+        .shutdown_thread(thread_id)
+        .await
+        .expect("shutdown writer");
+    store
+        .resume_thread(ResumeThreadParams {
+            history_revision: None,
+            thread_id,
+            rollout_path: Some(path.clone()),
+            history: None,
+            include_archived: false,
+            metadata: ThreadPersistenceMetadata {
+                cwd: Some(home.path().to_path_buf()),
+                model_provider: "test-provider".to_string(),
+                memory_mode: ThreadMemoryMode::Enabled,
+            },
+        })
+        .await
+        .expect("resume with a new live writer");
+    fs::rename(&path, &hidden).expect("hide the new incarnation's header");
+    assert!(
+        super::projection_header(&store, thread_id, &path)
+            .await
+            .is_err()
+    );
+    fs::rename(&hidden, &path).expect("restore the header after the failed read");
+    assert!(
+        super::projection_header(&store, thread_id, &path)
+            .await
+            .is_ok()
+    );
+    store
+        .shutdown_thread(thread_id)
+        .await
+        .expect("shutdown resumed writer");
+}
+
+#[tokio::test]
 async fn paginated_history_without_state_db_does_not_initialize_sqlite() {
     let home = TempDir::new().expect("temp dir");
     let config = test_config(home.path());

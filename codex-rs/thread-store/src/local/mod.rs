@@ -161,6 +161,9 @@ type WriterLockGuard = Arc<codex_rollout::WriterLockGuard>;
 
 struct LiveRecorderEntry {
     recorder: RolloutRecorder,
+    // The first SessionMeta is immutable for this writer incarnation. Reading it
+    // again can reopen/copy the entire rollout on whole-file storage backends.
+    projection_header: Arc<OnceCell<thread_history_materialization::ProjectionHeader>>,
     // Rollout projection rows are keyed by immutable rollout ID, not the stable thread ID used
     // to find this live writer.
     rollout_id: ThreadId,
@@ -385,6 +388,7 @@ impl LocalThreadStore {
             Entry::Vacant(entry) => {
                 entry.insert(LiveRecorderEntry {
                     recorder,
+                    projection_header: Arc::new(OnceCell::new()),
                     rollout_id,
                     history_mode,
                     writer_lock,
