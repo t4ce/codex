@@ -34,11 +34,12 @@ impl IdeHandler {
 fn spec(include_environment_id: bool) -> ToolSpec {
     let mut properties = BTreeMap::from([
         ("action".into(), JsonSchema::string_enum(
-            ["open", "discover", "context", "read_file", "write_file", "compile", "build_status", "cancel_build", "run"]
+            ["open", "discover", "context", "api_reference", "read_file", "write_file", "compile", "build_status", "cancel_build", "run"]
                 .into_iter().map(|name| json!(name)).collect(),
             Some("Workspace operation.".into()),
         )),
         ("endpoint".into(), JsonSchema::integer(Some("Endpoint returned by discover. Defaults to the workspace that launched Codex, or the sole open workspace for an ordinary Codex launch.".into()))),
+        ("topic".into(), JsonSchema::string(Some("Read-only platform API topic from the catalog returned by context; required for api_reference.".into()))),
         ("path".into(), JsonSchema::string(Some("Project-relative source path for read_file or write_file.".into()))),
         ("expected_revision_id".into(), JsonSchema::integer(Some("Revision returned by context or read_file; required for write_file and compile.".into()))),
         ("expected_text".into(), JsonSchema::string(Some("Previously read live file content; omit only when creating a new file.".into()))),
@@ -58,7 +59,7 @@ fn spec(include_environment_id: bool) -> ToolSpec {
     }
     ToolSpec::Function(ResponsesApiTool {
         name: "trueos_ide".into(),
-        description: "Work with a TRUEOS Edit project. open attaches to or launches a named project and returns its endpoint and context; discover lists workspaces; context returns the current revision and editor state; read_file reads project source; write_file saves complete text using the revision returned by context or read_file; compile starts a build for the expected revision; build_status reports progress; cancel_build requests cancellation; run starts the built project. Use endpoint from open or discover when multiple workspaces are open. Refresh context and source after a revision conflict. Edit owns the project store and build lifecycle.".into(),
+        description: "Work with a TRUEOS Edit project. open attaches to or launches a named project and returns its endpoint and context; discover lists workspaces; context returns the current revision, editor state and versioned platform API index; api_reference reads a platform API topic from that catalog without changing project files or invoking the compiler; read_file reads project source; write_file saves complete text using the revision returned by context or read_file; compile starts a build for the expected revision; build_status reports progress; cancel_build requests cancellation; run starts the built project. Use endpoint from open or discover when multiple workspaces are open. Refresh context and source after a revision conflict. Edit owns the project store and build lifecycle.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(vec!["action".into()]), Some(false.into())),

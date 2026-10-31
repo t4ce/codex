@@ -413,6 +413,7 @@ mod tests {
             open_files: vec![],
             selected_text: String::new(),
             build: protocol::BuildState::Idle,
+            api_reference: None,
         };
         let reply = OwnerReply {
             endpoint: 7,
@@ -452,6 +453,7 @@ mod tests {
             open_files: vec![],
             selected_text: String::new(),
             build: protocol::BuildState::Idle,
+            api_reference: None,
         };
         let reply = OwnerReply {
             endpoint: 7,

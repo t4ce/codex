@@ -100,6 +100,10 @@ fn render_prompt_context(context: &IdeContext) -> Option<String> {
         ide_context_section.push_str(&format!("\n## TRUEOS Edit workspace\n- Project: {}\n- Database: {}\n- Compiler: {}\n- Entry: {}\n- Endpoint: {}\n- Revision: {}\nUse this endpoint with the trueos_ide tool.\n", workspace.project, workspace.database, workspace.compiler, workspace.entry, workspace.endpoint, workspace.revision_id));
     }
 
+    if let Some(api) = context.native_workspace.as_ref().and_then(|workspace| workspace.api_reference.as_ref()) {
+        ide_context_section.push_str(api);
+    }
+
     if let Some(active_file) = &context.active_file {
         ide_context_section.push_str(&format!(
             "\n## Active file: {}\n",
@@ -216,6 +220,7 @@ mod tests {
                 compiler: "OdinSon".into(),
                 entry: "main.odin".into(),
                 revision_id: 7,
+                api_reference: Some("\n## TRUEOS platform API reference (read-only)\nAPI version: test-api\nAvailable topics: terminal, logging\n".into()),
             }),
             active_file: None,
             open_tabs: Vec::new(),
@@ -225,6 +230,8 @@ mod tests {
         assert!(prompt.contains("Endpoint: 42"));
         assert!(prompt.contains("Revision: 7"));
         assert!(prompt.contains("trueos_ide tool"));
+        assert!(prompt.contains("API version: test-api"));
+        assert!(prompt.contains("Available topics: terminal, logging"));
     }
 
     #[test]

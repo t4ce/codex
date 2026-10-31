@@ -30,6 +30,7 @@ struct NativeWorkspace {
     compiler: String,
     entry: String,
     revision_id: i64,
+    api_reference: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]

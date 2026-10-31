@@ -227,6 +227,7 @@ pub(crate) fn fetch_ide_context(
             compiler: format!("{:?}", context.compiler),
             entry: context.entry,
             revision_id: context.revision_id,
+            api_reference: context.api_reference.map(|api| api.render_summary()),
         }),
         active_file,
         open_tabs: context.open_files.into_iter().map(descriptor).collect(),
