@@ -16,6 +16,28 @@ use crate::session_start::cancel_session_start;
 use crate::session_start::complete_session_start;
 use crate::unarchive_prompt::run_unarchive_prompt;
 
+// Separate budgets preserve post-paint evidence even if attachment spends its first eight samples.
+// Wire IDs 1..=8 precede the one-shot paint; 9..=16 follow an actual successful handoff paint.
+fn startup_dispatch_sample(
+    samples: &mut [u8; 2],
+    handed_off: bool,
+    deadline: &mut Option<Instant>,
+) -> Option<u8> {
+    let phase = usize::from(handed_off);
+    if samples[phase] >= 8 {
+        return None;
+    }
+    let Some(end) = *deadline else {
+        return None;
+    };
+    if Instant::now() >= end {
+        *deadline = None;
+        return None;
+    }
+    samples[phase] += 1;
+    Some(samples[phase] + phase as u8 * 8)
+}
+
 fn spawn_startup_thread_start(
     app_server: &AppServerSession,
     local_settings: crate::local_settings::LocalSettings,
@@ -30,14 +52,17 @@ fn spawn_startup_thread_start(
     let thread_tool_transport = app_server.thread_tool_transport();
     tokio::spawn(async move {
         codex_arg0::startup_timing::mark("thread_start_begin");
-        let result = crate::app_server_session::start_thread_with_request_handle(
-            request_handle,
-            &local_settings,
-            config,
-            thread_params_mode,
-            remote_cwd_override,
-            thread_tool_transport,
-            launch_choices,
+        let result = codex_arg0::startup_timing::measure(
+            "tui.thread_start",
+            crate::app_server_session::start_thread_with_request_handle(
+                request_handle,
+                &local_settings,
+                config,
+                thread_params_mode,
+                remote_cwd_override,
+                thread_tool_transport,
+                launch_choices,
+            ),
         )
         .await
         .and_then(|started| {
@@ -172,10 +197,10 @@ impl App {
         &mut self,
         tui: &mut tui::Tui,
         app_event_rx: &mpsc::UnboundedReceiver<AppEvent>,
-    ) -> Result<()> {
+    ) -> Result<bool> {
         if tui.is_owned_screen() && !app_event_rx.is_empty() && !self.chat_widget.has_active_view()
         {
-            return Ok(());
+            return Ok(false);
         }
         self.chat_widget.pre_draw_tick();
         self.render_chat_widget_frame(tui, tui.terminal.last_known_screen_size)?;
@@ -189,7 +214,42 @@ impl App {
         if self.chat_widget.has_active_modal() && self.startup_protected_input_boundary {
             self.discard_startup_modal_input(tui)?;
         }
-        Ok(())
+        Ok(true)
+    }
+
+    /// Paint the attached session after its history and startup draft have reached the widget.
+    /// This handoff must not depend on a scheduled frame or the next terminal input event.
+    pub(super) fn render_pending_startup_handoff(
+        &mut self,
+        tui: &mut tui::Tui,
+        app_event_rx: &mpsc::UnboundedReceiver<AppEvent>,
+        pending: &mut bool,
+    ) -> Result<bool> {
+        if !*pending
+            || self.primary_session_configured.is_none()
+            || self.pending_startup_thread_start
+            || !app_event_rx.is_empty()
+            || self.has_queued_startup_protected_request()
+        {
+            return Ok(false);
+        }
+        let phase = codex_arg0::startup_timing::span("tui.startup_handoff_frame");
+        let painted = match self.render_startup_frame(tui, app_event_rx) {
+            Ok(painted) => {
+                phase.finish(if painted { "painted" } else { "skipped" });
+                painted
+            }
+            Err(err) => {
+                phase.finish("error");
+                return Err(err);
+            }
+        };
+        if !painted {
+            return Ok(false);
+        }
+        *pending = false;
+        codex_arg0::startup_timing::mark("startup_handoff_frame_rendered");
+        Ok(true)
     }
 
     /// Keep a visible modal closed to input if the terminal has not settled yet. The next input
@@ -343,13 +403,16 @@ impl App {
             match startup_draft
                 .run_until(
                     tui,
-                    prepare_fresh_startup_config(
-                        &mut config,
-                        &app_server,
-                        &app_server_target,
-                        &cli_kv_overrides,
-                        &harness_overrides,
-                        &environment_manager,
+                    codex_arg0::startup_timing::measure(
+                        "tui.fresh_defaults",
+                        prepare_fresh_startup_config(
+                            &mut config,
+                            &app_server,
+                            &app_server_target,
+                            &cli_kv_overrides,
+                            &harness_overrides,
+                            &environment_manager,
+                        ),
                     ),
                 )
                 .await
@@ -432,14 +495,17 @@ impl App {
             if matches!(&session_selection, SessionSelection::Fork(_)) && config.model.is_none() {
                 None
             } else {
-                handle_model_migration_prompt_if_needed(
-                    tui,
-                    &mut config,
-                    &local_settings,
-                    &mut launch_choices,
-                    model.as_str(),
-                    &app_event_tx,
-                    &available_models,
+                codex_arg0::startup_timing::measure(
+                    "tui.user_model_migration",
+                    handle_model_migration_prompt_if_needed(
+                        tui,
+                        &mut config,
+                        &local_settings,
+                        &mut launch_choices,
+                        model.as_str(),
+                        &app_event_tx,
+                        &available_models,
+                    ),
                 )
                 .await?
             };
@@ -560,10 +626,13 @@ impl App {
                     match startup_draft
                         .run_until(
                             tui,
-                            prepare_startup_tooltip_override(
-                                &mut local_settings,
-                                &available_models,
-                                is_first_run,
+                            codex_arg0::startup_timing::measure(
+                                "tui.startup_tooltip",
+                                prepare_startup_tooltip_override(
+                                    &mut local_settings,
+                                    &available_models,
+                                    is_first_run,
+                                ),
                             ),
                         )
                         .await
@@ -995,6 +1064,7 @@ See the Codex keymap documentation for supported actions and examples."
             dynamic_tool_status_updates,
             dynamic_tool_tasks: HashMap::new(),
             pending_startup_thread_start,
+            startup_skills_refresh_cwd: None,
             pending_server_version_notice: if pending_startup_thread_start {
                 initial_server_version_notice
                     .as_ref()
@@ -1160,6 +1230,7 @@ See the Codex keymap documentation for supported actions and examples."
             event_stream_ms = %event_stream_started_at.elapsed().as_millis(),
             "tui startup initial frame scheduled"
         );
+        app.arm_startup_skills_refresh();
         app.refresh_startup_skills(&app_server);
         // Kick off a non-blocking rate-limit prefetch so the first `/status`
         // already has data and available reset credits can be surfaced, without
@@ -1187,6 +1258,14 @@ See the Codex keymap documentation for supported actions and examples."
         let mut reconnect = None;
         let mut waiting_for_initial_session_configured = wait_for_initial_session_configured;
         let mut waiting_for_initial_session_header = true;
+        let mut pending_startup_frame = app.pending_startup_thread_start;
+        let mut startup_handoff_rendered = false;
+        let mut startup_handoff_state = None;
+        let mut startup_handoff_state_changes = 0u8;
+        let mut startup_app_event_samples = [0u8; 2];
+        let mut startup_server_event_samples = [0u8; 2];
+        let mut startup_dispatch_probe_deadline =
+            Some(Instant::now() + Duration::from_secs(/*secs*/ 120));
 
         #[cfg(all(not(debug_assertions), feature = "install-update"))]
         let pre_loop_exit_reason = if let Some(latest_version) = upgrade_version {
@@ -1355,7 +1434,41 @@ See the Codex keymap documentation for supported actions and examples."
                                 if cell.as_any().is::<history_cell::SessionInfoCell>()
                         );
                         let had_active_modal = app.chat_widget.has_active_modal();
-                        match Box::pin(app.handle_event(tui, &mut app_server, event)).await {
+                        let startup_sample = if app.primary_session_configured.is_some()
+                            && !app.pending_startup_thread_start {
+                            startup_dispatch_sample(
+                                &mut startup_app_event_samples, startup_handoff_rendered,
+                                &mut startup_dispatch_probe_deadline,
+                            )
+                        } else { None };
+                        let result = if let Some(sample) = startup_sample {
+                            // Static categories: 0 other, 1 usage read, 2 backend fallback,
+                            // 3 committed history. Never log event Debug output or payloads.
+                            let category = match &event {
+                                AppEvent::RateLimitsLoaded { .. } => 1,
+                                AppEvent::ApplyBackendBannerFallback { .. } => 2,
+                                AppEvent::InsertHistoryCell(_) => 3,
+                                _ => 0,
+                            };
+                            let event_name: &'static str = (&event).into();
+                            let op = match &event {
+                                AppEvent::CodexOp(AppCommand::ListSkills { .. }) => "list_skills",
+                                AppEvent::CodexOp(_) => "other",
+                                _ => "none",
+                            };
+                            codex_arg0::startup_timing::mark(&format!(
+                                "startup_app_event sample={} category={category} event={event_name} op={op}",
+                                sample,
+                            ));
+                            codex_arg0::startup_timing::measure(
+                                "tui.startup_app_event",
+                                Box::pin(app.handle_event(tui, &mut app_server, event)),
+                            )
+                            .await
+                        } else {
+                            Box::pin(app.handle_event(tui, &mut app_server, event)).await
+                        };
+                        match result {
                             Ok(AppRunControl::Continue) => {
                                 if is_initial_session_header {
                                     waiting_for_initial_session_header = false;
@@ -1428,7 +1541,40 @@ See the Codex keymap documentation for supported actions and examples."
                     app_server_event = app_server.next_event(), if listen_for_app_server_events && !app.reconnect.offline
                         && (matches!(app.app_server_target, AppServerTarget::Embedded) || !has_pending_app_events) => {
                         match app_server_event {
-                            Some(event) => app.handle_app_server_event(&app_server, event).await,
+                            Some(event) => {
+                                let startup_sample = if app.primary_session_configured.is_some()
+                                    && !app.pending_startup_thread_start {
+                                    startup_dispatch_sample(
+                                        &mut startup_server_event_samples, startup_handoff_rendered,
+                                        &mut startup_dispatch_probe_deadline,
+                                    )
+                                } else { None };
+                                if let Some(sample) = startup_sample {
+                                    // 0 lifecycle/other, 1 notification, 2 request.
+                                    let category = match &event {
+                                        codex_app_server_client::AppServerEvent::ServerNotification(_) => 1,
+                                        codex_app_server_client::AppServerEvent::ServerRequest(_) => 2,
+                                        _ => 0,
+                                    };
+                                    let event_name = match &event {
+                                        codex_app_server_client::AppServerEvent::ServerNotification(_) => "ServerNotification",
+                                        codex_app_server_client::AppServerEvent::ServerRequest(_) => "ServerRequest",
+                                        codex_app_server_client::AppServerEvent::Lagged { .. } => "Lagged",
+                                        codex_app_server_client::AppServerEvent::Disconnected { .. } => "Disconnected",
+                                    };
+                                    codex_arg0::startup_timing::mark(&format!(
+                                        "startup_server_event sample={} category={category} event={event_name}",
+                                        sample,
+                                    ));
+                                    codex_arg0::startup_timing::measure(
+                                        "tui.startup_server_event",
+                                        app.handle_app_server_event(&app_server, event),
+                                    )
+                                    .await;
+                                } else {
+                                    app.handle_app_server_event(&app_server, event).await;
+                                }
+                            }
                             None => {
                                 listen_for_app_server_events = false;
                                 app.begin_reconnect();
@@ -1523,7 +1669,12 @@ See the Codex keymap documentation for supported actions and examples."
                 ) {
                     waiting_for_initial_session_configured = false;
                     let had_active_modal = app.chat_widget.has_active_modal();
-                    if let Err(err) = app.drain_active_thread_events(tui).await {
+                    if let Err(err) = codex_arg0::startup_timing::measure(
+                        "tui.initial_thread_drain",
+                        app.drain_active_thread_events(tui),
+                    )
+                    .await
+                    {
                         break Err(err);
                     }
                     if !had_active_modal
@@ -1544,6 +1695,43 @@ See the Codex keymap documentation for supported actions and examples."
                                 &mut pending_startup_draft,
                                 &mut pending_startup_submission,
                             );
+                        }
+                        if pending_startup_frame && startup_handoff_state_changes < 16 {
+                            // State bits: 0 handoff pending, 1 configured session,
+                            // 2 thread start pending, 3 queued AppEvent, 4 queued protected
+                            // request, 5 queued active-thread event, 6 waiting for initial
+                            // session, 7 startup draft pending, 8 active modal,
+                            // 9 protected-screen input still quarantined.
+                            let mask = u16::from(pending_startup_frame)
+                                | (u16::from(app.primary_session_configured.is_some()) << 1)
+                                | (u16::from(app.pending_startup_thread_start) << 2)
+                                | (u16::from(!app_event_rx.is_empty()) << 3)
+                                | (u16::from(app.has_queued_startup_protected_request()) << 4)
+                                | (u16::from(
+                                    app.active_thread_rx
+                                        .as_ref()
+                                        .is_some_and(|rx| !rx.is_empty()),
+                                ) << 5)
+                                | (u16::from(waiting_for_initial_session_configured) << 6)
+                                | (u16::from(pending_startup_draft.is_some()) << 7)
+                                | (u16::from(app.chat_widget.has_active_modal()) << 8)
+                                | (u16::from(app.startup_pending_protected_request) << 9);
+                            if startup_handoff_state != Some(mask) {
+                                startup_handoff_state = Some(mask);
+                                startup_handoff_state_changes += 1;
+                                codex_arg0::startup_timing::mark(&format!(
+                                    "startup_handoff_state change={} mask={mask}",
+                                    startup_handoff_state_changes,
+                                ));
+                            }
+                        }
+                        match app.render_pending_startup_handoff(
+                            tui,
+                            &app_event_rx,
+                            &mut pending_startup_frame,
+                        ) {
+                            Ok(painted) => startup_handoff_rendered |= painted,
+                            Err(err) => break Err(err),
                         }
                         #[cfg(windows)]
                         if terminal_color_probe_pending

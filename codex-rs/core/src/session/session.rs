@@ -1972,7 +1972,7 @@ impl Session {
             );
             #[cfg(target_os = "trueos")]
             tracing::info!(target: "codex_startup", phase = "core_prewarm_schedule_begin", "fresh thread startup");
-            sess.schedule_startup_prewarm(super::startup_prewarm::PrewarmInput::Base)
+            sess.schedule_initial_prewarm(super::startup_prewarm::PrewarmInput::Base)
                 .await;
             #[cfg(target_os = "trueos")]
             tracing::info!(target: "codex_startup", phase = "core_prewarm_schedule_done", "fresh thread startup");

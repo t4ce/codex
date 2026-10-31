@@ -354,10 +354,20 @@ impl SqliteConfig {
         telemetry_override: Option<&dyn DbTelemetry>,
     ) -> anyhow::Result<SqlitePool> {
         let path = spec.path(self.home());
+        let (startup_open, startup_migrate) = match spec.kind {
+            DbKind::State => ("db.state.open", "db.state.migrate"),
+            DbKind::Logs => ("db.logs.open", "db.logs.migrate"),
+            DbKind::Goals => ("db.goals.open", "db.goals.migrate"),
+            DbKind::Memories => ("db.memories.open", "db.memories.migrate"),
+            DbKind::Queue => ("db.queue.open", "db.queue.migrate"),
+            DbKind::ThreadHistory => ("db.open", "db.migrate"),
+        };
+        let startup_open = codex_startup_timing::span(startup_open);
         let started = Instant::now();
         let pool_result = self
             .open_read_write_pool_with_spec(path.as_path(), Some(spec), telemetry_override)
             .await;
+        startup_open.finish(if pool_result.is_ok() { "ok" } else { "error" });
         telemetry::record_init_result(
             telemetry_override,
             spec.kind,
@@ -368,6 +378,7 @@ impl SqliteConfig {
         let pool = pool_result.map_err(|source| {
             RuntimeDbInitError::new(spec.label, "open", path.as_path(), source)
         })?;
+        let startup_migrate = codex_startup_timing::span(startup_migrate);
         let started = Instant::now();
         let migrate_result = async {
             if matches!(spec.kind, DbKind::State) {
@@ -376,6 +387,11 @@ impl SqliteConfig {
             migrator.run(&pool).await.map_err(anyhow::Error::from)
         }
         .await;
+        startup_migrate.finish(if migrate_result.is_ok() {
+            "ok"
+        } else {
+            "error"
+        });
         telemetry::record_init_result(
             telemetry_override,
             spec.kind,

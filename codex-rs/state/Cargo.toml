@@ -10,6 +10,7 @@ chrono = { workspace = true }
 codex-file-system = { workspace = true }
 codex-history = { workspace = true }
 codex-protocol = { workspace = true }
+codex-startup-timing = { workspace = true }
 codex-utils-paths = { workspace = true }
 file-id = { workspace = true }
 log = { workspace = true }

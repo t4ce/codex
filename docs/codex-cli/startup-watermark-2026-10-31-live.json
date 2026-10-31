@@ -1,0 +1,4431 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-31",
+  "kind": "successful_allocation_watermark_diagnostic_gate_observation",
+  "application_archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+  "kernel_evidence": {
+    "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+    "worktree": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+    "production_source_changes": {
+      "src/allcaps.rs": "18d7bd71566065f495877610d4cf7d5e396600caa4707ad330615369ac1aaad8",
+      "src/allocators.rs": "be6a558b7134c5ae2ecfe5e1465f88e9a5c7fbf0f4d2a8dc597ec042a5a76e71",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "0f640c89396938d4e6f6b35275f235bc62ab1a27545a85b133f502134f945fc9",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554"
+    },
+    "excluded_user_wip_verified": true,
+    "ssh_identity_preserved": true,
+    "private_buildins": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev",
+    "shared_caches": [
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/cargo",
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/host"
+    ],
+    "sibling_revisions": {
+      "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+      "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+    },
+    "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image.",
+    "staged_dependency_locks": {
+      "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+      "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+    },
+    "submodule_revisions": {
+      "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+      "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+    },
+    "mission_loader_files": {
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "0f640c89396938d4e6f6b35275f235bc62ab1a27545a85b133f502134f945fc9",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554"
+    },
+    "diff_review": "PASS: six HV files contain only fixed launch spans, request correlation and checkpoint disabled defaults; no unrelated hunks",
+    "gate_values": {
+      "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+      "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+    },
+    "launch_timing_harness": {
+      "source": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_launch_timing.py",
+      "sha256": "268d62c67cfdf32f8b51d8aa0bc42b3a1572b39c1eff94ab7611d39a3a199d61",
+      "tests_passed": 5
+    },
+    "watermark_gate_validation": {
+      "baseline": "/tmp/trueos-watermark-gate-baseline-20261031.json",
+      "root": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+      "flags": {
+        "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+        "CODEX_ALLOC_ABI_PROBES_ENABLED": false,
+        "HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED": false
+      },
+      "sha256": {
+        "src/allcaps.rs": "18d7bd71566065f495877610d4cf7d5e396600caa4707ad330615369ac1aaad8",
+        "src/allocators.rs": "be6a558b7134c5ae2ecfe5e1465f88e9a5c7fbf0f4d2a8dc597ec042a5a76e71"
+      }
+    },
+    "watermark_harness_tests_passed": 14,
+    "native_watermark_probe_enabled": false,
+    "incremental_patch": {
+      "path": "/tmp/trueos-native-watermark-off-20261031.patch",
+      "sha256": "948f98e71a78dd26ba9f4c52c25accac4ef18de12d17715dff587bacb2d9f0bd",
+      "production_files_changed": [
+        "src/allcaps.rs",
+        "src/allocators.rs"
+      ],
+      "review": "Only new private false allcaps flag and early return before success watermark clock, counters and heap scans; failure reporting untouched"
+    },
+    "instrumented_off_reference": {
+      "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-instrumented-off-20261031",
+      "artifacts": {
+        "TRUEOS.elf": {
+          "bytes": 73149776,
+          "sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf"
+        },
+        "TrueOS.tar.lz4": {
+          "bytes": 63625699,
+          "sha256": "0e4cf9d6689421b9a1d935df3553f1d500f23818301edbf6724385bac58dd9ce"
+        },
+        "EFI/BOOT/BOOTX64.EFI": {
+          "bytes": 61440,
+          "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+        },
+        "EFI/BOOT/tgl_guc_70.bin": {
+          "bytes": 335360,
+          "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+        }
+      }
+    },
+    "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-watermark-off-20261031",
+    "artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73145680,
+        "sha256": "b19657dfe616d7cfe7b0d1e95fe1c3c42bc730a1a8477ff3b6ccf83df59e8613"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63626959,
+        "sha256": "c942bc86b557f81d0b50941d80a3ec969d4bf4b58680c97b140b1e2b358a6188"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "archive_members_verified": {
+      "TRUEOS.elf": {
+        "bytes": 73145680,
+        "sha256": "b19657dfe616d7cfe7b0d1e95fe1c3c42bc730a1a8477ff3b6ccf83df59e8613"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "builtins_ready": {
+      "profile": "dev",
+      "sources": "d8b1ad50e038d5274499925afd69ebc2909fa482d96fa9c42878212301a5c886",
+      "database": {
+        "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+        "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+      },
+      "packages": {
+        "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+        "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+        "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+        "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+        "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+        "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+        "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+        "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+        "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+        "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+        "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+        "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+      }
+    },
+    "codex_cabi_compatibility": {
+      "blueprint_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+      "codex_elf_sha256": "90807c58d03fe722f83dbd0b55fca12c6eb787acc98c441842576d2fdaa85a5e",
+      "kernel_elf_sha256": "b19657dfe616d7cfe7b0d1e95fe1c3c42bc730a1a8477ff3b6ccf83df59e8613",
+      "required_cabi_imports": 56,
+      "kernel_resolver_entries_matched": 56,
+      "kernel_resolver_entries_total": 352,
+      "missing": [],
+      "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+      "resolver_snapshot": "/tmp/trueos-codex-watermark-off-resolver.rs",
+      "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+      "depfile_sha256": "039106ff65be5cbe8242a6130592c8f6320a33bd325fd2493ed51d4ff8dc1c1e",
+      "matched_functions": {
+        "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+        "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+        "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+        "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+        "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+        "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+        "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+        "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+        "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+        "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+        "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+        "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+        "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+        "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+        "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+        "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+        "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+        "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+        "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+        "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+        "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+        "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+        "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+        "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+        "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+        "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+        "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+        "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+        "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+        "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+        "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+        "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+        "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+        "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+        "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+        "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+        "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+        "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+        "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+        "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+        "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+        "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+        "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+        "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+        "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+        "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+        "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+        "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+        "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+        "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+        "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+        "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+        "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+        "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+      }
+    },
+    "matched_pair_immutable": true,
+    "published": false,
+    "reset": false,
+    "retained_instrumented_off_immutable": true,
+    "local_build_validation": "PASS",
+    "linked_instrumentation_markers": {
+      "trueos-startup-v1 request=": true,
+      "TRUEOS_STARTUP_REQUEST": true,
+      "ap_prepare": true,
+      "elf_load": true,
+      "guest_entry": true,
+      "vm_boot": true
+    },
+    "only_incremental_source_delta": [
+      "src/allcaps.rs",
+      "src/allocators.rs"
+    ],
+    "original_sources_unchanged": true,
+    "identical_prepared_builtins_to_instrumented_off": true,
+    "identical_cabi_resolver_to_instrumented_off": true,
+    "build_bounds": {
+      "cpus": "17",
+      "memory_max_bytes": 4294967296,
+      "memory_swap_max_bytes": 0,
+      "cargo_jobs": 1,
+      "first_kernel_compile_elapsed": "1m34s",
+      "cached_revalidation_elapsed": "0.23s",
+      "resource_guard_evidence": "/tmp/trueos-codex-watermark-off-build-resource-guard.json",
+      "aborted_for_app_memory": false
+    }
+  },
+  "kernel_evidence_sha256": "0816bbc163b68a4302591abedddc5c8c2e46ba09ccec9be44158579f0885e4fc",
+  "publication_receipt": {
+    "selected_epoch": 1793420243.8464277,
+    "mode": "watermark-off",
+    "previous_selection": "rig-images/debug.codex-startup-instrumented-off-20261031",
+    "selected_generation": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/debug.codex-startup-watermark-off-20261031",
+    "kernel_sha256": "b19657dfe616d7cfe7b0d1e95fe1c3c42bc730a1a8477ff3b6ccf83df59e8613",
+    "archive_sha256": "c942bc86b557f81d0b50941d80a3ec969d4bf4b58680c97b140b1e2b358a6188",
+    "capture_offset_before_reset": 34025695
+  },
+  "fresh_boot": {
+    "start_offset": 34025695,
+    "end_offset": 34515932,
+    "window_bytes": 490237,
+    "window_sha256": "293f9b13a65eabccdd73b17bdc4eb1e9148f41fa45dbd34b8a4a505740b9bcf8",
+    "observed_epoch": 1793420306.1384842,
+    "events": [
+      {
+        "line": 73,
+        "event": "Entering TrueOS kernel"
+      },
+      {
+        "line": 193,
+        "event": "[global] [info] trueosfs-request-broker: online realm=bsp callers=background-service-lanes wait=parked-no-executor-poll"
+      },
+      {
+        "line": 209,
+        "event": "[global] [info] spawn-svc: started codex-progress-observer (mask=0x04000000)"
+      },
+      {
+        "line": 289,
+        "event": "[storage] [info] http-trueosfs: listening on tcp 80 owner=<hardware> dev=1 Realtek RTL8125 ip=192.168.178.94 mode=dhcp"
+      },
+      {
+        "line": 291,
+        "event": "[boot] [important] hid-udp: task polling at_ms=1154 readiness=0x2d05f700"
+      },
+      {
+        "line": 301,
+        "event": "[storage] [info] http-trueosfs: tcp listen opened and ready dev=1"
+      },
+      {
+        "line": 1263,
+        "event": "[storage] [info] http-trueosfs: perf bytes=10 tsc_read=0 tsc_submit=17814 tsc_total=17814 cycles_per_byte=1781"
+      },
+      {
+        "line": 1267,
+        "event": "[storage] [info] http-trueosfs: perf bytes=10 tsc_read=0 tsc_submit=17204 tsc_total=17204 cycles_per_byte=1720"
+      },
+      {
+        "line": 1268,
+        "event": "[storage] [info] http-trueosfs: perf bytes=24 tsc_read=3004810 tsc_submit=18148 tsc_total=3022958 cycles_per_byte=125956"
+      }
+    ]
+  },
+  "baseline_controls": {
+    "document": "startup-loader-2026-10-31-live.json",
+    "document_sha256": "40c499c8177305d92763dad729165bb92ed748e10053ec3bb97c6007c537956e",
+    "kernel_sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf",
+    "successful_watermark_probe": "enabled in the instrumented-off baseline",
+    "trials": [
+      {
+        "name": "instrumented-off-full-prewarm-workers1",
+        "request": 1,
+        "sqlite_state": "cold_after_fresh_boot; separate host request 2",
+        "loader_interval_ms": 5733.0,
+        "first_flush_ms": 381.0,
+        "state_db_gate_ms": 1724.0,
+        "attach_done_ms": 10329.0,
+        "ready_frame_ms": 33304.0,
+        "attach_to_ready_ms": 22975.0,
+        "ready_without_input": false,
+        "first_draft_echo_ms": null,
+        "first_draft_echo_result": "TIMEOUT",
+        "no_input_seconds_after_observed_attach": 5.0
+      },
+      {
+        "name": "instrumented-off-full-prewarm-workers1-warm",
+        "request": 3,
+        "sqlite_state": "warm_service_retained_from_first_observation; no separate SQLite launch in this window",
+        "loader_interval_ms": 5548.0,
+        "first_flush_ms": 380.0,
+        "state_db_gate_ms": 177.0,
+        "attach_done_ms": 9019.0,
+        "ready_frame_ms": 28289.0,
+        "attach_to_ready_ms": 19270.0,
+        "ready_without_input": false,
+        "first_draft_echo_ms": 14231.098,
+        "first_draft_echo_result": "success",
+        "no_input_seconds_after_observed_attach": 5.0
+      }
+    ]
+  },
+  "observations": [
+    {
+      "name": "watermark-off-full-prewarm-workers1-cold",
+      "sqlite_state": "cold",
+      "capture": {
+        "start_offset": 34199611,
+        "end_offset": 34730833,
+        "bytes": 531222,
+        "sha256": "e19d27cd149ed7b0fba2e7a19541b88d42c2515b523d56cc6f88acf038650653",
+        "observed_epoch": 1793420355.4449909
+      },
+      "application_context": {
+        "request": 1,
+        "app_gen": 1,
+        "instance": "6ab00809-09ac-4f0e-b36e-74cbe411a9bd",
+        "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+      },
+      "application_pids_joined_by_request": [
+        1000,
+        1
+      ],
+      "runtime_workers": [
+        {
+          "line": 333,
+          "elapsed_ms": 75.0,
+          "async_workers": 1,
+          "blocking_cap": 8
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "watermark-off-full-prewarm-workers1-cold",
+        "capture_start_offset": 34199611,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 30.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 10249.0,
+        "ready_frame_ms": 31056.0,
+        "handoff_frame_ms": 31056.0,
+        "ready_without_input": true,
+        "handoff_without_input": true,
+        "draft_echo_ms": 827.103,
+        "attach_to_ready_ms": 20807.0,
+        "success": true,
+        "capture_end_offset": 34730833
+      },
+      "temporary_control": {
+        "worker_control": 1,
+        "prewarm_control": null,
+        "original_dotenv_existed": false,
+        "dotenv_restored": true,
+        "restore_error": null,
+        "temporary_assignments": [
+          "TOKIO_WORKER_THREADS=1"
+        ]
+      },
+      "loader_interval": {
+        "request": 1,
+        "host_vm": 0,
+        "host_vm_generation": 3,
+        "clock": "host mono_ms",
+        "start_phase": "prebind",
+        "start_ms": 18875.0,
+        "end_phase": "guest_entry",
+        "end_ms": 24606.0,
+        "duration_ms": 5731.0,
+        "phase_durations_ms": {
+          "prebind": 3863.0,
+          "matrix_reserve": 92.0,
+          "launch_queue": 0.0,
+          "readiness": 0.0,
+          "admission_lock": 0.0,
+          "vm_admission": 8.0,
+          "ap_queue": 0.0,
+          "ap_unpack": 0.0,
+          "ap_inspect": 5.0,
+          "ap_arenas": 3.0,
+          "ap_assets": 0.0,
+          "ap_files": 42.0,
+          "stage_env": 161.0,
+          "ap_prepare": 211.0,
+          "vm_boot": 17.0,
+          "guest_fs_root": 2.0,
+          "guest_fs_common": 0.0,
+          "guest_env": 92.0,
+          "elf_load": 1444.0,
+          "guest_entry": 2.0
+        }
+      },
+      "application_endpoints": {
+        "first_flush_ms": 387.0,
+        "editable_ms": 387.0,
+        "session_ready_frame_ms": 31056.0,
+        "startup_handoff_frame_ms": 31056.0,
+        "attach_done_ms": 10249.0,
+        "attach_to_ready_ms": 20807.0,
+        "state_db_gate_ms": 1711.0
+      },
+      "host_requests": [
+        {
+          "request": 1,
+          "spans": [
+            {
+              "name": "prebind",
+              "start_ms": 18875.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22738.0,
+              "duration_ms": 3863.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "matrix_reserve",
+              "start_ms": 22738.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22830.0,
+              "duration_ms": 92.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "launch_queue",
+              "start_ms": 22830.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22830.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "readiness",
+              "start_ms": 22830.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22830.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "admission_lock",
+              "start_ms": 22830.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22830.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_admission",
+              "start_ms": 22830.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 22838.0,
+              "duration_ms": 8.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_queue",
+              "start_ms": 22838.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22838.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_unpack",
+              "start_ms": 22838.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22838.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_inspect",
+              "start_ms": 22838.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22843.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_arenas",
+              "start_ms": 22843.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22846.0,
+              "duration_ms": 3.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_assets",
+              "start_ms": 22846.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22846.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_files",
+              "start_ms": 22846.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 22888.0,
+              "duration_ms": 42.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "stage_env",
+              "start_ms": 22888.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23049.0,
+              "duration_ms": 161.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_prepare",
+              "start_ms": 22838.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23049.0,
+              "duration_ms": 211.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_boot",
+              "start_ms": 23049.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23066.0,
+              "duration_ms": 17.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_root",
+              "start_ms": 23066.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23068.0,
+              "duration_ms": 2.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_common",
+              "start_ms": 23068.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23068.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_env",
+              "start_ms": 23068.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 23160.0,
+              "duration_ms": 92.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "elf_load",
+              "start_ms": 23160.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 24604.0,
+              "duration_ms": 1444.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_entry",
+              "start_ms": 24604.0,
+              "vm": 0,
+              "gen": 3,
+              "end_ms": 24606.0,
+              "duration_ms": 2.0,
+              "outcome": "ok",
+              "partial": false
+            }
+          ],
+          "last_mono_ms": 24606.0,
+          "open_spans": []
+        },
+        {
+          "request": 2,
+          "spans": [
+            {
+              "name": "prebind",
+              "start_ms": 26291.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26392.0,
+              "duration_ms": 101.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "matrix_reserve",
+              "start_ms": 26392.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26395.0,
+              "duration_ms": 3.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "launch_queue",
+              "start_ms": 26395.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26395.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "readiness",
+              "start_ms": 26395.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26395.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "admission_lock",
+              "start_ms": 26395.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26395.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_admission",
+              "start_ms": 26395.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 26403.0,
+              "duration_ms": 8.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_queue",
+              "start_ms": 26403.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26403.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_unpack",
+              "start_ms": 26403.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26403.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_inspect",
+              "start_ms": 26403.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26407.0,
+              "duration_ms": 4.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_arenas",
+              "start_ms": 26407.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26411.0,
+              "duration_ms": 4.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_assets",
+              "start_ms": 26411.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26412.0,
+              "duration_ms": 1.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_files",
+              "start_ms": 26412.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26412.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "stage_env",
+              "start_ms": 26412.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26419.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_prepare",
+              "start_ms": 26403.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26419.0,
+              "duration_ms": 16.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_boot",
+              "start_ms": 26419.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26436.0,
+              "duration_ms": 17.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_root",
+              "start_ms": 26436.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26438.0,
+              "duration_ms": 2.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_common",
+              "start_ms": 26438.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26438.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_env",
+              "start_ms": 26438.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26441.0,
+              "duration_ms": 3.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "elf_load",
+              "start_ms": 26441.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26460.0,
+              "duration_ms": 19.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_entry",
+              "start_ms": 26460.0,
+              "vm": 1,
+              "gen": 2,
+              "end_ms": 26460.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            }
+          ],
+          "last_mono_ms": 26460.0,
+          "open_spans": []
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000,
+            1
+          ],
+          "context": {
+            "request": 1,
+            "app_gen": 1,
+            "instance": "6ab00809-09ac-4f0e-b36e-74cbe411a9bd",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 12.0,
+              "delta_ms": 12.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 12.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 17.0,
+              "delta_ms": 5.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 17.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 19.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 63.0,
+              "delta_ms": 44.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 72.0,
+              "delta_ms": 9.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 72.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 72.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 75.0,
+              "delta_ms": 3.0
+            },
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 79.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 79.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 83.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 83.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 83.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 83.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 88.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 105.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 105.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 105.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 105.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 105.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 106.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 106.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 106.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 356.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 356.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 356.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 356.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 356.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 356.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 357.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 364.0,
+              "delta_ms": 7.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 386.0,
+              "delta_ms": 22.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 387.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 387.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 387.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 435.0,
+              "delta_ms": 48.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 435.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 461.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 461.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 489.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 495.0,
+              "delta_ms": 6.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 546.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 562.0,
+              "delta_ms": 16.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 2289.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 2306.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 5338.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 5338.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 6147.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 7368.0,
+              "delta_ms": 27.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 10222.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 10222.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 10246.0,
+              "delta_ms": 24.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 10249.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 31056.0,
+              "delta_ms": 20807.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 31056.0,
+              "delta_ms": 0.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 79.0,
+              "line": 373,
+              "end_ms": 79.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 84.0,
+              "line": 388,
+              "end_ms": 87.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 88.0,
+              "line": 391,
+              "end_ms": 88.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 88.0,
+              "line": 394,
+              "end_ms": 105.0,
+              "duration_ms": 17.0,
+              "outcome": "complete",
+              "poll_n": 28,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 6.0,
+              "outside_poll_ms": 6.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 105.0,
+              "line": 398,
+              "end_ms": 356.0,
+              "duration_ms": 251.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 251.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 356.0,
+              "line": 419,
+              "end_ms": 387.0,
+              "duration_ms": 31.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 31.0,
+              "poll_max_ms": 31.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 450.0,
+              "line": 459,
+              "end_ms": 460.0,
+              "duration_ms": 10.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 10.0,
+              "poll_max_ms": 10.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 476.0,
+              "line": 467,
+              "end_ms": 489.0,
+              "duration_ms": 13.0,
+              "outcome": "complete",
+              "poll_n": 26,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 7.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 542.0,
+              "line": 481,
+              "end_ms": 545.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 2108.0,
+              "line": 808,
+              "end_ms": 2145.0,
+              "duration_ms": 37.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 2145.0,
+              "line": 851,
+              "end_ms": 2163.0,
+              "duration_ms": 18.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 2164.0,
+              "line": 879,
+              "end_ms": 2182.0,
+              "duration_ms": 18.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 2182.0,
+              "line": 892,
+              "end_ms": 2186.0,
+              "duration_ms": 4.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 2186.0,
+              "line": 894,
+              "end_ms": 2207.0,
+              "duration_ms": 21.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 2207.0,
+              "line": 907,
+              "end_ms": 2212.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 2212.0,
+              "line": 909,
+              "end_ms": 2235.0,
+              "duration_ms": 23.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 2235.0,
+              "line": 925,
+              "end_ms": 2242.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 2242.0,
+              "line": 927,
+              "end_ms": 2269.0,
+              "duration_ms": 27.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 2269.0,
+              "line": 940,
+              "end_ms": 2276.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 2286.0,
+              "line": 942,
+              "end_ms": 2289.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 578.0,
+              "line": 492,
+              "end_ms": 2289.0,
+              "duration_ms": 1711.0,
+              "outcome": "complete",
+              "poll_n": 119,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 25.0,
+              "outside_poll_ms": 1671.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 2322.0,
+              "line": 966,
+              "end_ms": 5338.0,
+              "duration_ms": 3016.0,
+              "outcome": "complete",
+              "poll_n": 54,
+              "poll_total_ms": 21.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 2995.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 5354.0,
+              "line": 1022,
+              "end_ms": 6147.0,
+              "duration_ms": 793.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 793.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 6346.0,
+              "line": 1145,
+              "end_ms": 6352.0,
+              "duration_ms": 6.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 6.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 6346.0,
+              "line": 1144,
+              "end_ms": 6375.0,
+              "duration_ms": 29.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 29.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 6346.0,
+              "line": 1143,
+              "end_ms": 6387.0,
+              "duration_ms": 41.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 40.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6328.0,
+              "line": 1142,
+              "end_ms": 7289.0,
+              "duration_ms": 961.0,
+              "outcome": "complete",
+              "poll_n": 7,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 961.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 7289.0,
+              "line": 1547,
+              "end_ms": 7289.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 7305.0,
+              "line": 1552,
+              "end_ms": 7341.0,
+              "duration_ms": 36.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 2.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 34.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 7341.0,
+              "line": 1554,
+              "end_ms": 7341.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 7384.0,
+              "line": 1573,
+              "end_ms": 7384.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7368.0,
+              "line": 1566,
+              "end_ms": 10222.0,
+              "duration_ms": 2854.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 2848.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 10247.0,
+              "line": 2531,
+              "end_ms": 10249.0,
+              "duration_ms": 2.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 2.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 10222.0,
+              "line": 2493,
+              "end_ms": 10249.0,
+              "duration_ms": 27.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 27.0,
+              "poll_max_ms": 27.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 387.0,
+            "editable_ms": 387.0,
+            "session_ready_frame_ms": 31056.0,
+            "startup_handoff_frame_ms": 31056.0
+          },
+          "last_elapsed_ms": 31056.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "runtime": {
+            "async_workers": 1,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 12.0,
+              "end_ms": 17.0,
+              "duration_ms": 5.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 19.0,
+              "end_ms": 63.0,
+              "duration_ms": 44.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 17.0,
+              "end_ms": 72.0,
+              "duration_ms": 55.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 72.0,
+              "end_ms": 75.0,
+              "duration_ms": 3.0
+            },
+            {
+              "name": "runtime",
+              "start_ms": 75.0,
+              "end_ms": 79.0,
+              "duration_ms": 4.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 83.0,
+              "end_ms": 83.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 88.0,
+              "end_ms": 105.0,
+              "duration_ms": 17.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 105.0,
+              "end_ms": 105.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 105.0,
+              "end_ms": 106.0,
+              "duration_ms": 1.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 106.0,
+              "end_ms": 356.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 105.0,
+              "end_ms": 356.0,
+              "duration_ms": 251.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 364.0,
+              "end_ms": 386.0,
+              "duration_ms": 22.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 387.0,
+              "end_ms": 435.0,
+              "duration_ms": 48.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 435.0,
+              "end_ms": 461.0,
+              "duration_ms": 26.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 461.0,
+              "end_ms": 489.0,
+              "duration_ms": 28.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 495.0,
+              "end_ms": 546.0,
+              "duration_ms": 51.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 562.0,
+              "end_ms": 2289.0,
+              "duration_ms": 1727.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 2306.0,
+              "end_ms": 5338.0,
+              "duration_ms": 3032.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 5338.0,
+              "end_ms": 6147.0,
+              "duration_ms": 809.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 7368.0,
+              "end_ms": 10222.0,
+              "duration_ms": 2854.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 79.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 83.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 356.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 356.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 20807.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 3032.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 2854.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 1727.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 1221.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 809.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 51.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 48.0
+            },
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 44.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 28.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 26.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 24.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 22.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 16.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 12.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 9.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 7.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "main_thread_spawn_done",
+              "before": "main_thread_entered",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 2322.0,
+              "line": 966,
+              "end_ms": 5338.0,
+              "duration_ms": 3016.0,
+              "outcome": "complete",
+              "poll_n": 54,
+              "poll_total_ms": 21.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 2995.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7368.0,
+              "line": 1566,
+              "end_ms": 10222.0,
+              "duration_ms": 2854.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 2848.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 578.0,
+              "line": 492,
+              "end_ms": 2289.0,
+              "duration_ms": 1711.0,
+              "outcome": "complete",
+              "poll_n": 119,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 25.0,
+              "outside_poll_ms": 1671.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6328.0,
+              "line": 1142,
+              "end_ms": 7289.0,
+              "duration_ms": 961.0,
+              "outcome": "complete",
+              "poll_n": 7,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 961.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 5354.0,
+              "line": 1022,
+              "end_ms": 6147.0,
+              "duration_ms": 793.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 793.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 3,
+          "sampled_rows": 32,
+          "roles": {
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 1,
+              "max_slice_ms": 95,
+              "max_observed_boundary_age_ms": 6349
+            },
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483656,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662,
+                2147483669,
+                2147483670,
+                2147483671,
+                2147483672,
+                2147483673,
+                2147483674
+              ],
+              "carriers": [
+                4,
+                10
+              ],
+              "async_scheduler_job_ids": [
+                2147483650
+              ],
+              "max_ready_ms": 9332,
+              "max_slice_ms": 9351,
+              "max_observed_boundary_age_ms": 8725
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483652,
+                2147483653,
+                2147483655
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 64,
+              "max_slice_ms": 1,
+              "max_observed_boundary_age_ms": 24157
+            }
+          }
+        }
+      ],
+      "allocator_samples": [
+        {
+          "line": 630,
+          "vm": 0,
+          "alloc_calls": 27144,
+          "alloc_nodes": 112525,
+          "alloc_max_nodes": 53,
+          "alloc_failures": 0
+        },
+        {
+          "line": 631,
+          "vm": 1,
+          "alloc_calls": 1522,
+          "alloc_nodes": 3711,
+          "alloc_max_nodes": 17,
+          "alloc_failures": 0
+        },
+        {
+          "line": 1326,
+          "vm": 0,
+          "alloc_calls": 587659,
+          "alloc_nodes": 53237261,
+          "alloc_max_nodes": 957,
+          "alloc_failures": 0
+        },
+        {
+          "line": 1327,
+          "vm": 1,
+          "alloc_calls": 8707,
+          "alloc_nodes": 60849,
+          "alloc_max_nodes": 57,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2655,
+          "vm": 1,
+          "alloc_calls": 9484,
+          "alloc_nodes": 68054,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2876,
+          "vm": 0,
+          "alloc_calls": 1839607,
+          "alloc_nodes": 418499372,
+          "alloc_max_nodes": 2408,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2877,
+          "vm": 1,
+          "alloc_calls": 9521,
+          "alloc_nodes": 68709,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3071,
+          "vm": 1,
+          "alloc_calls": 9521,
+          "alloc_nodes": 68709,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3090,
+          "vm": 1,
+          "alloc_calls": 9529,
+          "alloc_nodes": 68718,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3360,
+          "vm": 0,
+          "alloc_calls": 2929577,
+          "alloc_nodes": 1263391753,
+          "alloc_max_nodes": 3795,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3361,
+          "vm": 1,
+          "alloc_calls": 9580,
+          "alloc_nodes": 69791,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3488,
+          "vm": 1,
+          "alloc_calls": 9580,
+          "alloc_nodes": 69791,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        }
+      ],
+      "parser_warnings": [],
+      "sanitized_source_receipts": {
+        "summary": {
+          "sha256": "ab03ceb1dc0097fa9923b7d5bdcb4085c369724f12e35b14e8ae7ef9114c2506"
+        },
+        "report": {
+          "sha256": "e01d6f2857986f23852ba9dd5f8072057d2a071397a6174257a68467034b6224"
+        },
+        "progress": {
+          "sha256": "6ca7abb595e308162863f72593720fb4c3350b5d4ce7dbbe3eb39dcc30687781"
+        }
+      }
+    },
+    {
+      "name": "watermark-off-full-prewarm-workers1-warm",
+      "sqlite_state": "warm_service_retained",
+      "capture": {
+        "start_offset": 34803757,
+        "end_offset": 35289876,
+        "bytes": 486119,
+        "sha256": "190638ed171649c964058f657eb48454b17d2db0ffe6b8ab3bb562e8c923a03d",
+        "observed_epoch": 1793420490.8365262
+      },
+      "application_context": {
+        "request": 3,
+        "app_gen": 1,
+        "instance": "6c4d8bca-c53f-4039-a4b3-55138a58cf5f",
+        "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+      },
+      "application_pids_joined_by_request": [
+        1000,
+        1
+      ],
+      "runtime_workers": [
+        {
+          "line": 311,
+          "elapsed_ms": 66.0,
+          "async_workers": 1,
+          "blocking_cap": 8
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "watermark-off-full-prewarm-workers1-warm",
+        "capture_start_offset": 34803757,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 30.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 8544.0,
+        "ready_frame_ms": 30821.0,
+        "handoff_frame_ms": 30821.0,
+        "ready_without_input": true,
+        "handoff_without_input": true,
+        "draft_echo_ms": 2301.486,
+        "attach_to_ready_ms": 22277.0,
+        "success": true,
+        "capture_end_offset": 35289876
+      },
+      "temporary_control": {
+        "worker_control": 1,
+        "prewarm_control": null,
+        "original_dotenv_existed": false,
+        "dotenv_restored": true,
+        "restore_error": null,
+        "temporary_assignments": [
+          "TOKIO_WORKER_THREADS=1"
+        ]
+      },
+      "loader_interval": {
+        "request": 3,
+        "host_vm": 0,
+        "host_vm_generation": 5,
+        "clock": "host mono_ms",
+        "start_phase": "prebind",
+        "start_ms": 106012.0,
+        "end_phase": "guest_entry",
+        "end_ms": 111560.0,
+        "duration_ms": 5548.0,
+        "phase_durations_ms": {
+          "prebind": 3734.0,
+          "matrix_reserve": 93.0,
+          "launch_queue": 0.0,
+          "readiness": 0.0,
+          "admission_lock": 0.0,
+          "vm_admission": 8.0,
+          "ap_queue": 0.0,
+          "ap_unpack": 0.0,
+          "ap_inspect": 5.0,
+          "ap_arenas": 4.0,
+          "ap_assets": 0.0,
+          "ap_files": 0.0,
+          "stage_env": 162.0,
+          "ap_prepare": 171.0,
+          "vm_boot": 17.0,
+          "guest_fs_root": 0.0,
+          "guest_fs_common": 0.0,
+          "guest_env": 92.0,
+          "elf_load": 1431.0,
+          "guest_entry": 2.0
+        }
+      },
+      "application_endpoints": {
+        "first_flush_ms": 381.0,
+        "editable_ms": 381.0,
+        "session_ready_frame_ms": 30821.0,
+        "startup_handoff_frame_ms": 30821.0,
+        "attach_done_ms": 8544.0,
+        "attach_to_ready_ms": 22277.0,
+        "state_db_gate_ms": 178.0
+      },
+      "host_requests": [
+        {
+          "request": 3,
+          "spans": [
+            {
+              "name": "prebind",
+              "start_ms": 106012.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109746.0,
+              "duration_ms": 3734.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "matrix_reserve",
+              "start_ms": 109746.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109839.0,
+              "duration_ms": 93.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "launch_queue",
+              "start_ms": 109839.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109839.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "readiness",
+              "start_ms": 109839.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109839.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "admission_lock",
+              "start_ms": 109839.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109839.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_admission",
+              "start_ms": 109839.0,
+              "vm": 255,
+              "gen": 0,
+              "end_ms": 109847.0,
+              "duration_ms": 8.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_queue",
+              "start_ms": 109847.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109847.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_unpack",
+              "start_ms": 109847.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109847.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_inspect",
+              "start_ms": 109847.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109852.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_arenas",
+              "start_ms": 109852.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109856.0,
+              "duration_ms": 4.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_assets",
+              "start_ms": 109856.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109856.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_files",
+              "start_ms": 109856.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 109856.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "stage_env",
+              "start_ms": 109856.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110018.0,
+              "duration_ms": 162.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "ap_prepare",
+              "start_ms": 109847.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110018.0,
+              "duration_ms": 171.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "vm_boot",
+              "start_ms": 110018.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110035.0,
+              "duration_ms": 17.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_root",
+              "start_ms": 110035.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110035.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_fs_common",
+              "start_ms": 110035.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110035.0,
+              "duration_ms": 0.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_env",
+              "start_ms": 110035.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 110127.0,
+              "duration_ms": 92.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "elf_load",
+              "start_ms": 110127.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 111558.0,
+              "duration_ms": 1431.0,
+              "outcome": "ok",
+              "partial": false
+            },
+            {
+              "name": "guest_entry",
+              "start_ms": 111558.0,
+              "vm": 0,
+              "gen": 5,
+              "end_ms": 111560.0,
+              "duration_ms": 2.0,
+              "outcome": "ok",
+              "partial": false
+            }
+          ],
+          "last_mono_ms": 111560.0,
+          "open_spans": []
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000,
+            1
+          ],
+          "context": {
+            "request": 3,
+            "app_gen": 1,
+            "instance": "6c4d8bca-c53f-4039-a4b3-55138a58cf5f",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 1.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 11.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 11.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 15.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 15.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 16.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 54.0,
+              "delta_ms": 38.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 63.0,
+              "delta_ms": 9.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 63.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 63.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 66.0,
+              "delta_ms": 3.0
+            },
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 66.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 66.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 66.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 70.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 70.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 75.0,
+              "delta_ms": 5.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 80.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 348.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 358.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 379.0,
+              "delta_ms": 21.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 381.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 381.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 381.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 397.0,
+              "delta_ms": 16.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 397.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 423.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 423.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 485.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 493.0,
+              "delta_ms": 8.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 529.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 562.0,
+              "delta_ms": 33.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 755.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 772.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 3964.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 3964.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 4508.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 5874.0,
+              "delta_ms": 29.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 8530.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 8530.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 8542.0,
+              "delta_ms": 12.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 8544.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 30821.0,
+              "delta_ms": 22277.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 30821.0,
+              "delta_ms": 0.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 70.0,
+              "line": 314,
+              "end_ms": 70.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 76.0,
+              "line": 321,
+              "end_ms": 79.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 80.0,
+              "line": 323,
+              "end_ms": 80.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 80.0,
+              "line": 326,
+              "end_ms": 97.0,
+              "duration_ms": 17.0,
+              "outcome": "complete",
+              "poll_n": 27,
+              "poll_total_ms": 14.0,
+              "poll_max_ms": 9.0,
+              "outside_poll_ms": 3.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 97.0,
+              "line": 330,
+              "end_ms": 347.0,
+              "duration_ms": 250.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 250.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 347.0,
+              "line": 352,
+              "end_ms": 381.0,
+              "duration_ms": 34.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 34.0,
+              "poll_max_ms": 34.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 412.0,
+              "line": 384,
+              "end_ms": 423.0,
+              "duration_ms": 11.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 455.0,
+              "line": 395,
+              "end_ms": 485.0,
+              "duration_ms": 30.0,
+              "outcome": "complete",
+              "poll_n": 26,
+              "poll_total_ms": 7.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 23.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 525.0,
+              "line": 409,
+              "end_ms": 529.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 4.0,
+              "poll_max_ms": 4.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 582.0,
+              "line": 438,
+              "end_ms": 600.0,
+              "duration_ms": 18.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 600.0,
+              "line": 452,
+              "end_ms": 621.0,
+              "duration_ms": 21.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 621.0,
+              "line": 465,
+              "end_ms": 637.0,
+              "duration_ms": 16.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 637.0,
+              "line": 478,
+              "end_ms": 643.0,
+              "duration_ms": 6.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 643.0,
+              "line": 480,
+              "end_ms": 663.0,
+              "duration_ms": 20.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 663.0,
+              "line": 493,
+              "end_ms": 670.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 670.0,
+              "line": 495,
+              "end_ms": 693.0,
+              "duration_ms": 23.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 693.0,
+              "line": 508,
+              "end_ms": 702.0,
+              "duration_ms": 9.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 702.0,
+              "line": 510,
+              "end_ms": 728.0,
+              "duration_ms": 26.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 728.0,
+              "line": 523,
+              "end_ms": 738.0,
+              "duration_ms": 10.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 748.0,
+              "line": 525,
+              "end_ms": 755.0,
+              "duration_ms": 7.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 577.0,
+              "line": 423,
+              "end_ms": 755.0,
+              "duration_ms": 178.0,
+              "outcome": "complete",
+              "poll_n": 106,
+              "poll_total_ms": 21.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 157.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 789.0,
+              "line": 557,
+              "end_ms": 3964.0,
+              "duration_ms": 3175.0,
+              "outcome": "complete",
+              "poll_n": 57,
+              "poll_total_ms": 27.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 3148.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 3980.0,
+              "line": 611,
+              "end_ms": 4508.0,
+              "duration_ms": 528.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 528.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 4815.0,
+              "line": 731,
+              "end_ms": 4844.0,
+              "duration_ms": 29.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 28.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 4815.0,
+              "line": 729,
+              "end_ms": 4865.0,
+              "duration_ms": 50.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 49.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 4815.0,
+              "line": 730,
+              "end_ms": 4868.0,
+              "duration_ms": 53.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 53.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 4670.0,
+              "line": 667,
+              "end_ms": 5791.0,
+              "duration_ms": 1121.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1121.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 5791.0,
+              "line": 1112,
+              "end_ms": 5791.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 5807.0,
+              "line": 1118,
+              "end_ms": 5845.0,
+              "duration_ms": 38.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 2.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 36.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 5845.0,
+              "line": 1128,
+              "end_ms": 5845.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 5890.0,
+              "line": 1147,
+              "end_ms": 5890.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 5874.0,
+              "line": 1140,
+              "end_ms": 8530.0,
+              "duration_ms": 2656.0,
+              "outcome": "complete",
+              "poll_n": 28,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2650.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 8542.0,
+              "line": 2063,
+              "end_ms": 8543.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 8530.0,
+              "line": 2042,
+              "end_ms": 8544.0,
+              "duration_ms": 14.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 14.0,
+              "poll_max_ms": 14.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 381.0,
+            "editable_ms": 381.0,
+            "session_ready_frame_ms": 30821.0,
+            "startup_handoff_frame_ms": 30821.0
+          },
+          "last_elapsed_ms": 30821.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "runtime": {
+            "async_workers": 1,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 11.0,
+              "end_ms": 15.0,
+              "duration_ms": 4.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 16.0,
+              "end_ms": 54.0,
+              "duration_ms": 38.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 15.0,
+              "end_ms": 63.0,
+              "duration_ms": 48.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 63.0,
+              "end_ms": 66.0,
+              "duration_ms": 3.0
+            },
+            {
+              "name": "runtime",
+              "start_ms": 66.0,
+              "end_ms": 70.0,
+              "duration_ms": 4.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 75.0,
+              "end_ms": 75.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 80.0,
+              "end_ms": 97.0,
+              "duration_ms": 17.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 97.0,
+              "end_ms": 97.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 97.0,
+              "end_ms": 97.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 97.0,
+              "end_ms": 347.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 97.0,
+              "end_ms": 347.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 358.0,
+              "end_ms": 379.0,
+              "duration_ms": 21.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 381.0,
+              "end_ms": 397.0,
+              "duration_ms": 16.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 397.0,
+              "end_ms": 423.0,
+              "duration_ms": 26.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 423.0,
+              "end_ms": 485.0,
+              "duration_ms": 62.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 493.0,
+              "end_ms": 529.0,
+              "duration_ms": 36.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 562.0,
+              "end_ms": 755.0,
+              "duration_ms": 193.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 772.0,
+              "end_ms": 3964.0,
+              "duration_ms": 3192.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 3964.0,
+              "end_ms": 4508.0,
+              "duration_ms": 544.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 5874.0,
+              "end_ms": 8530.0,
+              "duration_ms": 2656.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 70.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 75.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 347.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 347.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 22277.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 3192.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 2656.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 1366.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 544.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 193.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 62.0
+            },
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 38.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 36.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 33.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 26.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 21.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 16.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 12.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 9.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 8.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "main_thread_spawn_done",
+              "before": "main_thread_entered",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 789.0,
+              "line": 557,
+              "end_ms": 3964.0,
+              "duration_ms": 3175.0,
+              "outcome": "complete",
+              "poll_n": 57,
+              "poll_total_ms": 27.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 3148.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 5874.0,
+              "line": 1140,
+              "end_ms": 8530.0,
+              "duration_ms": 2656.0,
+              "outcome": "complete",
+              "poll_n": 28,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2650.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 4670.0,
+              "line": 667,
+              "end_ms": 5791.0,
+              "duration_ms": 1121.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1121.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 3980.0,
+              "line": 611,
+              "end_ms": 4508.0,
+              "duration_ms": 528.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 528.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 5,
+          "sampled_rows": 32,
+          "roles": {
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 1,
+              "max_slice_ms": 66,
+              "max_observed_boundary_age_ms": 16100
+            },
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483656,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662
+              ],
+              "carriers": [
+                3,
+                10
+              ],
+              "async_scheduler_job_ids": [
+                2147483650
+              ],
+              "max_ready_ms": 4901,
+              "max_slice_ms": 8431,
+              "max_observed_boundary_age_ms": 8676
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483652,
+                2147483653,
+                2147483655
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 64,
+              "max_slice_ms": 1,
+              "max_observed_boundary_age_ms": 24157
+            }
+          }
+        }
+      ],
+      "allocator_samples": [
+        {
+          "line": 153,
+          "vm": 1,
+          "alloc_calls": 9845,
+          "alloc_nodes": 74535,
+          "alloc_max_nodes": 74,
+          "alloc_failures": 0
+        },
+        {
+          "line": 659,
+          "vm": 0,
+          "alloc_calls": 536363,
+          "alloc_nodes": 50947724,
+          "alloc_max_nodes": 945,
+          "alloc_failures": 0
+        },
+        {
+          "line": 660,
+          "vm": 1,
+          "alloc_calls": 13099,
+          "alloc_nodes": 102967,
+          "alloc_max_nodes": 85,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2391,
+          "vm": 1,
+          "alloc_calls": 13873,
+          "alloc_nodes": 109328,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2576,
+          "vm": 1,
+          "alloc_calls": 13910,
+          "alloc_nodes": 109705,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2841,
+          "vm": 1,
+          "alloc_calls": 13910,
+          "alloc_nodes": 109705,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2864,
+          "vm": 1,
+          "alloc_calls": 13918,
+          "alloc_nodes": 109724,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2902,
+          "vm": 1,
+          "alloc_calls": 13918,
+          "alloc_nodes": 109724,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3063,
+          "vm": 1,
+          "alloc_calls": 14006,
+          "alloc_nodes": 110662,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3094,
+          "vm": 1,
+          "alloc_calls": 14006,
+          "alloc_nodes": 110662,
+          "alloc_max_nodes": 91,
+          "alloc_failures": 0
+        }
+      ],
+      "parser_warnings": [],
+      "sanitized_source_receipts": {
+        "summary": {
+          "sha256": "22097262bf4b3e3b07fcbb3fa586ae426db1d9cb9960fd20946a9efc2d0b190a"
+        },
+        "report": {
+          "sha256": "25b4d03a9d18f1a8670a0067319bd91cdafd174dae369dff37e1240467bbf750"
+        },
+        "progress": {
+          "sha256": "fc745189bd32bdf35aa664090bf630e180e6eb2ab1eb50452efa5a5c9ff8614d"
+        }
+      }
+    }
+  ],
+  "limits": [
+    "The new kernel disables only successful-allocation watermark diagnostics relative to the retained instrumented-off baseline; failure diagnostics and allocator algorithms are unchanged.",
+    "Both detailed guest allocation tracing and allocation/free ABI breadcrumbs are already disabled in both kernels.",
+    "Both kernels use the same old eacb application with one explicit async worker and original provider-gated initial prewarm. This is not a worker-count or new-prewarm-policy experiment.",
+    "The new no-input window is thirty host seconds after observing attachment; baseline controls used five. Readiness booleans and draft-echo latency are therefore not equivalent-condition comparisons.",
+    "One cold-service process and one warm-service process per setting do not establish repeatable performance effects; caches, service state, remote responses and stored session data can vary.",
+    "Host mono_ms and application elapsed_ms have different origins. Correlate by request within the boot; no combined end-to-end total is inferred.",
+    "Nested phases overlap; elapsed polls and scheduler continuations are wall time, not CPU consumption.",
+    "First-flush/readiness markers measure source events, not physical terminal presentation or every submission guard.",
+    "Only recognized timing fields and controlled-test metadata are retained."
+  ],
+  "comparison": {
+    "controls": [
+      {
+        "name": "instrumented-off-full-prewarm-workers1",
+        "request": 1,
+        "sqlite_state": "cold_after_fresh_boot; separate host request 2",
+        "loader_interval_ms": 5733.0,
+        "first_flush_ms": 381.0,
+        "state_db_gate_ms": 1724.0,
+        "attach_done_ms": 10329.0,
+        "ready_frame_ms": 33304.0,
+        "attach_to_ready_ms": 22975.0,
+        "ready_without_input": false,
+        "first_draft_echo_ms": null,
+        "first_draft_echo_result": "TIMEOUT",
+        "no_input_seconds_after_observed_attach": 5.0
+      },
+      {
+        "name": "instrumented-off-full-prewarm-workers1-warm",
+        "request": 3,
+        "sqlite_state": "warm_service_retained_from_first_observation; no separate SQLite launch in this window",
+        "loader_interval_ms": 5548.0,
+        "first_flush_ms": 380.0,
+        "state_db_gate_ms": 177.0,
+        "attach_done_ms": 9019.0,
+        "ready_frame_ms": 28289.0,
+        "attach_to_ready_ms": 19270.0,
+        "ready_without_input": false,
+        "first_draft_echo_ms": 14231.098,
+        "first_draft_echo_result": "success",
+        "no_input_seconds_after_observed_attach": 5.0
+      }
+    ],
+    "new_kernel_trials": [
+      {
+        "name": "watermark-off-full-prewarm-workers1-cold",
+        "request": 1,
+        "sqlite_state": "cold",
+        "loader_ms": 5731.0,
+        "first_flush_ms": 387.0,
+        "state_db_gate_ms": 1711.0,
+        "attach_done_ms": 10249.0,
+        "ready_frame_ms": 31056.0,
+        "attach_to_ready_ms": 20807.0,
+        "no_input_seconds_after_observed_attach": 30.0,
+        "ready_without_input": true,
+        "draft_echo_ms": 827.103
+      },
+      {
+        "name": "watermark-off-full-prewarm-workers1-warm",
+        "request": 3,
+        "sqlite_state": "warm_service_retained",
+        "loader_ms": 5548.0,
+        "first_flush_ms": 381.0,
+        "state_db_gate_ms": 178.0,
+        "attach_done_ms": 8544.0,
+        "ready_frame_ms": 30821.0,
+        "attach_to_ready_ms": 22277.0,
+        "no_input_seconds_after_observed_attach": 30.0,
+        "ready_without_input": true,
+        "draft_echo_ms": 2301.486
+      }
+    ],
+    "interpretation": "Cold readiness was 2.248 seconds earlier and warm readiness 2.532 seconds later in individual observations. There is no consistent startup gain across these controls. The changed five-versus-thirty-second no-input window prevents equivalent-condition draft-echo/readiness-boolean comparisons. No CPU attribution follows.",
+    "source_ready_frame_differences_ms": {
+      "cold_new_minus_baseline": -2248.0,
+      "warm_new_minus_baseline": 2532.0
+    }
+  },
+  "status": "Cold and warm private experiment completed; inconsistent individual timing changes, so the third gate is not promoted to production.",
+  "private_experiment_reproduction": {
+    "patch": {
+      "sha256": "948f98e71a78dd26ba9f4c52c25accac4ef18de12d17715dff587bacb2d9f0bd",
+      "text": "--- a/src/allcaps.rs\n+++ b/src/allcaps.rs\n@@ -146,6 +146,8 @@\n     // Alloc/free breadcrumbs are substantially hotter than other ABI boundaries.\n     // Other Codex progress, wait, filesystem and startup probes remain enabled.\n     pub const CODEX_ALLOC_ABI_PROBES_ENABLED: bool = false;\n+    // Success watermarks walk the fragmented guest heap; retain failure reports.\n+    pub const HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED: bool = false;\n \n     pub const GUEST_STACK_MIN_MIB: usize = 8;\n     pub const GUEST_STACK_DEFAULT_MIB: usize = 64;\n--- a/src/allocators.rs\n+++ b/src/allocators.rs\n@@ -1575,6 +1575,7 @@\n }\n \n fn log_hv_guest_alloc_watermark(vm_id: u8, layout: Layout, ptr: *mut u8, path: &str) {\n+    if !crate::allcaps::hv::HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED { return; }\n     // heap_stats walks every free node while holding the heap lock. The old\n     // bucket check happened after that walk, charging every quiet allocation\n     // for a full fragmented-heap scan. Bound the walk itself first.\n"
+    },
+    "harness": {
+      "filename": "test_trueos_native_watermark_gate.py",
+      "sha256": "225b040497ba059f635bc5a595a13014af1eaab8996a489b604dc0c1f5453cf4",
+      "source": "#!/usr/bin/env python3\n\"\"\"Compile the private production watermark paths with their gate OFF and ON.\n\nThe success/failure functions, caller predicate, data structs, and sample gate\nare extracted unchanged. Only kernel boundary effects are replaced by counters;\nthe production sampling/bucket conditions are never reproduced in the fixture.\nThe saved pre-patch hashes also prove that failure/caller behavior was untouched.\n\"\"\"\nfrom pathlib import Path\nimport hashlib\nimport json\nimport re\nimport subprocess\nimport tempfile\n\nROOT = Path('/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS')\nBASELINE = Path('/tmp/trueos-watermark-gate-baseline-20261031.json')\n\n\ndef item(source, pattern):\n    match = re.search(pattern, source, re.M)\n    assert match, pattern\n    brace = source.index('{', match.end())\n    ending = re.search(r'^}\\s*\\n', source[brace:], re.M)\n    assert ending, pattern\n    return source[match.start():brace + ending.end()]\n\n\nHARNESS = r'''#![allow(dead_code)]\nuse core::alloc::Layout;\nuse core::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering};\n\nmod allcaps { pub mod hv { @FLAG@ } }\n#[path = \"@WATERMARK_PATH@\"]\nmod watermark;\n\nstatic CLOCK_READS: AtomicUsize = AtomicUsize::new(0);\nstatic DOMAIN_ENTRIES: AtomicUsize = AtomicUsize::new(0);\nstatic HEAP_SCANS: AtomicUsize = AtomicUsize::new(0);\nstatic TRACE_READS: AtomicUsize = AtomicUsize::new(0);\nstatic INFO_LOGS: AtomicUsize = AtomicUsize::new(0);\nstatic WARN_LOGS: AtomicUsize = AtomicUsize::new(0);\nstatic IDENTITY_READS: AtomicUsize = AtomicUsize::new(0);\nstatic NOW_MS: AtomicU64 = AtomicU64::new(0);\nstatic FREE_BYTES: AtomicUsize = AtomicUsize::new(64 * 1024 * 1024);\nstatic HULL: AtomicBool = AtomicBool::new(false);\n\n#[macro_export]\nmacro_rules! log_info {\n    (target: $target:literal; $($args:tt)*) => {{\n        crate::INFO_LOGS.fetch_add(1, Ordering::Relaxed);\n        let _ = format_args!($($args)*);\n    }};\n}\n#[macro_export]\nmacro_rules! log_warn {\n    (target: $target:literal; $($args:tt)*) => {{\n        crate::WARN_LOGS.fetch_add(1, Ordering::Relaxed);\n        let _ = format_args!($($args)*);\n    }};\n}\nmod hv {\n    pub fn current_hull_guest_context_vm_id() -> Option<u8> {\n        super::IDENTITY_READS.fetch_add(1, super::Ordering::Relaxed);\n        super::HULL.load(super::Ordering::Relaxed).then_some(1)\n    }\n}\nmod r { pub mod input_timing {\n    pub fn now_ms() -> u64 {\n        crate::CLOCK_READS.fetch_add(1, crate::Ordering::Relaxed);\n        crate::NOW_MS.load(crate::Ordering::Relaxed)\n    }\n} }\n\n@CONSTANTS@\nstatic HV_GUEST_ALLOC_FREE_BUCKET_BY_VM: [AtomicU32; 8] =\n    [const { AtomicU32::new(HV_GUEST_ALLOC_BUCKET_INIT) }; 8];\nstatic HV_GUEST_ALLOC_SAMPLE_BY_VM: [watermark::SampleGate; 8] =\n    [const { watermark::SampleGate::new() }; 8];\n\n#[derive(Copy, Clone, Debug)]\npub enum HeapSourceKind { Arena }\n#[derive(Copy, Clone, Debug)]\n@HEAP_STATS@\n@ALLOC_TRACE@\n\nfn with_host_alloc_domain_strong<T>(f: impl FnOnce() -> T) -> T {\n    DOMAIN_ENTRIES.fetch_add(1, Ordering::Relaxed);\n    f()\n}\nfn hv_guest_heap_stats(_: u8) -> HeapStats {\n    HEAP_SCANS.fetch_add(1, Ordering::Relaxed);\n    let bytes = FREE_BYTES.load(Ordering::Relaxed);\n    HeapStats {\n        heap_start: 0, heap_end: bytes, phys_start: 0, usable_start: 0,\n        usable_total: bytes, free_bytes: bytes, largest_free_block: bytes,\n        free_blocks: 3, initialized: true, source: HeapSourceKind::Arena,\n    }\n}\nfn last_alloc_trace() -> AllocTrace {\n    TRACE_READS.fetch_add(1, Ordering::Relaxed);\n    AllocTrace {\n        seq: 1, caller_rip: 0, caller_rip_1: 0, caller_rip_2: 0,\n        layout_size: 8, layout_align: 8, stage: 0, head_ptr: 0,\n        block_ptr: 0, block_size: 0, block_next: 0, payload_start: 0,\n        aligned_used: 0,\n    }\n}\n\n@PREDICATE@\n@SUCCESS@\n@FAILURE@\n\nfn reset() {\n    for counter in [&CLOCK_READS, &DOMAIN_ENTRIES, &HEAP_SCANS, &TRACE_READS,\n        &INFO_LOGS, &WARN_LOGS, &IDENTITY_READS] {\n        counter.store(0, Ordering::Relaxed);\n    }\n    NOW_MS.store(0, Ordering::Relaxed);\n    FREE_BYTES.store(64 * 1024 * 1024, Ordering::Relaxed);\n    HULL.store(false, Ordering::Relaxed);\n}\nfn counters() -> [usize; 7] {\n    [&CLOCK_READS, &DOMAIN_ENTRIES, &HEAP_SCANS, &TRACE_READS,\n        &INFO_LOGS, &WARN_LOGS, &IDENTITY_READS].map(|x| x.load(Ordering::Relaxed))\n}\nfn success(vm: u8, bytes: usize) {\n    log_hv_guest_alloc_watermark(vm, Layout::from_size_align(bytes, 8).unwrap(),\n        core::ptr::dangling_mut(), \"fixture\");\n}\n\n#[cfg(not(watermark_probes_enabled))]\n#[test]\nfn disabled_success_never_reads_clock_enters_domain_scans_heap_reads_trace_or_logs() {\n    reset();\n    assert!(!allcaps::hv::HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED);\n    for vm in [0, 1, 255] {\n        for bytes in [8, 1024 * 1024, 32 * 1024 * 1024] {\n            success(vm, bytes);\n        }\n    }\n    assert_eq!(counters(), [0; 7]);\n    assert!(HV_GUEST_ALLOC_FREE_BUCKET_BY_VM.iter()\n        .all(|slot| slot.load(Ordering::Relaxed) == HV_GUEST_ALLOC_BUCKET_INIT));\n}\n\n#[cfg(watermark_probes_enabled)]\n#[test]\nfn enabled_ordinary_sampling_limits_walks_and_keeps_quiet_bucket_silent() {\n    reset();\n    success(0, 8);\n    success(0, 8);\n    NOW_MS.store(999, Ordering::Relaxed);\n    success(0, 8);\n    NOW_MS.store(1000, Ordering::Relaxed);\n    success(0, 8);\n    assert_eq!(counters(), [4, 2, 2, 1, 1, 0, 0]);\n}\n\n#[cfg(watermark_probes_enabled)]\n#[test]\nfn enabled_large_requests_keep_immediate_samples_and_delay_following_small_walk() {\n    reset();\n    success(1, 1024 * 1024);\n    success(1, 1024 * 1024);\n    success(1, 8);\n    assert_eq!(counters(), [3, 2, 2, 2, 2, 0, 0]);\n}\n\n#[cfg(watermark_probes_enabled)]\n#[test]\nfn enabled_changed_bucket_retains_success_report() {\n    reset();\n    success(2, 8);\n    NOW_MS.store(1000, Ordering::Relaxed);\n    success(2, 8);\n    FREE_BYTES.store(32 * 1024 * 1024, Ordering::Relaxed);\n    NOW_MS.store(2000, Ordering::Relaxed);\n    success(2, 8);\n    assert_eq!(counters(), [3, 3, 3, 2, 2, 0, 0]);\n}\n\n#[test]\nfn failure_diagnostic_bypasses_success_gate_and_keeps_both_warning_records() {\n    reset();\n    log_hv_guest_alloc_failure(3, Layout::from_size_align(128, 8).unwrap(), \"fixture\");\n    assert_eq!(counters(), [0, 1, 1, 1, 0, 2, 0]);\n}\n\n#[test]\nfn caller_predicate_preserves_native_and_hull_identity_semantics() {\n    reset();\n    assert!(should_log_hv_guest_alloc_success());\n    HULL.store(true, Ordering::Relaxed);\n    assert!(!should_log_hv_guest_alloc_success());\n    assert_eq!(counters(), [0, 0, 0, 0, 0, 0, 2]);\n}\n'''\n\n\ndef main():\n    baseline = json.loads(BASELINE.read_text())\n    source = (ROOT / 'src/allocators.rs').read_text()\n    allcaps = (ROOT / 'src/allcaps.rs').read_text()\n    functions = {\n        'failure': item(source, r'^fn log_hv_guest_alloc_failure\\('),\n        'predicate': item(source, r'^fn should_log_hv_guest_alloc_success\\('),\n        'explicit_alloc': item(source, r'^pub unsafe fn alloc_raw_hv_guest\\('),\n        'watermark': item(source, r'^fn log_hv_guest_alloc_watermark\\('),\n    }\n    for name in ('failure', 'predicate', 'explicit_alloc'):\n        assert functions[name] == baseline['functions'][name], f'changed {name}'\n    guard = '    if !crate::allcaps::hv::HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED { return; }\\n'\n    assert functions['watermark'].count(guard) == 1\n    assert functions['watermark'].replace(guard, '', 1) == baseline['functions']['watermark']\n    declaration = re.search(r'^    pub const HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED: bool = false;$',\n                            allcaps, re.M)\n    assert declaration, 'private gate must default OFF'\n    for existing in ('HV_ALLOC_DETAIL_PROBES_ENABLED', 'CODEX_ALLOC_ABI_PROBES_ENABLED'):\n        assert re.search(rf'pub const {existing}: bool = false;', allcaps)\n    addition = ('    // Success watermarks walk the fragmented guest heap; retain failure reports.\\n'\n                '    pub const HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED: bool = false;\\n')\n    assert hashlib.sha256(allcaps.replace(addition, '', 1).encode()).hexdigest() == baseline['sha256']['src/allcaps.rs']\n    assert hashlib.sha256(source.replace(guard, '', 1).encode()).hexdigest() == baseline['sha256']['src/allocators.rs']\n    constants = '\\n'.join(re.findall(r'^const HV_GUEST_ALLOC_BUCKET_(?:SHIFT|INIT):.*$', source, re.M))\n    assert len(constants.splitlines()) == 2\n    common = HARNESS.replace('@WATERMARK_PATH@', str(ROOT / 'src/allocators/watermark.rs'))\n    replacements = {\n        '@CONSTANTS@': constants,\n        '@HEAP_STATS@': item(source, r'^pub struct HeapStats\\b'),\n        '@ALLOC_TRACE@': item(source, r'^pub struct AllocTrace\\b'),\n        '@PREDICATE@': functions['predicate'],\n        '@SUCCESS@': functions['watermark'],\n        '@FAILURE@': functions['failure'],\n    }\n    for key, value in replacements.items():\n        common = common.replace(key, value)\n    with tempfile.TemporaryDirectory(prefix='trueos-watermark-gate-') as td:\n        td = Path(td)\n        for enabled in (False, True):\n            # Only the compile-time flag changes. All production function bodies stay exact.\n            flag = declaration.group().strip().replace('= false;', f'= {str(enabled).lower()};')\n            rs = td / f'watermark_{enabled}.rs'\n            binary = td / f'watermark_{enabled}'\n            rs.write_text(common.replace('@FLAG@', flag))\n            command = ['rustc', '--edition=2024', '--test', str(rs), '-o', str(binary)]\n            if enabled:\n                command += ['--cfg', 'watermark_probes_enabled']\n            subprocess.run(command, check=True)\n            subprocess.run([str(binary), '--test-threads=1'], check=True)\n    print('Source contracts PASS: only private flag+success early return; failure/predicate/caller exact.')\n    receipt = {'baseline': str(BASELINE), 'root': str(ROOT), 'flags': {\n        'HV_ALLOC_DETAIL_PROBES_ENABLED': False,\n        'CODEX_ALLOC_ABI_PROBES_ENABLED': False,\n        'HV_NATIVE_ALLOC_WATERMARK_PROBES_ENABLED': False},\n        'sha256': {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest()\n                   for p in ('src/allcaps.rs', 'src/allocators.rs')}}\n    out = Path('/tmp/trueos-watermark-gate-validation-20261031.json')\n    out.write_text(json.dumps(receipt, indent=2) + '\\n')\n    print(json.dumps(receipt, indent=2))\n\n\nif __name__ == '__main__':\n    main()\n",
+      "reported_tests_passed": 14,
+      "off_tests_passed": 6,
+      "on_tests_passed": 8,
+      "validation_log_sha256": "0670e0d095833823e03051c92031da8bc7579f0d25ee13e7546e23c3b1aded3c",
+      "source_contract": "Only private flag and success-path early return; failure diagnostic, predicate and explicit allocator caller unchanged."
+    },
+    "harness_baseline": {
+      "root": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+      "sha256": {
+        "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+        "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46"
+      },
+      "functions": {
+        "failure": "fn log_hv_guest_alloc_failure(vm_id: u8, layout: Layout, path: &str) {\n    with_host_alloc_domain_strong(|| {\n        let stats = hv_guest_heap_stats(vm_id);\n        let trace = last_alloc_trace();\n        crate::log_warn!(\n            target: \"hv\";\n            \"hv-guest-alloc: vm{} {} failed size={} align={} src={:?} usable_total={} free_bytes={} largest_free={} free_blocks={} init={}\\n\",\n            vm_id,\n            path,\n            layout.size(),\n            layout.align(),\n            stats.source,\n            stats.usable_total,\n            stats.free_bytes,\n            stats.largest_free_block,\n            stats.free_blocks,\n            stats.initialized,\n        );\n        crate::log_warn!(\n            target: \"hv\";\n            \"hv-guest-alloc: trace seq={} caller=0x{:016X} caller1=0x{:016X} caller2=0x{:016X} size={} align={} stage={} head=0x{:016X} block=0x{:016X} block_size={} next=0x{:016X} payload=0x{:016X} aligned_used={}\\n\",\n            trace.seq,\n            trace.caller_rip,\n            trace.caller_rip_1,\n            trace.caller_rip_2,\n            trace.layout_size,\n            trace.layout_align,\n            trace.stage,\n            trace.head_ptr,\n            trace.block_ptr,\n            trace.block_size,\n            trace.block_next,\n            trace.payload_start,\n            trace.aligned_used,\n        );\n    });\n}\n\n",
+        "predicate": "fn should_log_hv_guest_alloc_success() -> bool {\n    crate::hv::current_hull_guest_context_vm_id().is_none()\n}\n\n",
+        "explicit_alloc": "pub unsafe fn alloc_raw_hv_guest(vm_id: u8, layout: Layout) -> *mut u8 {\n    let _abi = unsafe { crate::r::threads::abi_scope(crate::r::blocking::diagnostics::AbiOperation::Alloc) };\n    if (vm_id as usize) >= crate::allcaps::hv::VM_ID_LIMIT || !ensure_hv_guest_heap_ready(vm_id) {\n        return core::ptr::null_mut();\n    }\n\n    let domain = AllocDomain::HvGuest(vm_id);\n    let ptr = {\n        let mut guard = allocator_for_domain(domain).lock();\n        guard.alloc(domain, layout)\n    };\n    if !ptr.is_null() {\n        let tag_ptr = ptr.sub(size_of::<AllocTag>()) as *mut AllocTag;\n        (*tag_ptr).domain = alloc_domain_tag(domain);\n        if should_log_hv_guest_alloc_success() {\n            log_hv_guest_alloc_watermark(vm_id, layout, ptr, \"raw-explicit\");\n        }\n    } else if should_log_hv_guest_alloc_success() {\n        log_hv_guest_alloc_failure(vm_id, layout, \"raw-explicit\");\n    }\n    ptr\n}\n\n",
+        "watermark": "fn log_hv_guest_alloc_watermark(vm_id: u8, layout: Layout, ptr: *mut u8, path: &str) {\n    // heap_stats walks every free node while holding the heap lock. The old\n    // bucket check happened after that walk, charging every quiet allocation\n    // for a full fragmented-heap scan. Bound the walk itself first.\n    let Some(sample) = HV_GUEST_ALLOC_SAMPLE_BY_VM.get(vm_id as usize) else { return; };\n    if !sample.admit(crate::r::input_timing::now_ms(), layout.size()) { return; }\n    with_host_alloc_domain_strong(|| {\n        let Some(bucket_slot) = HV_GUEST_ALLOC_FREE_BUCKET_BY_VM.get(vm_id as usize) else {\n            return;\n        };\n        let stats = hv_guest_heap_stats(vm_id);\n        let bucket = (stats.free_bytes >> HV_GUEST_ALLOC_BUCKET_SHIFT) as u32;\n        let previous = bucket_slot.swap(bucket, Ordering::AcqRel);\n        let should_log = layout.size() >= 1024 * 1024\n            || previous == HV_GUEST_ALLOC_BUCKET_INIT\n            || bucket != previous;\n        if !should_log {\n            return;\n        }\n        let trace = last_alloc_trace();\n        crate::log_info!(\n            target: \"hv\";\n            \"hv-guest-alloc: vm{} {} ok size={} align={} ptr=0x{:016X} free_bytes={} largest_free={} free_blocks={} bucket={} prev={} trace_size={} trace_align={} caller=0x{:016X} caller1=0x{:016X} caller2=0x{:016X}\\n\",\n            vm_id,\n            path,\n            layout.size(),\n            layout.align(),\n            ptr as usize,\n            stats.free_bytes,\n            stats.largest_free_block,\n            stats.free_blocks,\n            bucket,\n            previous,\n            trace.layout_size,\n            trace.layout_align,\n            trace.caller_rip,\n            trace.caller_rip_1,\n            trace.caller_rip_2,\n        );\n    });\n}\n\n"
+      }
+    }
+  },
+  "decision": {
+    "promote_success_watermark_gate_to_production": false,
+    "reason": "No consistent startup gain in the cold/warm observations; retain the private patch and receipts as an experiment.",
+    "production_success_watermark_diagnostics": "Retained; original production sources and the cdff instrumented-off kernel keep existing behavior.",
+    "production_source_hashes_after_experiment": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46"
+    },
+    "third_gate_present_in_original_production_sources": false,
+    "next_kernel_for_new_application_trials": "Return to retained instrumented-off cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf; actual selection is recorded separately."
+  }
+}

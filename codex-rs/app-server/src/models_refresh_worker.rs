@@ -39,6 +39,7 @@ fn spawn_with_interval(
     let shutdown = CancellationToken::new();
     let worker_shutdown = shutdown.clone();
     let task = tokio::spawn(async move {
+        let mut initial_refresh = true;
         loop {
             if worker_shutdown.is_cancelled() {
                 break;
@@ -46,7 +47,14 @@ fn spawn_with_interval(
             let Some(model_catalog) = model_catalog.upgrade() else {
                 break;
             };
-            if let Err(err) = model_catalog.list_models(RefreshStrategy::Online).await {
+            let refresh = model_catalog.list_models(RefreshStrategy::Online);
+            let result = if initial_refresh {
+                initial_refresh = false;
+                codex_startup_timing::measure("app_server.initial_model_refresh", refresh).await
+            } else {
+                refresh.await
+            };
+            if let Err(err) = result {
                 // Parser diagnostics can include provider credentials from the source TOML.
                 tracing::warn!(error_kind = ?err.kind(), "model catalog refresh blocked by provider requirements");
             }

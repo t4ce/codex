@@ -270,6 +270,7 @@ mod side;
 mod startup;
 pub(crate) mod startup_bootstrap;
 mod startup_prompts;
+mod startup_skills;
 mod startup_warnings;
 mod thread_event_buffer;
 mod thread_events;
@@ -655,6 +656,8 @@ pub(crate) struct App {
         tokio::sync::broadcast::Sender<codex_app_server_protocol::ThreadStatusChangedNotification>,
     dynamic_tool_tasks: HashMap<codex_app_server_protocol::RequestId, (String, JoinHandle<()>)>,
     pending_startup_thread_start: bool,
+    /// Coalesces only the first session-origin skills refresh with startup's background request.
+    startup_skills_refresh_cwd: Option<PathBuf>,
     pending_server_version_notice: Option<crate::status::remote_connection::ServerVersionNotice>,
     /// Opens the session picker after event dispatch returns, with a fresh stack.
     pending_open_resume_picker: bool,

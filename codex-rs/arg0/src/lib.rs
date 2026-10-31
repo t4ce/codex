@@ -300,11 +300,20 @@ fn build_runtime_for_platform(trueos: bool) -> anyhow::Result<tokio::runtime::Ru
     builder.enable_all();
     builder.thread_stack_size(THREAD_STACK_SIZE_BYTES);
     if trueos {
+        #[cfg(target_os = "trueos")]
+        let async_workers = trueos_threads::runtime_worker_count()?;
+        // Host tests exercise the TRUEOS blocking cap with its baseline pool.
+        #[cfg(not(target_os = "trueos"))]
+        let async_workers = 1;
+        builder.worker_threads(async_workers);
         // TRUEOS eagerly backs each 16 MiB stack from the Blueprint's heap.
         // Tokio's default of 512 blocking workers can exhaust the 1 GiB
         // Codex guest during filesystem/plugin fanout. Queue excess work
         // while leaving room for the executable, async workers and data.
         builder.max_blocking_threads(TRUEOS_MAX_BLOCKING_THREADS);
+        startup_timing::mark(&format!(
+            "runtime_workers_configured async_workers={async_workers} blocking_cap={TRUEOS_MAX_BLOCKING_THREADS}"
+        ));
     }
     Ok(builder.build()?)
 }
@@ -328,8 +337,20 @@ fn set_filtered<I>(iter: I)
 where
     I: IntoIterator<Item = Result<(String, String), dotenvy::Error>>,
 {
+    #[cfg(target_os = "trueos")]
+    let mut reserved_key_ignored = false;
     for (key, value) in iter.into_iter().flatten() {
         if !key.to_ascii_uppercase().starts_with(ILLEGAL_ENV_VAR_PREFIX) {
+            // Kernel launch identity and access scope are immutable. Match the
+            // kernel's case-sensitive namespace before calling set_var().
+            #[cfg(target_os = "trueos")]
+            if key.starts_with("TRUEOS_") {
+                if !reserved_key_ignored {
+                    startup_timing::mark("dotenv_reserved_trueos_key_ignored");
+                    reserved_key_ignored = true;
+                }
+                continue;
+            }
             // It is safe to call set_var() because our process is
             // single-threaded at this point in its execution.
             unsafe { std::env::set_var(&key, &value) };

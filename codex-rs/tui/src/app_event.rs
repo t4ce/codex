@@ -1134,6 +1134,11 @@ pub(crate) enum AppEvent {
         result: Result<(), String>,
     },
 
+    /// Automatic session-configuration refresh, distinct from an explicit skills command.
+    RefreshSessionSkills {
+        cwd: PathBuf,
+    },
+
     /// Refresh plugin mention bindings from the current config.
     RefreshPluginMentions,
 

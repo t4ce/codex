@@ -271,6 +271,7 @@ mod rollout_reconstruction;
 #[allow(clippy::module_inception)]
 pub(crate) mod session;
 pub(crate) mod startup_prewarm;
+mod startup_prewarm_policy;
 mod step_activation;
 pub(crate) mod step_context;
 pub(crate) mod step_settings;

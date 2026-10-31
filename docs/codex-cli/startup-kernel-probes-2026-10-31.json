@@ -1,0 +1,4233 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-31",
+  "kind": "matched_kernel_allocation_diagnostic_experiment",
+  "app_archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+  "kernels": {
+    "on": {
+      "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+      "sibling_revisions": {
+        "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+        "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+      },
+      "staged_dependency_locks": {
+        "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+        "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+      },
+      "submodule_revisions": {
+        "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+        "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+      },
+      "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-alloc-gates-on-20261031",
+      "gate_values": {
+        "HV_ALLOC_DETAIL_PROBES_ENABLED": true,
+        "CODEX_ALLOC_ABI_PROBES_ENABLED": true
+      },
+      "artifacts": {
+        "TRUEOS.elf": {
+          "bytes": 73137488,
+          "sha256": "51b42c882d3de10eac78831c95f9e614558759d1286f32a387bec237243d5a01"
+        },
+        "TrueOS.tar.lz4": {
+          "bytes": 63616230,
+          "sha256": "dfbc8a6dff0c9380e781e5f1933132ba01545e78daa4fe63d040a20387213df3"
+        },
+        "EFI/BOOT/BOOTX64.EFI": {
+          "bytes": 61440,
+          "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+        },
+        "EFI/BOOT/tgl_guc_70.bin": {
+          "bytes": 335360,
+          "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+        }
+      },
+      "builtins_ready": {
+        "profile": "dev",
+        "sources": "a7d009ef4ee4798bd7dbb6d969e185fca0240e32521fb33da15f5df2a9a13d01",
+        "database": {
+          "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+          "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+        },
+        "packages": {
+          "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+          "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+          "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+          "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+          "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+          "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+          "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+          "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+          "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+          "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+          "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+          "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+        }
+      },
+      "codex_cabi_compatibility": {
+        "blueprint_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+        "codex_elf_sha256": "90807c58d03fe722f83dbd0b55fca12c6eb787acc98c441842576d2fdaa85a5e",
+        "kernel_elf_sha256": "51b42c882d3de10eac78831c95f9e614558759d1286f32a387bec237243d5a01",
+        "required_cabi_imports": 56,
+        "kernel_resolver_entries_matched": 56,
+        "kernel_resolver_entries_total": 352,
+        "missing": [],
+        "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+        "resolver_snapshot": "/tmp/trueos-codex-alloc-gates-resolver-on.rs",
+        "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+        "depfile_sha256": "48b81ae593fa484523cdb63f6d8460f9d52aab56e0ec841b91173fa9fce30359",
+        "matched_functions": {
+          "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+          "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+          "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+          "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+          "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+          "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+          "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+          "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+          "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+          "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+          "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+          "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+          "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+          "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+          "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+          "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+          "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+          "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+          "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+          "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+          "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+          "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+          "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+          "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+          "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+          "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+          "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+          "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+          "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+          "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+          "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+          "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+          "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+          "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+          "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+          "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+          "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+          "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+          "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+          "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+          "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+          "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+          "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+          "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+          "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+          "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+          "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+          "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+          "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+          "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+          "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+          "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+          "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+          "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+          "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+          "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+        }
+      },
+      "archive_members_verified": {
+        "TRUEOS.elf": {
+          "bytes": 73137488,
+          "sha256": "51b42c882d3de10eac78831c95f9e614558759d1286f32a387bec237243d5a01"
+        },
+        "EFI/BOOT/BOOTX64.EFI": {
+          "bytes": 61440,
+          "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+        },
+        "EFI/BOOT/tgl_guc_70.bin": {
+          "bytes": 335360,
+          "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+        }
+      },
+      "excluded_user_wip_verified": true,
+      "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image."
+    },
+    "off": {
+      "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+      "sibling_revisions": {
+        "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+        "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+      },
+      "staged_dependency_locks": {
+        "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+        "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+      },
+      "submodule_revisions": {
+        "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+        "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+      },
+      "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-alloc-gates-20261031",
+      "gate_values": {
+        "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+        "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+      },
+      "artifacts": {
+        "TRUEOS.elf": {
+          "bytes": 73133392,
+          "sha256": "400e2c2b146b7cd83f3e554c16ce04c9bea650578b77adc1c87607aa89fd435b"
+        },
+        "TrueOS.tar.lz4": {
+          "bytes": 63622532,
+          "sha256": "f58892893fd354c9c107b0939b5ae639049cd47d48e6de3b16aa8a4149ef92d3"
+        },
+        "EFI/BOOT/BOOTX64.EFI": {
+          "bytes": 61440,
+          "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+        },
+        "EFI/BOOT/tgl_guc_70.bin": {
+          "bytes": 335360,
+          "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+        }
+      },
+      "builtins_ready": {
+        "profile": "dev",
+        "sources": "a7d009ef4ee4798bd7dbb6d969e185fca0240e32521fb33da15f5df2a9a13d01",
+        "database": {
+          "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+          "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+        },
+        "packages": {
+          "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+          "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+          "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+          "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+          "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+          "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+          "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+          "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+          "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+          "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+          "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+          "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+        }
+      },
+      "codex_cabi_compatibility": {
+        "blueprint_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+        "codex_elf_sha256": "90807c58d03fe722f83dbd0b55fca12c6eb787acc98c441842576d2fdaa85a5e",
+        "kernel_elf_sha256": "400e2c2b146b7cd83f3e554c16ce04c9bea650578b77adc1c87607aa89fd435b",
+        "required_cabi_imports": 56,
+        "kernel_resolver_entries_matched": 56,
+        "kernel_resolver_entries_total": 352,
+        "missing": [],
+        "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+        "resolver_snapshot": "/tmp/trueos-codex-alloc-gates-resolver-off.rs",
+        "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+        "depfile_sha256": "48b81ae593fa484523cdb63f6d8460f9d52aab56e0ec841b91173fa9fce30359",
+        "matched_functions": {
+          "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+          "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+          "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+          "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+          "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+          "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+          "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+          "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+          "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+          "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+          "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+          "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+          "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+          "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+          "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+          "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+          "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+          "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+          "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+          "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+          "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+          "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+          "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+          "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+          "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+          "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+          "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+          "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+          "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+          "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+          "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+          "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+          "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+          "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+          "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+          "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+          "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+          "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+          "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+          "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+          "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+          "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+          "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+          "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+          "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+          "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+          "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+          "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+          "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+          "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+          "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+          "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+          "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+          "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+          "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+          "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+        }
+      },
+      "archive_members_verified": {
+        "TRUEOS.elf": {
+          "bytes": 73133392,
+          "sha256": "400e2c2b146b7cd83f3e554c16ce04c9bea650578b77adc1c87607aa89fd435b"
+        },
+        "EFI/BOOT/BOOTX64.EFI": {
+          "bytes": 61440,
+          "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+        },
+        "EFI/BOOT/tgl_guc_70.bin": {
+          "bytes": 335360,
+          "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+        }
+      },
+      "excluded_user_wip_verified": true,
+      "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image."
+    }
+  },
+  "shared_inputs": {
+    "identical_loader": true,
+    "identical_firmware": true,
+    "identical_builtins": true,
+    "identical_cabi_resolver": true,
+    "only_on_off_source_delta": [
+      "HV_ALLOC_DETAIL_PROBES_ENABLED",
+      "CODEX_ALLOC_ABI_PROBES_ENABLED"
+    ],
+    "independent_final_validation": "PASS"
+  },
+  "publication_receipts": [
+    {
+      "selected_epoch": 1793418481.4984527,
+      "mode": "on",
+      "previous_selection": "rig-images/debug.iTTtHj",
+      "selected_generation": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/debug.codex-alloc-gates-on-20261031",
+      "kernel_sha256": "51b42c882d3de10eac78831c95f9e614558759d1286f32a387bec237243d5a01",
+      "archive_sha256": "dfbc8a6dff0c9380e781e5f1933132ba01545e78daa4fe63d040a20387213df3",
+      "capture_offset_before_reset": 29122272
+    },
+    {
+      "selected_epoch": 1793418837.327563,
+      "mode": "off",
+      "previous_selection": "rig-images/debug.codex-alloc-gates-on-20261031",
+      "selected_generation": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/debug.codex-alloc-gates-20261031",
+      "kernel_sha256": "400e2c2b146b7cd83f3e554c16ce04c9bea650578b77adc1c87607aa89fd435b",
+      "archive_sha256": "f58892893fd354c9c107b0939b5ae639049cd47d48e6de3b16aa8a4149ef92d3",
+      "capture_offset_before_reset": 30345737
+    }
+  ],
+  "trials": [
+    {
+      "name": "kernel-probes-on-workers2",
+      "probes": "on",
+      "capture": {
+        "start_offset": 29320232,
+        "end_offset": 30214677,
+        "bytes": 894445,
+        "sha256": "295fa1a8235e9f3edac59fbb38a67c371ac85a5d8557bb5badaed019ef34523e",
+        "observed_epoch": 1793418788.086261
+      },
+      "contexts": [
+        {
+          "app_gen": 1,
+          "instance": "daa2072c-9459-4278-807d-793d7b42b789",
+          "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "kernel-probes-on-workers2",
+        "capture_start_offset": 29320232,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 5.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 10046.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "success": false,
+        "error_type": "TIMEOUT",
+        "capture_end_offset": 29768322
+      },
+      "runtime_workers": [
+        {
+          "line": 299,
+          "elapsed_ms": 65.0,
+          "async_workers": 2,
+          "blocking_cap": 8
+        }
+      ],
+      "milestones": [
+        {
+          "line": 2811,
+          "name": "thread_attach_done",
+          "elapsed_ms": 10046.0
+        },
+        {
+          "line": 5069,
+          "name": "session_prompt_ready",
+          "elapsed_ms": 184722.0
+        },
+        {
+          "line": 5070,
+          "name": "startup_handoff_frame_rendered",
+          "elapsed_ms": 184723.0
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 3,
+          "sampled_rows": 164,
+          "roles": {
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483652,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662,
+                2147483663,
+                2147483670,
+                2147483671,
+                2147483672,
+                2147483673,
+                2147483674,
+                2147483675
+              ],
+              "carriers": [
+                4,
+                10
+              ],
+              "async_scheduler_job_ids": [
+                2147483650,
+                2147483651
+              ],
+              "max_ready_ms": 123209,
+              "max_slice_ms": 118478,
+              "max_observed_boundary_age_ms": 118695
+            },
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 2,
+              "max_slice_ms": 100,
+              "max_observed_boundary_age_ms": 164341
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483653,
+                2147483654,
+                2147483656
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 90,
+              "max_slice_ms": 34,
+              "max_observed_boundary_age_ms": 148293
+            }
+          }
+        }
+      ],
+      "allocator_samples": [
+        {
+          "line": 960,
+          "vm": 0,
+          "alloc_calls": 340493,
+          "alloc_nodes": 25051899,
+          "alloc_max_nodes": 654,
+          "alloc_failures": 0
+        },
+        {
+          "line": 961,
+          "vm": 1,
+          "alloc_calls": 8653,
+          "alloc_nodes": 60947,
+          "alloc_max_nodes": 60,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2391,
+          "vm": 0,
+          "alloc_calls": 956516,
+          "alloc_nodes": 71378625,
+          "alloc_max_nodes": 963,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2392,
+          "vm": 1,
+          "alloc_calls": 9471,
+          "alloc_nodes": 69244,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2968,
+          "vm": 1,
+          "alloc_calls": 9471,
+          "alloc_nodes": 69244,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2997,
+          "vm": 1,
+          "alloc_calls": 9479,
+          "alloc_nodes": 69254,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3098,
+          "vm": 1,
+          "alloc_calls": 9530,
+          "alloc_nodes": 70214,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3142,
+          "vm": 1,
+          "alloc_calls": 9567,
+          "alloc_nodes": 70809,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3263,
+          "vm": 1,
+          "alloc_calls": 9567,
+          "alloc_nodes": 70809,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3281,
+          "vm": 1,
+          "alloc_calls": 9575,
+          "alloc_nodes": 70819,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3299,
+          "vm": 1,
+          "alloc_calls": 9575,
+          "alloc_nodes": 70819,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3316,
+          "vm": 1,
+          "alloc_calls": 9575,
+          "alloc_nodes": 70819,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3382,
+          "vm": 1,
+          "alloc_calls": 9575,
+          "alloc_nodes": 70819,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3560,
+          "vm": 1,
+          "alloc_calls": 9700,
+          "alloc_nodes": 72838,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3641,
+          "vm": 1,
+          "alloc_calls": 9700,
+          "alloc_nodes": 72838,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3692,
+          "vm": 0,
+          "alloc_calls": 3276297,
+          "alloc_nodes": 2169140410,
+          "alloc_max_nodes": 66455,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3693,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3711,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3729,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3748,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3768,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3785,
+          "vm": 0,
+          "alloc_calls": 3734259,
+          "alloc_nodes": 3348106488,
+          "alloc_max_nodes": 121225,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3786,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3900,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3918,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3935,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3953,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3972,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3989,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4102,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4120,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4137,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4154,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4173,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4191,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4244,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4321,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4339,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4358,
+          "vm": 0,
+          "alloc_calls": 4236764,
+          "alloc_nodes": 5499970369,
+          "alloc_max_nodes": 121225,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4359,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4387,
+          "vm": 0,
+          "alloc_calls": 4266577,
+          "alloc_nodes": 5504371479,
+          "alloc_max_nodes": 267092,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4388,
+          "vm": 1,
+          "alloc_calls": 9708,
+          "alloc_nodes": 72847,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4729,
+          "vm": 1,
+          "alloc_calls": 10204,
+          "alloc_nodes": 80188,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 5139,
+          "vm": 1,
+          "alloc_calls": 10204,
+          "alloc_nodes": 80188,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 5377,
+          "vm": 0,
+          "alloc_calls": 5583521,
+          "alloc_nodes": 6035747065,
+          "alloc_max_nodes": 267092,
+          "alloc_failures": 0
+        },
+        {
+          "line": 5378,
+          "vm": 1,
+          "alloc_calls": 10263,
+          "alloc_nodes": 81146,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 5398,
+          "vm": 1,
+          "alloc_calls": 10263,
+          "alloc_nodes": 81146,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        },
+        {
+          "line": 5416,
+          "vm": 1,
+          "alloc_calls": 10300,
+          "alloc_nodes": 81716,
+          "alloc_max_nodes": 71,
+          "alloc_failures": 0
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000
+          ],
+          "context": {
+            "app_gen": 1,
+            "instance": "daa2072c-9459-4278-807d-793d7b42b789",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 12.0,
+              "delta_ms": 12.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 12.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 14.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 14.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 16.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 53.0,
+              "delta_ms": 37.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 62.0,
+              "delta_ms": 9.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 62.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 62.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 65.0,
+              "delta_ms": 3.0
+            }
+          ],
+          "spans": [],
+          "endpoints": {},
+          "last_elapsed_ms": 65.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 12.0,
+              "end_ms": 14.0,
+              "duration_ms": 2.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 16.0,
+              "end_ms": 53.0,
+              "duration_ms": 37.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 14.0,
+              "end_ms": 62.0,
+              "duration_ms": 48.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 62.0,
+              "end_ms": 65.0,
+              "duration_ms": 3.0
+            }
+          ],
+          "open_milestone_intervals": [],
+          "milestone_gaps": [
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 37.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 12.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 9.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [],
+          "long_polls": []
+        },
+        {
+          "pid": 1,
+          "pids": [
+            1
+          ],
+          "context": {},
+          "milestones": [
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 72.0,
+              "delta_ms": 7.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 72.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 78.0,
+              "delta_ms": 6.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 78.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 78.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 78.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 83.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 101.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 101.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 101.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 101.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 101.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 102.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 102.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 102.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 352.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 352.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 352.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 352.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 352.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 352.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 353.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 363.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 385.0,
+              "delta_ms": 22.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 386.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 386.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 387.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 419.0,
+              "delta_ms": 32.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 419.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 462.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 462.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 492.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 500.0,
+              "delta_ms": 8.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 537.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 570.0,
+              "delta_ms": 33.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 2316.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 2333.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 2666.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 2666.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 5866.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 7163.0,
+              "delta_ms": 29.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 10013.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 10013.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 10040.0,
+              "delta_ms": 27.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 10046.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 184722.0,
+              "delta_ms": 174676.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 184723.0,
+              "delta_ms": 1.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 72.0,
+              "line": 350,
+              "end_ms": 72.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 78.0,
+              "line": 357,
+              "end_ms": 82.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 1.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 82.0,
+              "line": 361,
+              "end_ms": 83.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 83.0,
+              "line": 364,
+              "end_ms": 101.0,
+              "duration_ms": 18.0,
+              "outcome": "complete",
+              "poll_n": 24,
+              "poll_total_ms": 12.0,
+              "poll_max_ms": 9.0,
+              "outside_poll_ms": 6.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 101.0,
+              "line": 368,
+              "end_ms": 352.0,
+              "duration_ms": 251.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 251.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 352.0,
+              "line": 389,
+              "end_ms": 386.0,
+              "duration_ms": 34.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 34.0,
+              "poll_max_ms": 34.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 451.0,
+              "line": 429,
+              "end_ms": 462.0,
+              "duration_ms": 11.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 478.0,
+              "line": 438,
+              "end_ms": 492.0,
+              "duration_ms": 14.0,
+              "outcome": "complete",
+              "poll_n": 23,
+              "poll_total_ms": 9.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 5.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 533.0,
+              "line": 450,
+              "end_ms": 537.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 4.0,
+              "poll_max_ms": 4.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 2118.0,
+              "line": 729,
+              "end_ms": 2156.0,
+              "duration_ms": 38.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 2156.0,
+              "line": 773,
+              "end_ms": 2176.0,
+              "duration_ms": 20.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 2176.0,
+              "line": 801,
+              "end_ms": 2197.0,
+              "duration_ms": 21.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 2197.0,
+              "line": 814,
+              "end_ms": 2202.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 2202.0,
+              "line": 816,
+              "end_ms": 2224.0,
+              "duration_ms": 22.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 2224.0,
+              "line": 829,
+              "end_ms": 2230.0,
+              "duration_ms": 6.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 2230.0,
+              "line": 831,
+              "end_ms": 2256.0,
+              "duration_ms": 26.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 2256.0,
+              "line": 847,
+              "end_ms": 2264.0,
+              "duration_ms": 8.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 2264.0,
+              "line": 849,
+              "end_ms": 2294.0,
+              "duration_ms": 30.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 2294.0,
+              "line": 862,
+              "end_ms": 2303.0,
+              "duration_ms": 9.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 2312.0,
+              "line": 864,
+              "end_ms": 2316.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 586.0,
+              "line": 464,
+              "end_ms": 2316.0,
+              "duration_ms": 1730.0,
+              "outcome": "complete",
+              "poll_n": 120,
+              "poll_total_ms": 51.0,
+              "poll_max_ms": 24.0,
+              "outside_poll_ms": 1679.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 2349.0,
+              "line": 889,
+              "end_ms": 2666.0,
+              "duration_ms": 317.0,
+              "outcome": "complete",
+              "poll_n": 54,
+              "poll_total_ms": 25.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 292.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2682.0,
+              "line": 933,
+              "end_ms": 5866.0,
+              "duration_ms": 3184.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 3184.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 6079.0,
+              "line": 1120,
+              "end_ms": 6081.0,
+              "duration_ms": 2.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 2.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 6079.0,
+              "line": 1118,
+              "end_ms": 6102.0,
+              "duration_ms": 23.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 22.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 6079.0,
+              "line": 1119,
+              "end_ms": 6112.0,
+              "duration_ms": 33.0,
+              "outcome": "complete",
+              "poll_n": 5,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 33.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6045.0,
+              "line": 1096,
+              "end_ms": 7074.0,
+              "duration_ms": 1029.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1029.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 7074.0,
+              "line": 1485,
+              "end_ms": 7074.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 7090.0,
+              "line": 1490,
+              "end_ms": 7134.0,
+              "duration_ms": 44.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 2.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 42.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 7134.0,
+              "line": 1492,
+              "end_ms": 7134.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 7179.0,
+              "line": 1511,
+              "end_ms": 7180.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7163.0,
+              "line": 1504,
+              "end_ms": 10013.0,
+              "duration_ms": 2850.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 2844.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 10041.0,
+              "line": 2808,
+              "end_ms": 10045.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 4.0,
+              "poll_max_ms": 4.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 10013.0,
+              "line": 2806,
+              "end_ms": 10046.0,
+              "duration_ms": 33.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 33.0,
+              "poll_max_ms": 33.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 386.0,
+            "editable_ms": 386.0,
+            "session_ready_frame_ms": 184722.0,
+            "startup_handoff_frame_ms": 184723.0
+          },
+          "last_elapsed_ms": 184723.0,
+          "runtime": {
+            "async_workers": 2,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "runtime",
+              "start_ms": 65.0,
+              "end_ms": 72.0,
+              "duration_ms": 7.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 78.0,
+              "end_ms": 78.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 83.0,
+              "end_ms": 101.0,
+              "duration_ms": 18.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 101.0,
+              "end_ms": 101.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 101.0,
+              "end_ms": 102.0,
+              "duration_ms": 1.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 102.0,
+              "end_ms": 352.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 101.0,
+              "end_ms": 352.0,
+              "duration_ms": 251.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 363.0,
+              "end_ms": 385.0,
+              "duration_ms": 22.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 387.0,
+              "end_ms": 419.0,
+              "duration_ms": 32.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 419.0,
+              "end_ms": 462.0,
+              "duration_ms": 43.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 462.0,
+              "end_ms": 492.0,
+              "duration_ms": 30.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 500.0,
+              "end_ms": 537.0,
+              "duration_ms": 37.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 570.0,
+              "end_ms": 2316.0,
+              "duration_ms": 1746.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 2333.0,
+              "end_ms": 2666.0,
+              "duration_ms": 333.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 2666.0,
+              "end_ms": 5866.0,
+              "duration_ms": 3200.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 7163.0,
+              "end_ms": 10013.0,
+              "duration_ms": 2850.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 72.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 78.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 352.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 352.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 174676.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 3200.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 2850.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 1746.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 1297.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 333.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 43.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 37.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 33.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 32.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 30.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 27.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 22.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 18.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 8.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 7.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2682.0,
+              "line": 933,
+              "end_ms": 5866.0,
+              "duration_ms": 3184.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 3184.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7163.0,
+              "line": 1504,
+              "end_ms": 10013.0,
+              "duration_ms": 2850.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 2844.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 586.0,
+              "line": 464,
+              "end_ms": 2316.0,
+              "duration_ms": 1730.0,
+              "outcome": "complete",
+              "poll_n": 120,
+              "poll_total_ms": 51.0,
+              "poll_max_ms": 24.0,
+              "outside_poll_ms": 1679.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6045.0,
+              "line": 1096,
+              "end_ms": 7074.0,
+              "duration_ms": 1029.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1029.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ],
+      "ready_frame_ms": 184722,
+      "attach_to_ready_ms": 174676,
+      "fresh_boot": {
+        "start_offset": 29122272,
+        "end_offset": 29318426,
+        "window_bytes": 196154,
+        "window_sha256": "6f7b7fd711e3bd0d04f71868e26fda65b96f0a7a6a484ea1461162bde263f6e1",
+        "observed_epoch": 1793418550.792568,
+        "events": [
+          {
+            "line": 222,
+            "event": "Entering TrueOS kernel"
+          },
+          {
+            "line": 342,
+            "event": "[global] [info] trueosfs-request-broker: online realm=bsp callers=background-service-lanes wait=parked-no-executor-poll"
+          },
+          {
+            "line": 364,
+            "event": "[global] [info] spawn-svc: started codex-progress-observer (mask=0x04000000)"
+          },
+          {
+            "line": 432,
+            "event": "[boot] [important] hid-udp: task polling at_ms=1141 readiness=0x0c05f700"
+          },
+          {
+            "line": 505,
+            "event": "[storage] [info] http-trueosfs: listening on tcp 80 owner=<hardware> dev=1 Realtek RTL8125 ip=192.168.178.94 mode=dhcp"
+          },
+          {
+            "line": 512,
+            "event": "[storage] [info] http-trueosfs: tcp listen opened and ready dev=1"
+          },
+          {
+            "line": 1266,
+            "event": "[storage] [info] http-trueosfs: perf bytes=296311 tsc_read=0 tsc_submit=251934 tsc_total=251934 cycles_per_byte=0"
+          }
+        ],
+        "keyword_counts": {
+          "boot": 37,
+          "kernel": 10,
+          "panic": 1,
+          "codex-progress": 29,
+          "http": 6,
+          "reset": 5
+        }
+      },
+      "first_flush_ms": 386,
+      "handoff_frame_ms": 184723,
+      "observations_at_or_before_first_ready": {
+        "runtime_until_ready": {
+          "tokio-pool": {
+            "max_ready_ms": 123209,
+            "max_slice_ms": 118478
+          },
+          "foreground": {
+            "max_ready_ms": 2,
+            "max_slice_ms": 100
+          },
+          "unclassified": {
+            "max_ready_ms": 90,
+            "max_slice_ms": 34
+          }
+        },
+        "active_abi_samples_until_ready": {
+          "alloc": 27,
+          "free": 0,
+          "wait": 110,
+          "none": 2
+        },
+        "coarse_allocator_receipts_before_ready": 6
+      },
+      "sanitized_source_receipts": {
+        "summary": {
+          "sha256": "b236daca49c4ff488171074c1744c33ae12803f6e54cf6c52fdad539b1953596"
+        },
+        "report": {
+          "sha256": "738f7aaf4cf011682bf31712341191ab553fc71a61ce32986821805c41841b59"
+        },
+        "progress": {
+          "sha256": "84c9d5faf005b6290552a8f7bbb35358bce4dd71c3d7e5e3434ff4da7c3aa471"
+        }
+      }
+    },
+    {
+      "name": "kernel-probes-off-workers2",
+      "probes": "off",
+      "capture": {
+        "start_offset": 30525156,
+        "end_offset": 31234022,
+        "bytes": 708866,
+        "sha256": "a10b087d26407a0fd6916babd602642e4b9367db2a1a76955b42f415e98e2f58",
+        "observed_epoch": 1793419032.2204814
+      },
+      "contexts": [
+        {
+          "app_gen": 1,
+          "instance": "f3b1aae9-bd6a-4458-8c92-e35ac1898d62",
+          "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "kernel-probes-off-workers2",
+        "capture_start_offset": 30525156,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 5.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 9193.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "success": false,
+        "error_type": "TIMEOUT",
+        "capture_end_offset": 31011579
+      },
+      "runtime_workers": [
+        {
+          "line": 294,
+          "elapsed_ms": 65.0,
+          "async_workers": 2,
+          "blocking_cap": 8
+        }
+      ],
+      "milestones": [
+        {
+          "line": 2811,
+          "name": "thread_attach_done",
+          "elapsed_ms": 9193.0
+        },
+        {
+          "line": 4075,
+          "name": "session_prompt_ready",
+          "elapsed_ms": 73494.0
+        },
+        {
+          "line": 4076,
+          "name": "startup_handoff_frame_rendered",
+          "elapsed_ms": 73494.0
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 3,
+          "sampled_rows": 92,
+          "roles": {
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 1,
+              "max_slice_ms": 66,
+              "max_observed_boundary_age_ms": 50946
+            },
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483652,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662,
+                2147483663,
+                2147483670,
+                2147483671,
+                2147483672,
+                2147483673,
+                2147483674,
+                2147483675,
+                2147483676,
+                2147483677
+              ],
+              "carriers": [
+                4,
+                10
+              ],
+              "async_scheduler_job_ids": [
+                2147483650,
+                2147483651
+              ],
+              "max_ready_ms": 35274,
+              "max_slice_ms": 35274,
+              "max_observed_boundary_age_ms": 31997
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483653,
+                2147483654,
+                2147483656
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 66,
+              "max_slice_ms": 29,
+              "max_observed_boundary_age_ms": 49936
+            }
+          }
+        }
+      ],
+      "allocator_samples": [
+        {
+          "line": 387,
+          "vm": 0,
+          "alloc_calls": 11567,
+          "alloc_nodes": 33383,
+          "alloc_max_nodes": 46,
+          "alloc_failures": 0
+        },
+        {
+          "line": 1052,
+          "vm": 0,
+          "alloc_calls": 507690,
+          "alloc_nodes": 57283237,
+          "alloc_max_nodes": 1017,
+          "alloc_failures": 0
+        },
+        {
+          "line": 1053,
+          "vm": 1,
+          "alloc_calls": 8694,
+          "alloc_nodes": 54388,
+          "alloc_max_nodes": 59,
+          "alloc_failures": 0
+        },
+        {
+          "line": 2990,
+          "vm": 1,
+          "alloc_calls": 9471,
+          "alloc_nodes": 63183,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3191,
+          "vm": 1,
+          "alloc_calls": 9508,
+          "alloc_nodes": 63801,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3224,
+          "vm": 1,
+          "alloc_calls": 9508,
+          "alloc_nodes": 63801,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3247,
+          "vm": 1,
+          "alloc_calls": 9545,
+          "alloc_nodes": 64261,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3405,
+          "vm": 1,
+          "alloc_calls": 9545,
+          "alloc_nodes": 64261,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3529,
+          "vm": 1,
+          "alloc_calls": 9604,
+          "alloc_nodes": 65413,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3557,
+          "vm": 1,
+          "alloc_calls": 9604,
+          "alloc_nodes": 65413,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3579,
+          "vm": 1,
+          "alloc_calls": 9641,
+          "alloc_nodes": 66297,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3601,
+          "vm": 1,
+          "alloc_calls": 9641,
+          "alloc_nodes": 66297,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3623,
+          "vm": 1,
+          "alloc_calls": 9700,
+          "alloc_nodes": 67542,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3644,
+          "vm": 1,
+          "alloc_calls": 9700,
+          "alloc_nodes": 67542,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3837,
+          "vm": 1,
+          "alloc_calls": 9737,
+          "alloc_nodes": 68426,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 3882,
+          "vm": 1,
+          "alloc_calls": 9737,
+          "alloc_nodes": 68426,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4123,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4143,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4163,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4181,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4296,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4316,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4333,
+          "vm": 1,
+          "alloc_calls": 9775,
+          "alloc_nodes": 69301,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        },
+        {
+          "line": 4375,
+          "vm": 1,
+          "alloc_calls": 9886,
+          "alloc_nodes": 71764,
+          "alloc_max_nodes": 76,
+          "alloc_failures": 0
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000
+          ],
+          "context": {
+            "app_gen": 1,
+            "instance": "f3b1aae9-bd6a-4458-8c92-e35ac1898d62",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 10.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 10.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 10.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 11.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 12.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 53.0,
+              "delta_ms": 41.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 62.0,
+              "delta_ms": 9.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 62.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 62.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 65.0,
+              "delta_ms": 3.0
+            }
+          ],
+          "spans": [],
+          "endpoints": {},
+          "last_elapsed_ms": 65.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 10.0,
+              "end_ms": 10.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 12.0,
+              "end_ms": 53.0,
+              "duration_ms": 41.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 11.0,
+              "end_ms": 62.0,
+              "duration_ms": 51.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 62.0,
+              "end_ms": 65.0,
+              "duration_ms": 3.0
+            }
+          ],
+          "open_milestone_intervals": [],
+          "milestone_gaps": [
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 41.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 9.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [],
+          "long_polls": []
+        },
+        {
+          "pid": 1,
+          "pids": [
+            1
+          ],
+          "context": {},
+          "milestones": [
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 65.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 72.0,
+              "delta_ms": 7.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 72.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 76.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 76.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 76.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 76.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 81.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 97.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 347.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 348.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 356.0,
+              "delta_ms": 8.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 377.0,
+              "delta_ms": 21.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 378.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 378.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 378.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 394.0,
+              "delta_ms": 16.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 394.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 421.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 421.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 481.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 487.0,
+              "delta_ms": 6.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 540.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 556.0,
+              "delta_ms": 16.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 2283.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 2300.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 2764.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 2764.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 5272.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 6481.0,
+              "delta_ms": 27.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 9169.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 9169.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 9191.0,
+              "delta_ms": 22.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 9193.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 73494.0,
+              "delta_ms": 64301.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 73494.0,
+              "delta_ms": 0.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 72.0,
+              "line": 345,
+              "end_ms": 72.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 77.0,
+              "line": 352,
+              "end_ms": 81.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 81.0,
+              "line": 356,
+              "end_ms": 81.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 81.0,
+              "line": 359,
+              "end_ms": 97.0,
+              "duration_ms": 16.0,
+              "outcome": "complete",
+              "poll_n": 30,
+              "poll_total_ms": 12.0,
+              "poll_max_ms": 7.0,
+              "outside_poll_ms": 4.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 97.0,
+              "line": 363,
+              "end_ms": 347.0,
+              "duration_ms": 250.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 250.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 347.0,
+              "line": 398,
+              "end_ms": 378.0,
+              "duration_ms": 31.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 31.0,
+              "poll_max_ms": 31.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 410.0,
+              "line": 430,
+              "end_ms": 421.0,
+              "duration_ms": 11.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 469.0,
+              "line": 446,
+              "end_ms": 481.0,
+              "duration_ms": 12.0,
+              "outcome": "complete",
+              "poll_n": 27,
+              "poll_total_ms": 8.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 4.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 536.0,
+              "line": 460,
+              "end_ms": 540.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 2103.0,
+              "line": 738,
+              "end_ms": 2141.0,
+              "duration_ms": 38.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 2141.0,
+              "line": 782,
+              "end_ms": 2160.0,
+              "duration_ms": 19.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 2160.0,
+              "line": 810,
+              "end_ms": 2178.0,
+              "duration_ms": 18.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 2178.0,
+              "line": 823,
+              "end_ms": 2183.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 2183.0,
+              "line": 825,
+              "end_ms": 2203.0,
+              "duration_ms": 20.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 2203.0,
+              "line": 838,
+              "end_ms": 2208.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 2208.0,
+              "line": 840,
+              "end_ms": 2232.0,
+              "duration_ms": 24.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 2232.0,
+              "line": 856,
+              "end_ms": 2239.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 2239.0,
+              "line": 858,
+              "end_ms": 2264.0,
+              "duration_ms": 25.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 2264.0,
+              "line": 871,
+              "end_ms": 2271.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 2280.0,
+              "line": 873,
+              "end_ms": 2283.0,
+              "duration_ms": 3.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 572.0,
+              "line": 471,
+              "end_ms": 2283.0,
+              "duration_ms": 1711.0,
+              "outcome": "complete",
+              "poll_n": 119,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 24.0,
+              "outside_poll_ms": 1671.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 2316.0,
+              "line": 898,
+              "end_ms": 2764.0,
+              "duration_ms": 448.0,
+              "outcome": "complete",
+              "poll_n": 57,
+              "poll_total_ms": 25.0,
+              "poll_max_ms": 4.0,
+              "outside_poll_ms": 423.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2781.0,
+              "line": 953,
+              "end_ms": 5272.0,
+              "duration_ms": 2491.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 2491.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 5485.0,
+              "line": 1135,
+              "end_ms": 5486.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 5484.0,
+              "line": 1133,
+              "end_ms": 5502.0,
+              "duration_ms": 18.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 17.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 5484.0,
+              "line": 1134,
+              "end_ms": 5513.0,
+              "duration_ms": 29.0,
+              "outcome": "complete",
+              "poll_n": 5,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 29.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 5451.0,
+              "line": 1108,
+              "end_ms": 6396.0,
+              "duration_ms": 945.0,
+              "outcome": "complete",
+              "poll_n": 7,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 945.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 6396.0,
+              "line": 1496,
+              "end_ms": 6396.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 6413.0,
+              "line": 1501,
+              "end_ms": 6453.0,
+              "duration_ms": 40.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 39.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 6454.0,
+              "line": 1503,
+              "end_ms": 6454.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 6497.0,
+              "line": 1522,
+              "end_ms": 6497.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 6481.0,
+              "line": 1515,
+              "end_ms": 9169.0,
+              "duration_ms": 2688.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2683.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 9192.0,
+              "line": 2808,
+              "end_ms": 9193.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 9169.0,
+              "line": 2789,
+              "end_ms": 9193.0,
+              "duration_ms": 24.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 24.0,
+              "poll_max_ms": 24.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 378.0,
+            "editable_ms": 378.0,
+            "session_ready_frame_ms": 73494.0,
+            "startup_handoff_frame_ms": 73494.0
+          },
+          "last_elapsed_ms": 73494.0,
+          "runtime": {
+            "async_workers": 2,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "runtime",
+              "start_ms": 65.0,
+              "end_ms": 72.0,
+              "duration_ms": 7.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 76.0,
+              "end_ms": 76.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 81.0,
+              "end_ms": 97.0,
+              "duration_ms": 16.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 97.0,
+              "end_ms": 97.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 97.0,
+              "end_ms": 97.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 97.0,
+              "end_ms": 347.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 97.0,
+              "end_ms": 347.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 356.0,
+              "end_ms": 377.0,
+              "duration_ms": 21.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 378.0,
+              "end_ms": 394.0,
+              "duration_ms": 16.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 394.0,
+              "end_ms": 421.0,
+              "duration_ms": 27.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 421.0,
+              "end_ms": 481.0,
+              "duration_ms": 60.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 487.0,
+              "end_ms": 540.0,
+              "duration_ms": 53.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 556.0,
+              "end_ms": 2283.0,
+              "duration_ms": 1727.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 2300.0,
+              "end_ms": 2764.0,
+              "duration_ms": 464.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 2764.0,
+              "end_ms": 5272.0,
+              "duration_ms": 2508.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 6481.0,
+              "end_ms": 9169.0,
+              "duration_ms": 2688.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 72.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 76.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 347.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 347.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 64301.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 2688.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 2508.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 1727.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 1209.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 464.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 60.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 53.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 27.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 22.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 21.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 16.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 16.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 16.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 8.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 7.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 6481.0,
+              "line": 1515,
+              "end_ms": 9169.0,
+              "duration_ms": 2688.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2683.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2781.0,
+              "line": 953,
+              "end_ms": 5272.0,
+              "duration_ms": 2491.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 2491.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 572.0,
+              "line": 471,
+              "end_ms": 2283.0,
+              "duration_ms": 1711.0,
+              "outcome": "complete",
+              "poll_n": 119,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 24.0,
+              "outside_poll_ms": 1671.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 5451.0,
+              "line": 1108,
+              "end_ms": 6396.0,
+              "duration_ms": 945.0,
+              "outcome": "complete",
+              "poll_n": 7,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 945.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ],
+      "ready_frame_ms": 73494,
+      "attach_to_ready_ms": 64301,
+      "fresh_boot": {
+        "start_offset": 30345737,
+        "end_offset": 30523595,
+        "window_bytes": 177858,
+        "window_sha256": "8ef081a55d2590c7cc510e76997ed0c31d660a77ab9d9f040e1e36684724c678",
+        "observed_epoch": 1793418890.3285944,
+        "events": [
+          {
+            "line": 77,
+            "event": "Entering TrueOS kernel"
+          },
+          {
+            "line": 197,
+            "event": "[global] [info] trueosfs-request-broker: online realm=bsp callers=background-service-lanes wait=parked-no-executor-poll"
+          },
+          {
+            "line": 222,
+            "event": "[global] [info] spawn-svc: started codex-progress-observer (mask=0x04000000)"
+          },
+          {
+            "line": 294,
+            "event": "[storage] [info] http-trueosfs: listening on tcp 80 owner=<hardware> dev=1 Realtek RTL8125 ip=192.168.178.94 mode=dhcp"
+          },
+          {
+            "line": 296,
+            "event": "[boot] [important] hid-udp: task polling at_ms=1141 readiness=0x2d05f700"
+          },
+          {
+            "line": 306,
+            "event": "[storage] [info] http-trueosfs: tcp listen opened and ready dev=1"
+          },
+          {
+            "line": 1117,
+            "event": "[storage] [info] http-trueosfs: perf bytes=296267 tsc_read=0 tsc_submit=257528 tsc_total=257528 cycles_per_byte=0"
+          }
+        ]
+      },
+      "first_flush_ms": 378,
+      "handoff_frame_ms": 73494,
+      "observations_at_or_before_first_ready": {
+        "runtime_until_ready": {
+          "foreground": {
+            "max_ready_ms": 1,
+            "max_slice_ms": 66
+          },
+          "tokio-pool": {
+            "max_ready_ms": 35221,
+            "max_slice_ms": 35274
+          },
+          "unclassified": {
+            "max_ready_ms": 66,
+            "max_slice_ms": 11
+          }
+        },
+        "active_abi_samples_until_ready": {
+          "alloc": 0,
+          "free": 0,
+          "wait": 45,
+          "none": 15
+        },
+        "coarse_allocator_receipts_before_ready": 2
+      },
+      "sanitized_source_receipts": {
+        "summary": {
+          "sha256": "0025e77aa5a9827fd30f273735fe1d2e0ba6d6f900180336c3d5b1d6513be0ef"
+        },
+        "report": {
+          "sha256": "95423fb2b9506e9342f15d85c51ca20823d7dd3833c0922517dba1ba8fafb13f"
+        },
+        "progress": {
+          "sha256": "4bfe51118eb427c88b47cc7499ee73aafaee6357e69737bad1ef334ed915a62f"
+        }
+      }
+    }
+  ],
+  "status": "Matched probe-ON and probe-OFF live trials completed with the same application archive and two async workers; substantial diagnostic-cost evidence, with a residual 64.301-second attachment-to-ready gap.",
+  "limits": [
+    "The original Oct30 kernel is not the matched baseline; causal comparison uses the separately built ON/OFF pair.",
+    "Both images use the same allocation algorithm and locks.",
+    "Kernel identity is publication+fresh-boot evidence; boot logs do not emit the kernel SHA.",
+    "Stripped kernels are checked through the exact compiled generated C ABI resolver and ABI declaration/lock identity, not an ELF symbol table.",
+    "One controlled pair is not a repeated benchmark.",
+    "One completed process per kernel setting, both after a fresh boot; not a statistical benchmark.",
+    "Both detailed heap tracing and allocation/free ABI breadcrumbs change together, so their individual costs are not separated.",
+    "Network/account/catalog behavior may vary between sequential trials.",
+    "Runtime maxima below use observer rows at or before first ready-frame, avoiding unequal post-ready windows.",
+    "Allocator coarse receipts may skip while the heap mutex is busy; missing rows do not mean no work.",
+    "First-flush and ready-frame are source markers; application clock starts after loading."
+  ],
+  "comparison": {
+    "kind": "allocation_probe_flags_on_vs_off_same_published_app",
+    "first_ready_difference_ms": 111228,
+    "attach_to_ready_difference_ms": 110375,
+    "trials": [
+      {
+        "mode": "on",
+        "first_flush_ms": 386.0,
+        "attach_done_ms": 10046.0,
+        "ready_frame_ms": 184722.0,
+        "handoff_frame_ms": 184723.0,
+        "attach_to_ready_ms": 174676.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "first_draft_echo_result": "TIMEOUT",
+        "runtime_until_ready": {
+          "tokio-pool": {
+            "max_ready_ms": 123209,
+            "max_slice_ms": 118478
+          },
+          "foreground": {
+            "max_ready_ms": 2,
+            "max_slice_ms": 100
+          },
+          "unclassified": {
+            "max_ready_ms": 90,
+            "max_slice_ms": 34
+          }
+        },
+        "active_abi_samples_until_ready": {
+          "alloc": 27,
+          "free": 0,
+          "wait": 110,
+          "none": 2
+        },
+        "coarse_allocator_receipts_before_ready": 6
+      },
+      {
+        "mode": "off",
+        "first_flush_ms": 378.0,
+        "attach_done_ms": 9193.0,
+        "ready_frame_ms": 73494.0,
+        "handoff_frame_ms": 73494.0,
+        "attach_to_ready_ms": 64301.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "first_draft_echo_result": "TIMEOUT",
+        "runtime_until_ready": {
+          "foreground": {
+            "max_ready_ms": 1,
+            "max_slice_ms": 66
+          },
+          "tokio-pool": {
+            "max_ready_ms": 35221,
+            "max_slice_ms": 35274
+          },
+          "unclassified": {
+            "max_ready_ms": 66,
+            "max_slice_ms": 11
+          }
+        },
+        "active_abi_samples_until_ready": {
+          "alloc": 0,
+          "free": 0,
+          "wait": 45,
+          "none": 15
+        },
+        "coarse_allocator_receipts_before_ready": 2
+      }
+    ],
+    "interpretation": "The completed matched pair is evidence that allocation diagnostics materially affect this workload. Both trials still failed the five-second no-input readiness and fifteen-second first draft echo checks; OFF retained a 64.301-second attachment-to-ready gap. This does not attribute CPU cost or isolate the individual diagnostic gates.",
+    "limits": [
+      "One completed process per kernel setting, both after a fresh boot; not a statistical benchmark.",
+      "Both detailed heap tracing and allocation/free ABI breadcrumbs change together, so their individual costs are not separated.",
+      "Network/account/catalog behavior may vary between sequential trials.",
+      "Runtime maxima below use observer rows at or before first ready-frame, avoiding unequal post-ready windows.",
+      "Allocator coarse receipts may skip while the heap mutex is busy; missing rows do not mean no work.",
+      "First-flush and ready-frame are source markers; application clock starts after loading."
+    ]
+  }
+}

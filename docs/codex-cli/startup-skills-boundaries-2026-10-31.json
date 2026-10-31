@@ -1,0 +1,537 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-31T05:37:45.582283+00:00",
+  "scope": "Initial forced skills/list RPC and host/local filesystem implementation; source audit during frozen app build. No auth/config file contents inspected. Caller supplies the default environment filesystem, so custom/remote ExecutorFileSystem implementations can have different I/O boundaries.",
+  "evidence_type": "source_only",
+  "validation": {
+    "source_files_hashed": 24,
+    "tests_run": false,
+    "builds_run": false,
+    "rig_access": false,
+    "repository_files_modified": false
+  },
+  "sources": [
+    {
+      "id": "catalog",
+      "path": "codex/codex-rs/app-server/src/request_processors/catalog_processor.rs",
+      "sha256": "dbf348e8185b86a4485d870c697321fbee6ced314554310a43241fb91ea5ff06",
+      "bytes": 28316,
+      "pointers": [
+        {
+          "line": 20,
+          "symbol": "SKILLS_LIST_CWD_CONCURRENCY / skills_to_info"
+        },
+        {
+          "line": 526,
+          "symbol": "skills_list_response"
+        }
+      ]
+    },
+    {
+      "id": "protocol",
+      "path": "codex/codex-rs/app-server-protocol/src/protocol/common.rs",
+      "sha256": "aa07c1ca0a8ff85419183ccf06c5cb595e7001f72da0859496c837732fab6a2b",
+      "bytes": 174233,
+      "pointers": [
+        {
+          "line": 894,
+          "symbol": "SkillsList global_shared_read(config)"
+        }
+      ]
+    },
+    {
+      "id": "request_dispatch",
+      "path": "codex/codex-rs/app-server/src/message_processor.rs",
+      "sha256": "1f719c1ac258574cf7b3de5ff5cd5d5171e2d1e445c2a79a66b8a0b89aa9dc13",
+      "bytes": 82777,
+      "pointers": [
+        {
+          "line": 1085,
+          "symbol": "request serialization scheduling"
+        },
+        {
+          "line": 1568,
+          "symbol": "SkillsList dispatch"
+        }
+      ]
+    },
+    {
+      "id": "client_refresh",
+      "path": "codex/codex-rs/tui/src/app/background_requests.rs",
+      "sha256": "a821bef10a6b6db10935da0fab9f5cae339ea028aba734fc3fc90c06ffb2196d",
+      "bytes": 64654,
+      "pointers": [
+        {
+          "line": 255,
+          "symbol": "refresh_startup_skills"
+        },
+        {
+          "line": 917,
+          "symbol": "fetch_skills_list / request_typed"
+        }
+      ]
+    },
+    {
+      "id": "config_manager",
+      "path": "codex/codex-rs/app-server/src/config_manager.rs",
+      "sha256": "1959382400b876dcc9a405419b8f79dc8ca103e6f6206d1fb4bb851013ef27a3",
+      "bytes": 24174,
+      "pointers": [
+        {
+          "line": 197,
+          "symbol": "load_latest_config"
+        },
+        {
+          "line": 463,
+          "symbol": "load_with_cli_overrides"
+        }
+      ]
+    },
+    {
+      "id": "config_builder",
+      "path": "codex/codex-rs/core/src/config/mod.rs",
+      "sha256": "62da30cdcb9397b6869be407c99fe9f2bcd3654998a9cec396ffa9a1cd9f6838",
+      "bytes": 210623,
+      "pointers": [
+        {
+          "line": 1542,
+          "symbol": "ConfigBuilder::build; boxed future is not worker handoff"
+        }
+      ]
+    },
+    {
+      "id": "skills_host",
+      "path": "codex/codex-rs/ext/skills/src/host_service.rs",
+      "sha256": "e8adc265017853cb5651fd44a4bdacf0e94f2ee67cece5e8e358dec56486ce2c",
+      "bytes": 17064,
+      "pointers": [
+        {
+          "line": 240,
+          "symbol": "snapshot_for_cwd_with_root_snapshots"
+        },
+        {
+          "line": 303,
+          "symbol": "snapshot_for_skill_roots"
+        },
+        {
+          "line": 351,
+          "symbol": "build_skill_outcome"
+        },
+        {
+          "line": 375,
+          "symbol": "clear_cache"
+        },
+        {
+          "line": 412,
+          "symbol": "ensure_system_skills_installed"
+        }
+      ]
+    },
+    {
+      "id": "bundled_skills",
+      "path": "codex/codex-rs/skills/src/lib.rs",
+      "sha256": "3ecde0354b968ebbe5c4a357c7e508ddab779b3f580cdbb398af34038b22b433",
+      "bytes": 7630,
+      "pointers": [
+        {
+          "line": 80,
+          "symbol": "install_system_skills"
+        },
+        {
+          "line": 113,
+          "symbol": "embedded_system_skills_fingerprint"
+        }
+      ]
+    },
+    {
+      "id": "skills_merge",
+      "path": "codex/codex-rs/ext/skills/src/loader/host_merge.rs",
+      "sha256": "be07e58e686b59722ed0858cd68382a3b74a5c979b56f18909b5789255bc417d",
+      "bytes": 10928,
+      "pointers": [
+        {
+          "line": 42,
+          "symbol": "load_and_merge_host_skill_roots_with_request_snapshots"
+        },
+        {
+          "line": 143,
+          "symbol": "buffer_unordered root fanout"
+        },
+        {
+          "line": 241,
+          "symbol": "sort_by_cached_key"
+        }
+      ]
+    },
+    {
+      "id": "skills_limits",
+      "path": "codex/codex-rs/ext/skills/src/loader/mod.rs",
+      "sha256": "a2922951b9e15bab05e41b3c541498b921e2e885179062d2ef1bdf53934c1c53",
+      "bytes": 963,
+      "pointers": [
+        {
+          "line": 18,
+          "symbol": "MAX_CONCURRENT_ROOT_SCANS=8"
+        }
+      ]
+    },
+    {
+      "id": "skills_discovery",
+      "path": "codex/codex-rs/ext/skills/src/loader/discovery.rs",
+      "sha256": "f54af2d63b532f6dfa1d72eaa5d12ff09fe4825e245c069a20ac40c253da686b",
+      "bytes": 6994,
+      "pointers": [
+        {
+          "line": 17,
+          "symbol": "MAX_SCAN_ENTRIES and MAX_CONCURRENT_SKILL_LOADS=64"
+        }
+      ]
+    },
+    {
+      "id": "skills_parse",
+      "path": "codex/codex-rs/ext/skills/src/loader/host.rs",
+      "sha256": "0c93bd8d435ec6bd6bb83a80c9dd9b57e04c302e35ff107329817b394d417c6c",
+      "bytes": 14801,
+      "pointers": [
+        {
+          "line": 130,
+          "symbol": "load_host_skill_root"
+        },
+        {
+          "line": 259,
+          "symbol": "bounded canonicalization"
+        },
+        {
+          "line": 309,
+          "symbol": "bounded file parsing"
+        },
+        {
+          "line": 345,
+          "symbol": "parse_skill_file"
+        }
+      ]
+    },
+    {
+      "id": "skills_metadata",
+      "path": "codex/codex-rs/ext/skills/src/loader/metadata.rs",
+      "sha256": "f1dd5419849cf843dcfde811856e9b712b649e83a892e70e25e0b7fd10c73c0c",
+      "bytes": 4054,
+      "pointers": [
+        {
+          "line": 26,
+          "symbol": "load_host_skill_metadata"
+        }
+      ]
+    },
+    {
+      "id": "plugins_manager",
+      "path": "codex/codex-rs/core-plugins/src/manager.rs",
+      "sha256": "e1bf876fce0fc9e72bdf39eb2b78580d9b0e4c9c8ed1e4dc13aa4fe94329fabe",
+      "bytes": 149405,
+      "pointers": [
+        {
+          "line": 725,
+          "symbol": "loaded_plugins_load_semaphore=1"
+        },
+        {
+          "line": 821,
+          "symbol": "plugins_for_config"
+        },
+        {
+          "line": 954,
+          "symbol": "clear_cache"
+        },
+        {
+          "line": 977,
+          "symbol": "clear_loaded_plugins_cache"
+        }
+      ]
+    },
+    {
+      "id": "plugins_loader",
+      "path": "codex/codex-rs/core-plugins/src/loader.rs",
+      "sha256": "2afacc1f37ff02749e9c8e4e50a77d81003737e429e4ec30eb014c44272e44eb",
+      "bytes": 69587,
+      "pointers": [
+        {
+          "line": 170,
+          "symbol": "load_plugins_from_layer_stack_with_scope"
+        },
+        {
+          "line": 194,
+          "symbol": "serial per-plugin await"
+        },
+        {
+          "line": 843,
+          "symbol": "load_plugin"
+        },
+        {
+          "line": 1064,
+          "symbol": "load_plugin_skill_inventory"
+        },
+        {
+          "line": 1277,
+          "symbol": "append_plugin_hook_file"
+        }
+      ]
+    },
+    {
+      "id": "manifest_cache",
+      "path": "codex/codex-rs/core-plugins/src/manifest/manifest_cache.rs",
+      "sha256": "eea101cc436324f793dbcc7d3ab292d4af099f5f7dc0469c9ec23e27bb78825d",
+      "bytes": 5781,
+      "pointers": [
+        {
+          "line": 59,
+          "symbol": "ManifestCache::load"
+        },
+        {
+          "line": 104,
+          "symbol": "ManifestCache::parse"
+        },
+        {
+          "line": 145,
+          "symbol": "ManifestCacheState::parse"
+        }
+      ]
+    },
+    {
+      "id": "plugin_versions",
+      "path": "codex/codex-rs/core-plugin-common/src/installed.rs",
+      "sha256": "ef7d8ec9cc65c61ca36c8772ed42badf79c589123e552991d4c53cab90ea708f",
+      "bytes": 3230,
+      "pointers": [
+        {
+          "line": 47,
+          "symbol": "active_plugin_version"
+        }
+      ]
+    },
+    {
+      "id": "manifest_discovery",
+      "path": "codex/codex-rs/utils/plugins/src/plugin_namespace.rs",
+      "sha256": "9e57acf9c08f0cab959d9719d572968385f3310679cf5f9191b1236f033f0753",
+      "bytes": 15839,
+      "pointers": [
+        {
+          "line": 43,
+          "symbol": "find_plugin_manifest_path"
+        }
+      ]
+    },
+    {
+      "id": "filesystem",
+      "path": "codex/codex-rs/exec-server/src/local_file_system.rs",
+      "sha256": "558f4ad9454c168690101e544963a6b8ee30c99abf6fcb3cde4810e8b05ee5e0",
+      "bytes": 54960,
+      "pointers": [
+        {
+          "line": 654,
+          "symbol": "DirectFileSystem canonicalize"
+        },
+        {
+          "line": 752,
+          "symbol": "TRUEOS metadata dispatch"
+        },
+        {
+          "line": 791,
+          "symbol": "TRUEOS read_directory dispatch"
+        },
+        {
+          "line": 819,
+          "symbol": "sync_walk"
+        },
+        {
+          "line": 1139,
+          "symbol": "spawn_blocking sync_walk"
+        }
+      ]
+    },
+    {
+      "id": "filesystem_read",
+      "path": "codex/codex-rs/exec-server/src/local_file_system_read.rs",
+      "sha256": "303681e613965ba3cfe4f0c429072059ee3f7361d140d87850b389d3454cd283",
+      "bytes": 2370,
+      "pointers": [
+        {
+          "line": 21,
+          "symbol": "spawn_blocking bounded cancellable read"
+        }
+      ]
+    },
+    {
+      "id": "typed_filesystem",
+      "path": "codex/codex-rs/exec-server/src/typed_file_system.rs",
+      "sha256": "8b3dc3f4f3e52b96457251fb39afc20f5b8aec865a48b28eed366dff2d71785c",
+      "bytes": 4154,
+      "pointers": [
+        {
+          "line": 74,
+          "symbol": "content_type native typed_metadata"
+        },
+        {
+          "line": 84,
+          "symbol": "read_directory native list_dir_typed"
+        }
+      ]
+    },
+    {
+      "id": "runtime",
+      "path": "codex/codex-rs/arg0/src/lib.rs",
+      "sha256": "2ed9ab3b8c6b364cd9c256178b41a98f7a72c0f9d5f31d021342084e2dbb92ce",
+      "bytes": 32232,
+      "pointers": [
+        {
+          "line": 296,
+          "symbol": "TRUEOS_MAX_BLOCKING_THREADS=8"
+        },
+        {
+          "line": 313,
+          "symbol": "builder.max_blocking_threads"
+        }
+      ]
+    },
+    {
+      "id": "native_tokio_fs",
+      "path": "TRUEOS-Buildins/vendor/tokio-1.54.1/src/fs/trueos.rs",
+      "sha256": "1ad0118b5ba4478dcdcf61ac9ea622e4595753ad37f4f6611c9fac17b4ba8609",
+      "bytes": 37731,
+      "pointers": [
+        {
+          "line": 269,
+          "symbol": "AsyncFsOperation::ready"
+        },
+        {
+          "line": 500,
+          "symbol": "stat_async"
+        },
+        {
+          "line": 1166,
+          "symbol": "canonicalize"
+        },
+        {
+          "line": 1178,
+          "symbol": "metadata"
+        }
+      ]
+    },
+    {
+      "id": "native_tokio_pool",
+      "path": "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/pool.rs",
+      "sha256": "d1bc7db7658d8f0118ccb76b878112cd1f8d01957da82578b4441b6cb41d26c6",
+      "bytes": 25439,
+      "pointers": [
+        {
+          "line": 508,
+          "symbol": "spawn_thread"
+        },
+        {
+          "line": 524,
+          "symbol": "ChildRoleGuard::tokio_pool"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "rpc_boundary",
+      "sources": [
+        "catalog",
+        "protocol",
+        "request_dispatch",
+        "client_refresh"
+      ],
+      "mechanics": "Background TUI task issues request_typed SkillsList(force_reload=true). App-server schedules the request separately under shared config serialization. Force clears plugin and skill caches synchronously before awaiting per-CWD reload. Each CWD awaits config, plugins, then skills; result conversion and final ordering are synchronous.",
+      "limits": "Shared serialization can wait behind an exclusive config writer. This audit does not measure such a wait."
+    },
+    {
+      "id": "bundled_check",
+      "sources": [
+        "skills_host",
+        "bundled_skills"
+      ],
+      "mechanics": "When bundled skills are enabled, snapshot resolution calls synchronous install_system_skills before async root resolution. Warm verification still builds and sorts embedded fingerprint items, hashes embedded file contents, and uses std filesystem marker checks. Marker mismatch performs synchronous filesystem rewrite.",
+      "limits": "Not measured; no assertion this is dominant. The embedded fingerprint is not memoized in this function."
+    },
+    {
+      "id": "plugin_cold_load",
+      "sources": [
+        "plugins_manager",
+        "plugins_loader",
+        "plugin_versions",
+        "manifest_discovery",
+        "manifest_cache"
+      ],
+      "mechanics": "Cold plugin loads are guarded by one async semaphore and process configured plugins sequentially. Version directory enumeration/sort, root checks, manifest discovery/read, SHA digest and JSON validation, and legacy hook reads/parsing have no spawn_blocking boundary in this path. Cacheable manifest parsing <=64KiB is serialized under a std Mutex; larger inputs parse outside that cache lock. Plugin skills use the host root loader; MCP/apps combine async I/O with inline parsing.",
+      "limits": "Plugin install/uninstall/materialization have separate spawn_blocking calls but do not wrap this forced read path. Remote installed plugins are taken from a snapshot here; no claim that this method itself performs a remote catalog fetch."
+    },
+    {
+      "id": "scan_parse_merge",
+      "sources": [
+        "skills_host",
+        "skills_merge",
+        "skills_limits",
+        "skills_discovery",
+        "skills_parse",
+        "skills_metadata",
+        "catalog"
+      ],
+      "mechanics": "Root and per-file fanout await I/O; frontmatter/metadata parsing, namespace qualification, deduplication, disabled-path resolution, catalog sorting, and response metadata cloning execute synchronously inside async request polls. Cache removal/eviction can also drop existing metadata inline.",
+      "limits": "buffered/join concurrency does not preempt ready synchronous work. File counts and durations were not sampled."
+    },
+    {
+      "id": "existing_blocking_boundaries",
+      "sources": [
+        "filesystem",
+        "filesystem_read",
+        "runtime",
+        "native_tokio_pool"
+      ],
+      "mechanics": "Directory walk runs sync_walk in spawn_blocking. Skill text read runs bounded, cancellation-aware synchronous I/O in spawn_blocking. TRUEOS cap is eight blocking workers; excess work queues. Native Tokio assigns pool-thread admission metadata to both scheduler cores and blocking jobs.",
+      "limits": "These are the host/local filesystem boundaries; the request can supply a different ExecutorFileSystem. This is an existing task/thread boundary, not proof of independent physical CPU/carrier isolation, nor evidence that the blocking pool is exhausted."
+    },
+    {
+      "id": "trueos_async_metadata",
+      "sources": [
+        "native_tokio_fs",
+        "typed_filesystem",
+        "filesystem"
+      ],
+      "mechanics": "TRUEOS Tokio canonicalize/metadata bypass ordinary-platform asyncify and use native async C ABI operations. AsyncFsOperation::ready checks status; pending calls poll_once, self-wakes, then returns Pending. Typed directory metadata/listing also uses native async VFS. Result decoding/path construction stays inline.",
+      "limits": "Self-wake can generate scheduling traffic, but this source audit does not quantify it or establish it as a stall cause."
+    }
+  ],
+  "bounds": {
+    "cwd_concurrency": 5,
+    "root_scan_concurrency": 8,
+    "per_root_skill_operation_concurrency": 64,
+    "blocking_workers_cap": 8,
+    "plugin_cold_load_permits": 1,
+    "meaning": "These are independent fanout/admission limits, not a count of physical CPU threads."
+  },
+  "probe_interpretation": {
+    "client_refresh_span": "tui.startup_skills_refresh wraps only the client request_typed future. Its wall duration includes request/response and server wait; its poll times measure client-side work/scheduling, NOT server handler CPU or blocking closure CPU.",
+    "foreground_event_span": "SkillsListLoaded AppEvent sample measures synchronous TUI application of returned metadata, separately from the server request.",
+    "server_subspan_requirement": "To distinguish server inline work, native-FS wait, and blocking queue/run delay, instrument bounded server-stage futures and/or blocking-job queue/run aggregates. No such additional probes were implemented by this audit.",
+    "correction": "Earlier chat suggestion that the client refresh poll timings directly cover server parsing/fingerprint work was incorrect; this record supersedes it."
+  },
+  "follow_up_if_new_live_run_still_lags": [
+    "First compare client refresh wall, post-handoff AppEvent/server sample identities, and actual draft echo timing; do not infer CPU from RPC wall wait.",
+    "For a remaining skills-correlated stall, add bounded server-stage spans around bundled verification, plugin cold load, host root loading, and final merge; include count-only cardinalities if needed, no paths or payloads.",
+    "Distinguish inline poll time from blocking queue/start/completion and native-FS progress before choosing CPU offload, fanout limits, or cache changes. Avoid moving the whole async request into spawn_blocking or raising worker counts without attribution."
+  ],
+  "not_established": [
+    "No measured CPU attribution",
+    "No measured lock contention",
+    "No measured blocking-pool exhaustion",
+    "No proof skills work caused FrameScheduler starvation",
+    "No live performance improvement claim",
+    "No source algorithm or scheduling change proposed as already validated"
+  ],
+  "audit_provenance": {
+    "input_sha256": "8e731af91673cb93f81ac25803b854dc07c720cb2447cebf0ccdc84cd362172f",
+    "path_normalization": "Absolute workspace paths replaced by repository-relative identifiers. Temporary artifact paths omitted; exact artifact hashes and sizes retained. Evidence links are relative to this documentation directory.",
+    "status": "Source-only historical audit; no implementation, new timing measurement, or validation of the pending package."
+  },
+  "source_path_basis": "Repository names relative to the workspace root; source hashes identify the audited content."
+}

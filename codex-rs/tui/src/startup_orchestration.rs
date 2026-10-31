@@ -153,8 +153,11 @@ pub(super) async fn run_main_inner(
         launch_loader_overrides.user_config_path = Some(user_config_path);
         launch_loader_overrides.user_config_profile = Some(profile_v2.clone());
     }
-    let embedded_network_policy =
-        codex_app_server_client::EmbeddedNetworkPolicy::load(&launch_loader_overrides).await;
+    let embedded_network_policy = codex_arg0::startup_timing::measure(
+        "tui.local_network_policy",
+        codex_app_server_client::EmbeddedNetworkPolicy::load(&launch_loader_overrides),
+    )
+    .await;
     let workload_identity_selected = is_workload_identity_selected();
 
     if !std::io::stdin().is_terminal() || !std::io::stdout().is_terminal() {
@@ -275,11 +278,14 @@ pub(super) async fn run_main_inner(
         std::env::var_os(codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR).as_deref(),
     )?;
     let prepared_environment_manager =
-        if should_load_configured_environments(&launch_loader_overrides, &presentation_target) {
-            EnvironmentManager::prepare_from_codex_home(&codex_home).await
-        } else {
-            EnvironmentManager::prepare_from_env().await
-        }
+        codex_arg0::startup_timing::measure("tui.environment_discovery", async {
+            if should_load_configured_environments(&launch_loader_overrides, &presentation_target) {
+                EnvironmentManager::prepare_from_codex_home(&codex_home).await
+            } else {
+                EnvironmentManager::prepare_from_env().await
+            }
+        })
+        .await
         .map_err(std::io::Error::other)?;
     if cli.shared.worktree
         && (presentation_target.uses_remote_workspace()
@@ -299,12 +305,15 @@ pub(super) async fn run_main_inner(
     let mut loader_overrides = launch_loader_overrides;
     loader_overrides.ignore_login_requirements = presentation_target.uses_remote_workspace();
     codex_arg0::startup_timing::mark("presentation_config_begin");
-    let presentation = startup_presentation::load(
-        &cli,
-        &codex_home,
-        loader_overrides.clone(),
-        cli_kv_overrides.clone(),
-        config_cwd,
+    let presentation = codex_arg0::startup_timing::measure(
+        "tui.presentation_config",
+        startup_presentation::load(
+            &cli,
+            &codex_home,
+            loader_overrides.clone(),
+            cli_kv_overrides.clone(),
+            config_cwd,
+        ),
     )
     .await
     .map_err(|err| {
@@ -324,11 +333,15 @@ pub(super) async fn run_main_inner(
     codex_arg0::startup_timing::mark("terminal_init_begin");
     // Keep normal terminal signals available until local configuration is ready. Once raw
     // mode begins, StartupDraft immediately takes ownership of input.
-    let (initialized_terminal, terminal_restore_guard) = tokio::task::spawn_blocking(|| {
-        tui::init().map(|terminal| (terminal, TerminalRestoreGuard::new()))
-    })
-    .await
-    .map_err(std::io::Error::other)??;
+    let (initialized_terminal, terminal_restore_guard) =
+        codex_arg0::startup_timing::measure("tui.terminal_init", async {
+            tokio::task::spawn_blocking(|| {
+                tui::init().map(|terminal| (terminal, TerminalRestoreGuard::new()))
+            })
+            .await
+        })
+        .await
+        .map_err(std::io::Error::other)??;
     codex_arg0::startup_timing::mark("terminal_init_done");
     // Snapshot the backend size sampled during init, before any viewport changes or resizes.
     let initial_terminal_size = initialized_terminal.terminal.last_known_screen_size;
@@ -348,13 +361,16 @@ pub(super) async fn run_main_inner(
         screen.transcript_mode.is_owned(),
         screen.use_alt_screen,
     );
-    let mut startup_draft = startup_draft::StartupDraft::new(
-        initialized_terminal,
-        terminal_restore_guard,
-        initial_screen,
-        session_action,
-        screen,
-    )?;
+    let mut startup_draft = codex_arg0::startup_timing::measure("tui.first_frame", async {
+        startup_draft::StartupDraft::new(
+            initialized_terminal,
+            terminal_restore_guard,
+            initial_screen,
+            session_action,
+            screen,
+        )
+    })
+    .await?;
 
     let implicit_connection = explicit_remote_endpoint.is_none();
     let default_daemon = if implicit_connection && reuse_implicit_local_daemon {
@@ -395,11 +411,14 @@ pub(super) async fn run_main_inner(
     codex_arg0::startup_timing::mark("screen_reader_done");
     codex_arg0::startup_timing::mark("cloud_config_begin");
     let cloud_config_bundle = startup_draft
-        .run_until(cloud_config_bundle_for_app_server_target(
-            &app_server_target,
-            &bootstrap_config,
-            &codex_home,
-            &embedded_network_policy,
+        .run_until(codex_arg0::startup_timing::measure(
+            "tui.cloud_config",
+            cloud_config_bundle_for_app_server_target(
+                &app_server_target,
+                &bootstrap_config,
+                &codex_home,
+                &embedded_network_policy,
+            ),
         ))
         .await??;
     let bootstrap_config_toml = &bootstrap_config.config_toml;
@@ -511,12 +530,15 @@ pub(super) async fn run_main_inner(
 
     codex_arg0::startup_timing::mark("full_config_begin");
     let mut config = startup_draft
-        .run_until(load_config_or_exit(
-            cli_kv_overrides.clone(),
-            overrides.clone(),
-            loader_overrides.clone(),
-            cloud_config_bundle.clone(),
-            strict_config,
+        .run_until(codex_arg0::startup_timing::measure(
+            "tui.full_config",
+            load_config_or_exit(
+                cli_kv_overrides.clone(),
+                overrides.clone(),
+                loader_overrides.clone(),
+                cloud_config_bundle.clone(),
+                strict_config,
+            ),
         ))
         .await?;
     codex_arg0::startup_timing::mark("full_config_done");
@@ -533,11 +555,14 @@ pub(super) async fn run_main_inner(
         cloud_config_bundle
     } else {
         startup_draft
-            .run_until(cloud_config_bundle_loader_for_storage(
-                embedded_network_policy.bind_bootstrap_auth(
-                    app_server_target.auth_config_for_cloud_loader(config.auth_config()),
+            .run_until(codex_arg0::startup_timing::measure(
+                "tui.cloud_auth_storage",
+                cloud_config_bundle_loader_for_storage(
+                    embedded_network_policy.bind_bootstrap_auth(
+                        app_server_target.auth_config_for_cloud_loader(config.auth_config()),
+                    ),
+                    /*enable_codex_api_key_env*/ false,
                 ),
-                /*enable_codex_api_key_env*/ false,
             ))
             .await??
     };
@@ -815,9 +840,9 @@ pub(super) async fn run_main_inner(
     let launch_telemetry = daemon_telemetry::Launch(Some(launch_telemetry));
     codex_arg0::startup_timing::mark("state_db_begin");
     let state_db = startup_draft
-        .run_until(init_state_db_for_app_server_target(
-            &config,
-            &app_server_target,
+        .run_until(codex_arg0::startup_timing::measure(
+            "tui.state_db",
+            init_state_db_for_app_server_target(&config, &app_server_target),
         ))
         .await??;
     codex_arg0::startup_timing::mark("state_db_done");

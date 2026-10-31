@@ -1325,6 +1325,179 @@ async fn known_thread_started_preserves_session_without_reading_unmaterialized_r
 }
 
 #[tokio::test]
+async fn startup_handoff_paints_queued_history_and_draft_once_without_input() -> Result<()> {
+    use crate::custom_terminal::test_support::last_rendered_buffer;
+
+    let (mut app, mut events, _ops) = make_test_app_with_channels().await;
+    let mut app_server = crate::start_embedded_app_server_for_picker(&app.config).await?;
+    let mut tui = crate::tui::test_support::make_test_tui()?;
+    tui.set_owned_screen(/*owned*/ true)?;
+    let mut pending_frame = true;
+    app.pending_startup_thread_start = true;
+    assert!(app.render_startup_frame(&mut tui, &events)?);
+    let loading = last_rendered_buffer(&tui.terminal).clone();
+
+    // No configured session is available to replace the provisional loading frame.
+    app.pending_startup_thread_start = false;
+    assert!(!app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(pending_frame);
+    assert_eq!(last_rendered_buffer(&tui.terminal), &loading);
+
+    app.pending_startup_thread_start = true;
+    app.enqueue_primary_thread_session(
+        test_thread_session(ThreadId::new(), app.config.cwd.to_path_buf()),
+        Vec::new(),
+    )
+    .await?;
+    while let Ok(event) = events.try_recv() {
+        Box::pin(app.handle_event(&mut tui, &mut app_server, event)).await?;
+    }
+
+    // Attachment history may be ready before the thread-start handoff finishes.
+    assert!(!app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(pending_frame);
+    assert_eq!(last_rendered_buffer(&tui.terminal), &loading);
+    app.pending_startup_thread_start = false;
+    app.app_event_tx.send(AppEvent::InsertHistoryCell(Box::new(
+        PlainHistoryCell::new(vec!["startup history delivered".into()]),
+    )));
+    assert!(!app.render_startup_frame(&mut tui, &events)?);
+    assert!(!app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(pending_frame);
+    assert_eq!(last_rendered_buffer(&tui.terminal), &loading);
+
+    let AppEvent::InsertHistoryCell(cell) = events.try_recv()? else {
+        panic!("expected the queued startup history cell");
+    };
+    app.insert_history_cell(&mut tui, cell);
+    let (mut startup_pane, _startup_events) = startup_bottom_pane();
+    startup_pane.set_composer_text("handoff draft".into(), Vec::new(), Vec::new());
+    let mut draft = Some(startup_pane.composer_draft_snapshot());
+    let mut submission = false;
+    app.chat_widget
+        .restore_startup_input_when_ready(&mut draft, &mut submission);
+    assert!(draft.is_none());
+
+    // The production handoff paints synchronously: neither input nor a frame timer is polled.
+    tokio::time::pause();
+    let now = tokio::time::Instant::now();
+    assert!(app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(!pending_frame);
+    let rendered = last_rendered_buffer(&tui.terminal).clone();
+    let text = rendered
+        .content()
+        .iter()
+        .map(ratatui::buffer::Cell::symbol)
+        .collect::<String>();
+    assert!(text.contains("startup history delivered"));
+    assert!(text.contains("handoff draft"));
+    app.chat_widget
+        .apply_external_edit("later draft waits for its normal frame".into());
+    assert!(!app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert_eq!(last_rendered_buffer(&tui.terminal), &rendered);
+    assert_eq!(tokio::time::Instant::now(), now);
+
+    tui.set_owned_screen(/*owned*/ false)?;
+    tokio::time::resume();
+    app_server.shutdown().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn startup_handoff_waits_for_queued_protected_requests() -> Result<()> {
+    let (mut app, mut events, _ops) = make_test_app_with_channels().await;
+    let mut app_server = crate::start_embedded_app_server_for_picker(&app.config).await?;
+    let mut tui = crate::tui::test_support::make_test_tui()?;
+    let thread_id = ThreadId::new();
+    app.enqueue_primary_thread_session(
+        test_thread_session(thread_id, app.config.cwd.to_path_buf()),
+        Vec::new(),
+    )
+    .await?;
+    while let Ok(event) = events.try_recv() {
+        Box::pin(app.handle_event(&mut tui, &mut app_server, event)).await?;
+    }
+    app.startup_protected_input_boundary = true;
+    app.pending_primary_events
+        .push_back(ThreadBufferedEvent::Request(Box::new(
+            exec_approval_request(thread_id, "turn-1", "call-1", /*approval_id*/ None),
+        )));
+    let mut pending_frame = true;
+    assert!(app.has_queued_startup_protected_request());
+    assert!(!app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(pending_frame);
+    assert!(!app.chat_widget.has_active_modal());
+    assert_eq!(app.pending_primary_events.len(), 1);
+
+    // A server resolution can remove a queued request before it becomes a visible modal.
+    app.pending_primary_events.clear();
+    assert!(app.render_pending_startup_handoff(&mut tui, &events, &mut pending_frame)?);
+    assert!(!pending_frame);
+    app_server.shutdown().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn initial_session_skills_coalesce_once_after_background_success_or_failure() {
+    for succeeded in [false, true] {
+        let mut app = make_test_app().await;
+        let cwd = app.config.cwd.to_path_buf();
+        app.startup_skills_refresh_cwd = Some(cwd.clone());
+        if succeeded {
+            app.handle_skills_list_result(
+                Ok(codex_app_server_protocol::SkillsListResponse { data: Vec::new() }),
+                "startup skills fixture",
+            );
+        } else {
+            app.handle_skills_list_result(
+                Err(color_eyre::eyre::eyre!("startup skills fixture error")),
+                "startup skills fixture",
+            );
+        }
+        assert!(
+            app.normalize_session_skills_refresh(AppEvent::RefreshSessionSkills {
+                cwd: cwd.clone()
+            })
+            .is_none()
+        );
+        assert!(app.startup_skills_refresh_cwd.is_none());
+        let later = app
+            .normalize_session_skills_refresh(AppEvent::RefreshSessionSkills { cwd: cwd.clone() });
+        assert!(matches!(later,
+            Some(AppEvent::CodexOp(AppCommand::ListSkills { cwds, force_reload: true }))
+                if cwds == vec![cwd]));
+    }
+}
+
+#[tokio::test]
+async fn initial_session_skills_keep_explicit_and_changed_directory_refreshes() {
+    let mut app = make_test_app().await;
+    let cwd = app.config.cwd.to_path_buf();
+    app.startup_skills_refresh_cwd = Some(cwd.clone());
+    let explicit = app.normalize_session_skills_refresh(AppEvent::CodexOp(
+        AppCommand::list_skills(vec![cwd.clone()], /*force_reload*/ true),
+    ));
+    assert!(matches!(
+        explicit,
+        Some(AppEvent::CodexOp(AppCommand::ListSkills { .. }))
+    ));
+    assert_eq!(app.startup_skills_refresh_cwd, Some(cwd.clone()));
+
+    let other_cwd = cwd.join("different-workspace");
+    let changed = app.normalize_session_skills_refresh(AppEvent::RefreshSessionSkills {
+        cwd: other_cwd.clone(),
+    });
+    assert!(matches!(changed,
+        Some(AppEvent::CodexOp(AppCommand::ListSkills { cwds, force_reload: true }))
+            if cwds == vec![other_cwd]));
+    assert!(app.startup_skills_refresh_cwd.is_none());
+    assert!(matches!(
+        app.normalize_session_skills_refresh(AppEvent::RefreshSessionSkills { cwd }),
+        Some(AppEvent::CodexOp(AppCommand::ListSkills { .. }))
+    ));
+}
+
+#[tokio::test]
 async fn startup_thread_started_submits_queued_startup_input() {
     let (mut app, _app_event_rx, mut op_rx) = make_test_app_with_channels().await;
     app.pending_startup_thread_start = true;

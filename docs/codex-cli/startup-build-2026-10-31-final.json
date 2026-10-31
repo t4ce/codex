@@ -1,0 +1,325 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-31T04:45:57.309478+00:00",
+  "result": "PASS",
+  "scope": "Final TRUEOS Codex startup instrumentation and policy build; artifact/publication evidence, with runtime comparisons recorded separately.",
+  "artifact": {
+    "blueprint": {
+      "sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+      "bytes": 76019144,
+      "flags": 3,
+      "entry": 4319078464
+    },
+    "blueprint_path": "TRUEOS-Blueprints/dist/codex.bp",
+    "elf": {
+      "sha256": "547df50ff49387c6385ec36f7bb465a63dc71f3e78920a53cab5f414c4e367ce",
+      "bytes": 219972736
+    },
+    "container": "TRBP version1, flags3, LZ4 frame containing one module.elf x86-64 relocatable object"
+  },
+  "workload_receipt": {
+    "path": "TRUEOS-Blueprints/dist/codex.workload.json",
+    "sha256": "024ed8b74422fa28fc25978a6e1624051516a0e5755a7a4fa78bfd1b67cca1a7",
+    "version": 1,
+    "artifact": {
+      "elf_sha256": "547df50ff49387c6385ec36f7bb465a63dc71f3e78920a53cab5f414c4e367ce",
+      "required_imports": [
+        "trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1"
+      ]
+    },
+    "packages": {
+      "codex-arg0": {
+        "version": "0.162.0",
+        "manifest": "codex/codex-rs/arg0/Cargo.toml"
+      },
+      "codex-cli": {
+        "version": "0.162.0",
+        "manifest": "codex/codex-rs/cli/Cargo.toml"
+      },
+      "tokio": {
+        "version": "1.54.1",
+        "manifest": "TRUEOS-Buildins/vendor/tokio-1.54.1/Cargo.toml"
+      }
+    },
+    "files_sha256": {
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/pool.rs": "d1bc7db7658d8f0118ccb76b878112cd1f8d01957da82578b4441b6cb41d26c6",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/task.rs": "abe6b4bc3026468b2446291ae338f255c719b4102ac0cd4cc7e06039a2d416eb",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/scheduler/multi_thread/worker.rs": "6b503efc98d1c779ec29bdef6822454629356be6c2be1b90bd928942fc26a8b0",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/trueos.rs": "83302b936cce85b094c3ebc28dde441f642cc88d3003d92bded8df63021a7ccc",
+      "codex/codex-rs/arg0/src/lib.rs": "9d2cceffe44b71d7c62b4df50596239f42d61eaceb7e520ec64d6c1a2e4fe949",
+      "codex/codex-rs/arg0/src/startup_timing.rs": "e11aa120586e9e9d7f391377a464ef11ba0128a39986a87e4665256033690193",
+      "codex/codex-rs/arg0/src/trueos_threads.rs": "787bcfcfe21743b329e4580beadb2d1be0d6e9adb8e65bdcf5b0f328604bd1a4",
+      "codex/codex-rs/cli/src/lib.rs": "bb416a9020678bbf0678fec197c4133606773862d85a1dd73cb2b4b6b8b0fd51",
+      "codex/codex-rs/cli/src/main.rs": "b67b043e605934df984a80c726e4d02428f11fa652a5c787a3e555fa78b059b2"
+    },
+    "all_nine_source_hashes_current": true
+  },
+  "mission_sources": {
+    "repository": "codex",
+    "repository_head": "de43fb8708be9bd27b1e989bf75bd4d43a396e26",
+    "files_sha256": {
+      "codex/codex-rs/app-server/Cargo.toml": "7f98d50c967188a744cda09b98007c17aa48308a568915240804395a9dce7043",
+      "codex/codex-rs/app-server/src/models_refresh_worker.rs": "5d664b74681eb112c4ee207c2caf36bd1e88d0df4caff2a830d2cda2d10b8764",
+      "codex/codex-rs/arg0/Cargo.toml": "ac9ad0871cf1eba68277be0915ed5a302f7a1409721590913ad98b443cbdf223",
+      "codex/codex-rs/arg0/src/lib.rs": "9d2cceffe44b71d7c62b4df50596239f42d61eaceb7e520ec64d6c1a2e4fe949",
+      "codex/codex-rs/arg0/src/startup_timing.rs": "e11aa120586e9e9d7f391377a464ef11ba0128a39986a87e4665256033690193",
+      "codex/codex-rs/arg0/src/trueos_threads.rs": "787bcfcfe21743b329e4580beadb2d1be0d6e9adb8e65bdcf5b0f328604bd1a4",
+      "codex/codex-rs/cli/src/main.rs": "b67b043e605934df984a80c726e4d02428f11fa652a5c787a3e555fa78b059b2",
+      "codex/codex-rs/core/Cargo.toml": "86bc0fdf7e5b97ffa983c3641f6149ebcad9e7d3fbfca5ee99b57d07038e8794",
+      "codex/codex-rs/core/src/session/mod.rs": "947feeb6d69ffe3cae6a7319bc49626af133c18d9263ed0908e7001ad358ce16",
+      "codex/codex-rs/core/src/session/session.rs": "35d70daf42342fb3e047f14020ccef738b99094c63e8a58911b8eef1f7cbde36",
+      "codex/codex-rs/core/src/session/startup_prewarm.rs": "82b5864509ca67d6790fb7d58846fa6f7e508559734ac00ed9d815a41f79560c",
+      "codex/codex-rs/core/src/session/startup_prewarm_policy.rs": "1a2c830e3422b13aed0342ecec1dcfa5852b9dda31a65aedf02d81e396c4e4f0",
+      "codex/codex-rs/startup-timing/Cargo.toml": "3391971e9449da53af0eac9c9de40262df3abda2d9dffa2f81215471fd5c7605",
+      "codex/codex-rs/startup-timing/src/lib.rs": "d0005e015630ca187cee9a93f672beda31e6b7cfae1e874c5dea42f3b4de8857",
+      "codex/codex-rs/tui/src/app/event_dispatch.rs": "b8961ee0b2989cb1b64d34fea76f264f0b7346341efec619d5d213ac57009291",
+      "codex/codex-rs/tui/src/app/session_lifecycle.rs": "2bda1eaf97e4f1a417a1bb4945b00adb6e7aa6fe0f1e2989ff51955d04b6d79c",
+      "codex/codex-rs/tui/src/app/startup.rs": "a603ed642c2c236a75eb18fb1382361e4a32785cfaba061ee358714520caf8a7",
+      "codex/codex-rs/tui/src/app/tests/startup.rs": "eb87e62daf5fef7549e51bf313863e657f91fa3ca503114cdf8322bcb7f3452a",
+      "codex/codex-rs/tui/src/app/thread_routing.rs": "477b312a366741a29f15c50ba5d54fa931e68c27a57a4c6c09ecb8a40a13bc08",
+      "codex/codex-rs/tui/src/app_server_session.rs": "f9a8e9b7f5b594c0b92175d7f1191b9d4f741690bbad0d1a69891f4797491edd",
+      "codex/codex-rs/tui/src/lib.rs": "53d81c63a94a5b7935fd9cc77524ebb4b544b68ea3dcc5d5f31fc7e6c800e5a6",
+      "codex/codex-rs/tui/src/startup_orchestration.rs": "1576c4cb03923d051532f02894d2251e39e3ba78bba437640ab84e2cff1c8ec3"
+    },
+    "all_22_source_hashes_current_and_in_success_stamp": true
+  },
+  "elf_verification": {
+    "required_hooks": {
+      "trueos_cabi_thread_swap_activity_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      },
+      "trueos_cabi_thread_configure_placement_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      },
+      "trueos_cabi_thread_swap_child_role_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      }
+    },
+    "required_hooks_are_strong_global_undefined": true,
+    "cabi_imports": [
+      "trueos_cabi_async_fs_checked_write_begin_v1",
+      "trueos_cabi_async_fs_create_dir_all_start",
+      "trueos_cabi_async_fs_discard",
+      "trueos_cabi_async_fs_list_dir_start",
+      "trueos_cabi_async_fs_metadata_start_v2",
+      "trueos_cabi_async_fs_read_start",
+      "trueos_cabi_async_fs_remove_start",
+      "trueos_cabi_async_fs_rename_start",
+      "trueos_cabi_async_fs_result_len",
+      "trueos_cabi_async_fs_result_read",
+      "trueos_cabi_async_fs_status",
+      "trueos_cabi_async_fs_typed_list_dir_start",
+      "trueos_cabi_async_fs_typed_stat_start",
+      "trueos_cabi_async_fs_write_begin",
+      "trueos_cabi_async_fs_write_chunk",
+      "trueos_cabi_async_fs_write_commit",
+      "trueos_cabi_blueprint_child_read_v1",
+      "trueos_cabi_blueprint_child_send_v1",
+      "trueos_cabi_blueprint_child_spawn_program_v1",
+      "trueos_cabi_blueprint_child_status_v1",
+      "trueos_cabi_blueprint_child_terminate_v1",
+      "trueos_cabi_blueprint_launch_script_v1",
+      "trueos_cabi_blueprint_shutdown",
+      "trueos_cabi_blueprint_terminal_lease_current_v1",
+      "trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+      "trueos_cabi_calculator_evaluate",
+      "trueos_cabi_dns_resolve_ipv4",
+      "trueos_cabi_dobby_ui4_focus",
+      "trueos_cabi_dobby_ui4_key",
+      "trueos_cabi_dobby_ui4_observe_metadata",
+      "trueos_cabi_dobby_ui4_observe_prepare",
+      "trueos_cabi_dobby_ui4_observe_read",
+      "trueos_cabi_dobby_ui4_pointer",
+      "trueos_cabi_dobby_ui4_type",
+      "trueos_cabi_dobby_ui4_windows",
+      "trueos_cabi_env_var",
+      "trueos_cabi_log",
+      "trueos_cabi_poll_once",
+      "trueos_cabi_shell3_session_control_v1",
+      "trueos_cabi_shell3_session_open_v1",
+      "trueos_cabi_shell3_session_read_v1",
+      "trueos_cabi_shell3_session_write_v1",
+      "trueos_cabi_sleep_ms",
+      "trueos_cabi_spirit_agents_publish_v1",
+      "trueos_cabi_spirit_emotion_play",
+      "trueos_cabi_spirit_move",
+      "trueos_cabi_thread_available_parallelism",
+      "trueos_cabi_thread_configure_placement_v1",
+      "trueos_cabi_thread_current_id",
+      "trueos_cabi_thread_detach",
+      "trueos_cabi_thread_join",
+      "trueos_cabi_thread_set_name",
+      "trueos_cabi_thread_spawn",
+      "trueos_cabi_thread_swap_activity_v1",
+      "trueos_cabi_thread_swap_child_role_v1",
+      "trueos_cabi_write"
+    ],
+    "cabi_import_count": 56,
+    "kernel_resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+    "all_imports_in_typed_generated_kernel_resolver": true,
+    "compiled_markers": {
+      "TRUEOS_CODEX_STARTUP_PREWARM": true,
+      "core_startup_websocket_selected": true,
+      "core_startup_websocket_deferred": true,
+      "core_startup_prewarm_override_invalid": true,
+      "core.startup_websocket_prewarm": true,
+      "app_server.initial_model_refresh": true,
+      "runtime_workers_configured async_workers=": true,
+      "startup_handoff_frame_rendered": true,
+      "session_prompt_ready": true,
+      "startup_handoff_state change=": true,
+      "startup_app_event sample=": true,
+      "startup_server_event sample=": true,
+      "tui.startup_app_event": true,
+      "tui.startup_server_event": true,
+      "tui.startup_backend_fallback": true,
+      "tui.startup_handoff_frame": true,
+      "TRUEOS_STARTUP_REQUEST": true,
+      "poll_n=": true,
+      "poll_total_ms=": true,
+      "poll_max_ms=": true,
+      "timing_span_budget_exhausted": true
+    },
+    "compiled_marker_count": 21,
+    "cabi_signature_guard": {
+      "imports": 56,
+      "blueprint_contract_sha256": "7b45c952246148c9158a2c67d493370966ea6825941f75e411480252196dd661",
+      "kernel_contract_sha256": "7b45c952246148c9158a2c67d493370966ea6825941f75e411480252196dd661",
+      "complete_kernel_contract_sha256": "14ba897959d6b21a5fd1d5057087f004889d767b67c23bbe998b9ffbed84cc51",
+      "compatible": true
+    },
+    "kernel_reference": {
+      "elf_sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf",
+      "archive_sha256": "0e4cf9d6689421b9a1d935df3553f1d500f23818301edbf6724385bac58dd9ce",
+      "allocation_detail_probe_enabled": false,
+      "allocation_abi_probe_enabled": false
+    }
+  },
+  "postpublication_cache": {
+    "fresh": true,
+    "stamp": "codex/codex-rs/cli/target/trueos-blueprint/build-cache/codex.json",
+    "stamp_sha256": "07dcd9cf2d5644d549f9012f5b4a411e35b0dc1b40f583a1d8a12baa42806d1e",
+    "key_hash": "1e0f8c840f915d7b3ee6325976bf255e8797555df252003bc12a182f7844547f",
+    "environment_hash": "13ffd44a1e9b1c1a3e1b2c55451843142b5624ffd1abf13db443a5590d81ad6e",
+    "input_digest": "886ebc3190efb1563d31563c6864105e77b59649290654ea49d34bd434e77ac5",
+    "current_input_digest": "886ebc3190efb1563d31563c6864105e77b59649290654ea49d34bd434e77ac5",
+    "snapshot_stable": true,
+    "watched_roots": 24820,
+    "watched_entries": 88384,
+    "first_changed_paths": [],
+    "outputs": [
+      {
+        "path": "TRUEOS-Blueprints/dist/codex.bp",
+        "sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+        "matches_recorded": true,
+        "bytes": 76019144
+      },
+      {
+        "path": "TRUEOS-Blueprints/dist/codex.workload.json",
+        "sha256": "024ed8b74422fa28fc25978a6e1624051516a0e5755a7a4fa78bfd1b67cca1a7",
+        "matches_recorded": true,
+        "bytes": 2237
+      }
+    ]
+  },
+  "cache_coverage_exclusions": {
+    "TRUEOS/src/allcaps.rs": {
+      "covering_roots": [],
+      "exact_input_record": false
+    },
+    "TRUEOS/src/allocators.rs": {
+      "covering_roots": [],
+      "exact_input_record": false
+    },
+    "TRUEOS/tools/codex_startup_report.py": {
+      "covering_roots": [],
+      "exact_input_record": false
+    }
+  },
+  "compiler_configuration": {
+    "cargo_profile": "release",
+    "profile_settings": {
+      "opt-level": 3,
+      "lto": "fat",
+      "codegen-units": 1,
+      "incremental": false,
+      "panic": "abort",
+      "strip": "none"
+    },
+    "profile_manifest": "codex/codex-rs/cli/Cargo.toml",
+    "profile_manifest_sha256": "73784163844286b10cca466f9837aa88c5e5f5e4191a976e11070f1299984784",
+    "profile_manifest_identical_to_repository_HEAD": true,
+    "staged_profile_matches_original": true,
+    "compiler_optimization_settings_changed_for_this_mission": false,
+    "artifact_target": "x86_64-unknown-trueos",
+    "target_spec": "TRUEOS-Blueprints/apps/target.json",
+    "target_spec_sha256": "c124f4048fb623f2180a61568efeb08ba818c35981c667aff33a1d280f8ae87b",
+    "cache_key_hash": "1e0f8c840f915d7b3ee6325976bf255e8797555df252003bc12a182f7844547f",
+    "environment_hash": "13ffd44a1e9b1c1a3e1b2c55451843142b5624ffd1abf13db443a5590d81ad6e",
+    "explicit_nonsecret_build_environment": {
+      "TRUEOS_BUILD_SCOPE": "1",
+      "CARGO_BUILD_JOBS": "1",
+      "RAYON_NUM_THREADS": "1"
+    }
+  },
+  "build_resources": {
+    "initial_cpu": 16,
+    "later_cpu": 4,
+    "transition_verified_all_observed_threads": true,
+    "observed_thread_affinity_counts": {
+      "4": 13
+    },
+    "cpu_quota_percent": 100,
+    "nice": 15,
+    "memory_max_bytes": 15032385536,
+    "memory_swap_max_bytes": 0,
+    "cargo_jobs": 1,
+    "rayon_threads": 1,
+    "resource_transition_changed_compiler_flags_or_environment": false,
+    "resource_transition_is_host_build_allocation_not_TRUEOS_runtime_change": true,
+    "cargo_release_clock": {
+      "display": "49m 40s",
+      "elapsed_seconds": 2980
+    }
+  },
+  "publication": {
+    "command": "cargo bp codex-cli",
+    "working_directory": "TRUEOS-Blueprints",
+    "skip_publish_control_unset": true,
+    "normal_cache_hit": true,
+    "rust_artifact_codegen_repeated": false,
+    "cache_stamp_unchanged_across_publication": true,
+    "receipt_unchanged_across_publication": true,
+    "log_sha256": "a6b807d4fc4a2240b8fa19624d35f03a02962a3bca0182f74fac32a056d08d60",
+    "proof_lines": [
+      "trueos-blueprint: Codex workload verified: placement, child roles, execution activity; blueprint_sha256=f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+      "trueos-blueprint: up to date: TRUEOS-Blueprints/dist/codex.bp",
+      "trueos-blueprint: published codex.bp\u00a7\u00a7f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247"
+    ],
+    "remote_verification": {
+      "source": "independent_gio_cat_of_smb_artifact",
+      "observed_utc": "2026-10-31T04:43:23.097407+00:00",
+      "artifact_name": "codex.bp\u00a7\u00a7f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+      "sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+      "bytes": 76019144,
+      "matches_audited_local_artifact": true,
+      "only_codex_version": true
+    }
+  },
+  "provenance": {
+    "pack_log_sha256": "3e6e919d9199000b8f57bd66320cb475b83727b23fa97469a297f45598f13f97",
+    "published_artifact_receipt_sha256": "85556d99af79a16272e890d54567393b8a8af5d2fb3768b6a8d2eb4d76269acf",
+    "postpublication_audit_sha256": "ea7190dfb39b82c8d0aacc1af946b0c973bcd1a6e2ffc07a62f68ce995ebb240",
+    "postpublication_preflight_sha256": "1a4b3674304719fcfd8a7546b3e781fb80ab4f580db5144ec81646c06d593684"
+  },
+  "limits": [
+    "Compiled marker presence and artifact identity do not establish a runtime performance gain.",
+    "Kernel ELF symbols are stripped; C ABI coverage uses the exact compiled generated resolver and signature guard.",
+    "No raw build environment, credentials, provider configuration, prompts, SQL or captured terminal payload is included."
+  ]
+}

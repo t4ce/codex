@@ -2130,6 +2130,7 @@ dependencies = [
  "codex-shell-command",
  "codex-skills",
  "codex-skills-extension",
+ "codex-startup-timing",
  "codex-state",
  "codex-thread-store",
  "codex-tools",
@@ -2369,6 +2370,7 @@ dependencies = [
  "codex-install-context",
  "codex-linux-sandbox",
  "codex-sandboxing",
+ "codex-startup-timing",
  "codex-utils-cargo-bin",
  "codex-utils-paths",
  "codex-utils-pty",
@@ -2978,6 +2980,7 @@ dependencies = [
  "codex-shell-command",
  "codex-skills",
  "codex-skills-extension",
+ "codex-startup-timing",
  "codex-state",
  "codex-terminal-detection",
  "codex-test-binary-support",
@@ -4467,6 +4470,7 @@ dependencies = [
  "codex-otel",
  "codex-protocol",
  "codex-state",
+ "codex-startup-timing",
  "codex-utils-output-truncation",
  "codex-utils-paths",
  "codex-utils-process",
@@ -4624,6 +4628,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "codex-startup-timing"
+version = "0.162.0"
+
+[[package]]
 name = "codex-state"
 version = "0.162.0"
 dependencies = [
@@ -4633,6 +4641,7 @@ dependencies = [
  "codex-git-utils",
  "codex-history",
  "codex-protocol",
+ "codex-startup-timing",
  "codex-utils-paths",
  "file-id",
  "libsqlite3-sys",

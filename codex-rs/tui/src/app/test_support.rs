@@ -111,6 +111,7 @@ pub(crate) async fn make_test_app() -> Box<App> {
         dynamic_tool_status_updates: tokio::sync::broadcast::channel(/*capacity*/ 64).0,
         dynamic_tool_tasks: HashMap::new(),
         pending_startup_thread_start: false,
+        startup_skills_refresh_cwd: None,
         pending_server_version_notice: None,
         pending_open_resume_picker: false,
         pending_working_directory_change: None,

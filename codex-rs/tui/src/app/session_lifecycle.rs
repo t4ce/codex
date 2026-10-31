@@ -946,7 +946,11 @@ impl App {
                 let recovery_was_pending = self.chat_widget.hold_rate_limit_recovery();
                 self.enqueue_primary_thread_session(started.session, started.turns)
                     .await?;
-                self.apply_backend_banner_fallback(app_server).await;
+                codex_arg0::startup_timing::measure(
+                    "tui.startup_backend_fallback",
+                    self.apply_backend_banner_fallback(app_server),
+                )
+                .await;
                 if let Some(notice) = self.pending_server_version_notice.take() {
                     self.chat_widget.add_server_version_warning(notice);
                 }

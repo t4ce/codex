@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "kind": "source_only_single_launch_loader_candidates",
+  "status": "read_only_no_implementation_or_new_measurement",
+  "source_root": "TRUEOS",
+  "checked_source_sha256": {
+    "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+    "src/hv/blueprint/prebind.rs": "b87d59449f0db7da915dac680c1349f76ac5395b302d0f4e41eac2997e0d7672",
+    "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+    "src/hv/mod.rs": "0f640c89396938d4e6f6b35275f235bc62ab1a27545a85b133f502134f945fc9",
+    "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+    "src/hv/matrix.rs": "4270436cc8329e62ff29cb059608f178eac06a2808ae5caadaef4eafcfeadf8c",
+    "src/r/tar.rs": "c841f45dfb15838dfbb7e5653089f7e2bdd298aad1f4a7a6d884d3914b37eda9",
+    "src/r/lz4.rs": "7f3e14a75d8f9d3fa71f10ed4003b40383cf9716183d9df209866aa144efa2e2",
+    "src/cpu_task_pool.rs": "ecc2ded118d4d677c4ca764265d53271e288e3821f91dca8f1089c2538a1b994",
+    "src/r/codec.rs": "aeb08f0b2df7bd65a015af751f9af8f2e088770d531ac469e287137f98ea4804",
+    "src/gpu/app_shaders.rs": "02f6de3fc64ac0e29b825e7bbfb49963e97ac9a9372f6269e7d1201ce535d355",
+    "src/workers.rs": "411fc0f64645b91865bd0193c0e64b2a0bf42496246ccedb5f22280ef96b732e"
+  },
+  "all_checked_sources_equal_isolated_cdff_build_source": true,
+  "existing_measurement_evidence": {
+    "path": "startup-prewarm-2026-10-31-live.json",
+    "sha256": "4c9bb038438459d7cb801625d3bdddf4bdc4b31a5cc18c5a32d040d9eb35fa35",
+    "artifact_sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+    "phase_durations_ms": [
+      {
+        "prebind": 3735.0,
+        "matrix_reserve": 93.0,
+        "launch_queue": 0.0,
+        "readiness": 0.0,
+        "admission_lock": 0.0,
+        "vm_admission": 8.0,
+        "ap_queue": 0.0,
+        "ap_unpack": 0.0,
+        "ap_inspect": 4.0,
+        "ap_arenas": 4.0,
+        "ap_assets": 0.0,
+        "ap_files": 0.0,
+        "stage_env": 162.0,
+        "ap_prepare": 170.0,
+        "vm_boot": 17.0,
+        "guest_fs_root": 0.0,
+        "guest_fs_common": 0.0,
+        "guest_env": 92.0,
+        "elf_load": 1429.0,
+        "guest_entry": 2.0
+      },
+      {
+        "prebind": 3868.0,
+        "matrix_reserve": 92.0,
+        "launch_queue": 0.0,
+        "readiness": 0.0,
+        "admission_lock": 0.0,
+        "vm_admission": 8.0,
+        "ap_queue": 0.0,
+        "ap_unpack": 0.0,
+        "ap_inspect": 4.0,
+        "ap_arenas": 4.0,
+        "ap_assets": 0.0,
+        "ap_files": 45.0,
+        "stage_env": 160.0,
+        "ap_prepare": 214.0,
+        "vm_boot": 16.0,
+        "guest_fs_root": 0.0,
+        "guest_fs_common": 2.0,
+        "guest_env": 92.0,
+        "elf_load": 1438.0,
+        "guest_entry": 2.0
+      }
+    ]
+  },
+  "metadata_inspection": {
+    "prior_immutable_blueprint": {
+      "sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247",
+      "bytes": 76019144,
+      "artifact_role": "prior_immutable_blueprint"
+    },
+    "prior_immutable_elf": {
+      "sha256": "547df50ff49387c6385ec36f7bb465a63dc71f3e78920a53cab5f414c4e367ce",
+      "bytes": 219972736,
+      "artifact_role": "prior_immutable_elf"
+    },
+    "elf": {
+      "section_count": 15,
+      "symbol_count": 33958,
+      "alloc_relocations": 3047601,
+      "unique_relocation_symbols": 33497,
+      "relocation_type_counts": {
+        "2": 1230006,
+        "4": 1654443,
+        "9": 17,
+        "42": 435,
+        "1": 162700
+      },
+      "most_reused_symbol_reference_counts": [
+        1592800,
+        350970,
+        309541,
+        272233,
+        102824
+      ],
+      "alloc_section_bytes": 145103857,
+      "progbits_alloc_bytes": 145093345,
+      "sections": [
+        {
+          "name": "",
+          "bytes": 0,
+          "alloc": false
+        },
+        {
+          "name": ".text",
+          "bytes": 132198817,
+          "alloc": true
+        },
+        {
+          "name": ".rodata",
+          "bytes": 10020480,
+          "alloc": true
+        },
+        {
+          "name": ".data.rel.ro",
+          "bytes": 2635488,
+          "alloc": true
+        },
+        {
+          "name": ".data",
+          "bytes": 238560,
+          "alloc": true
+        },
+        {
+          "name": ".bss",
+          "bytes": 10512,
+          "alloc": true
+        },
+        {
+          "name": ".rela.text",
+          "bytes": 59568192,
+          "alloc": false
+        },
+        {
+          "name": ".rela.rodata",
+          "bytes": 9669432,
+          "alloc": false
+        },
+        {
+          "name": ".rela.data.rel.ro",
+          "bytes": 3780528,
+          "alloc": false
+        },
+        {
+          "name": ".rela.data",
+          "bytes": 124272,
+          "alloc": false
+        },
+        {
+          "name": ".comment",
+          "bytes": 91,
+          "alloc": false
+        },
+        {
+          "name": ".note.GNU-stack",
+          "bytes": 0,
+          "alloc": false
+        },
+        {
+          "name": ".symtab",
+          "bytes": 814992,
+          "alloc": false
+        },
+        {
+          "name": ".shstrtab",
+          "bytes": 110,
+          "alloc": false
+        },
+        {
+          "name": ".strtab",
+          "bytes": 917063,
+          "alloc": false
+        }
+      ]
+    },
+    "lz4_frame": {
+      "decoded_tar_bytes": 219974656,
+      "elf_bytes": 219972736,
+      "blocks": 53,
+      "independent": true,
+      "max_block_bytes": 4194304,
+      "content_checksum": true,
+      "block_checksum": false
+    },
+    "no_decompression_or_benchmark_performed": true,
+    "current_in_progress_dist_not_inspected": true
+  },
+  "already_reused": {
+    "unpacked_payload": "launcher.rs61/159 moves prebind Vec into pending state; hv/mod.rs3054 selects Some(bytes), so ap_unpack is0ms in existing runs. stage_blueprint_launch uses unpacked state rather than decoding again.",
+    "current_cpu_decoder": "src/r/lz4.rs181 preallocates known content size and193 decodes directly into final output; no per-block temporary decompressed Vec.",
+    "cheap_repeated_scans": "ELF has15 sections; existing ap_inspect4ms includes type/import/shader/stat scans. Missing shader/asset sections are absent in this artifact; skipping these is low expected payoff."
+  },
+  "ranked_candidates": [
+    {
+      "rank": 1,
+      "name": "Memoize symbol decoding and resolved addresses within load_rel_image",
+      "sources": [
+        "src/hv/blueprint/blueprint.rs529",
+        "src/hv/blueprint/blueprint.rs560",
+        "src/hv/blueprint/blueprint.rs755",
+        "src/hv/blueprint/blueprint.rs990"
+      ],
+      "concrete_work": "3047601 final relocation applications repeat read_symbol/UTF8 name decoding/address validation for33497 unique symbols; the PC import discovery pass additionally decodes symbols for2884449 PC32/PLT32 relocations.",
+      "approach": "Loader-local bounded parsed-symbol cache during discovery and lazy resolved-address cache after section bases are fixed; never reuse across launches/VMs. Vec<Option<usize>> for33958 slots is543328B. Cache legitimate address0; retain per-write bounds/addend/range checks.",
+      "risk": "Low to moderate; preserve first-reference error behavior, undefined strong/weak handling, absolute/section values, special/unresolved stub resolution and ownership.",
+      "verification_needed": [
+        "Bounded spans around discovery, symbol resolution, zero/copy and relocation apply with totals only.",
+        "Compare relocated byte image/main address to current implementation for valid fixtures; malformed symbol/relocation bounds, weak0, unsupported imports/types, PC32 overflow.",
+        "Same artifact/kernel matched A/B; no speedup number claimed from metadata."
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "Combine GOT and PC-import discovery into one relocation traversal",
+      "sources": [
+        "src/hv/blueprint/blueprint.rs720",
+        "src/hv/blueprint/blueprint.rs738",
+        "src/hv/blueprint/blueprint.rs827",
+        "src/hv/blueprint/blueprint.rs954"
+      ],
+      "concrete_work": "Current code traverses all alloc relocations three times: GOT collection, PC import collection, final apply. Combining the firsttwo removes one3047601-entry traversal without retaining millions of relocation objects.",
+      "approach": "One collector builds both existing bounded-by-symbol sets/maps; reuse symbol cache. Keep validate_alloc_relocations header/slice checks684 (cheap table validation, not a fourth full relocation walk).",
+      "risk": "Low to moderate; retain unsupported/implicit-addend checks and deterministic map order; avoid a new per-relocation allocation.",
+      "verification_needed": [
+        "Count collector input relocations and unique GOT/import outputs; compare old/new collections.",
+        "Measure collector span and final output under same artifact; preserve error rejection before executable mapping."
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "Reuse the exact packed archive digest within one launch",
+      "sources": [
+        "src/hv/matrix.rs45",
+        "src/hv/blueprint/blueprint.rs1647",
+        "src/hv/blueprint/blueprint.rs1694",
+        "src/hv/mod.rs3305",
+        "src/hv/guest_run.rs387"
+      ],
+      "concrete_work": "Same immutable76019144B archive hashed for Matrix receipt and again in host and guest build_process_env. Existing Matrix phase92-93ms and guest_env92ms are consistent with material scan cost but are not isolated SHA timing.",
+      "approach": "Carry a digest computed from the owned launch bytes through a sealed prepared state; format it for TRUEOS_APP_SHA256. Recompute once for legacy restore/fallback, never consult mutable AppDB by archive name.",
+      "risk": "Low; snapshot/generation and old-artifact replacement identity must remain exact. Expected savings bounded by existing relevant phases, not seconds.",
+      "verification_needed": [
+        "Add one bounded hash span/counter; confirm one full archive hash per normal launch.",
+        "Receipt and kernel-owned env digest must equal independent SHA of the exact launch bytes after AppDB replacement, named instance, child launch, and restore."
+      ]
+    },
+    {
+      "rank": 4,
+      "name": "Avoid the second full ELF buffer during single tar-member extraction",
+      "sources": [
+        "src/r/tar.rs250",
+        "src/r/tar.rs257",
+        "src/r/tar.rs259",
+        "src/r/tar.rs260",
+        "src/hv/blueprint/blueprint.rs1822"
+      ],
+      "concrete_work": "LZ4 outputs219974656B TAR, then generic unpack data.to_vec duplicates219972736B ELF before TAR drops; transient extra209.78MiB and full copy. This occurs within measured3.735-3.868s prebind but its own elapsed time is unknown.",
+      "approach": "Specialized owned single-member view retaining the decoded TAR allocation plus validated member range removes that copy. A simple safe copy_within+truncate path only removes allocation/peak overlap, retaining one copy. Streaming directly into ELF is a larger follow-up.",
+      "risk": "Moderate structural ownership change: pending/guest clone/checkpoint paths expect Vec containing exact ELF. Preserve PAX/checksum/trailing-zero/exactly-one/limits checks and ensure byte views omit container headers. Do not change generic unpack semantics.",
+      "verification_needed": [
+        "First split prebind decode, checksum, tar validation/copy and import scan timings.",
+        "Record peak live decode bytes/allocation counts.",
+        "Canonical/PAX paths, raw/dependent LZ4, arbitrary short blocks, bad checksum/trailing data/multiple members/size cap and checkpoint view behavior."
+      ]
+    },
+    {
+      "rank": 5,
+      "name": "Offload synchronous prebind from caller to existing bounded CPU work service",
+      "sources": [
+        "src/hv/launcher.rs56",
+        "src/hv/launcher.rs61",
+        "src/hv/launcher.rs64",
+        "src/hv/launcher.rs111",
+        "src/cpu_task_pool.rs116",
+        "src/r/codec.rs13"
+      ],
+      "concrete_work": "enqueue performs full prebind synchronously before even selecting/spawning its background launch task. Whether this stalls the UI depends on the actual caller CPU/executor, which existing markers do not identify.",
+      "approach": "Keep cheap header/size admission synchronous; execute owned unpack/import preparation via CpuTaskPool::run or equivalent existing bounded compute lane before readiness/guest execution. This targets interaction responsiveness; it does not itself reduce CPU time.",
+      "risk": "Moderate: early error timing/native terminal handoff/cancellation/target discard and allocation-domain ownership must be preserved. CpuTaskPool already has bounded cap, AP lease and direct waker; spawning another async future alone does not move CPU work.",
+      "verification_needed": [
+        "Capture prebind CPU slot/task domain and UI event/paint latency during download-to-launch.",
+        "Cancellation/full-pool/no-eligible-worker/failure observer and exact Matrix lifetime cleanup.",
+        "Only after measurement consider independent LZ4 block fanout;53 independent4MiB blocks make it possible, but arbitrary short/dependent frames and memory bound/checksum join require explicit handling."
+      ]
+    }
+  ],
+  "secondary_not_first_changes": [
+    {
+      "name": "Image zero then overwrite",
+      "source": "src/hv/blueprint/blueprint.rs897-924",
+      "detail": "Entire >=145103857B image is zeroed before145093345B PROGBITS is copied over it. Selective initialization can avoid overwriting already-copied bytes, but all padding/NOBITS/other alloc types and synthetic tables must stay initialized; measure bandwidth first."
+    },
+    {
+      "name": "Eager launch-state copies",
+      "source": "src/hv/mod.rs3281-3288",
+      "detail": "Child template clones76MB archive, then state.clone copies another76MB packed+220MB unpacked into guest ownership. Potential deferred/shared immutable host metadata is larger ownership/lifecycle work, not a safe deletion: host teardown and ManuallyDrop guest view must remain valid."
+    }
+  ],
+  "measurement_guard": "Do not add Instant calls in generic early-boot CPU decoder: src/r/lz4.rs178-180 warns clock initialization maps ACPI/HPET before DMA. Restrict probes to existing postboot launch Trace or optional supplied observer. Never log every relocation/block; bounded aggregate counts/spans only.",
+  "scope_limits": [
+    "No persistent executable images, compiler options, source edits, test execution, build, kernel operation, rig connection or publication.",
+    "Metadata counts are prior immutable f9 artifact matching existing prewarm evidence, not the in-progress skills artifact.",
+    "All performance improvements remain hypotheses until isolated subspans and matched live A/B."
+  ],
+  "audit_provenance": {
+    "input_sha256": "6cc8029f355145d98edec9a7414bfed96b7dad8c12b356c37d707541aca650fa",
+    "path_normalization": "Absolute workspace paths replaced by repository-relative identifiers. Temporary artifact paths omitted; exact artifact hashes and sizes retained. Evidence links are relative to this documentation directory.",
+    "status": "Source-only historical audit; no implementation, new timing measurement, or validation of the pending package."
+  }
+}

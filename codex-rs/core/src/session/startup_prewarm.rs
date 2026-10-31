@@ -3,6 +3,8 @@
 //! turn consumes it; shutdown and turn cancellation use the same handoff.
 
 use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
@@ -22,6 +24,8 @@ use crate::responses_metadata::CodexResponsesRequestKind;
 use crate::session::INITIAL_SUBMIT_ID;
 use crate::session::RequestEffortUsage;
 use crate::session::session::Session;
+use crate::session::startup_prewarm_policy::PrewarmSchedule;
+use crate::session::startup_prewarm_policy::STARTUP_PREWARM_ENV;
 use crate::session::turn::build_prompt;
 use codex_features::Feature;
 use codex_otel::STARTUP_PREWARM_AGE_AT_FIRST_TURN_METRIC;
@@ -206,7 +210,28 @@ impl SessionStartupPrewarmHandle {
 }
 
 impl Session {
+    /// Initial setup can defer full turn/tool preparation without changing first-turn transport.
+    pub(crate) async fn schedule_initial_prewarm(self: &Arc<Self>, input: PrewarmInput) {
+        let value = if cfg!(target_os = "trueos") {
+            std::env::var_os(STARTUP_PREWARM_ENV)
+        } else {
+            None
+        };
+        let schedule = PrewarmSchedule::initial(cfg!(target_os = "trueos"), value.as_deref())
+            .unwrap_or_else(|_| {
+                codex_startup_timing::mark("core_startup_prewarm_override_invalid");
+                warn!("invalid CDX_STARTUP_PREWARM; expected 0 or 1; startup WebSocket prewarm deferred");
+                PrewarmSchedule::Initial { websocket: false }
+            });
+        self.schedule_prewarm(input, schedule).await;
+    }
+
     pub(crate) async fn schedule_startup_prewarm(self: &Arc<Self>, input: PrewarmInput) {
+        self.schedule_prewarm(input, PrewarmSchedule::Explicit)
+            .await;
+    }
+
+    async fn schedule_prewarm(self: &Arc<Self>, input: PrewarmInput, schedule: PrewarmSchedule) {
         let websocket_connect_timeout = self.provider().await.websocket_connect_timeout();
         let mut state = self.state.lock().await;
         if state.shutting_down {
@@ -241,7 +266,17 @@ impl Session {
             });
         }
 
-        if !self.services.model_client.responses_websocket_enabled() {
+        let websocket_enabled = self.services.model_client.responses_websocket_enabled();
+        if schedule.is_initial() {
+            codex_startup_timing::mark(if !websocket_enabled {
+                "core_startup_websocket_unavailable"
+            } else if schedule.websocket_enabled(websocket_enabled) {
+                "core_startup_websocket_selected"
+            } else {
+                "core_startup_websocket_deferred"
+            });
+        }
+        if !schedule.websocket_enabled(websocket_enabled) {
             // Without websocket prewarm, resolve auth once so Agent Identity bootstrap can
             // register or engage this session's bearer fallback before the first user request.
             let model_client = self.services.model_client.clone();
@@ -256,21 +291,39 @@ impl Session {
         let session_telemetry = self.services.session_telemetry.clone();
         let started_at = Instant::now();
         let startup_prewarm_session = Arc::clone(self);
+        let measure_startup = schedule.is_initial();
         let startup_prewarm = tokio::spawn(
             async move {
-                let result = schedule_startup_prewarm_inner(startup_prewarm_session, input).await;
-                let status = if result.is_ok() { "ready" } else { "failed" };
-                session_telemetry.record_startup_phase(
-                    "startup_prewarm_total",
-                    started_at.elapsed(),
-                    Some(status),
-                );
-                session_telemetry.record_duration(
-                    STARTUP_PREWARM_DURATION_METRIC,
-                    started_at.elapsed(),
-                    &[("status", status), ("input", input.as_str())],
-                );
-                result
+                let prewarm = async move {
+                    // Erase the large MCP/OAuth preparation future before adding telemetry
+                    // and measurement wrappers, keeping Send checking local to this boundary.
+                    let preparation: Pin<
+                        Box<dyn Future<Output = CodexResult<ModelClientSession>> + Send>,
+                    > = Box::pin(schedule_startup_prewarm_inner(
+                        startup_prewarm_session,
+                        input,
+                    ));
+                    let result = preparation.await;
+                    let status = if result.is_ok() { "ready" } else { "failed" };
+                    session_telemetry.record_startup_phase(
+                        "startup_prewarm_total",
+                        started_at.elapsed(),
+                        Some(status),
+                    );
+                    session_telemetry.record_duration(
+                        STARTUP_PREWARM_DURATION_METRIC,
+                        started_at.elapsed(),
+                        &[("status", status), ("input", input.as_str())],
+                    );
+                    result
+                };
+                if measure_startup {
+                    // This future owns context, tool/router and prompt construction as well
+                    // as the connection warmup. Its polls expose synchronous preparation.
+                    codex_startup_timing::measure("core.startup_websocket_prewarm", prewarm).await
+                } else {
+                    prewarm.await
+                }
             }
             .instrument(trace_span!(
                 "startup_prewarm",

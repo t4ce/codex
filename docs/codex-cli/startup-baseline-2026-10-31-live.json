@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-31",
+  "kind": "live_pre_fix_application_startup",
+  "archive_sha256": "2797ba5fdbe601f56b0cca47621863a7e8e2a06d91865b88ce1eba6f11c3c286",
+  "kernel_sha256": null,
+  "host_launch_probes_observed": false,
+  "configured_placement": {
+    "mode": 1,
+    "background_cap": 2
+  },
+  "async_workers_observed": 1,
+  "runs": [
+    {
+      "scenario": "fresh_process_cold_sqlite",
+      "capture": {
+        "capture_path": "/home/t4ce/Repositories/TRUEOS/bld/baremetal-logs/trueos-baremetal.2.log",
+        "offset": 21794574,
+        "started_epoch": 1793412620.0644443,
+        "end_offset": 22543130,
+        "window_bytes": 748556,
+        "window_sha256": "4e0138ac82308b05d49964614e8dc14feb287014fb6a9703b8cc4a164b3e1b51",
+        "observed_epoch": 1793412803.1570692
+      },
+      "editable_ms": 137,
+      "thread_attach_done_ms": 12111,
+      "session_ready_frame_ms": 52237,
+      "attach_to_ready_ms": 40126,
+      "spans_ms": {
+        "tui.state_db": 2181,
+        "tui.app_server": 3490,
+        "tui.account_status": 938,
+        "tui.hooks_catalog": 1261,
+        "tui.thread_start": 3406,
+        "tui.thread_attach": 36,
+        "backfill.gate": 18
+      },
+      "largest_startup_poll_ms": 36,
+      "notes": [
+        "Ready frame followed harmless paste/clear experiment; no prompt was submitted."
+      ]
+    },
+    {
+      "scenario": "fresh_process_warm_sqlite_controlled_input",
+      "capture": {
+        "capture_start_offset": 23437361,
+        "capture_end_offset": 24022200,
+        "window_bytes": 584839,
+        "window_sha256": "05f90690ff290d63296dd0066cf8b9122e75da3df32e4a0f74c6f042c5606767",
+        "observed_epoch": 1793413507.5488033
+      },
+      "editable_ms": 203,
+      "thread_attach_done_ms": 11004,
+      "session_ready_frame_ms": 31349,
+      "attach_to_ready_ms": 20345,
+      "no_input_host_seconds_after_observed_attach": 5,
+      "ready_observed_during_no_input_window": false,
+      "initial_paste_echo_timed_out": true
+    },
+    {
+      "scenario": "fresh_process_warm_sqlite_two_worker_control",
+      "async_workers_observed": 2,
+      "capture": {
+        "start_offset": 24702543,
+        "end_offset": 25155332,
+        "bytes": 452789,
+        "sha256": "378695704f3186af87eca27ec14ec7f4bee2b0a998d2c28dbf260ab8e317869d",
+        "observed_epoch": 1793415544.2094526
+      },
+      "editable_ms": 393,
+      "thread_attach_done_ms": 12539.0,
+      "session_ready_frame_ms": null,
+      "no_input_host_seconds_after_observed_attach": 5.0,
+      "ready_observed_during_no_input_window": false,
+      "initial_paste_echo_timed_out": true,
+      "paste_echo_timeout_seconds": 15,
+      "observed_async_boundary_ages_ms": [
+        41046,
+        28627
+      ],
+      "notes": [
+        "Same pre-fix artifact with temporary TOKIO_WORKER_THREADS=2; original absent dotenv restored.",
+        "Two distinct async-scheduler jobs observed; no ready marker in the measured capture window. The owned VM was subsequently stopped.",
+        "Unchanged guest-enter sequences and advancing ABI counters show long continuations, not measured CPU consumption or proof of a fixed deadlock."
+      ]
+    }
+  ],
+  "settled_ssh_draft_echo": {
+    "kind": "ssh_bracketed_paste_to_draft_echo",
+    "slot": "code",
+    "archive_sha256": "2797ba5fdbe601f56b0cca47621863a7e8e2a06d91865b88ce1eba6f11c3c286",
+    "samples_ms": [
+      30.882,
+      39.825,
+      29.713,
+      28.586,
+      39.737
+    ],
+    "turns_submitted": 0,
+    "limits": [
+      "Includes SSH transport and terminal output delivery, not physical presentation or CPU time.",
+      "Retained initialized session, not startup latency."
+    ],
+    "median_ms": 30.882,
+    "max_ms": 39.825,
+    "success": true
+  },
+  "limits": [
+    "Three pre-fix observations, including a controlled two-worker trial; not a before/after speedup comparison.",
+    "Application clocks start after loading and are not aligned with host observation timestamps.",
+    "Host loader/request records are absent; Hull/native PID correlation is ambiguous.",
+    "Ready-frame marker is a presentation proxy, not proof every submission guard is open.",
+    "Scheduler continuations and allocator counters are not CPU attribution."
+  ]
+}

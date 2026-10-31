@@ -32,6 +32,9 @@ impl App {
         app_server: &mut AppServerSession,
         event: AppEvent,
     ) -> Result<AppRunControl> {
+        let Some(event) = self.normalize_session_skills_refresh(event) else {
+            return Ok(AppRunControl::Continue);
+        };
         let from_agents_overview = matches!(event, AppEvent::ForkAgentsOverviewThreadReady { .. });
         let event = if let AppEvent::ForkAgentsOverviewThreadReady { thread_id } = event {
             if self.current_displayed_thread_id() != Some(thread_id)
@@ -163,6 +166,9 @@ impl App {
             event => (event, None),
         };
         match event {
+            AppEvent::RefreshSessionSkills { .. } => {
+                unreachable!("session skills refresh was normalized before dispatch")
+            }
             AppEvent::OpenDaemonMenu => self.open_daemon_menu(),
             AppEvent::ConfirmDaemonRestart => self.confirm_daemon_restart(),
             AppEvent::RunDaemonRestart => {
@@ -326,8 +332,18 @@ impl App {
                 }
             }
             AppEvent::StartupThreadStarted { result } => {
-                self.handle_startup_thread_started(app_server, result)
-                    .await?;
+                codex_arg0::startup_timing::mark("thread_start_event_received");
+                let result = codex_arg0::startup_timing::measure(
+                    "tui.thread_attach",
+                    self.handle_startup_thread_started(app_server, result),
+                )
+                .await;
+                codex_arg0::startup_timing::mark(if result.is_ok() {
+                    "thread_attach_done"
+                } else {
+                    "thread_attach_failed"
+                });
+                result?;
             }
             AppEvent::DynamicToolThreadStarted {
                 thread,

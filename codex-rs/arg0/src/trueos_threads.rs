@@ -13,8 +13,12 @@ use std::path::PathBuf;
 
 const PLACEMENT_ENV: &str = "CODEX_TRUEOS_THREAD_PLACEMENT";
 const BACKGROUND_CAP_ENV: &str = "CODEX_TRUEOS_BACKGROUND_CARRIERS";
+const ASYNC_WORKERS_ENV: &str = "TOKIO_WORKER_THREADS";
 const PROFILE_FILENAME: &str = "trueos-threads.conf";
 const MAX_PROFILE_BYTES: usize = 128;
+
+#[cfg(target_os = "trueos")]
+static SELECTED_PLACEMENT: std::sync::OnceLock<PlacementConfig> = std::sync::OnceLock::new();
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u32)]
@@ -31,6 +35,30 @@ struct PlacementConfig {
 }
 
 impl PlacementConfig {
+    /// Carrier admission and Tokio worker count must describe the same launch.
+    /// Keep the baseline worker until a larger pool is explicitly requested.
+    /// Placement bounds the experiment; extra carriers alone do not establish
+    /// that concurrent allocation-heavy startup work benefits from more workers.
+    fn async_workers(self, requested: Option<&str>) -> io::Result<usize> {
+        let limit = match self.placement {
+            Placement::Single => 1,
+            Placement::Isolated | Placement::Spread => self.background_cap as usize,
+        };
+        match requested {
+            None => Ok(1),
+            Some(value) => value
+                .parse::<usize>()
+                .ok()
+                .filter(|workers| (1..=limit).contains(workers))
+                .ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        format!("{ASYNC_WORKERS_ENV} must be an integer from 1 to {limit} for the selected TRUEOS placement"),
+                    )
+                }),
+        }
+    }
+
     fn parse(placement: Option<&str>, background_cap: Option<&str>) -> io::Result<Self> {
         let placement = match placement {
             None | Some("single") => Placement::Single,
@@ -140,18 +168,19 @@ unsafe extern "C" {
 }
 
 #[cfg(target_os = "trueos")]
-pub(crate) fn configure_from_env() -> io::Result<()> {
-    fn setting(name: &str) -> io::Result<Option<String>> {
-        match std::env::var(name) {
-            Ok(value) => Ok(Some(value)),
-            Err(std::env::VarError::NotPresent) => Ok(None),
-            Err(std::env::VarError::NotUnicode(_)) => Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                format!("{name} must contain a UTF-8 value"),
-            )),
-        }
+fn setting(name: &str) -> io::Result<Option<String>> {
+    match std::env::var(name) {
+        Ok(value) => Ok(Some(value)),
+        Err(std::env::VarError::NotPresent) => Ok(None),
+        Err(std::env::VarError::NotUnicode(_)) => Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            format!("{name} must contain a UTF-8 value"),
+        )),
     }
+}
 
+#[cfg(target_os = "trueos")]
+pub(crate) fn configure_from_env() -> io::Result<()> {
     let placement = setting(PLACEMENT_ENV)?;
     let background_cap = setting(BACKGROUND_CAP_ENV)?;
     let (config, explicitly_configured) =
@@ -175,6 +204,9 @@ pub(crate) fn configure_from_env() -> io::Result<()> {
             io::Error::from_raw_os_error(result)
         )));
     }
+    SELECTED_PLACEMENT
+        .set(config)
+        .map_err(|_| io::Error::other("TRUEOS thread placement was already selected"))?;
     tracing::info!(
         target: "codex_startup",
         placement = ?config.placement,
@@ -186,6 +218,17 @@ pub(crate) fn configure_from_env() -> io::Result<()> {
         config.placement as u32, config.background_cap
     ));
     Ok(())
+}
+
+/// Resolve workers after dotenv loading, using the successfully admitted
+/// placement snapshot rather than reopening a profile that can have changed.
+#[cfg(target_os = "trueos")]
+pub(crate) fn runtime_worker_count() -> io::Result<usize> {
+    let selected = SELECTED_PLACEMENT
+        .get()
+        .copied()
+        .unwrap_or(PlacementConfig::parse(None, None)?);
+    selected.async_workers(setting(ASYNC_WORKERS_ENV)?.as_deref())
 }
 
 #[cfg(target_os = "trueos")]
@@ -269,6 +312,55 @@ mod tests {
                 background_cap: 2,
             }
         );
+    }
+
+    #[test]
+    fn async_workers_default_to_one_and_experiments_respect_placement() {
+        for cap in 1..=4 {
+            for mode in ["single", "isolated", "spread"] {
+                let config = PlacementConfig::parse(Some(mode), Some(&cap.to_string())).unwrap();
+                let expected = if mode == "single" { 1 } else { cap as usize };
+                assert_eq!(config.async_workers(None).unwrap(), 1);
+                for workers in 1..=expected {
+                    assert_eq!(
+                        config.async_workers(Some(&workers.to_string())).unwrap(),
+                        workers
+                    );
+                }
+                assert!(
+                    config
+                        .async_workers(Some(&(expected + 1).to_string()))
+                        .is_err()
+                );
+            }
+        }
+        assert_eq!(
+            PlacementConfig::parse(None, None)
+                .unwrap()
+                .async_workers(None)
+                .unwrap(),
+            1
+        );
+    }
+
+    #[test]
+    fn async_worker_overrides_reject_unbounded_or_invalid_values() {
+        let config = PlacementConfig::parse(Some("isolated"), Some("4")).unwrap();
+        for value in [
+            "",
+            "0",
+            "5",
+            "-1",
+            "many",
+            "1.5",
+            " 2",
+            "2 ",
+            "18446744073709551616",
+        ] {
+            let error = config.async_workers(Some(value)).unwrap_err();
+            assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+            assert!(error.to_string().contains(ASYNC_WORKERS_ENV));
+        }
     }
 
     #[test]

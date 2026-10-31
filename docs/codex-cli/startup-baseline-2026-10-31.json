@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-31",
+  "kind": "existing_legacy_collector_observation",
+  "capture_bytes_read": 21438989,
+  "capture_sha256": "81d2844b7f56c32c1e37e56a59f5e0158673687282856e3a88f29347fc7e1363",
+  "archive_sha256": null,
+  "kernel_sha256": null,
+  "configured_placement": {
+    "mode": 1,
+    "background_cap": 2
+  },
+  "application_endpoints_ms": {
+    "first_flush_ms": 377.0,
+    "editable_ms": 378.0,
+    "session_ready_frame_ms": 73585.0
+  },
+  "application_intervals_ms": {
+    "runtime": 3.0,
+    "motion": 0.0,
+    "presentation_config": 58.0,
+    "terminal_checks": 0.0,
+    "terminal_modes": 0.0,
+    "terminal_queries": 53.0,
+    "terminal_init": 53.0,
+    "first_frame_render": 2.0,
+    "screen_reader": 0.0,
+    "cloud_config": 13.0,
+    "full_config": 70.0,
+    "cloud_auth_storage": 16.0,
+    "state_db": 5640.0,
+    "app_server": 3680.0,
+    "account_status": 1724.0,
+    "thread_start": 14114.0
+  },
+  "largest_milestone_gaps": [
+    {
+      "after": "thread_start_done",
+      "before": "session_prompt_ready",
+      "duration_ms": 40316.0
+    },
+    {
+      "after": "thread_start_begin",
+      "before": "thread_start_done",
+      "duration_ms": 14114.0
+    },
+    {
+      "after": "account_status_done",
+      "before": "thread_start_begin",
+      "duration_ms": 7619.0
+    }
+  ],
+  "limits": [
+    "One captured sequence; not a controlled before/after comparison.",
+    "Application timing origin is after loading; no post-download total is established.",
+    "Legacy records lack request/image identity; PID-only correlation is ambiguous.",
+    "Ready-frame marker is a drawing proxy, not proof every submission guard is open.",
+    "Gaps may contain waiting, protected interaction or delayed drawing; no CPU attribution.",
+    "Completed backend flush is not client physical presentation time."
+  ]
+}

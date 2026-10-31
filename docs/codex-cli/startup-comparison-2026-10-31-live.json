@@ -1,0 +1,3258 @@
+{
+  "schema": 1,
+  "audit_date": "2026-10-31",
+  "kind": "live_startup_comparison_no_speedup_established",
+  "baseline_archive_sha256": "2797ba5fdbe601f56b0cca47621863a7e8e2a06d91865b88ce1eba6f11c3c286",
+  "tested_archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+  "tested_elf_sha256": "90807c58d03fe722f83dbd0b55fca12c6eb787acc98c441842576d2fdaa85a5e",
+  "package_checks": {
+    "fresh_workload_sources": 9,
+    "required_strong_kernel_hooks": 3,
+    "embedded_markers_verified": true,
+    "published_copy_stream_hash_verified": true,
+    "normal_cargo_bp_cache_hit_publish_passed": true
+  },
+  "host_build": {
+    "command": "cargo bp codex-cli",
+    "compiler_profile_unchanged": true,
+    "scope_memory_max_bytes": 15032385536,
+    "scope_memory_peak_bytes": 14437048320,
+    "full_pack_exit_code": 0,
+    "publish_exit_code": 0
+  },
+  "placement": {
+    "mode": "isolated",
+    "background_cap": 2
+  },
+  "trials": [
+    {
+      "name": "fixed-workers1",
+      "capture": {
+        "start_offset": 25466254,
+        "end_offset": 26036183,
+        "bytes": 569929,
+        "sha256": "7c0d173311ec63dd6ec8091f7310ed69549cb9a6b413b3a8975111ed84110a6f",
+        "observed_epoch": 1793416308.0029862
+      },
+      "contexts": [
+        {
+          "app_gen": 1,
+          "instance": "7ec97dac-d01e-4a2e-881e-0e9c9580b011",
+          "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "fixed-workers1",
+        "capture_start_offset": 25466254,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 5.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 13401.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "success": false,
+        "error_type": "TIMEOUT",
+        "capture_end_offset": 25816571
+      },
+      "runtime_workers": [
+        {
+          "line": 270,
+          "elapsed_ms": 70.0,
+          "async_workers": 1,
+          "blocking_cap": 8
+        }
+      ],
+      "milestones": [
+        {
+          "line": 2088,
+          "name": "thread_attach_done",
+          "elapsed_ms": 13401.0
+        },
+        {
+          "line": 3151,
+          "name": "session_prompt_ready",
+          "elapsed_ms": 51985.0
+        },
+        {
+          "line": 3152,
+          "name": "startup_handoff_frame_rendered",
+          "elapsed_ms": 51986.0
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 9,
+          "sampled_rows": 56,
+          "roles": {
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 1,
+              "max_slice_ms": 103,
+              "max_observed_boundary_age_ms": 16101
+            },
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483656,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662,
+                2147483669,
+                2147483670,
+                2147483672,
+                2147483673,
+                2147483674,
+                2147483676,
+                2147483678,
+                2147483680,
+                2147483681,
+                2147483682,
+                2147483683,
+                2147483684
+              ],
+              "carriers": [
+                3,
+                11
+              ],
+              "async_scheduler_job_ids": [
+                2147483650
+              ],
+              "max_ready_ms": 4905,
+              "max_slice_ms": 9729,
+              "max_observed_boundary_age_ms": 10361
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483652,
+                2147483653,
+                2147483655
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 83,
+              "max_slice_ms": 4,
+              "max_observed_boundary_age_ms": 27616
+            }
+          }
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000
+          ],
+          "context": {
+            "app_gen": 1,
+            "instance": "7ec97dac-d01e-4a2e-881e-0e9c9580b011",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 10.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 10.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 14.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 14.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 16.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 56.0,
+              "delta_ms": 40.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 67.0,
+              "delta_ms": 11.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 67.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 67.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 70.0,
+              "delta_ms": 3.0
+            }
+          ],
+          "spans": [],
+          "endpoints": {},
+          "last_elapsed_ms": 70.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 10.0,
+              "end_ms": 14.0,
+              "duration_ms": 4.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 16.0,
+              "end_ms": 56.0,
+              "duration_ms": 40.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 14.0,
+              "end_ms": 67.0,
+              "duration_ms": 53.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 67.0,
+              "end_ms": 70.0,
+              "duration_ms": 3.0
+            }
+          ],
+          "open_milestone_intervals": [],
+          "milestone_gaps": [
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 40.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 11.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [],
+          "long_polls": []
+        },
+        {
+          "pid": 1,
+          "pids": [
+            1
+          ],
+          "context": {},
+          "milestones": [
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 70.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 70.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 70.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 73.0,
+              "delta_ms": 3.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 73.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 80.0,
+              "delta_ms": 7.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 80.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 80.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 80.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 85.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 111.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 111.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 111.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 111.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 111.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 112.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 112.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 112.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 362.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 362.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 362.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 362.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 362.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 362.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 363.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 375.0,
+              "delta_ms": 12.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 397.0,
+              "delta_ms": 22.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 399.0,
+              "delta_ms": 2.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 399.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 399.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 448.0,
+              "delta_ms": 49.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 448.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 475.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 475.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 513.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 523.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 577.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 595.0,
+              "delta_ms": 18.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 1915.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 1932.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 5456.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 5456.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 6380.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 8790.0,
+              "delta_ms": 107.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 13386.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 13386.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 13400.0,
+              "delta_ms": 14.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 13401.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 51985.0,
+              "delta_ms": 38584.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 51986.0,
+              "delta_ms": 1.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 73.0,
+              "line": 274,
+              "end_ms": 73.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 80.0,
+              "line": 281,
+              "end_ms": 84.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 4.0,
+              "poll_max_ms": 4.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 85.0,
+              "line": 284,
+              "end_ms": 85.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 85.0,
+              "line": 287,
+              "end_ms": 111.0,
+              "duration_ms": 26.0,
+              "outcome": "complete",
+              "poll_n": 104,
+              "poll_total_ms": 20.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 6.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 111.0,
+              "line": 291,
+              "end_ms": 362.0,
+              "duration_ms": 251.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 251.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 362.0,
+              "line": 313,
+              "end_ms": 399.0,
+              "duration_ms": 37.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 37.0,
+              "poll_max_ms": 37.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 464.0,
+              "line": 361,
+              "end_ms": 475.0,
+              "duration_ms": 11.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 491.0,
+              "line": 370,
+              "end_ms": 513.0,
+              "duration_ms": 22.0,
+              "outcome": "complete",
+              "poll_n": 55,
+              "poll_total_ms": 15.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 7.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 571.0,
+              "line": 386,
+              "end_ms": 577.0,
+              "duration_ms": 6.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 6.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 626.0,
+              "line": 412,
+              "end_ms": 694.0,
+              "duration_ms": 68.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 694.0,
+              "line": 426,
+              "end_ms": 797.0,
+              "duration_ms": 103.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 797.0,
+              "line": 439,
+              "end_ms": 925.0,
+              "duration_ms": 128.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 925.0,
+              "line": 453,
+              "end_ms": 975.0,
+              "duration_ms": 50.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 975.0,
+              "line": 455,
+              "end_ms": 1140.0,
+              "duration_ms": 165.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 1140.0,
+              "line": 471,
+              "end_ms": 1200.0,
+              "duration_ms": 60.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 1200.0,
+              "line": 473,
+              "end_ms": 1394.0,
+              "duration_ms": 194.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 1394.0,
+              "line": 486,
+              "end_ms": 1468.0,
+              "duration_ms": 74.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 1468.0,
+              "line": 488,
+              "end_ms": 1696.0,
+              "duration_ms": 228.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 1696.0,
+              "line": 501,
+              "end_ms": 1783.0,
+              "duration_ms": 87.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 1877.0,
+              "line": 503,
+              "end_ms": 1915.0,
+              "duration_ms": 38.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 611.0,
+              "line": 397,
+              "end_ms": 1915.0,
+              "duration_ms": 1304.0,
+              "outcome": "complete",
+              "poll_n": 112,
+              "poll_total_ms": 80.0,
+              "poll_max_ms": 9.0,
+              "outside_poll_ms": 1224.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 1948.0,
+              "line": 522,
+              "end_ms": 5456.0,
+              "duration_ms": 3508.0,
+              "outcome": "complete",
+              "poll_n": 175,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 7.0,
+              "outside_poll_ms": 3468.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 5472.0,
+              "line": 609,
+              "end_ms": 6380.0,
+              "duration_ms": 908.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 908.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 6639.0,
+              "line": 741,
+              "end_ms": 6641.0,
+              "duration_ms": 2.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 2.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 6639.0,
+              "line": 740,
+              "end_ms": 6686.0,
+              "duration_ms": 47.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 47.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 6639.0,
+              "line": 739,
+              "end_ms": 6697.0,
+              "duration_ms": 58.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 57.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6578.0,
+              "line": 732,
+              "end_ms": 8491.0,
+              "duration_ms": 1913.0,
+              "outcome": "complete",
+              "poll_n": 9,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1913.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 8491.0,
+              "line": 1121,
+              "end_ms": 8491.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 8507.0,
+              "line": 1126,
+              "end_ms": 8683.0,
+              "duration_ms": 176.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 175.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 8683.0,
+              "line": 1129,
+              "end_ms": 8683.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 8801.0,
+              "line": 1148,
+              "end_ms": 8801.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 8790.0,
+              "line": 1141,
+              "end_ms": 13386.0,
+              "duration_ms": 4596.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 4591.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 13400.0,
+              "line": 2085,
+              "end_ms": 13401.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 13386.0,
+              "line": 2083,
+              "end_ms": 13401.0,
+              "duration_ms": 15.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 15.0,
+              "poll_max_ms": 15.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 399.0,
+            "editable_ms": 399.0,
+            "session_ready_frame_ms": 51985.0
+          },
+          "last_elapsed_ms": 51986.0,
+          "runtime": {
+            "async_workers": 1,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "runtime",
+              "start_ms": 70.0,
+              "end_ms": 73.0,
+              "duration_ms": 3.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 80.0,
+              "end_ms": 80.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 85.0,
+              "end_ms": 111.0,
+              "duration_ms": 26.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 111.0,
+              "end_ms": 111.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 111.0,
+              "end_ms": 112.0,
+              "duration_ms": 1.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 112.0,
+              "end_ms": 362.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 111.0,
+              "end_ms": 362.0,
+              "duration_ms": 251.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 375.0,
+              "end_ms": 397.0,
+              "duration_ms": 22.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 399.0,
+              "end_ms": 448.0,
+              "duration_ms": 49.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 448.0,
+              "end_ms": 475.0,
+              "duration_ms": 27.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 475.0,
+              "end_ms": 513.0,
+              "duration_ms": 38.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 523.0,
+              "end_ms": 577.0,
+              "duration_ms": 54.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 595.0,
+              "end_ms": 1915.0,
+              "duration_ms": 1320.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 1932.0,
+              "end_ms": 5456.0,
+              "duration_ms": 3524.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 5456.0,
+              "end_ms": 6380.0,
+              "duration_ms": 924.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 8790.0,
+              "end_ms": 13386.0,
+              "duration_ms": 4596.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 73.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 80.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 362.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 362.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 38584.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 4596.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 3524.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 2410.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 1320.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 924.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 54.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 49.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 38.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 27.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 26.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 22.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 18.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 14.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 12.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 7.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 2.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 8790.0,
+              "line": 1141,
+              "end_ms": 13386.0,
+              "duration_ms": 4596.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 4591.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 1948.0,
+              "line": 522,
+              "end_ms": 5456.0,
+              "duration_ms": 3508.0,
+              "outcome": "complete",
+              "poll_n": 175,
+              "poll_total_ms": 40.0,
+              "poll_max_ms": 7.0,
+              "outside_poll_ms": 3468.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6578.0,
+              "line": 732,
+              "end_ms": 8491.0,
+              "duration_ms": 1913.0,
+              "outcome": "complete",
+              "poll_n": 9,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1913.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 611.0,
+              "line": 397,
+              "end_ms": 1915.0,
+              "duration_ms": 1304.0,
+              "outcome": "complete",
+              "poll_n": 112,
+              "poll_total_ms": 80.0,
+              "poll_max_ms": 9.0,
+              "outside_poll_ms": 1224.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 5472.0,
+              "line": 609,
+              "end_ms": 6380.0,
+              "duration_ms": 908.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 908.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ]
+    },
+    {
+      "name": "fixed-workers2",
+      "capture": {
+        "start_offset": 26086520,
+        "end_offset": 26139042,
+        "bytes": 52522,
+        "sha256": "2bb905e00ba571efabbfc969535222ca8ec45b18bd0027faeb51efcf66ce9fa5",
+        "observed_epoch": 1793416427.128039
+      },
+      "contexts": [
+        {
+          "app_gen": 1,
+          "instance": "83832120-5c0e-47e2-8410-26352e8e2a59",
+          "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "fixed-workers2",
+        "capture_start_offset": 26086520,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 5.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "success": false,
+        "error_type": "TIMEOUT",
+        "capture_end_offset": 26086520
+      },
+      "runtime_workers": [],
+      "milestones": [],
+      "generation_summaries": [],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000
+          ],
+          "context": {
+            "app_gen": 1,
+            "instance": "83832120-5c0e-47e2-8410-26352e8e2a59",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            }
+          ],
+          "spans": [],
+          "endpoints": {},
+          "last_elapsed_ms": 0.0,
+          "milestone_intervals": [],
+          "open_milestone_intervals": [],
+          "milestone_gaps": [],
+          "open_spans": [],
+          "slow_spans": [],
+          "long_polls": []
+        }
+      ]
+    },
+    {
+      "name": "fixed-workers2-recovered",
+      "capture": {
+        "start_offset": 26365514,
+        "end_offset": 27688797,
+        "bytes": 1323283,
+        "sha256": "87f9638925dfa99ecd611691fa1e98ce4b7399438fed5ec0d9577f5c30880baf",
+        "observed_epoch": 1793417435.1982172
+      },
+      "contexts": [
+        {
+          "app_gen": 1,
+          "instance": "b0dbd07b-ce1b-4645-bccb-547ae55abb8a",
+          "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+        }
+      ],
+      "harness": {
+        "kind": "fresh_startup_no_input_until_after_attach",
+        "name": "fixed-workers2-recovered",
+        "capture_start_offset": 26365514,
+        "turns_submitted": 0,
+        "no_input_seconds_after_observed_attach": 5.0,
+        "limits": [
+          "Collector delivery adds latency to observation; app elapsed and host monotonic origins differ.",
+          "One fresh process; SQLite may already be running."
+        ],
+        "attach_done_ms": 9738.0,
+        "ready_without_input": false,
+        "handoff_without_input": false,
+        "success": false,
+        "error_type": "TIMEOUT",
+        "capture_end_offset": 26764555
+      },
+      "runtime_workers": [
+        {
+          "line": 298,
+          "elapsed_ms": 63.0,
+          "async_workers": 2,
+          "blocking_cap": 8
+        }
+      ],
+      "milestones": [
+        {
+          "line": 2576,
+          "name": "thread_attach_done",
+          "elapsed_ms": 9738.0
+        },
+        {
+          "line": 4586,
+          "name": "session_prompt_ready",
+          "elapsed_ms": 162669.0
+        },
+        {
+          "line": 4587,
+          "name": "startup_handoff_frame_rendered",
+          "elapsed_ms": 162669.0
+        }
+      ],
+      "generation_summaries": [
+        {
+          "vm": 0,
+          "gen": 3,
+          "sampled_rows": 388,
+          "roles": {
+            "tokio-pool": {
+              "job_ids": [
+                2147483650,
+                2147483651,
+                2147483652,
+                2147483657,
+                2147483658,
+                2147483659,
+                2147483660,
+                2147483661,
+                2147483662,
+                2147483663,
+                2147483670,
+                2147483671,
+                2147483672,
+                2147483673,
+                2147483674,
+                2147483675,
+                2147483676,
+                2147483677,
+                2147483678,
+                2147483679,
+                2147483680,
+                2147483681,
+                2147483682,
+                2147483683,
+                2147483684,
+                2147483685,
+                2147483686,
+                2147483687,
+                2147483688
+              ],
+              "carriers": [
+                4,
+                10
+              ],
+              "async_scheduler_job_ids": [
+                2147483650,
+                2147483651
+              ],
+              "max_ready_ms": 126065,
+              "max_slice_ms": 126018,
+              "max_observed_boundary_age_ms": 125285
+            },
+            "foreground": {
+              "job_ids": [
+                1
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 1,
+              "max_slice_ms": 84,
+              "max_observed_boundary_age_ms": 133648
+            },
+            "unclassified": {
+              "job_ids": [
+                2147483653,
+                2147483654,
+                2147483656
+              ],
+              "carriers": [
+                19
+              ],
+              "async_scheduler_job_ids": [],
+              "max_ready_ms": 58,
+              "max_slice_ms": 47,
+              "max_observed_boundary_age_ms": 133576
+            }
+          }
+        }
+      ],
+      "application_runs": [
+        {
+          "pid": 1000,
+          "pids": [
+            1000
+          ],
+          "context": {
+            "app_gen": 1,
+            "instance": "b0dbd07b-ce1b-4645-bccb-547ae55abb8a",
+            "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+          },
+          "milestones": [
+            {
+              "name": "process_main",
+              "elapsed_ms": 0.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_placement_configured",
+              "elapsed_ms": 11.0,
+              "delta_ms": 11.0
+            },
+            {
+              "name": "dotenv_begin",
+              "elapsed_ms": 11.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "dotenv_done",
+              "elapsed_ms": 11.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "path_aliases_begin",
+              "elapsed_ms": 11.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup_begin",
+              "elapsed_ms": 15.0,
+              "delta_ms": 4.0
+            },
+            {
+              "name": "arg0_cleanup_done",
+              "elapsed_ms": 51.0,
+              "delta_ms": 36.0
+            },
+            {
+              "name": "path_aliases_done",
+              "elapsed_ms": 60.0,
+              "delta_ms": 9.0
+            },
+            {
+              "name": "arg0_dispatch_done",
+              "elapsed_ms": 60.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_begin",
+              "elapsed_ms": 60.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "main_thread_spawn_done",
+              "elapsed_ms": 63.0,
+              "delta_ms": 3.0
+            }
+          ],
+          "spans": [],
+          "endpoints": {},
+          "last_elapsed_ms": 63.0,
+          "placement": {
+            "mode": 1,
+            "background_cap": 2
+          },
+          "milestone_intervals": [
+            {
+              "name": "dotenv",
+              "start_ms": 11.0,
+              "end_ms": 11.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "arg0_cleanup",
+              "start_ms": 15.0,
+              "end_ms": 51.0,
+              "duration_ms": 36.0
+            },
+            {
+              "name": "path_aliases",
+              "start_ms": 11.0,
+              "end_ms": 60.0,
+              "duration_ms": 49.0
+            },
+            {
+              "name": "main_thread_spawn",
+              "start_ms": 60.0,
+              "end_ms": 63.0,
+              "duration_ms": 3.0
+            }
+          ],
+          "open_milestone_intervals": [],
+          "milestone_gaps": [
+            {
+              "after": "arg0_cleanup_begin",
+              "before": "arg0_cleanup_done",
+              "duration_ms": 36.0
+            },
+            {
+              "after": "process_main",
+              "before": "thread_placement_configured",
+              "duration_ms": 11.0
+            },
+            {
+              "after": "arg0_cleanup_done",
+              "before": "path_aliases_done",
+              "duration_ms": 9.0
+            },
+            {
+              "after": "path_aliases_begin",
+              "before": "arg0_cleanup_begin",
+              "duration_ms": 4.0
+            },
+            {
+              "after": "main_thread_spawn_begin",
+              "before": "main_thread_spawn_done",
+              "duration_ms": 3.0
+            },
+            {
+              "after": "thread_placement_configured",
+              "before": "dotenv_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_begin",
+              "before": "dotenv_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "dotenv_done",
+              "before": "path_aliases_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "path_aliases_done",
+              "before": "arg0_dispatch_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "arg0_dispatch_done",
+              "before": "main_thread_spawn_begin",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [],
+          "long_polls": []
+        },
+        {
+          "pid": 1,
+          "pids": [
+            1
+          ],
+          "context": {},
+          "milestones": [
+            {
+              "name": "main_thread_entered",
+              "elapsed_ms": 63.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_begin",
+              "elapsed_ms": 63.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_workers_configured",
+              "elapsed_ms": 63.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "runtime_done",
+              "elapsed_ms": 70.0,
+              "delta_ms": 7.0
+            },
+            {
+              "name": "cli_begin",
+              "elapsed_ms": 70.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cli_entering_tui",
+              "elapsed_ms": 75.0,
+              "delta_ms": 5.0
+            },
+            {
+              "name": "motion_begin",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "motion_done",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_preflight_begin",
+              "elapsed_ms": 75.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_begin",
+              "elapsed_ms": 81.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "presentation_config_done",
+              "elapsed_ms": 99.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_begin",
+              "elapsed_ms": 99.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_begin",
+              "elapsed_ms": 99.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_checks_done",
+              "elapsed_ms": 99.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_begin",
+              "elapsed_ms": 99.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_modes_done",
+              "elapsed_ms": 100.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "crossterm_backend_created",
+              "elapsed_ms": 100.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_begin",
+              "elapsed_ms": 100.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_queries_done",
+              "elapsed_ms": 350.0,
+              "delta_ms": 250.0
+            },
+            {
+              "name": "ratatui_terminal_begin",
+              "elapsed_ms": 350.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "ratatui_terminal_created",
+              "elapsed_ms": 350.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_stderr_guard_done",
+              "elapsed_ms": 350.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "terminal_init_done",
+              "elapsed_ms": 350.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_draft_begin",
+              "elapsed_ms": 350.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "tui_event_loop_created",
+              "elapsed_ms": 351.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "first_frame_render_begin",
+              "elapsed_ms": 361.0,
+              "delta_ms": 10.0
+            },
+            {
+              "name": "first_frame_render_done",
+              "elapsed_ms": 383.0,
+              "delta_ms": 22.0
+            },
+            {
+              "name": "first_frame_backend_flushed",
+              "elapsed_ms": 384.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "editable_composer_visible",
+              "elapsed_ms": 384.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "screen_reader_begin",
+              "elapsed_ms": 385.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "screen_reader_done",
+              "elapsed_ms": 417.0,
+              "delta_ms": 32.0
+            },
+            {
+              "name": "cloud_config_begin",
+              "elapsed_ms": 417.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_config_done",
+              "elapsed_ms": 444.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_begin",
+              "elapsed_ms": 444.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "full_config_done",
+              "elapsed_ms": 489.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "cloud_auth_storage_begin",
+              "elapsed_ms": 497.0,
+              "delta_ms": 8.0
+            },
+            {
+              "name": "cloud_auth_storage_done",
+              "elapsed_ms": 518.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "state_db_begin",
+              "elapsed_ms": 535.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "state_db_done",
+              "elapsed_ms": 2302.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "app_server_begin",
+              "elapsed_ms": 2319.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "app_server_done",
+              "elapsed_ms": 2505.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "account_status_begin",
+              "elapsed_ms": 2506.0,
+              "delta_ms": 1.0
+            },
+            {
+              "name": "account_status_done",
+              "elapsed_ms": 5830.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_begin",
+              "elapsed_ms": 7119.0,
+              "delta_ms": 29.0
+            },
+            {
+              "name": "thread_start_done",
+              "elapsed_ms": 9686.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "thread_start_event_received",
+              "elapsed_ms": 9703.0,
+              "delta_ms": 17.0
+            },
+            {
+              "name": "primary_session_attached",
+              "elapsed_ms": 9732.0,
+              "delta_ms": 29.0
+            },
+            {
+              "name": "thread_attach_done",
+              "elapsed_ms": 9738.0,
+              "delta_ms": 0.0
+            },
+            {
+              "name": "session_prompt_ready",
+              "elapsed_ms": 162669.0,
+              "delta_ms": 152931.0
+            },
+            {
+              "name": "startup_handoff_frame_rendered",
+              "elapsed_ms": 162669.0,
+              "delta_ms": 0.0
+            }
+          ],
+          "spans": [
+            {
+              "id": 1,
+              "name": "cli.trueos_ide_launch_script",
+              "start_ms": 70.0,
+              "line": 349,
+              "end_ms": 70.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 2,
+              "name": "tui.local_network_policy",
+              "start_ms": 76.0,
+              "line": 356,
+              "end_ms": 80.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 3.0,
+              "poll_max_ms": 3.0,
+              "outside_poll_ms": 1.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 3,
+              "name": "tui.environment_discovery",
+              "start_ms": 80.0,
+              "line": 360,
+              "end_ms": 81.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 4,
+              "name": "tui.presentation_config",
+              "start_ms": 81.0,
+              "line": 363,
+              "end_ms": 99.0,
+              "duration_ms": 18.0,
+              "outcome": "complete",
+              "poll_n": 22,
+              "poll_total_ms": 12.0,
+              "poll_max_ms": 9.0,
+              "outside_poll_ms": 6.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 5,
+              "name": "tui.terminal_init",
+              "start_ms": 99.0,
+              "line": 367,
+              "end_ms": 350.0,
+              "duration_ms": 251.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 251.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 6,
+              "name": "tui.first_frame",
+              "start_ms": 350.0,
+              "line": 388,
+              "end_ms": 384.0,
+              "duration_ms": 34.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 34.0,
+              "poll_max_ms": 34.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "before_editable"
+            },
+            {
+              "id": 7,
+              "name": "tui.cloud_config",
+              "start_ms": 433.0,
+              "line": 425,
+              "end_ms": 444.0,
+              "duration_ms": 11.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 11.0,
+              "poll_max_ms": 11.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 8,
+              "name": "tui.full_config",
+              "start_ms": 460.0,
+              "line": 433,
+              "end_ms": 489.0,
+              "duration_ms": 29.0,
+              "outcome": "complete",
+              "poll_n": 25,
+              "poll_total_ms": 10.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 19.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 9,
+              "name": "tui.cloud_auth_storage",
+              "start_ms": 513.0,
+              "line": 446,
+              "end_ms": 518.0,
+              "duration_ms": 5.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 11,
+              "name": "db.state.open",
+              "start_ms": 2113.0,
+              "line": 728,
+              "end_ms": 2152.0,
+              "duration_ms": 39.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 12,
+              "name": "db.state.migrate",
+              "start_ms": 2152.0,
+              "line": 772,
+              "end_ms": 2171.0,
+              "duration_ms": 19.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 13,
+              "name": "db.logs.open",
+              "start_ms": 2172.0,
+              "line": 800,
+              "end_ms": 2190.0,
+              "duration_ms": 18.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 14,
+              "name": "db.logs.migrate",
+              "start_ms": 2190.0,
+              "line": 813,
+              "end_ms": 2196.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 15,
+              "name": "db.goals.open",
+              "start_ms": 2196.0,
+              "line": 815,
+              "end_ms": 2217.0,
+              "duration_ms": 21.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 16,
+              "name": "db.goals.migrate",
+              "start_ms": 2217.0,
+              "line": 828,
+              "end_ms": 2222.0,
+              "duration_ms": 5.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 17,
+              "name": "db.memories.open",
+              "start_ms": 2223.0,
+              "line": 830,
+              "end_ms": 2246.0,
+              "duration_ms": 23.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 18,
+              "name": "db.memories.migrate",
+              "start_ms": 2246.0,
+              "line": 846,
+              "end_ms": 2253.0,
+              "duration_ms": 7.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 19,
+              "name": "db.queue.open",
+              "start_ms": 2254.0,
+              "line": 848,
+              "end_ms": 2281.0,
+              "duration_ms": 27.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 20,
+              "name": "db.queue.migrate",
+              "start_ms": 2281.0,
+              "line": 861,
+              "end_ms": 2290.0,
+              "duration_ms": 9.0,
+              "outcome": "ok",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 21,
+              "name": "backfill.gate",
+              "start_ms": 2298.0,
+              "line": 863,
+              "end_ms": 2302.0,
+              "duration_ms": 4.0,
+              "outcome": "complete",
+              "poll_n": 0,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": null,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 567.0,
+              "line": 460,
+              "end_ms": 2302.0,
+              "duration_ms": 1735.0,
+              "outcome": "complete",
+              "poll_n": 120,
+              "poll_total_ms": 46.0,
+              "poll_max_ms": 25.0,
+              "outside_poll_ms": 1689.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 22,
+              "name": "tui.app_server",
+              "start_ms": 2335.0,
+              "line": 888,
+              "end_ms": 2505.0,
+              "duration_ms": 170.0,
+              "outcome": "complete",
+              "poll_n": 57,
+              "poll_total_ms": 26.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 144.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2521.0,
+              "line": 929,
+              "end_ms": 5830.0,
+              "duration_ms": 3309.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 3309.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 27,
+              "name": "tui.collaboration_modes",
+              "start_ms": 6034.0,
+              "line": 1125,
+              "end_ms": 6035.0,
+              "duration_ms": 1.0,
+              "outcome": "complete",
+              "poll_n": 3,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 25,
+              "name": "tui.model_list",
+              "start_ms": 6034.0,
+              "line": 1123,
+              "end_ms": 6058.0,
+              "duration_ms": 24.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 1.0,
+              "poll_max_ms": 1.0,
+              "outside_poll_ms": 23.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 26,
+              "name": "tui.config_requirements",
+              "start_ms": 6034.0,
+              "line": 1124,
+              "end_ms": 6064.0,
+              "duration_ms": 30.0,
+              "outcome": "complete",
+              "poll_n": 5,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 30.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6000.0,
+              "line": 1098,
+              "end_ms": 7031.0,
+              "duration_ms": 1031.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1031.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 28,
+              "name": "tui.user_hooks_review",
+              "start_ms": 7031.0,
+              "line": 1484,
+              "end_ms": 7031.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 29,
+              "name": "tui.fresh_defaults",
+              "start_ms": 7047.0,
+              "line": 1489,
+              "end_ms": 7090.0,
+              "duration_ms": 43.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 2.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 41.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 30,
+              "name": "tui.user_model_migration",
+              "start_ms": 7090.0,
+              "line": 1491,
+              "end_ms": 7090.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": true,
+              "position": "after_editable"
+            },
+            {
+              "id": 32,
+              "name": "tui.startup_tooltip",
+              "start_ms": 7135.0,
+              "line": 1510,
+              "end_ms": 7135.0,
+              "duration_ms": 0.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7119.0,
+              "line": 1503,
+              "end_ms": 9686.0,
+              "duration_ms": 2567.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2561.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 34,
+              "name": "tui.startup_backend_fallback",
+              "start_ms": 9733.0,
+              "line": 2573,
+              "end_ms": 9738.0,
+              "duration_ms": 5.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 5.0,
+              "poll_max_ms": 5.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 33,
+              "name": "tui.thread_attach",
+              "start_ms": 9703.0,
+              "line": 2562,
+              "end_ms": 9738.0,
+              "duration_ms": 35.0,
+              "outcome": "complete",
+              "poll_n": 1,
+              "poll_total_ms": 35.0,
+              "poll_max_ms": 35.0,
+              "outside_poll_ms": 0.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "endpoints": {
+            "first_flush_ms": 384.0,
+            "editable_ms": 384.0,
+            "session_ready_frame_ms": 162669.0,
+            "startup_handoff_frame_ms": 162669.0
+          },
+          "last_elapsed_ms": 162669.0,
+          "runtime": {
+            "async_workers": 2,
+            "blocking_cap": 8
+          },
+          "milestone_intervals": [
+            {
+              "name": "runtime",
+              "start_ms": 63.0,
+              "end_ms": 70.0,
+              "duration_ms": 7.0
+            },
+            {
+              "name": "motion",
+              "start_ms": 75.0,
+              "end_ms": 75.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "presentation_config",
+              "start_ms": 81.0,
+              "end_ms": 99.0,
+              "duration_ms": 18.0
+            },
+            {
+              "name": "terminal_checks",
+              "start_ms": 99.0,
+              "end_ms": 99.0,
+              "duration_ms": 0.0
+            },
+            {
+              "name": "terminal_modes",
+              "start_ms": 99.0,
+              "end_ms": 100.0,
+              "duration_ms": 1.0
+            },
+            {
+              "name": "terminal_queries",
+              "start_ms": 100.0,
+              "end_ms": 350.0,
+              "duration_ms": 250.0
+            },
+            {
+              "name": "terminal_init",
+              "start_ms": 99.0,
+              "end_ms": 350.0,
+              "duration_ms": 251.0
+            },
+            {
+              "name": "first_frame_render",
+              "start_ms": 361.0,
+              "end_ms": 383.0,
+              "duration_ms": 22.0
+            },
+            {
+              "name": "screen_reader",
+              "start_ms": 385.0,
+              "end_ms": 417.0,
+              "duration_ms": 32.0
+            },
+            {
+              "name": "cloud_config",
+              "start_ms": 417.0,
+              "end_ms": 444.0,
+              "duration_ms": 27.0
+            },
+            {
+              "name": "full_config",
+              "start_ms": 444.0,
+              "end_ms": 489.0,
+              "duration_ms": 45.0
+            },
+            {
+              "name": "cloud_auth_storage",
+              "start_ms": 497.0,
+              "end_ms": 518.0,
+              "duration_ms": 21.0
+            },
+            {
+              "name": "state_db",
+              "start_ms": 535.0,
+              "end_ms": 2302.0,
+              "duration_ms": 1767.0
+            },
+            {
+              "name": "app_server",
+              "start_ms": 2319.0,
+              "end_ms": 2505.0,
+              "duration_ms": 186.0
+            },
+            {
+              "name": "account_status",
+              "start_ms": 2506.0,
+              "end_ms": 5830.0,
+              "duration_ms": 3324.0
+            },
+            {
+              "name": "thread_start",
+              "start_ms": 7119.0,
+              "end_ms": 9686.0,
+              "duration_ms": 2567.0
+            }
+          ],
+          "open_milestone_intervals": [
+            {
+              "name": "cli",
+              "start_ms": 70.0
+            },
+            {
+              "name": "tui_preflight",
+              "start_ms": 75.0
+            },
+            {
+              "name": "ratatui_terminal",
+              "start_ms": 350.0
+            },
+            {
+              "name": "tui_draft",
+              "start_ms": 350.0
+            }
+          ],
+          "milestone_gaps": [
+            {
+              "after": "thread_attach_done",
+              "before": "session_prompt_ready",
+              "duration_ms": 152931.0
+            },
+            {
+              "after": "account_status_begin",
+              "before": "account_status_done",
+              "duration_ms": 3324.0
+            },
+            {
+              "after": "thread_start_begin",
+              "before": "thread_start_done",
+              "duration_ms": 2567.0
+            },
+            {
+              "after": "state_db_begin",
+              "before": "state_db_done",
+              "duration_ms": 1767.0
+            },
+            {
+              "after": "account_status_done",
+              "before": "thread_start_begin",
+              "duration_ms": 1289.0
+            },
+            {
+              "after": "terminal_queries_begin",
+              "before": "terminal_queries_done",
+              "duration_ms": 250.0
+            },
+            {
+              "after": "app_server_begin",
+              "before": "app_server_done",
+              "duration_ms": 186.0
+            },
+            {
+              "after": "full_config_begin",
+              "before": "full_config_done",
+              "duration_ms": 45.0
+            },
+            {
+              "after": "screen_reader_begin",
+              "before": "screen_reader_done",
+              "duration_ms": 32.0
+            },
+            {
+              "after": "thread_start_event_received",
+              "before": "primary_session_attached",
+              "duration_ms": 29.0
+            },
+            {
+              "after": "cloud_config_begin",
+              "before": "cloud_config_done",
+              "duration_ms": 27.0
+            },
+            {
+              "after": "first_frame_render_begin",
+              "before": "first_frame_render_done",
+              "duration_ms": 22.0
+            },
+            {
+              "after": "cloud_auth_storage_begin",
+              "before": "cloud_auth_storage_done",
+              "duration_ms": 21.0
+            },
+            {
+              "after": "presentation_config_begin",
+              "before": "presentation_config_done",
+              "duration_ms": 18.0
+            },
+            {
+              "after": "cloud_auth_storage_done",
+              "before": "state_db_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "state_db_done",
+              "before": "app_server_begin",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "thread_start_done",
+              "before": "thread_start_event_received",
+              "duration_ms": 17.0
+            },
+            {
+              "after": "tui_event_loop_created",
+              "before": "first_frame_render_begin",
+              "duration_ms": 10.0
+            },
+            {
+              "after": "full_config_done",
+              "before": "cloud_auth_storage_begin",
+              "duration_ms": 8.0
+            },
+            {
+              "after": "runtime_workers_configured",
+              "before": "runtime_done",
+              "duration_ms": 7.0
+            },
+            {
+              "after": "tui_preflight_begin",
+              "before": "presentation_config_begin",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "primary_session_attached",
+              "before": "thread_attach_done",
+              "duration_ms": 6.0
+            },
+            {
+              "after": "cli_begin",
+              "before": "cli_entering_tui",
+              "duration_ms": 5.0
+            },
+            {
+              "after": "terminal_modes_begin",
+              "before": "terminal_modes_done",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "tui_draft_begin",
+              "before": "tui_event_loop_created",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "first_frame_render_done",
+              "before": "first_frame_backend_flushed",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "editable_composer_visible",
+              "before": "screen_reader_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "app_server_done",
+              "before": "account_status_begin",
+              "duration_ms": 1.0
+            },
+            {
+              "after": "main_thread_entered",
+              "before": "runtime_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_begin",
+              "before": "runtime_workers_configured",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "runtime_done",
+              "before": "cli_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cli_entering_tui",
+              "before": "motion_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_begin",
+              "before": "motion_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "motion_done",
+              "before": "tui_preflight_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "presentation_config_done",
+              "before": "terminal_init_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_begin",
+              "before": "terminal_checks_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_begin",
+              "before": "terminal_checks_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_checks_done",
+              "before": "terminal_modes_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_modes_done",
+              "before": "crossterm_backend_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "crossterm_backend_created",
+              "before": "terminal_queries_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_queries_done",
+              "before": "ratatui_terminal_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_begin",
+              "before": "ratatui_terminal_created",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "ratatui_terminal_created",
+              "before": "terminal_stderr_guard_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_stderr_guard_done",
+              "before": "terminal_init_done",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "terminal_init_done",
+              "before": "tui_draft_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "first_frame_backend_flushed",
+              "before": "editable_composer_visible",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "screen_reader_done",
+              "before": "cloud_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "cloud_config_done",
+              "before": "full_config_begin",
+              "duration_ms": 0.0
+            },
+            {
+              "after": "session_prompt_ready",
+              "before": "startup_handoff_frame_rendered",
+              "duration_ms": 0.0
+            }
+          ],
+          "open_spans": [],
+          "slow_spans": [
+            {
+              "id": 23,
+              "name": "tui.account_status",
+              "start_ms": 2521.0,
+              "line": 929,
+              "end_ms": 5830.0,
+              "duration_ms": 3309.0,
+              "outcome": "complete",
+              "poll_n": 2,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 3309.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 31,
+              "name": "tui.thread_start",
+              "start_ms": 7119.0,
+              "line": 1503,
+              "end_ms": 9686.0,
+              "duration_ms": 2567.0,
+              "outcome": "complete",
+              "poll_n": 4,
+              "poll_total_ms": 6.0,
+              "poll_max_ms": 2.0,
+              "outside_poll_ms": 2561.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 10,
+              "name": "tui.state_db",
+              "start_ms": 567.0,
+              "line": 460,
+              "end_ms": 2302.0,
+              "duration_ms": 1735.0,
+              "outcome": "complete",
+              "poll_n": 120,
+              "poll_total_ms": 46.0,
+              "poll_max_ms": 25.0,
+              "outside_poll_ms": 1689.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            },
+            {
+              "id": 24,
+              "name": "tui.hooks_catalog",
+              "start_ms": 6000.0,
+              "line": 1098,
+              "end_ms": 7031.0,
+              "duration_ms": 1031.0,
+              "outcome": "complete",
+              "poll_n": 8,
+              "poll_total_ms": 0.0,
+              "poll_max_ms": 0.0,
+              "outside_poll_ms": 1031.0,
+              "partial": false,
+              "interactive": false,
+              "position": "after_editable"
+            }
+          ],
+          "long_polls": []
+        }
+      ],
+      "notes": [
+        "Cold SQLite after approved reboot; not a matched warm comparison.",
+        "Two actual scheduler jobs observed; eventual ready/handoff 162669 ms; attachment-to-ready gap 152931 ms."
+      ],
+      "settled_ssh_draft_echo": {
+        "kind": "ssh_bracketed_paste_to_draft_echo",
+        "slot": "code",
+        "archive_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10",
+        "samples_ms": [
+          28.811,
+          30.547,
+          29.64,
+          29.705,
+          29.607
+        ],
+        "turns_submitted": 0,
+        "limits": [
+          "Includes SSH transport and terminal output delivery, not physical presentation or CPU time.",
+          "Retained initialized session, not startup latency."
+        ],
+        "median_ms": 29.64,
+        "max_ms": 30.547,
+        "success": true
+      }
+    }
+  ],
+  "conclusions": [
+    "The fixed one-worker image executed its handoff paint at 51986 ms, but the 38584 ms attachment-to-ready gap remained.",
+    "The attempted two-worker fixed-image trial blocked before placement/runtime initialization and is not a valid worker comparison.",
+    "At its stop request the latter VM had one pending synchronous filesystem request and no native jobs.",
+    "HTTP file access first timed out and then refused connections, while SSH remained available.",
+    "Both temporary dotenv files were removed and verified absent; the second required an approved rig reboot to restore filesystem access.",
+    "The recovered valid two-worker run eventually painted ready and handoff at 162669 ms, 152931 ms after attachment. A completed continuation maximum reached 126018 ms. Once settled, five draft echo samples had median 29.640 ms / max 30.547 ms."
+  ],
+  "recovery": {
+    "owned_codex_stop_accepted": true,
+    "temporary_dotenv_may_remain": false,
+    "temporary_dotenv_expected_bytes": 24,
+    "reboot_approval_requested": true,
+    "reboot_performed": true,
+    "user_approved": true,
+    "temporary_dotenv_removed_and_verified_absent": true,
+    "reset_receipt": {
+      "approved": true,
+      "reset_requested_epoch": 1793416877.757017,
+      "capture_offset_before_reset": 26192916,
+      "published_kernel_sha256": "6e74f05d6b10f2d3a8042de919c4e4e723186e97aacdff946a9f6c7bf1d12620",
+      "published_generation": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/debug.iTTtHj",
+      "temporary_dotenv_expected_bytes": 24,
+      "http_recovered": true,
+      "temporary_dotenv_removed_and_verified_absent": true,
+      "temporary_dotenv_matched_test_control": true,
+      "placement_profile_after_recovery": "isolated 2"
+    }
+  },
+  "followup_diagnostics_status": "Additional guard/event/drain/render probes passed exact TRUEOS check; current source keeps one worker by default and a startup-only optional-prewarm defer experiment is being added. Pre-Rustc pack was intentionally terminated before these source changes; final package rebuild pending.",
+  "limits": [
+    "One fixed one-worker run and an invalid two-worker attempt do not establish a performance regression or speedup.",
+    "SQLite was warm; application timings begin after loading and do not measure full download-to-ready startup.",
+    "Host loader probes were absent and Hull/native PID identity cannot be uniquely joined by PID.",
+    "Continuation ages, ABI snapshots and candidate counts are not CPU attribution.",
+    "No prompts were submitted."
+  ],
+  "kernel_probe_experiment": {
+    "source_revision": "two_default_off_gates",
+    "preserve_coarse_work_counts": true,
+    "preserve_other_abi_and_startup_probes": true,
+    "allocation_algorithm_unchanged": true,
+    "locks_unchanged": true,
+    "gate_contracts_passed": 24,
+    "existing_allocator_tests_passed": 8,
+    "isolated_build_status": "preparing",
+    "deployed": false
+  }
+}

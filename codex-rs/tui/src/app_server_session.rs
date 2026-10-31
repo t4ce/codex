@@ -696,37 +696,48 @@ impl AppServerSession {
         let requirements_request_id = self.next_request_id();
         let (models, requirements, collaboration_modes) = tokio::try_join!(
             async {
-                self.client
-                    .request_typed::<ModelListResponse>(ClientRequest::ModelList {
-                        request_id: model_request_id,
-                        params: ModelListParams {
-                            cursor: None,
-                            limit: None,
-                            include_hidden: Some(true),
-                        },
-                    })
-                    .await
-                    .map_err(|err| {
-                        bootstrap_request_error("model/list failed during TUI bootstrap", err)
-                    })
+                codex_arg0::startup_timing::measure(
+                    "tui.model_list",
+                    self.client
+                        .request_typed::<ModelListResponse>(ClientRequest::ModelList {
+                            request_id: model_request_id,
+                            params: ModelListParams {
+                                cursor: None,
+                                limit: None,
+                                include_hidden: Some(true),
+                            },
+                        }),
+                )
+                .await
+                .map_err(|err| {
+                    bootstrap_request_error("model/list failed during TUI bootstrap", err)
+                })
             },
             async {
-                self.client
-                    .request_typed::<ConfigRequirementsReadResponse>(
+                codex_arg0::startup_timing::measure(
+                    "tui.config_requirements",
+                    self.client.request_typed::<ConfigRequirementsReadResponse>(
                         ClientRequest::ConfigRequirementsRead {
                             request_id: requirements_request_id,
                             params: None,
                         },
+                    ),
+                )
+                .await
+                .map_err(|err| {
+                    bootstrap_request_error(
+                        "configRequirements/read failed during TUI bootstrap",
+                        err,
                     )
-                    .await
-                    .map_err(|err| {
-                        bootstrap_request_error(
-                            "configRequirements/read failed during TUI bootstrap",
-                            err,
-                        )
-                    })
+                })
             },
-            async { Ok(crate::collaboration_modes::list(self.request_handle()).await) },
+            async {
+                Ok(codex_arg0::startup_timing::measure(
+                    "tui.collaboration_modes",
+                    crate::collaboration_modes::list(self.request_handle()),
+                )
+                .await)
+            },
         )?;
         let mut available_models = models
             .data

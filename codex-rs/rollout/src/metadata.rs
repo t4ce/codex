@@ -182,6 +182,7 @@ pub async fn extract_metadata_from_rollout(
     })
 }
 
+#[cfg(test)]
 pub(crate) async fn backfill_sessions(
     runtime: &codex_state::StateRuntime,
     codex_home: &Path,
@@ -196,11 +197,29 @@ pub(crate) async fn backfill_sessions(
     .await;
 }
 
-pub(crate) async fn backfill_sessions_with_lease(
+#[cfg(test)]
+async fn backfill_sessions_with_lease(
     runtime: &codex_state::StateRuntime,
     codex_home: &Path,
     default_provider: &str,
     backfill_lease_seconds: i64,
+) {
+    backfill_sessions_for_startup(
+        runtime,
+        codex_home,
+        default_provider,
+        Some(backfill_lease_seconds),
+        /*trace_lease*/ true,
+    )
+    .await;
+}
+
+pub(crate) async fn backfill_sessions_for_startup(
+    runtime: &codex_state::StateRuntime,
+    codex_home: &Path,
+    default_provider: &str,
+    backfill_lease_seconds: Option<i64>,
+    trace_lease: bool,
 ) {
     let metric_client = codex_otel::global();
     let timer = metric_client
@@ -219,7 +238,18 @@ pub(crate) async fn backfill_sessions_with_lease(
     if backfill_state.status == BackfillStatus::Complete {
         return;
     }
-    let claimed = match runtime.try_claim_backfill(backfill_lease_seconds).await {
+    let lease_timing = trace_lease.then(|| codex_startup_timing::span("backfill.lease"));
+    let claim_result = runtime
+        .try_claim_backfill(backfill_lease_seconds.unwrap_or(BACKFILL_LEASE_SECONDS))
+        .await;
+    if let Some(timing) = lease_timing {
+        timing.finish(match &claim_result {
+            Ok(true) => "claimed",
+            Ok(false) => "busy",
+            Err(_) => "error",
+        });
+    }
+    let claimed = match claim_result {
         Ok(claimed) => claimed,
         Err(err) => {
             warn!(
@@ -260,6 +290,8 @@ pub(crate) async fn backfill_sessions_with_lease(
         }
     }
 
+    let scan_timing = codex_startup_timing::span("backfill.scan");
+    let mut scan_failed = false;
     let sessions_root = codex_home.join(SESSIONS_SUBDIR);
     let archived_root = codex_home.join(ARCHIVED_SESSIONS_SUBDIR);
     let mut rollout_paths: Vec<BackfillRolloutPath> = Vec::new();
@@ -276,6 +308,7 @@ pub(crate) async fn backfill_sessions_with_lease(
                 }));
             }
             Err(err) => {
+                scan_failed = true;
                 warn!(
                     "failed to collect rollout paths under {}: {err}",
                     root.display()
@@ -287,7 +320,9 @@ pub(crate) async fn backfill_sessions_with_lease(
     if let Some(last_watermark) = backfill_state.last_watermark.as_deref() {
         rollout_paths.retain(|entry| entry.watermark.as_str() > last_watermark);
     }
+    scan_timing.finish(if scan_failed { "error" } else { "complete" });
 
+    let apply_timing = codex_startup_timing::span("backfill.apply");
     let mut stats = BackfillStats {
         scanned: 0,
         upserted: 0,
@@ -369,10 +404,15 @@ pub(crate) async fn backfill_sessions_with_lease(
             }
         }
     }
-    if let Err(err) = runtime
+    let completion_result = runtime
         .mark_backfill_complete(last_watermark.as_deref())
-        .await
-    {
+        .await;
+    apply_timing.finish(if completion_result.is_ok() && stats.failed == 0 {
+        "complete"
+    } else {
+        "error"
+    });
+    if let Err(err) = completion_result {
         warn!(
             "failed to mark backfill complete at {}: {err}",
             codex_home.display()

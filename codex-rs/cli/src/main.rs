@@ -1077,7 +1077,12 @@ async fn cli_main(
 ) -> anyhow::Result<()> {
     codex_arg0::startup_timing::mark("cli_begin");
     #[cfg(target_os = "trueos")]
-    codex_core::trueos_ide::initialize_launch_script().await.map_err(anyhow::Error::msg)?;
+    codex_arg0::startup_timing::measure(
+        "cli.trueos_ide_launch_script",
+        codex_core::trueos_ide::initialize_launch_script(),
+    )
+    .await
+    .map_err(anyhow::Error::msg)?;
     let MultitoolCli {
         config_overrides: mut root_config_overrides,
         feature_toggles,

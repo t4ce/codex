@@ -1436,6 +1436,7 @@ impl App {
                 self.chat_widget.handle_thread_session(session);
             }
         }
+        codex_arg0::startup_timing::mark("primary_session_attached");
         let should_buffer_initial_replay = !turns.is_empty();
         let replayed_final_items = realtime_delivery::completed_agent_items_from_turns(&turns);
         let replayed_voice_texts = realtime_delivery::replayed_voice_texts_from_turns(&turns);

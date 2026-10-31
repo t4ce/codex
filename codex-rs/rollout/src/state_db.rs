@@ -107,6 +107,7 @@ async fn try_init_with_roots_inner(
                     sqlite.home().display()
                 )
             })?;
+    let backfill_gate_timing = codex_startup_timing::span("backfill.gate");
     let backfill_gate_started = Instant::now();
     let backfill_gate_result = wait_for_backfill_gate(
         runtime.as_ref(),
@@ -115,6 +116,11 @@ async fn try_init_with_roots_inner(
         backfill_lease_seconds,
     )
     .await;
+    backfill_gate_timing.finish(if backfill_gate_result.is_ok() {
+        "complete"
+    } else {
+        "error"
+    });
     codex_state::record_backfill_gate(
         /*telemetry*/ None,
         backfill_gate_started.elapsed(),
@@ -165,17 +171,16 @@ async fn wait_for_backfill_gate(
             return Ok(());
         }
 
-        if let Some(backfill_lease_seconds) = backfill_lease_seconds {
-            metadata::backfill_sessions_with_lease(
-                runtime,
-                codex_home,
-                default_model_provider_id,
-                backfill_lease_seconds,
-            )
-            .await;
-        } else {
-            metadata::backfill_sessions(runtime, codex_home, default_model_provider_id).await;
-        }
+        metadata::backfill_sessions_for_startup(
+            runtime,
+            codex_home,
+            default_model_provider_id,
+            backfill_lease_seconds,
+            // A competing owner's lease can cause one retry per second.
+            // The gate measures that full wait; trace only its first claim.
+            !reported_wait,
+        )
+        .await;
         let backfill_state = runtime.get_backfill_state().await.map_err(|err| {
             anyhow::anyhow!(
                 "failed to read backfill state at {} after startup backfill: {err}",

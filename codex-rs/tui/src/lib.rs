@@ -1263,19 +1263,22 @@ async fn run_ratatui_app(
     let startup_app_server = startup_draft
         .run_until(
             &mut tui,
-            start_app_server(
-                &mut app_server_target,
-                arg0_paths.clone(),
-                initial_config.clone(),
-                cli_kv_overrides.clone(),
-                loader_overrides.clone(),
-                strict_config,
-                cloud_config_bundle.clone(),
-                feedback.clone(),
-                log_db.clone(),
-                &mut state_db,
-                environment_manager.clone(),
-                embedded_network_policy.clone(),
+            codex_arg0::startup_timing::measure(
+                "tui.app_server",
+                start_app_server(
+                    &mut app_server_target,
+                    arg0_paths.clone(),
+                    initial_config.clone(),
+                    cli_kv_overrides.clone(),
+                    loader_overrides.clone(),
+                    strict_config,
+                    cloud_config_bundle.clone(),
+                    feedback.clone(),
+                    log_db.clone(),
+                    &mut state_db,
+                    environment_manager.clone(),
+                    embedded_network_policy.clone(),
+                ),
             ),
         )
         .await;
@@ -1342,7 +1345,13 @@ async fn run_ratatui_app(
         };
         codex_arg0::startup_timing::mark("account_status_begin");
         let login_status = startup_draft
-            .run_until(&mut tui, get_login_status(active_app_server))
+            .run_until(
+                &mut tui,
+                codex_arg0::startup_timing::measure(
+                    "tui.account_status",
+                    get_login_status(active_app_server),
+                ),
+            )
             .await;
         match login_status {
             Ok(Ok((login_status, account))) => (login_status, Some(account)),
@@ -1382,25 +1391,28 @@ async fn run_ratatui_app(
             &app_server_target,
         );
         codex_arg0::startup_timing::mark("onboarding_begin");
-        let onboarding_result = run_onboarding_app(
-            OnboardingScreenArgs {
-                show_login_screen,
-                bedrock_setup_enabled,
-                show_trust_screen: should_show_trust_screen_flag,
-                remote_project_trust: None,
-                login_status,
-                app_server_target: app_server_target.clone(),
-                app_server_request_handle: app_server
-                    .as_ref()
-                    .map(AppServerSession::request_handle),
-                config: initial_config.clone(),
-            },
-            if show_login_screen {
-                app_server.as_mut()
-            } else {
-                None
-            },
-            &mut tui,
+        let onboarding_result = codex_arg0::startup_timing::measure(
+            "tui.user_onboarding",
+            run_onboarding_app(
+                OnboardingScreenArgs {
+                    show_login_screen,
+                    bedrock_setup_enabled,
+                    show_trust_screen: should_show_trust_screen_flag,
+                    remote_project_trust: None,
+                    login_status,
+                    app_server_target: app_server_target.clone(),
+                    app_server_request_handle: app_server
+                        .as_ref()
+                        .map(AppServerSession::request_handle),
+                    config: initial_config.clone(),
+                },
+                if show_login_screen {
+                    app_server.as_mut()
+                } else {
+                    None
+                },
+                &mut tui,
+            ),
         )
         .await;
         let onboarding_result = match onboarding_result {
@@ -2128,9 +2140,17 @@ async fn run_ratatui_app(
                     }?;
                     Ok(Some(bootstrap))
                 },
-                load_startup_hooks_review_entry(hooks_request_handle, hooks_cwd),
+                codex_arg0::startup_timing::measure(
+                    "tui.hooks_catalog",
+                    load_startup_hooks_review_entry(hooks_request_handle, hooks_cwd)
+                ),
                 async {
-                    check_gov_cloud_guidance && check_gov_cloud(guidance_request_handle).await
+                    check_gov_cloud_guidance
+                        && codex_arg0::startup_timing::measure(
+                            "tui.gov_cloud_check",
+                            check_gov_cloud(guidance_request_handle),
+                        )
+                        .await
                 },
             )
         })
@@ -2170,12 +2190,15 @@ async fn run_ratatui_app(
             tracing::warn!(%err, "Failed to save GovCloud guidance acknowledgment");
         }
     }
-    let startup_hooks_review = maybe_run_startup_hooks_review(
-        &mut app_server,
-        &mut tui,
-        &config,
-        bypass_hook_trust_for_startup_review,
-        startup_hooks_entry,
+    let startup_hooks_review = codex_arg0::startup_timing::measure(
+        "tui.user_hooks_review",
+        maybe_run_startup_hooks_review(
+            &mut app_server,
+            &mut tui,
+            &config,
+            bypass_hook_trust_for_startup_review,
+            startup_hooks_entry,
+        ),
     )
     .await;
     let startup_hooks_browser = match startup_hooks_review {
