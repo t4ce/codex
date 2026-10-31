@@ -3,7 +3,40 @@
 Source audit: 31 October 2026. Scope begins after archive download, through
 loading, first editable paint, session readiness, and first-turn preparation.
 Compiler optimization and persisting an executable image are outside this work.
-These are source-established dependencies, not measured costs on a fresh rig run.
+The execution map combines source-established dependencies with separately
+identified live observations; source complexity alone does not establish cost.
+
+Current result: the verified `392016b8…` archive completed normal
+`cargo bp codex-cli` packaging and publication
+([build receipt](startup-build-2026-10-31-skills.json)). Its same-binary skills
+control reduced attachment-to-ready from 19,003 ms to 21 ms. With coalescing
+enabled, the provisional composer appears around 0.4 s and the configured
+session around 8–11 s from application timing origin; host loader timings use
+a separate clock. Early draft echo still takes up to 4.1 s, and two-worker
+results are inconsistent ([live evidence](startup-skills-2026-10-31-live.json)).
+The repeated pre-Tokio outage now has a controlled placement result. Kernel A
+stalled in an awaited range read on the fifth clean launch, whose initial VMX
+carrier was AP 14. That AP also hosted the permanent Skhynix disk service.
+Kernel B changed only the service placement to BSP 0: its fifth launch again
+used AP 14, entered Tokio, reached readiness at 9,020 ms, and fully retired.
+The native read had no active std thread from which to yield its carrier, so
+the AP could not poll the service needed to complete that read. Extra Tokio
+workers cannot repair this wait before Tokio exists. See the
+[matched live comparison](startup-read-range-placement-2026-10-31-live.json).
+The production policy requires BSP 0 for this disk service, retaining other
+devices' policies and the executor wait guards. Its normal coupled build,
+compatibility checks, source promotion, and tests pass
+([production provenance](startup-block-service-2026-10-31-production.json)).
+Five clean serial Codex launches reached readiness and fully retired, including
+AP 14 on the fifth launch at 8,778 ms. The sixth alias attempt failed fetching
+the catalog before Codex started. After proving that pullbot's retirement, a
+separate alias retry completed another Codex startup at 9,307 ms. This is six
+successful Codex startups, not six consecutive successful alias attempts; the
+original six-attempt series retains its failed result. The latest session is
+retained with its controlled draft cleared. See the
+[production live proof](startup-block-service-2026-10-31-live.json).
+The earlier [native-FS proof](startup-native-fs-2026-10-31.json) remains a
+historical diagnostic-only result.
 
 ## Two readiness points
 
@@ -166,10 +199,12 @@ A completed async continuation reached 126.0 s, and allocation counters reached
 3.50 million calls / 3.42 billion candidate visits. Once settled, five draft echo
 samples had a median of 29.640 ms and maximum of 30.547 ms, including SSH delivery.
 These are elapsed boundaries and work counts. They establish
-that a second worker does not fix the stall; they do not attribute CPU cost.
+that a second worker alone did not fix that archive's stall; they do not
+attribute CPU cost.
 The tested archive selected N workers by default as an initial experiment.
 Current source deliberately retains one unless a larger pool is explicitly
-requested; the live results do not justify raising the default.
+requested. The later worker comparison below uses the skills-corrected archive
+and must be assessed separately.
 
 Additional source probes now distinguish the initial thread-event drain,
 post-attachment AppEvent handlers, handoff guards, and the actual render call.
@@ -183,12 +218,56 @@ command awaits `skills/list`, whose server path clears plugin/skills caches,
 reloads config, resolves plugins, and scans skills. The old numeric categories
 cannot prove this event's identity, and pending wall time is not CPU attribution.
 The existing background startup refresh already requests the same forced read.
-Current source coalesces the initial duplicate; its next archive still requires
-a live comparison. The same run's first draft echo also took 12.387 s after
+The same run's first draft echo also took 12.387 s after
 readiness, motivating a separate bounded post-handoff probe budget.
 
 The sanitized comparison and recovery state are retained in
 [`startup-comparison-2026-10-31-live.json`](startup-comparison-2026-10-31-live.json).
+
+The combined `392016b8…` archive subsequently completed packaging and normal
+cache-hit publication, with an independent published-copy hash match. On the
+same kernel and binary, coalescing enabled attached at 9,395 ms and painted ready
+at 9,416 ms: a 21 ms gap. Control `CDX_STARTUP_SKILLS_COALESCE=0` attached at
+9,066 ms and painted ready at 28,069 ms: a 19,003 ms gap. Its statically named
+`RefreshSessionSkills` handler waited 18,976 ms, with only 2 ms in five polls;
+draining took 13 ms and painting 7 ms. Restoring coalescing with full prewarming
+enabled produced a 32 ms attachment-to-ready gap. This controlled reversal
+identifies the duplicate foreground skills request as the late readiness
+dependency in these runs. It does not identify server CPU cost or remove every
+source of input latency.
+
+Input measurements now reconstruct the terminal screen from every received
+chunk, including chunks consumed by other waits. A raw contiguous-string match
+can miss text rendered through cursor movement and reused cells; the earlier
+retained mixed-marker timeout is therefore unconfirmed. The corrected settled
+session trial displayed and cleared all ten markers in 18.695–40.693 ms. Fresh
+startup remains different: after five input-free seconds following observed
+attachment, screen-confirmed single/two-token echoes took 4,106/3,711 ms with
+one worker. A two-worker two-token trial took 114 ms, with a 60 ms clear versus
+3,266 ms in the one-worker two-token trial. Both configured-session handoffs
+remained short (28/37 ms).
+
+That worker pair is preliminary: the admitted background slots differed, and a
+repeat failed before placement or Tokio initialization. Both excluded failures
+reached only `process_main` on launch request 6 / VM generation 11 while filesystem
+access stalled; neither measures worker or UI latency. No worker default has
+changed. A requested carrier cap is not proof of that many admitted carriers;
+the kernel's placement record must confirm actual capacity before increasing
+workers. The exact windows, identities, controls, screen-observer receipts, and
+excluded runs are retained in
+[`startup-skills-2026-10-31-live.json`](startup-skills-2026-10-31-live.json).
+
+The later `5db…` diagnostic kernel forms a separate group. Cold one-worker
+trial G had a 22 ms attachment-to-ready gap and a screen-confirmed 2,927.159 ms
+early draft echo. Warm two-worker trial H had a 26 ms gap, a 2,130.905 ms echo,
+and a 200.175 ms clear. These differ in service warmth and do not form a
+controlled worker comparison; two workers also do not guarantee a short echo.
+Trials I/J are excluded from isolated worker comparisons because subsequent
+launches began before the previous VM incarnation finished retiring. J's
+identity guard rejected the sample before input, and cleanup was confirmed.
+A stop-command acknowledgement proves acceptance, not retirement. Clean serial
+relaunch tests must wait for exact-incarnation retirement before another launch.
+The production default remains one async worker.
 
 ## What actually runs
 
@@ -243,9 +322,9 @@ The strongest background probe candidate is initial WebSocket prewarming. Before
 thread creation returns, its detached Tokio task can build a full turn context,
 refresh AGENTS/MCP projections, construct tool schemas, build a cold tool-search
 index, and only then send `generate=false`. This is optional preparation, with
-synchronous allocation-heavy work inside the async task. No existing setting
-disables only this startup work: provider-level WebSocket disabling also changes
-normal turn transport, and removed legacy WebSocket feature flags do not gate it.
+synchronous allocation-heavy work inside the async task. Before this change,
+provider-level WebSocket disabling also changed normal turn transport, and
+removed legacy WebSocket feature flags did not gate only startup preparation.
 Current source defers full initial WebSocket preparation on TRUEOS, retaining
 auth-only warming. `CDX_STARTUP_PREWARM=1` opts into the original full
 startup work for a same-binary comparison; `0` defers, and invalid/non-Unicode
@@ -258,7 +337,12 @@ including turn/tool/router/prompt preparation. Static selection markers make
 the executed policy visible without logging configuration values. The immediate
 model-catalog worker's first refresh is separately measured as
 `app_server.initial_model_refresh`; periodic refresh behavior is unchanged.
-The full-versus-deferred effect still needs a valid same-binary comparison.
+The same-binary full-prewarm control measured this task from 9,262 to 26,204 ms:
+16,942 ms wall time, 1,711 ms across 65 polls, with a 1,520 ms maximum poll.
+Session readiness still followed attachment by only 32 ms with skills coalescing
+enabled. This proves substantial optional work ran after readiness; it does not
+assign its pending time to CPU or establish a first-turn improvement. The
+default deferred path omits that full initial task while preserving auth warming.
 
 Current TRUEOS source gives automatic session configuration its own
 `RefreshSessionSkills { cwd }` event. Immediately before launching the existing
@@ -276,8 +360,9 @@ invalid/non-Unicode values retain coalescing with a static warning. The
 production-source harness proves the default can return while the background
 RPC is pending, while control `0` and explicit refresh commands still wait.
 `tui.startup_skills_refresh` measures the actual detached fetch future, and
-static enabled/disabled/coalesced markers identify the selected path. These are
-source and harness results, not a measured live startup improvement.
+static enabled/disabled/coalesced markers identify the selected path. The live
+same-binary control above confirmed the initial foreground wait disappears with
+coalescing; the background refresh and explicit refresh behavior remain intact.
 
 The [source-only skills audit](startup-skills-boundaries-2026-10-31.json)
 distinguishes existing host filesystem boundaries: walks and skill-file reads
@@ -291,8 +376,8 @@ separately. Bounded server-stage subspans and blocking queue/run aggregates woul
 be needed to attribute a remaining delay; this audit supplies candidates rather
 than an established cause or validated improvement.
 
-Prioritize the late handoff region before small pre-paint savings. If the new
-queue/attachment probes locate the delay in event draining or drawing, evaluate
+The duplicate-skills wait is now isolated and corrected. If subsequent
+queue/attachment probes locate another delay in event draining or drawing, evaluate
 bounded app-event batches and allowing redraw while protected input stays
 quarantined. The current guard disables the entire terminal event branch,
 including draw events. An inline awaited event handler can also pause progress;
@@ -362,6 +447,8 @@ python3 tools/codex_startup_report.py /path/to/capture.log
 python3 tools/codex_startup_report.py /path/to/capture.log --json > /tmp/startup-report.json
 # Replay one frozen launch window from an existing multi-boot collector:
 python3 tools/codex_startup_report.py /path/to/capture.log --start-offset 35552934 --end-offset 36113250 --json
+# Replay the later native-FS kernel's functional-check window:
+python3 tools/codex_native_fs_report.py /path/to/capture.log --start-offset 44117665 --end-offset 44552282 > /tmp/native-fs-report.json
 ```
 
 The existing 256 KiB kernel ring can evict startup before a later read. Use one
@@ -375,6 +462,25 @@ Repeat the same fresh/resume scenario using `single` and `isolated 2` profiles,
 with the same archive, kernel, configuration and stored history. Record cold
 versus already-running SQLite service separately. Do not mix user onboarding
 time with unattended startup time. Use several runs rather than one maximum.
+
+After stopping the owned app, prove its exact incarnation has retired before
+launching the next trial. The read-only gate accepts a frozen schema-2 startup
+summary, or original `codex_startup_report.py --json` output containing a hashed
+`capture_window` and exactly one application. Unbounded `parse_lines` output is
+insufficient. Capture and new receipt paths are explicit:
+
+```sh
+python3 tools/codex_retirement_gate.py --startup-summary /path/to/startup-proof.json --capture /path/to/capture.log --expected-sha256 392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89 --output /tmp/new-retirement-receipt.json
+```
+
+Continue only after exit status 0. The gate checks source bytes, launch context,
+VM generation, ordered filesystem drain and carrier-released offline status,
+then rejects later boot, application context, VM reuse, retained resources, and
+partial records. Its normal mode follows bounded appends on the same file; it
+does not stop apps or serialize the caller. Existing receipts are never replaced.
+Optional `--end-offset` replays a frozen historical endpoint and explicitly
+cannot establish that launching is safe now. A stop acknowledgement alone does
+not satisfy this gate.
 
 Application timing is enabled by `CODEX_STARTUP_TIMING_STDERR=1` (TRUEOS routes it
 to the resident logger) or `CODEX_STARTUP_TIMING_FILE` (four-column TSV). TRUEOS's
@@ -420,6 +526,90 @@ its first timing call. Request IDs relate their records but do not align these
 clock origins. Nested/concurrent durations overlap and must not be summed.
 Capture arrival time and historical lifetime maxima cannot reconstruct phases.
 The report exports recognized timing fields only, excluding unrelated logs.
+
+The later `5db…` kernel adds passive `codex-fs-native` observations before the
+observer's zero-native-carrier idle gate, covering profile/config opens before
+Tokio exists. The CLI archive remains `392016b8…`. A measured Codex or SQLite
+launch arms a 180-second window and at most 128 observation attempts, with sixteen
+shared slots and at most four numeric records per five-second observer tick.
+The request owns its observation through queuing and BSP processing; detaching
+the waiting caller does not cancel the disk operation. Records identify VM, VM
+generation, launch, native request, operation, phase, status, and elapsed ages;
+they contain no path, filename, content, or Debug payload. Phases are 1 queued,
+2 service entry, 3 filesystem await, 4 result ready, 5 before completion
+publication, 6 after publication, 7 before owner retirement, and 8 finished.
+
+A clean serial reproduction first proved exact-generation filesystem drain and
+offline carrier release for all four preceding launches. The fifth Codex launch
+(request 6, VM0 generation 11) again reached only `process_main`, before placement
+or Tokio. Native request 17806, operation 4 (read-file-range), remained in phase
+3 with status 0 over 36 snapshots: age 1,920–176,920 ms, queue delay zero, and
+unchanged released/full/missed/expired counters. This identifies an awaited
+filesystem operation; it does not identify which internal filesystem substep is
+waiting or attribute CPU. The bounded evidence is
+included in the [live report](startup-skills-2026-10-31-live.json).
+
+The separate native-FS replay tool hashes the selected raw byte window, groups
+only these fixed fields, and rejects malformed records. Use the same one-boot
+bounds as the app report: IDs can repeat after reboot. `full`, `missed`, `expired`,
+and `released` aggregates qualify coverage. Expiry removes observation only;
+release or absence does not prove filesystem completion. Short phases can fall
+between samples, and a stalled BSP observer can prevent samples entirely.
+This probe changes no request ordering, cancellation, index, or locking policy;
+the original `5db…` functional check established diagnostics only. New-kernel
+worker trials must be compared within
+that kernel rather than pooled with the earlier `cdff…` pair. Selected admission
+reads the clock under existing request-queue locks, including the retired-stream
+abort path, so this instrumentation still adds bounded work. Kernel/source
+identities and the functional replay are retained in
+[`startup-native-fs-2026-10-31.json`](startup-native-fs-2026-10-31.json).
+
+The subsequent range probe preserves phases 1–8 and adds operation-4 substeps:
+9 scratch/helper entry, 10 placement await, 11 record-cache work, 12 index await,
+and 13 range-read await. Phase 9 includes helper-entry validation as well as
+scratch allocation; it is not an allocation-only measurement. The public helper
+uses a no-op observer. Inactive or expired tickets stop reading the clock.
+The same slot, attempt, deadline, and emission bounds apply. Actual-source tests
+exercise pending futures, errors, cache hits, completion ordering, and expiry;
+the extended numeric parser rejects these substeps on other operations.
+
+In matched A/B kernels, A's fifth request remained in phase 13 for at least
+95,485 ms. B moved only the permanent service to the independently polled BSP,
+preserving the worker-selector call as an experimental control; the fifth AP-14
+launch completed. Both series proved exact-incarnation retirement before each
+next launch. B's sixth alias attempt failed fetching the Appstore catalog,
+before download, loader entry, or a Codex process context. It is excluded from
+the placement comparison, and is not evidence of another native-read stall.
+The [build pair](startup-read-range-pair-2026-10-31.json) and
+[live comparison](startup-read-range-placement-2026-10-31-live.json) preserve
+the exact source, artifact, capture, and protocol identities.
+
+Production source replaces the old E-core preference with an explicit private
+`CurrentExecutor | Bsp` policy. Only Skhynix registration requires BSP 0; an
+unavailable or incorrect BSP spawner returns `NotReady` without choosing an AP.
+Service requests, signals, driver ownership, task-pool retries, and other device
+registrations retain their existing behavior. The experiment switch and
+artificial worker-selector call are removed. No recursive executor polling or
+Tokio runtime change is part of this repair. A fresh production series is
+required because removing the artificial selector changes its global counter.
+That production check now passes on the fifth AP-14 launch. The subsequent
+catalog failure and successful separate retry are preserved separately in the
+[production live proof](startup-block-service-2026-10-31-live.json).
+
+Early input remains a separate measured issue. Across the six actual production
+startups, five-host-second post-attachment, two-token draft samples took
+2,505–3,404 ms to become visible on the reconstructed SSH terminal. The same
+short two-token paste bypasses image-path probing. Its synchronous composer
+path has no three-second timer; the frame scheduler's 120-FPS clamp is about
+8.33 ms. Neither observation establishes where the remaining delay occurs.
+The [input-path source audit](startup-input-path-2026-10-31.json) maps the gap.
+Next measurements should correlate the first few actual inputs through selection,
+application, frame request, scheduler receipt/emission, draw selection, render,
+backend flush, and synchronized-update return. Include the active-thread handler
+awaits that can postpone selection. Bound sample counts and the startup window,
+export static categories and numeric IDs only, and preserve real frame coalescing
+instead of pairing unrelated broadcasts. These additional probes are a proposed
+next experiment, not part of the verified current image.
 
 Remaining measurement gaps: archive rereading before launcher enqueue; allocator
 lock wait versus first-fit search time; SQLite Open's storage/connection creation
@@ -546,10 +736,13 @@ python3 tools/testpy/test_codex_startup_prewarm.py
 python3 tools/testpy/test_codex_startup_skills.py
 python3 tools/testpy/test_codex_dotenv.py
 python3 tools/testpy/test_allocation_probe_gates.py
+python3 tools/testpy/test_native_fs_progress.py
+python3 tools/testpy/test_codex_native_fs_report.py
+python3 tools/testpy/test_codex_retirement_gate.py
 ```
 
-These validate measurement behavior. They do not establish a hardware startup
-speedup or identify the cause of the previously observed multi-second stalls.
+These validate measurement behavior; live comparisons above supply the separate
+evidence for the duplicate-skills readiness improvement.
 The current report suite passes 27 tests; startup-skills host/forced-TRUEOS
 harnesses pass 26, and the handoff harness passes eight. The prewarm policy
 harness passes 24; dotenv validation passes two plain filter contracts plus six
@@ -557,6 +750,16 @@ tests through the actual Environment/C-ABI boundary. Skills coverage includes
 early completion/failure, stale cwd, one-shot consumption, explicit commands,
 control `0`, and independent before/after dispatch budgets. Two additional real
 TUI startup regressions are present but were not executed by these host harnesses.
+The native-FS tracker/glue harness passes twelve production-source tests, and
+its bounded replay parser passes fourteen. They cover expiry/reuse ownership,
+concurrent snapshots, the zero-carrier observer path, strict numeric export,
+partial windows, and file-append bounds; they do not establish filesystem CPU
+cost or the cause of an outage.
+The portable retirement gate passes 38 offline tests: its original 24 plus
+portable CLI, original-report normalization, exact-byte proof, and historical
+replay cases. Actual Serial3/4 frozen replays preserve the original window hashes
+and exact VM0 generations 7/9. These historical results do not authorize a later
+launch; each live transition requires a fresh retirement observation.
 
 The coupled builtins refresh and `cargo check --bin TRUEOS --locked` passed with
 the loader probes. Earlier bounded app builds hit 6 GiB and 10 GiB host compiler
@@ -601,7 +804,15 @@ The latest combined TRUEOS CLI check, including initial-skills coalescing,
 dotenv boundaries, and the renamed controls, passed in 136.092 seconds with
 2.73 GiB peak memory. All 43 watched source hashes stayed stable across the
 1,254-unit graph (922 packages, 71 patches). This validates compilation of the
-actual staged source graph. Its follow-up full package is building; code
-generation/linking, publication, and live startup effects for these newest
-changes remain unvalidated. Earlier package and live receipts describe their
-original archives and are preserved unchanged.
+actual staged source graph. The follow-up full package completed code generation,
+linking, packaging, and workload verification in 18m58s. Normal `cargo bp codex-cli`
+then reused the verified package and published it; an independent remote read
+matched archive SHA-256
+`392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89`
+(76,017,503 bytes). Build graph, source hashes, tests, and publication receipts
+are retained in
+[`startup-build-2026-10-31-skills.json`](startup-build-2026-10-31-skills.json).
+The same-binary live skills and prewarm controls are recorded separately above;
+first-turn latency and repeatable worker-count benefits remain unestablished.
+Earlier package and live receipts describe their original archives and are
+preserved unchanged.

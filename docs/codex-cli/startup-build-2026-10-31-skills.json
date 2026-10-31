@@ -1,0 +1,850 @@
+{
+  "schema": 2,
+  "recorded_utc": "2026-10-31T06:07:48.663315+00:00",
+  "result": "PASS",
+  "scope": "TRUEOS Codex initial skills refresh coalescing, mutable startup controls, bounded startup instrumentation, and verified normal cargo bp publication. Runtime comparisons are recorded separately.",
+  "behavior": {
+    "initial_skills_refresh": "The first same-cwd automatic session refresh shares the already-started background force_reload=true request. Explicit ListSkills and later session refreshes retain their original behavior.",
+    "skills_control": {
+      "key": "CDX_STARTUP_SKILLS_COALESCE",
+      "trueos_default": "enabled",
+      "disabled_value": "0",
+      "enabled_value": "1",
+      "invalid_value": "enabled with static warning",
+      "other_platforms": "unchanged"
+    },
+    "prewarm_control": {
+      "key": "CDX_STARTUP_PREWARM",
+      "default": "deferred",
+      "accepted_values": [
+        "0",
+        "1"
+      ],
+      "invalid_value": "deferred with static warning",
+      "typed_future_send_boundary_unchanged": true
+    },
+    "dotenv": "TRUEOS skips exact uppercase reserved TRUEOS_ keys before set_var and emits a bounded static marker without key/value payloads. Existing case-insensitive CODEX_ filtering and the kernel immutable namespace guard remain intact.",
+    "startup_dispatch_probes": {
+      "app_events": "8 before actual handoff paint and 8 after",
+      "server_events": "8 before actual handoff paint and 8 after",
+      "shared_deadline_seconds": 120,
+      "span_cap": 32,
+      "sample_ids": "1..8 before paint,9..16 after",
+      "event_names": "IntoStaticStr app name; fixed outer server variant name",
+      "operation_names": "none,other,list_skills",
+      "payload_logging_added": false
+    }
+  },
+  "artifact": {
+    "blueprint": {
+      "sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "bytes": 76017503,
+      "flags": 3,
+      "entry": 4319079424
+    },
+    "blueprint_path": "TRUEOS-Blueprints/dist/codex.bp",
+    "elf": {
+      "sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "bytes": 219999816
+    },
+    "container": "TRBP version1, flags3, LZ4 frame containing one module.elf x86-64 relocatable object"
+  },
+  "workload_receipt": {
+    "path": "TRUEOS-Blueprints/dist/codex.workload.json",
+    "sha256": "3cd9301b4fd897309bdf59d6de53c8efdb490be20517d35a3171d1191ea1bb2d",
+    "version": 1,
+    "artifact": {
+      "elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "required_imports": [
+        "trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1"
+      ]
+    },
+    "packages": {
+      "codex-arg0": {
+        "version": "0.162.0",
+        "manifest": "codex/codex-rs/arg0/Cargo.toml"
+      },
+      "codex-cli": {
+        "version": "0.162.0",
+        "manifest": "codex/codex-rs/cli/Cargo.toml"
+      },
+      "tokio": {
+        "version": "1.54.1",
+        "manifest": "TRUEOS-Buildins/vendor/tokio-1.54.1/Cargo.toml"
+      }
+    },
+    "files_sha256": {
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/pool.rs": "d1bc7db7658d8f0118ccb76b878112cd1f8d01957da82578b4441b6cb41d26c6",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/task.rs": "abe6b4bc3026468b2446291ae338f255c719b4102ac0cd4cc7e06039a2d416eb",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/scheduler/multi_thread/worker.rs": "6b503efc98d1c779ec29bdef6822454629356be6c2be1b90bd928942fc26a8b0",
+      "TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/trueos.rs": "83302b936cce85b094c3ebc28dde441f642cc88d3003d92bded8df63021a7ccc",
+      "codex/codex-rs/arg0/src/lib.rs": "2ed9ab3b8c6b364cd9c256178b41a98f7a72c0f9d5f31d021342084e2dbb92ce",
+      "codex/codex-rs/arg0/src/startup_timing.rs": "e11aa120586e9e9d7f391377a464ef11ba0128a39986a87e4665256033690193",
+      "codex/codex-rs/arg0/src/trueos_threads.rs": "787bcfcfe21743b329e4580beadb2d1be0d6e9adb8e65bdcf5b0f328604bd1a4",
+      "codex/codex-rs/cli/src/lib.rs": "bb416a9020678bbf0678fec197c4133606773862d85a1dd73cb2b4b6b8b0fd51",
+      "codex/codex-rs/cli/src/main.rs": "b67b043e605934df984a80c726e4d02428f11fa652a5c787a3e555fa78b059b2"
+    },
+    "all_nine_source_hashes_current": true,
+    "role": "Capability/source provenance for arg0, entrypoint and Tokio; complete dependency freshness is checked independently by the full build cache."
+  },
+  "mission_sources": {
+    "codex_repository_head": "5968eb5230181dc16dc40247eb6b43be835cb43a",
+    "files_sha256": {
+      "TRUEOS/tools/codex_startup_report.py": "73ab5d4187f949c34a85bd89ffa6921bdcd2c8355aefd43a52064157749c7a54",
+      "TRUEOS/tools/testpy/test_codex_dotenv.py": "1c0f11de4b4f58bba20e1e3a95662cd7448e65be3bc86e82ce31a33289d8eab7",
+      "TRUEOS/tools/testpy/test_codex_startup_prewarm.py": "dcab663f62259ab711b23b2b2e96c13eaeba5243008003c016648e1d152b10f5",
+      "TRUEOS/tools/testpy/test_codex_startup_report.py": "7351b1afbacaa4ae7b0fdb4679c56ca1500a6c2b2d3a9f2ea1608f4b5031549f",
+      "TRUEOS/tools/testpy/test_codex_startup_skills.py": "1effc432c0b22320182856f528078cc0bdc9e5b3dcdc701fdfc22596ea3237fb",
+      "codex/codex-rs/Cargo.lock": "125a6351e6ee2e20d05d2df3b9930bd0fde9dadd7931ae5c6f56bec3c0f3d644",
+      "codex/codex-rs/Cargo.toml": "5b0c15662cad9d65b0db76defcbc949b2ca87ffa4c8315a0e1fb82d6e0873362",
+      "codex/codex-rs/app-server/Cargo.toml": "7f98d50c967188a744cda09b98007c17aa48308a568915240804395a9dce7043",
+      "codex/codex-rs/app-server/src/models_refresh_worker.rs": "5d664b74681eb112c4ee207c2caf36bd1e88d0df4caff2a830d2cda2d10b8764",
+      "codex/codex-rs/arg0/Cargo.toml": "ac9ad0871cf1eba68277be0915ed5a302f7a1409721590913ad98b443cbdf223",
+      "codex/codex-rs/arg0/src/lib.rs": "2ed9ab3b8c6b364cd9c256178b41a98f7a72c0f9d5f31d021342084e2dbb92ce",
+      "codex/codex-rs/arg0/src/startup_timing.rs": "e11aa120586e9e9d7f391377a464ef11ba0128a39986a87e4665256033690193",
+      "codex/codex-rs/arg0/src/trueos_threads.rs": "787bcfcfe21743b329e4580beadb2d1be0d6e9adb8e65bdcf5b0f328604bd1a4",
+      "codex/codex-rs/cli/src/main.rs": "b67b043e605934df984a80c726e4d02428f11fa652a5c787a3e555fa78b059b2",
+      "codex/codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.lock": "5bd11fa6e2b84361e4afa60b3116642d0ceedc5f8bfc34a628784a35bee9ec72",
+      "codex/codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.toml": "e553e22d74a666ef597decd83157261b5940aeef7ede46483503594149cb6068",
+      "codex/codex-rs/core/Cargo.toml": "86bc0fdf7e5b97ffa983c3641f6149ebcad9e7d3fbfca5ee99b57d07038e8794",
+      "codex/codex-rs/core/src/session/mod.rs": "947feeb6d69ffe3cae6a7319bc49626af133c18d9263ed0908e7001ad358ce16",
+      "codex/codex-rs/core/src/session/session.rs": "35d70daf42342fb3e047f14020ccef738b99094c63e8a58911b8eef1f7cbde36",
+      "codex/codex-rs/core/src/session/startup_prewarm.rs": "5c105a30bf1619597f5ebe0fc7bae7bdc2c0724f1dc5fc9c98f45448ee99702c",
+      "codex/codex-rs/core/src/session/startup_prewarm_policy.rs": "35d5cb0331b395c02b040ca36e460707ca2af5a35342d4b1cf7f431e74d26b2e",
+      "codex/codex-rs/rollout/Cargo.toml": "5adc5dcac7d712b1787bf12d90d39d3e90b54686af681e758998222fd2466280",
+      "codex/codex-rs/rollout/src/metadata.rs": "cb6582d86655b6febc44828a645bf5c968f5233aaf30221b3cd4251d7b47df57",
+      "codex/codex-rs/rollout/src/state_db.rs": "c5016488360a5af4a372fe8657bde50dd4b356dace70ce14ec3ac2b0778b48b4",
+      "codex/codex-rs/startup-timing/Cargo.toml": "3391971e9449da53af0eac9c9de40262df3abda2d9dffa2f81215471fd5c7605",
+      "codex/codex-rs/startup-timing/src/lib.rs": "d0005e015630ca187cee9a93f672beda31e6b7cfae1e874c5dea42f3b4de8857",
+      "codex/codex-rs/state/Cargo.toml": "a71a30764bb4e308b8c120f6eb7ff9473b67263b82a16a3d1cf2f0d377604118",
+      "codex/codex-rs/state/src/sqlite.rs": "ec3686a69804202e69cc45ba80ec33096f0526dff60b946d41f7cc5ba0bff28b",
+      "codex/codex-rs/tui/src/app.rs": "9081f1443a40f8506ab2730d54537f71f45aa78aabefd23e465fc1566c154305",
+      "codex/codex-rs/tui/src/app/background_requests.rs": "a821bef10a6b6db10935da0fab9f5cae339ea028aba734fc3fc90c06ffb2196d",
+      "codex/codex-rs/tui/src/app/event_dispatch.rs": "fefe92a7bb433907aa41fb23ccbc6a538497505c742ed45289bcbfd6305daab8",
+      "codex/codex-rs/tui/src/app/session_lifecycle.rs": "2bda1eaf97e4f1a417a1bb4945b00adb6e7aa6fe0f1e2989ff51955d04b6d79c",
+      "codex/codex-rs/tui/src/app/startup.rs": "b92f0fe8b2d2ae327cb7b331c7740e3ac9dda7f74a79bb357e79a03d7133b3f9",
+      "codex/codex-rs/tui/src/app/startup_skills.rs": "6af5aecf983f9c5161c156f93fbf2a78d9f9516da26b114dffce4202732380d2",
+      "codex/codex-rs/tui/src/app/test_support.rs": "942f787ff884990eb5967bac9ff36ae87a63f96ca94ca51436a7f549fd4c9c58",
+      "codex/codex-rs/tui/src/app/tests.rs": "7baf01b0c46e20bac09b17c10a74bda137f95a1cc13fbc744c09eab597f267d2",
+      "codex/codex-rs/tui/src/app/tests/startup.rs": "2b0fecb7067c2a5770c033aea2563d073ae5618c1278d5b931cc96fea14dc6ac",
+      "codex/codex-rs/tui/src/app/thread_routing.rs": "477b312a366741a29f15c50ba5d54fa931e68c27a57a4c6c09ecb8a40a13bc08",
+      "codex/codex-rs/tui/src/app_event.rs": "92dfcd8a16a66603c25824894044d4fb75113da7ab641066209007b183e615b4",
+      "codex/codex-rs/tui/src/app_server_session.rs": "f9a8e9b7f5b594c0b92175d7f1191b9d4f741690bbad0d1a69891f4797491edd",
+      "codex/codex-rs/tui/src/chatwidget/session_flow.rs": "f806dc35c39daa6125361c8063d33ba3e9fd99eb5fab87482657112cf21f5340",
+      "codex/codex-rs/tui/src/lib.rs": "53d81c63a94a5b7935fd9cc77524ebb4b544b68ea3dcc5d5f31fc7e6c800e5a6",
+      "codex/codex-rs/tui/src/startup_orchestration.rs": "1576c4cb03923d051532f02894d2251e39e3ba78bba437640ab84e2cff1c8ec3"
+    },
+    "source_manifest_test_count": 43,
+    "all_43_current_after_pack_and_publication": true,
+    "staged_generated_lock_matches_actual_trueos_check": true,
+    "cache_coverage": {
+      "TRUEOS/tools/codex_startup_report.py": {
+        "required_exact_cache_input": false,
+        "exact_cache_input": false,
+        "reason": "Host report tool outside app dependency cache; independently hashed."
+      },
+      "TRUEOS/tools/testpy/test_codex_dotenv.py": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "TRUEOS/tools/testpy/test_codex_startup_prewarm.py": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "TRUEOS/tools/testpy/test_codex_startup_report.py": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "TRUEOS/tools/testpy/test_codex_startup_skills.py": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/Cargo.lock": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/app-server/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/app-server/src/models_refresh_worker.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/arg0/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/arg0/src/lib.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/arg0/src/startup_timing.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/arg0/src/trueos_threads.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/cli/src/main.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.lock": {
+        "required_exact_cache_input": false,
+        "exact_cache_input": false,
+        "reason": "Generated staged lock: independently hashed; original lock and generator are cache inputs."
+      },
+      "codex/codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.toml": {
+        "required_exact_cache_input": false,
+        "exact_cache_input": false,
+        "reason": "Generated staged manifest: independently hashed; originals and generator are cache inputs."
+      },
+      "codex/codex-rs/core/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/core/src/session/mod.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/core/src/session/session.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/core/src/session/startup_prewarm.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/core/src/session/startup_prewarm_policy.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/rollout/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/rollout/src/metadata.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/rollout/src/state_db.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/startup-timing/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/startup-timing/src/lib.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/state/Cargo.toml": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/state/src/sqlite.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/background_requests.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/event_dispatch.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/session_lifecycle.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/startup.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/startup_skills.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/test_support.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/tests.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/tests/startup.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app/thread_routing.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app_event.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/app_server_session.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/chatwidget/session_flow.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/lib.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      },
+      "codex/codex-rs/tui/src/startup_orchestration.rs": {
+        "required_exact_cache_input": true,
+        "exact_cache_input": true
+      }
+    },
+    "required_exact_cache_inputs": 40,
+    "separately_hashed_cache_exceptions": 3
+  },
+  "validation": {
+    "prewarm_and_environment": {
+      "existing_prewarm_tests": 24,
+      "dotenv_single_thread_child_contracts": 2,
+      "actual_environment_and_cabi_tests": 6,
+      "warnings": 0
+    },
+    "skills_and_existing_regressions": {
+      "production_extracted_host_tests": 13,
+      "production_extracted_trueos_tests": 13,
+      "existing_handoff_tests": 8,
+      "existing_report_tests": 26,
+      "independent_review": "pass; no blocking issue",
+      "real_tui_regressions_added": 2,
+      "real_tui_regressions_executed": false
+    },
+    "actual_trueos_cli_check": {
+      "exit_code": 0,
+      "steps": [
+        {
+          "label": "unit_graph",
+          "exit_code": 0,
+          "duration_seconds": 0.76
+        },
+        {
+          "label": "actual_trueos_cli_check",
+          "exit_code": 0,
+          "duration_seconds": 136.092
+        }
+      ],
+      "all_43_source_hashes_stable_across_check": true,
+      "unit_graph_units": 1254,
+      "unit_graph_packages": 922,
+      "root_features": [
+        "nopowersh",
+        "sh3",
+        "trueos-blueprint"
+      ],
+      "overlay_patch_count": 71,
+      "sysroot": "TRUEOS-Blueprints/target/trueos-blueprint/std/sysroots/00207f49002271ea",
+      "cgroup_peak_bytes": 2930122752
+    },
+    "full_release_pack": {
+      "exit_code": 0,
+      "cargo_clock_display": "18m 58s",
+      "cargo_clock_seconds": 1138
+    },
+    "prepublication_and_postpublication_full_audits": "PASS"
+  },
+  "elf_verification": {
+    "required_hooks": {
+      "trueos_cabi_thread_swap_activity_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      },
+      "trueos_cabi_thread_configure_placement_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      },
+      "trueos_cabi_thread_swap_child_role_v1": {
+        "binding": "GLOBAL",
+        "index": "UND"
+      }
+    },
+    "required_hooks_are_strong_global_undefined": true,
+    "cabi_imports": [
+      "trueos_cabi_async_fs_checked_write_begin_v1",
+      "trueos_cabi_async_fs_create_dir_all_start",
+      "trueos_cabi_async_fs_discard",
+      "trueos_cabi_async_fs_list_dir_start",
+      "trueos_cabi_async_fs_metadata_start_v2",
+      "trueos_cabi_async_fs_read_start",
+      "trueos_cabi_async_fs_remove_start",
+      "trueos_cabi_async_fs_rename_start",
+      "trueos_cabi_async_fs_result_len",
+      "trueos_cabi_async_fs_result_read",
+      "trueos_cabi_async_fs_status",
+      "trueos_cabi_async_fs_typed_list_dir_start",
+      "trueos_cabi_async_fs_typed_stat_start",
+      "trueos_cabi_async_fs_write_begin",
+      "trueos_cabi_async_fs_write_chunk",
+      "trueos_cabi_async_fs_write_commit",
+      "trueos_cabi_blueprint_child_read_v1",
+      "trueos_cabi_blueprint_child_send_v1",
+      "trueos_cabi_blueprint_child_spawn_program_v1",
+      "trueos_cabi_blueprint_child_status_v1",
+      "trueos_cabi_blueprint_child_terminate_v1",
+      "trueos_cabi_blueprint_launch_script_v1",
+      "trueos_cabi_blueprint_shutdown",
+      "trueos_cabi_blueprint_terminal_lease_current_v1",
+      "trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+      "trueos_cabi_calculator_evaluate",
+      "trueos_cabi_dns_resolve_ipv4",
+      "trueos_cabi_dobby_ui4_focus",
+      "trueos_cabi_dobby_ui4_key",
+      "trueos_cabi_dobby_ui4_observe_metadata",
+      "trueos_cabi_dobby_ui4_observe_prepare",
+      "trueos_cabi_dobby_ui4_observe_read",
+      "trueos_cabi_dobby_ui4_pointer",
+      "trueos_cabi_dobby_ui4_type",
+      "trueos_cabi_dobby_ui4_windows",
+      "trueos_cabi_env_var",
+      "trueos_cabi_log",
+      "trueos_cabi_poll_once",
+      "trueos_cabi_shell3_session_control_v1",
+      "trueos_cabi_shell3_session_open_v1",
+      "trueos_cabi_shell3_session_read_v1",
+      "trueos_cabi_shell3_session_write_v1",
+      "trueos_cabi_sleep_ms",
+      "trueos_cabi_spirit_agents_publish_v1",
+      "trueos_cabi_spirit_emotion_play",
+      "trueos_cabi_spirit_move",
+      "trueos_cabi_thread_available_parallelism",
+      "trueos_cabi_thread_configure_placement_v1",
+      "trueos_cabi_thread_current_id",
+      "trueos_cabi_thread_detach",
+      "trueos_cabi_thread_join",
+      "trueos_cabi_thread_set_name",
+      "trueos_cabi_thread_spawn",
+      "trueos_cabi_thread_swap_activity_v1",
+      "trueos_cabi_thread_swap_child_role_v1",
+      "trueos_cabi_write"
+    ],
+    "cabi_import_count": 56,
+    "kernel_resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+    "all_imports_in_typed_generated_kernel_resolver": true,
+    "compiled_markers": {
+      "CDX_STARTUP_PREWARM": true,
+      "core_startup_websocket_selected": true,
+      "core_startup_websocket_deferred": true,
+      "core_startup_prewarm_override_invalid": true,
+      "core.startup_websocket_prewarm": true,
+      "app_server.initial_model_refresh": true,
+      "runtime_workers_configured async_workers=": true,
+      "startup_handoff_frame_rendered": true,
+      "session_prompt_ready": true,
+      "startup_handoff_state change=": true,
+      "startup_app_event sample=": true,
+      "startup_server_event sample=": true,
+      "tui.startup_app_event": true,
+      "tui.startup_server_event": true,
+      "tui.startup_backend_fallback": true,
+      "tui.startup_handoff_frame": true,
+      "TRUEOS_STARTUP_REQUEST": true,
+      "poll_n=": true,
+      "poll_total_ms=": true,
+      "poll_max_ms=": true,
+      "timing_span_budget_exhausted": true,
+      "CDX_STARTUP_SKILLS_COALESCE": true,
+      "dotenv_reserved_trueos_key_ignored": true,
+      "tui.startup_skills_refresh": true,
+      "tui_startup_skills_override_invalid": true,
+      "tui_startup_skills_coalescing_enabled": true,
+      "tui_startup_skills_coalescing_disabled": true,
+      "tui_startup_skills_coalesced": true,
+      "core_startup_websocket_unavailable": true,
+      "RefreshSessionSkills": true,
+      "SkillsListLoaded": true
+    },
+    "compiled_marker_count": 31,
+    "obsolete_override_names_absent": {
+      "TRUEOS_CODEX_STARTUP_PREWARM": true,
+      "CODEX_TRUEOS_STARTUP_PREWARM": true
+    },
+    "cabi_signature_guard": {
+      "imports": 56,
+      "blueprint_contract_sha256": "7b45c952246148c9158a2c67d493370966ea6825941f75e411480252196dd661",
+      "kernel_contract_sha256": "7b45c952246148c9158a2c67d493370966ea6825941f75e411480252196dd661",
+      "complete_kernel_contract_sha256": "14ba897959d6b21a5fd1d5057087f004889d767b67c23bbe998b9ffbed84cc51",
+      "compatible": true
+    },
+    "kernel_reference": {
+      "elf_sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf",
+      "archive_sha256": "0e4cf9d6689421b9a1d935df3553f1d500f23818301edbf6724385bac58dd9ce",
+      "allocation_detail_probe_enabled": false,
+      "allocation_abi_probe_enabled": false
+    }
+  },
+  "postpublication_cache": {
+    "fresh": true,
+    "stamp": "codex/codex-rs/cli/target/trueos-blueprint/build-cache/codex.json",
+    "stamp_sha256": "13b07e83ac5de74ff6020716d1b7e519d4d27fd27dddceb708e220ee36386cb7",
+    "key_hash": "1e0f8c840f915d7b3ee6325976bf255e8797555df252003bc12a182f7844547f",
+    "environment_hash": "13ffd44a1e9b1c1a3e1b2c55451843142b5624ffd1abf13db443a5590d81ad6e",
+    "input_digest": "ebdec70c2977aa10e51c7977681044793590685fa6a576efe9a7f68ecf74bc70",
+    "current_input_digest": "ebdec70c2977aa10e51c7977681044793590685fa6a576efe9a7f68ecf74bc70",
+    "snapshot_stable": true,
+    "watched_roots": 24821,
+    "watched_entries": 88387,
+    "first_changed_paths": [],
+    "outputs": [
+      {
+        "path": "TRUEOS-Blueprints/dist/codex.bp",
+        "sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+        "matches_recorded": true,
+        "bytes": 76017503
+      },
+      {
+        "path": "TRUEOS-Blueprints/dist/codex.workload.json",
+        "sha256": "3cd9301b4fd897309bdf59d6de53c8efdb490be20517d35a3171d1191ea1bb2d",
+        "matches_recorded": true,
+        "bytes": 2237
+      }
+    ]
+  },
+  "compiler_configuration": {
+    "cargo_profile": "release",
+    "profile_settings": {
+      "opt-level": 3,
+      "lto": "fat",
+      "codegen-units": 1,
+      "incremental": false,
+      "panic": "abort",
+      "strip": "none"
+    },
+    "profile_manifest_sha256": "73784163844286b10cca466f9837aa88c5e5f5e4191a976e11070f1299984784",
+    "profile_manifest_identical_to_repository_HEAD": true,
+    "staged_profile_matches_original": true,
+    "compiler_optimization_settings_changed_for_this_mission": false,
+    "target_spec_sha256": "c124f4048fb623f2180a61568efeb08ba818c35981c667aff33a1d280f8ae87b",
+    "profile_manifest": "codex/codex-rs/cli/Cargo.toml",
+    "artifact_target": "x86_64-unknown-trueos",
+    "target_spec": "TRUEOS-Blueprints/apps/target.json",
+    "cache_key_hash": "1e0f8c840f915d7b3ee6325976bf255e8797555df252003bc12a182f7844547f",
+    "environment_hash": "13ffd44a1e9b1c1a3e1b2c55451843142b5624ffd1abf13db443a5590d81ad6e",
+    "actual_retry_builder_environment_matches_prior_builds": true,
+    "explicit_nonsecret_build_environment": {
+      "TRUEOS_BUILD_SCOPE": "1",
+      "CARGO_BUILD_JOBS": "1",
+      "RAYON_NUM_THREADS": "1"
+    },
+    "inherited_compiler_environment_hashes": {
+      "RUSTFLAGS": {
+        "present": false,
+        "sha256": null
+      },
+      "CARGO_ENCODED_RUSTFLAGS": {
+        "present": false,
+        "sha256": null
+      },
+      "RUSTC_WRAPPER": {
+        "present": false,
+        "sha256": null
+      },
+      "RUSTC_WORKSPACE_WRAPPER": {
+        "present": false,
+        "sha256": null
+      },
+      "RUSTC_BOOTSTRAP": {
+        "present": false,
+        "sha256": null
+      }
+    },
+    "compiler_flags_or_optimization_settings_changed_for_retry": false
+  },
+  "build_attempts": {
+    "first_attempt": {
+      "start_utc": "2026-10-31 05:04:37 UTC",
+      "last_sample_utc": "2026-10-31 05:36:54 UTC",
+      "outcome": "Final CLI compiler killed by host global OOM; no successful artifact produced by this attempt.",
+      "scope_memory_max_bytes": 15032385536,
+      "scope_swap_max_bytes": 0,
+      "peak_observed_bytes": 13853495296,
+      "memory_events": {
+        "low": 0,
+        "high": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 1,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      }
+    },
+    "successful_retry": {
+      "start_utc": "2026-10-31 05:40:35 UTC",
+      "exit_utc": "2026-10-31 06:03:09 UTC",
+      "exit_code": 0,
+      "cpu": 4,
+      "cpu_quota_percent": 100,
+      "nice": 15,
+      "cargo_jobs": 1,
+      "rayon_threads": 1,
+      "initial_limits": {
+        "memory_high_bytes": 10737418240,
+        "memory_max_bytes": 15032385536,
+        "swap_max_bytes": 4294967296,
+        "cpu_quota_percent": 100
+      },
+      "limit_adjustment": {
+        "utc": "2026-10-31 05:48:32 UTC",
+        "reason": "Soft memory target caused61percent memory pressure stalls while host MemAvailable remained about3.8GiB; increase soft target, reduce hard ceiling; same compiler flags/environment.",
+        "old_limits": {
+          "memory_high_bytes": 10737418240,
+          "memory_max_bytes": 15032385536,
+          "swap_max_bytes": 4294967296
+        },
+        "new_limits": {
+          "memory.high": "12884901888",
+          "memory.max": "13958643712",
+          "memory.swap.max": "4294967296"
+        },
+        "memory_pressure": "some avg10=92.00 avg60=38.81 avg300=11.36 total=40429664\nfull avg10=91.32 avg60=38.59 avg300=11.30 total=40228326"
+      },
+      "peak_observed_bytes": 12886970368,
+      "swap_peak_observed_bytes": 1815633920,
+      "memory_events": {
+        "low": 0,
+        "high": 26328,
+        "max": 0,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "swap_events": {
+        "high": 0,
+        "max": 0,
+        "fail": 75514
+      },
+      "observations": 1277,
+      "resource_scope_disappeared_utc": "2026-10-31 06:02:45 UTC",
+      "peak_is_last_observed_not_exact_post_exit_cgroup_peak": true,
+      "resource_changes_are_host_build_allocation_not_trueos_runtime_changes": true,
+      "compiler_flags_and_source_unchanged": true
+    }
+  },
+  "host_artifact_relocation": {
+    "scope": "Host diagnostic/build artifacts moved off RAM-backed /tmp; TRUEOS executable storage and startup behavior were unchanged.",
+    "relocated_path_count": 9,
+    "relocated_file_records": 1497,
+    "relocated_total_bytes": 2029632629,
+    "pre_removal_verified_by_relocator": true,
+    "independently_rehashed_after_publication": true,
+    "receipt_sha256": "48558e408ab2bc5a4f17e16657a1695cc9d601ee7609086db44154d150176c6a",
+    "verification": "Current disk trees/files rehashed using exact pre-relocation manifest serialization; all9 source paths remain symlinks to recorded targets.",
+    "entries": [
+      {
+        "source_path": "/tmp/codex-startup-source-target",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/codex-startup-source-target",
+        "files": 1485,
+        "bytes": 633461022,
+        "manifest_sha256": "28414b7d7957660abb1cd19da2da576598bbe8cec3f4c7dfcb55cf878031df01",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:38 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/codex-startup-source-target",
+        "manifest_still_matches_pre_relocation": true
+      },
+      {
+        "source_path": "/tmp/trueos-codex-eacb-kernel-compat",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-eacb-kernel-compat",
+        "files": 2,
+        "bytes": 219988100,
+        "manifest_sha256": "803126bffc63c36a5db16f842602aca41fdcb16d44de4016759af5af43c809d7",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:39 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-eacb-kernel-compat",
+        "manifest_still_matches_pre_relocation": true
+      },
+      {
+        "source_path": "/tmp/trueos-codex-final-app-audit",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-final-app-audit",
+        "files": 1,
+        "bytes": 219972736,
+        "manifest_sha256": "f225355887d3e8f3ffff479b9a740002bb0edb482dac60e5ba3cc1a0586a0901",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:39 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-final-app-audit",
+        "manifest_still_matches_pre_relocation": true
+      },
+      {
+        "source_path": "/tmp/trueos-codex-handoff-eacb51c8.bp",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-handoff-eacb51c8.bp",
+        "files": 1,
+        "bytes": 76068630,
+        "manifest_sha256": "53e951cd88da799f1e2bc9dbf377ef894e4a76ba8edb0deaec79b3137163f5e4",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:39 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-handoff-eacb51c8.bp",
+        "manifest_still_matches_pre_relocation": true,
+        "file_sha256": "eacb51c8a6a8e830a0028e65c3200d25030850484b6183d175584012ddf5ff10"
+      },
+      {
+        "source_path": "/tmp/trueos-codex-baseline-2797ba5f.bp",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-baseline-2797ba5f.bp",
+        "files": 1,
+        "bytes": 76067228,
+        "manifest_sha256": "5860bbb77bba732b886ed6e7c09b9d2d57b0312e3c09997fed6e9fe59252d032",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:40 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-baseline-2797ba5f.bp",
+        "manifest_still_matches_pre_relocation": true,
+        "file_sha256": "2797ba5fdbe601f56b0cca47621863a7e8e2a06d91865b88ce1eba6f11c3c286"
+      },
+      {
+        "source_path": "/tmp/trueos-codex-pre-skills-f9cce017.bp",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-pre-skills-f9cce017.bp",
+        "files": 1,
+        "bytes": 76019144,
+        "manifest_sha256": "538996b64583b242ebd920d2930356afe44f5ec6e30608ba08d4c8383a35d273",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:39:40 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-pre-skills-f9cce017.bp",
+        "manifest_still_matches_pre_relocation": true,
+        "file_sha256": "f9cce017b7a22ab6d90cd73115fd8a347a8e1df74e27995d79b7e617fad14247"
+      },
+      {
+        "source_path": "/tmp/codex-packed-audit-xfm8e9p3",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/codex-packed-audit-xfm8e9p3",
+        "files": 4,
+        "bytes": 620250762,
+        "manifest_sha256": "721e5cd56d8c7c8bd12b04f80ca3650273a6bdab7e5e302faf7ce774d9c88dac",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:40:24 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/codex-packed-audit-xfm8e9p3",
+        "manifest_still_matches_pre_relocation": true
+      },
+      {
+        "source_path": "/tmp/trueos-codex.bp",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex.bp",
+        "files": 1,
+        "bytes": 68024624,
+        "manifest_sha256": "4b4f3bd02e010fa6aa55222d7064265d613e8ddc600ca2ce12f714fb6027664c",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:40:24 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex.bp",
+        "manifest_still_matches_pre_relocation": true,
+        "file_sha256": "2dc447b85a7c32c744478d09b9a9e3f179f1c26ec0c029886cb6caf8f10a2652"
+      },
+      {
+        "source_path": "/tmp/trueos-codex-workload-populated-stamp.json",
+        "disk_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-workload-populated-stamp.json",
+        "files": 1,
+        "bytes": 39780383,
+        "manifest_sha256": "544a31caa82888a170e1ff1db2197d844634f25f458579bcbe892e44738c40c1",
+        "verified_equal_before_removal": true,
+        "old_path_preserved_as_symlink": true,
+        "utc": "2026-10-31 05:40:24 UTC",
+        "independently_rehashed_after_publication": true,
+        "current_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-workload-populated-stamp.json",
+        "manifest_still_matches_pre_relocation": true,
+        "file_sha256": "2f9c5e422276ca00e869153c1f0803ff81669902a94d2ec04936dcdd1c9a3bbb"
+      }
+    ],
+    "new_skills_elf_direct_disk_output": {
+      "logical_path": "/tmp/trueos-codex-skills-app-audit/module.elf",
+      "directory_symlink_target": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-skills-app-audit",
+      "resolved_path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-skills-app-audit/module.elf",
+      "sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "bytes": 219999816,
+      "created_directly_on_disk_not_relocated": true
+    },
+    "separate_ide_task_directories": "Not relocated: /tmp/codex-trueos-ide-check and /tmp/trueos-ide-runtime-probe belong to a separate task."
+  },
+  "publication": {
+    "command": "cargo bp codex-cli",
+    "working_directory": "TRUEOS-Blueprints",
+    "skip_publish_control_unset": true,
+    "exit_code": 0,
+    "completed_utc": "2026-10-31 06:04:17 UTC",
+    "normal_cache_hit": true,
+    "rust_artifact_codegen_repeated": false,
+    "cache_stamp_unchanged_across_publication": true,
+    "receipt_unchanged_across_publication": true,
+    "log_sha256": "e67160a0e9a0ffbc7056cd853baded24e3ab961469870f0ea42b8b1a117adbf9",
+    "proof_lines": [
+      "trueos-blueprint: Codex workload verified: placement, child roles, execution activity; blueprint_sha256=392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "trueos-blueprint: up to date: TRUEOS-Blueprints/dist/codex.bp",
+      "trueos-blueprint: published codex.bp\u00a7\u00a7392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89"
+    ],
+    "remote_verification": {
+      "source": "independent_gio_cat_of_smb_artifact",
+      "observed_utc": "2026-10-31T06:04:28.119352+00:00",
+      "artifact_name": "codex.bp\u00a7\u00a7392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "bytes": 76017503,
+      "matches_audited_local_artifact": true,
+      "only_codex_version": true
+    }
+  },
+  "provenance": {
+    "initial_failed_pack_log_sha256": "241b6a8d4c76abbaf74a3e256aeac442b73791e5f29bb1cdffc2937aa8219915",
+    "successful_retry_pack_log_sha256": "69ee0cc4865eeb807edef2054bd63fb117844bf81fa4cf99f9730db55c18f359",
+    "publication_log_sha256": "e67160a0e9a0ffbc7056cd853baded24e3ab961469870f0ea42b8b1a117adbf9",
+    "published_artifact_receipt_sha256": "f07e1c0e00abe6e9a56e27f51e675c1cbd20c3c7e6832f4c0a7460d9e692483c",
+    "prepublication_audit_sha256": "26c72d40109d74bb93d0917f52fbe7ea356a472aa2e31648c02a40aa6b38f5ce",
+    "postpublication_audit_sha256": "26c72d40109d74bb93d0917f52fbe7ea356a472aa2e31648c02a40aa6b38f5ce",
+    "postpublication_preflight_sha256": "81afa4f127fb936560657c3db138613cb766e5bc17f2a531f75e79a83392d468",
+    "actual_retry_environment_receipt_sha256": "ed56b7e2b6a7d1991956bca722494ee9636bb47e57234ae0c41e0306136bbbff",
+    "actual_trueos_check_before_sha256": "816a1c0c0c703f7f5da226379aa69ba71be54dbf2092781b1df469c517b48ad8",
+    "actual_trueos_check_after_sha256": "80f0c607c9e05c8586b43c100091a8165bc4db251a2c8531c5bde1d1b06fbb9a",
+    "actual_trueos_unit_graph_sha256": "85921472446b8010afa0cc38143b6f986ca960602ccc843daa8b29f7ec743685",
+    "prewarm_dotenv_frozen_receipt_sha256": "321f6c4df599b716134db6b801b808ceb53ba28b4b86abcd6bcc61d39b618489",
+    "skills_frozen_receipt_sha256": "e5ec75d664c747472314af4f3b10bb01665bc14f5b4063c74e3093a252d4058a",
+    "relocation_independent_audit_sha256": "c2dcc7964d2fc0a0b46a89d2091abf8fdc5f6031db956384d4f1c6baf7c96ad6",
+    "prior_f9_build_document": {
+      "path": "codex/docs/codex-cli/startup-build-2026-10-31-final.json",
+      "sha256": "1a7a87754d3632678540b63773a28ae82cdd58c89ef8f7e8e7af904559e3ffa5",
+      "unchanged": true
+    },
+    "prior_f9_remote_receipt_backup": {
+      "path": "/home/t4ce/.cache/trueos-codex-startup-host-artifacts-20261031/trueos-codex-f9cce-published-artifact.json",
+      "sha256": "85556d99af79a16272e890d54567393b8a8af5d2fb3768b6a8d2eb4d76269acf"
+    }
+  },
+  "limits": [
+    "Artifact identity and marker presence do not establish a runtime performance gain; live A/B results belong in separate runtime evidence.",
+    "Two real TUI regression tests were added but not executed; extracted production-source harnesses and the actual TRUEOS CLI graph check passed.",
+    "Resource peaks are sampled observations, not exact post-exit cgroup peaks. Retry had swap failure events but no OOM or hard memory-limit events.",
+    "Kernel ELF symbols are stripped; C ABI coverage uses the exact compiled generated resolver and signature guard.",
+    "The nine-file workload receipt covers capability provenance; full cache coverage independently verifies all watched dependency inputs.",
+    "No raw build environment, credentials, SMB URI, provider configuration, prompts, SQL or captured terminal payload is included."
+  ]
+}

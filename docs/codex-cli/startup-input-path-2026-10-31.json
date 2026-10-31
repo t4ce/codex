@@ -1,0 +1,477 @@
+{
+  "schema": "trueos-codex-startup-input-source-audit/v1",
+  "audit_date": "2026-10-31",
+  "status": "source-only; proposed probes and optional candidate are not implemented",
+  "scope": "Current first explicit Paste selection through composer application, frame scheduling, Draw selection, render and flush. No source edits, build, tests, or rig/network operations were performed for this audit.",
+  "application": {
+    "archive_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+    "archive_bytes": 76017503,
+    "build_evidence": "startup-build-2026-10-31-skills.json",
+    "build_evidence_sha256": "3b14408304d2d6340c475802d787a1fd306c1e8bbba463f34569cbf889084bc7",
+    "qualification": "Audit hashes identify the current checkout/dependency source, not a new application build. CLI archive remains unchanged during kernel work."
+  },
+  "sources": [
+    {
+      "path": "codex-rs/tui/src/app/startup.rs",
+      "sha256": "b92f0fe8b2d2ae327cb7b331c7740e3ac9dda7f74a79bb357e79a03d7133b3f9",
+      "locations": [
+        {
+          "name": "terminal_event_selection",
+          "line": 1508
+        },
+        {
+          "name": "terminal_event_dispatch",
+          "line": 1531
+        },
+        {
+          "name": "active_thread_await",
+          "line": 1500
+        },
+        {
+          "name": "terminal_branch_guard",
+          "line": 1363
+        },
+        {
+          "name": "existing_app_event_probe",
+          "line": 1464
+        },
+        {
+          "name": "existing_server_event_probe",
+          "line": 1570
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/app.rs",
+      "sha256": "9081f1443a40f8506ab2730d54537f71f45aa78aabefd23e465fc1566c154305",
+      "locations": [
+        {
+          "name": "handler",
+          "line": 867
+        },
+        {
+          "name": "paste_selected",
+          "line": 1125
+        },
+        {
+          "name": "paste_apply_call",
+          "line": 1146
+        },
+        {
+          "name": "draw_selected",
+          "line": 1154
+        },
+        {
+          "name": "draw_render_call",
+          "line": 1174
+        },
+        {
+          "name": "render_dispatch",
+          "line": 1247
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/chatwidget/interaction.rs",
+      "sha256": "12b62b13426414165cfcbd793129977248e20da27444cf34f06991d92aac57f2",
+      "locations": [
+        {
+          "name": "paste_handler",
+          "line": 601
+        },
+        {
+          "name": "burst_draw_guard",
+          "line": 618
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/bottom_pane/mod.rs",
+      "sha256": "6a9f08e84bd95a3bba0e4198d3f405861ba26673b44d19dec49c72cf3565a0be",
+      "locations": [
+        {
+          "name": "paste_handler",
+          "line": 1049
+        },
+        {
+          "name": "composer_apply",
+          "line": 1078
+        },
+        {
+          "name": "frame_request",
+          "line": 2282
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/bottom_pane/chat_composer/paste_input.rs",
+      "sha256": "076085b6f92cab0581e0dc6d9f4bc40888f03019bdb19f2a9dda7884234d73f0",
+      "locations": [
+        {
+          "name": "explicit_paste",
+          "line": 71
+        },
+        {
+          "name": "apply_paste",
+          "line": 154
+        },
+        {
+          "name": "optional_image_path",
+          "line": 197
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/bottom_pane/chat_composer.rs",
+      "sha256": "15998efb179d41564111bf907da1266773b87de7bbda6be59ae4082544671c61",
+      "locations": [
+        {
+          "name": "image_path_handler",
+          "line": 1239
+        },
+        {
+          "name": "image_dimensions",
+          "line": 1246
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/clipboard_paste.rs",
+      "sha256": "228362e5a85f3de2e039594acb392be6df1d630362cb0a0db09890a874715d4c",
+      "locations": [
+        {
+          "name": "path_normalization",
+          "line": 264
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/tui/frame_requester.rs",
+      "sha256": "ed05cdc6741c919430eb1910b0aa25e89a4aeba4c9510caa49ee4611d3ac5658",
+      "locations": [
+        {
+          "name": "scheduler_spawn",
+          "line": 42
+        },
+        {
+          "name": "immediate_request",
+          "line": 49
+        },
+        {
+          "name": "delayed_request",
+          "line": 54
+        },
+        {
+          "name": "scheduler_receive",
+          "line": 105
+        },
+        {
+          "name": "scheduler_timer",
+          "line": 101
+        },
+        {
+          "name": "draw_emit",
+          "line": 122
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/tui/frame_rate_limiter.rs",
+      "sha256": "67f461e4070265b1f7e7fc699f211beb4844f43ffda2eb38f41bd536a13a4ef6",
+      "locations": [
+        {
+          "name": "maximum_frame_rate",
+          "line": 13
+        },
+        {
+          "name": "deadline_clamp",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/tui/event_stream.rs",
+      "sha256": "f2cc745d113bd5ad01f978bb523bc6bf9bdffe429e0c3cc2d95c1af96ea483d7",
+      "locations": [
+        {
+          "name": "crossterm_poll",
+          "line": 213
+        },
+        {
+          "name": "draw_poll",
+          "line": 260
+        },
+        {
+          "name": "paste_mapping",
+          "line": 304
+        },
+        {
+          "name": "fair_draw_input_poll",
+          "line": 326
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/app/owned_transcript.rs",
+      "sha256": "6da0da8c0c4440a9aae08ed2f664b707008c59fbd4667a33603b5ecbdc26fa93",
+      "locations": [
+        {
+          "name": "owned_render",
+          "line": 116
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/tui.rs",
+      "sha256": "423c0da8c7042b6534afa59d9596afc2055c190b8ed65afda3ef804dea736a10",
+      "locations": [
+        {
+          "name": "resize_aware_draw",
+          "line": 1492
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/tui/src/custom_terminal.rs",
+      "sha256": "20fd1c7bd83062734b286c562ced02acc28728da07b066a3bb12cbf571d123d6",
+      "locations": [
+        {
+          "name": "draw",
+          "line": 371
+        },
+        {
+          "name": "first_render_begin",
+          "line": 385
+        },
+        {
+          "name": "first_render_done",
+          "line": 387
+        },
+        {
+          "name": "backend_flush",
+          "line": 453
+        },
+        {
+          "name": "first_flush_milestone",
+          "line": 454
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/startup-timing/src/lib.rs",
+      "sha256": "d0005e015630ca187cee9a93f672beda31e6b7cfae1e874c5dea42f3b4de8857",
+      "locations": [
+        {
+          "name": "deduplicated_milestone",
+          "line": 81
+        },
+        {
+          "name": "deduplicate_full_label",
+          "line": 90
+        },
+        {
+          "name": "span_budget",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "path": "codex-rs/Cargo.lock",
+      "sha256": "125a6351e6ee2e20d05d2df3b9930bd0fde9dadd7931ae5c6f56bec3c0f3d644",
+      "locations": [
+        {
+          "name": "image_dependency",
+          "line": 9220
+        }
+      ]
+    }
+  ],
+  "dependency_sources": [
+    {
+      "dependency": "image",
+      "version": "0.25.9",
+      "path": "src/images/dynimage.rs",
+      "sha256": "66001e5af9d022f5f73242405b62d44f6ec68805b2c9a417c83a954b697eb26f",
+      "locations": [
+        {
+          "name": "image_dimensions",
+          "line": 1644
+        }
+      ],
+      "origin": "locally cached Cargo registry source; no network fetch"
+    },
+    {
+      "dependency": "image",
+      "version": "0.25.9",
+      "path": "src/io/image_reader_type.rs",
+      "sha256": "de35b428b582b96ecd44465f15d5b3d6ba203a060614e79fb1d4866312c12b42",
+      "locations": [
+        {
+          "name": "into_decoder",
+          "line": 219
+        },
+        {
+          "name": "require_format",
+          "line": 325
+        },
+        {
+          "name": "open_impl",
+          "line": 351
+        },
+        {
+          "name": "file_open",
+          "line": 358
+        }
+      ],
+      "origin": "locally cached Cargo registry source; no network fetch"
+    }
+  ],
+  "execution_path": [
+    {
+      "step": 1,
+      "stage": "select_input",
+      "sources": [
+        "app/startup.rs:1508",
+        "app/startup.rs:1531",
+        "tui/event_stream.rs:304"
+      ],
+      "mechanics": "Main select branch maps and selects Paste, then awaits the app handler. The entire terminal-event branch can be suppressed by startup/history/protected-input or thread-switch guards."
+    },
+    {
+      "step": 2,
+      "stage": "apply_paste",
+      "sources": [
+        "app.rs:1125",
+        "chatwidget/interaction.rs:601",
+        "bottom_pane/mod.rs:1049",
+        "bottom_pane/chat_composer/paste_input.rs:71",
+        "bottom_pane/chat_composer/paste_input.rs:154"
+      ],
+      "mechanics": "Normal explicit paste applies synchronously through chat widget and composer, then syncs popups/recovery state. It flushes pending unbracketed typing and clears paste-burst state. No unconditional three-second explicit-paste delay appears in this path."
+    },
+    {
+      "step": 3,
+      "stage": "request_frame",
+      "sources": [
+        "bottom_pane/mod.rs:1078",
+        "bottom_pane/mod.rs:2282",
+        "tui/frame_requester.rs:49"
+      ],
+      "mechanics": "A successful ordinary composer edit requests redraw. Immediate frame request enqueues Instant::now on an unbounded MPSC channel; it does not paint inline."
+    },
+    {
+      "step": 4,
+      "stage": "schedule_frame",
+      "sources": [
+        "tui/frame_requester.rs:42",
+        "tui/frame_requester.rs:101",
+        "tui/frame_requester.rs:105",
+        "tui/frame_requester.rs:110",
+        "tui/frame_requester.rs:118",
+        "tui/frame_requester.rs:122"
+      ],
+      "mechanics": "A detached Tokio worker task receives the request, coalesces/clamps deadlines, then emits broadcast only through its Tokio sleep branch. Immediate redraw consequently depends on that task and timer progress. The rate limit is approximately8.33ms/120FPS, not three seconds."
+    },
+    {
+      "step": 5,
+      "stage": "select_draw",
+      "sources": [
+        "tui/event_stream.rs:260",
+        "tui/event_stream.rs:327",
+        "app/startup.rs:1508",
+        "app.rs:1154"
+      ],
+      "mechanics": "TuiEventStream alternates draw/input poll order; lagged broadcast also maps to Draw. Main-loop guards and awaited handlers can still postpone polling or handling it."
+    },
+    {
+      "step": 6,
+      "stage": "prepare_and_render",
+      "sources": [
+        "app.rs:1162",
+        "app.rs:1174",
+        "app.rs:1247",
+        "app/owned_transcript.rs:116",
+        "tui.rs:1492",
+        "custom_terminal.rs:371"
+      ],
+      "mechanics": "Draw may defer while unbracketed paste capture is active; otherwise it runs pre-draw work and owned/inline transcript rendering. Explicit short paste clears the burst state, so that heuristic is not an established explanation for controlled bracketed-paste lag."
+    },
+    {
+      "step": 7,
+      "stage": "flush_and_release_update",
+      "sources": [
+        "custom_terminal.rs:385",
+        "custom_terminal.rs:453",
+        "custom_terminal.rs:454",
+        "tui.rs:1562"
+      ],
+      "mechanics": "Rendering computes diffs/cursor updates and flushes the backend inside the enclosing synchronized-update closure. A new latency trace must also include return from outer sync_update because backend flush alone does not prove the terminal released the synchronized update or the remote client displayed it."
+    }
+  ],
+  "existing_marker_coverage": {
+    "first_frame_marks": "first_frame_render_begin/done and first_frame_backend_flushed are deduplicated milestones; they do not time later paste redraws.",
+    "handoff": "session_prompt_ready and startup_handoff_frame_rendered establish initial configured drawing, not subsequent edit latency.",
+    "dispatch": "Existing bounded AppEvent/server samples cover eight events before and eight after handoff within120s; they do not time Paste handling, frame scheduler queue/timer, or active-thread branch awaits.",
+    "unspanned_main_await": "app/startup.rs1500 awaits handle_active_thread_event; queued main-loop work before input selection can be outside existing sampled App/server coverage.",
+    "input_boundary": "The selected Paste marker would begin after crossterm delivery. It cannot alone partition SSH delivery, terminal-parser/reader delay, main-loop delay before polling, or remote screen presentation.",
+    "clock_qualification": "Future poll totals and lifetimes are wall-time observations, not CPU attribution. Host probe and application clocks must not be equated."
+  },
+  "minimal_probe_plan": {
+    "implemented": false,
+    "cohort": "First four Paste/edit dispatches during a120-second window from TUI loop initialization; classify only static event kinds.",
+    "bounds": "At most four input traces and eight active-thread dispatch spans; stop checking clocks once budget/deadline closes. Reuse the existing shared256-span cap; no per-session unbounded logging.",
+    "correlation": "Carry a bounded numeric input/request sequence through the real frame request and emitted draw; record first/last request IDs when requests coalesce. Do not infer pairing from unrelated unit broadcasts or insert an extra redraw just to time it.",
+    "phases": [
+      "input_selected",
+      "paste_applied",
+      "frame_requested",
+      "frame_scheduler_received",
+      "frame_scheduler_emitted",
+      "draw_selected",
+      "render_begin",
+      "render_done",
+      "backend_flush_begin",
+      "backend_flush_done",
+      "synchronized_update_done"
+    ],
+    "measurements": [
+      "Total handle_tui_event and paste-application wall intervals for the selected cohort.",
+      "Frame request enqueue-to-receive, requested deadline, actual emit time and due lateness; distinguish immediate and delayed requests.",
+      "Draw selection-to-render/flush/outer synchronized-update return.",
+      "Bounded actual handle_active_thread_event future spans with static event category to identify waits before the next terminal poll."
+    ],
+    "privacy": "Numeric sequences/times and static enums only; no pasted text, paths, filenames, cursor content, event Debug output, or payload serialization.",
+    "validation_targets": [
+      "Controlled fake time for immediate/delayed/coalesced frames without changing rate limiting.",
+      "First four inputs correlate once with eventual draw or explicit skip/error; expiry and exhausted budget stop clock reads.",
+      "Protected input, modal/overlay, owned-screen history, paste burst, resize and render-error behavior remains unchanged.",
+      "Compare with reconstructed-screen host probes; any remaining interval outside app selection-to-update-return is upstream/downstream and remains unpartitioned."
+    ]
+  },
+  "optional_extensionless_candidate": {
+    "implemented": false,
+    "measured": false,
+    "candidate": "After normalizing a possible pasted path, reject a missing/empty extension before calling image::image_dimensions.",
+    "source_basis": "normalize_pasted_path accepts one shell token as a relative path. image0.25.9 image_dimensions calls ImageReader::open (File::open), then into_dimensions/into_decoder requires a format. With no extension there is no format and this path cannot succeed; it does not guess content automatically.",
+    "expected_effect": "Avoid an unnecessary synchronous file open for extensionless ordinary one-token text while preserving currently successful image attachment paths.",
+    "limits": [
+      "Ordinary unquoted two-token probes already fail path normalization before image I/O, so this candidate does not explain or promise to fix their2\u20134s lag.",
+      "Do not reject every unknown extension without separately checking decoding-hook semantics.",
+      "No UI performance claim follows from this source observation; any future implementation needs no-file-open and preserved-valid-image tests."
+    ]
+  },
+  "fix_assessment": {
+    "current_decision": "Measure this chain before changing redraw behavior. No unconditional three-second timer was found in the audited explicit-paste/frame limiter path.",
+    "not_supported_by_current_evidence": [
+      "Bypassing frame coalescing/rate limiting or owned-screen/protected-input guards.",
+      "Treating long Tokio continuation ages as CPU consumption or proof of a lost wakeup.",
+      "Assuming more Tokio workers consistently fixes early input latency.",
+      "Claiming input selection or backend flush alone measures physical key arrival or remote screen presentation."
+    ],
+    "no_changes": [
+      "No CLI Rust or dependency source changed.",
+      "No new probes or optional path gate implemented.",
+      "No compiler optimization, executable persistence, transport, or runtime-worker policy change."
+    ]
+  }
+}

@@ -1,0 +1,924 @@
+{
+  "schema": "trueos-read-range-placement-kernel-pair/v1",
+  "date": "2026-10-31",
+  "result": "PASS-local-build-and-source-validation",
+  "purpose": "Matched A/B diagnostic kernels to isolate completion-service placement after the fifth Codex launch stalls within a native read-range request.",
+  "interpretation": {
+    "runtime_win_claimed_here": false,
+    "runtime_results": "Parent-owned live-capture aggregate contains the actual A/B trial outcomes. This receipt freezes builds, sources, tests and comparison purity.",
+    "cpu_causality_from_ages": false,
+    "completion_from_missing_observation": false
+  },
+  "parent_kernel": {
+    "elf_sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8",
+    "durable_reference": "startup-native-fs-2026-10-31.json",
+    "durable_reference_sha256": "29520bf0a2c4548aac0845eb5ea8b462c3e495205baa4c6d48f4b465eaf79e1b"
+  },
+  "A": {
+    "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+    "worktree": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+    "production_source_changes": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "8c487e7841d8018df569be5627f5e291e681d942e4470bd287f6f4d457a1b774"
+    },
+    "excluded_user_wip_verified": true,
+    "ssh_identity_preserved": true,
+    "private_buildins": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev",
+    "shared_caches": [
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/cargo",
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/host"
+    ],
+    "sibling_revisions": {
+      "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+      "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+    },
+    "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image.",
+    "staged_dependency_locks": {
+      "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+      "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+    },
+    "submodule_revisions": {
+      "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+      "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+    },
+    "mission_loader_files": {
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554"
+    },
+    "diff_review": "PASS independent ui_fairness subphase+isolation control reviews; host18+17+14 tests pass; Acontrol=false baseline worker policy.",
+    "gate_values": {
+      "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+      "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+    },
+    "launch_timing_harness": {
+      "source": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_launch_timing.py",
+      "sha256": "268d62c67cfdf32f8b51d8aa0bc42b3a1572b39c1eff94ab7611d39a3a199d61",
+      "tests_passed": 5
+    },
+    "diagnostic_candidate_receipt": {
+      "path": "/tmp/trueos-native-fs-read-range-private-20261031.json",
+      "sha256": "1436b5bc83cf82ecbb25606c9ce090647fbd5d9124c22952d6826a0f2aa41a75"
+    },
+    "comparison_parent_kernel_elf_sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8",
+    "placement_control": {
+      "name": "BLOCK_SERVICE_BSP_ISOLATION_CONTROL",
+      "candidate_A": false,
+      "candidate_B": true,
+      "scope": "Only prefer_eff_worker=true; current onlycaller src/usb3/skhynix.rs",
+      "purity": "Both variants call same preferEff worker picker once before control; native picker and shared cursor implementation unchanged.",
+      "bsp_contract": "workers::spawner_for_slot(0), reject actualslot!=0, missingBSP or task allocation failure returnsNotReady, no AP1/current executor fallback under control.",
+      "marker": "block-service: worker control=bsp-isolation chosen_slot=N actual_slot=0 pool_cap=N",
+      "signal_service_conservation": "Hash of entire source with only placement method/constant removed equals original5db source; service_task, signal, Request/Reply loop unchanged.",
+      "compiled_value": false
+    },
+    "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-ecore-20261031",
+    "artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73166160,
+        "sha256": "9fd0fffd73bbb52593342a31a9d33268599b11409e95c98f2aba7e526538086b"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63636967,
+        "sha256": "6ef41935a902549a35a1b460dddf0473328e14d47361d6e87f81ac726fc4a2fd"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "archive_members_verified": {
+      "TRUEOS.elf": {
+        "bytes": 73166160,
+        "sha256": "9fd0fffd73bbb52593342a31a9d33268599b11409e95c98f2aba7e526538086b"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "builtins_ready": {
+      "profile": "dev",
+      "sources": "d8b1ad50e038d5274499925afd69ebc2909fa482d96fa9c42878212301a5c886",
+      "database": {
+        "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+        "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+      },
+      "packages": {
+        "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+        "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+        "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+        "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+        "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+        "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+        "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+        "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+        "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+        "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+        "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+        "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+      }
+    },
+    "codex_cabi_compatibility": {
+      "blueprint_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "codex_elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "kernel_elf_sha256": "9fd0fffd73bbb52593342a31a9d33268599b11409e95c98f2aba7e526538086b",
+      "required_cabi_imports": 56,
+      "kernel_resolver_entries_matched": 56,
+      "kernel_resolver_entries_total": 352,
+      "missing": [],
+      "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+      "resolver_snapshot": "/tmp/trueos-codex-read-range-ecore-resolver.rs",
+      "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+      "depfile_sha256": "e27039f33bafe34e7a84af145ec1f9edcb245ad1a4e0c22d5298d303b592b085",
+      "matched_functions": {
+        "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+        "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+        "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+        "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+        "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+        "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+        "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+        "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+        "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+        "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+        "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+        "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+        "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+        "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+        "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+        "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+        "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+        "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+        "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+        "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+        "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+        "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+        "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+        "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+        "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+        "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+        "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+        "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+        "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+        "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+        "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+        "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+        "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+        "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+        "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+        "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+        "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+        "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+        "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+        "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+        "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+        "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+        "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+        "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+        "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+        "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+        "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+        "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+        "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+        "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+        "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+        "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+        "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+        "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+      }
+    },
+    "matched_pair_immutable": true,
+    "published": false,
+    "reset": false,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 8.361,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--check",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 0.365,
+        "result": 0
+      },
+      {
+        "argv": [
+          "cargo",
+          "build",
+          "--bin",
+          "TRUEOS",
+          "--locked"
+        ],
+        "elapsed_seconds": 97.178,
+        "result": 0
+      },
+      {
+        "argv": [
+          "/home/t4ce/.rustup/toolchains/nightly-2026-07-10-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy",
+          "--strip-debug",
+          "/home/t4ce/Repositories/TRUEOS/tgt/x86_64-unknown-trueos/debug/TRUEOS",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-ecore-20261031/TRUEOS.elf"
+        ],
+        "elapsed_seconds": 0.073,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tools/trueos-boot/bundle.py",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-ecore-20261031"
+        ],
+        "elapsed_seconds": 0.303,
+        "result": 0
+      }
+    ],
+    "started_utc": "2026-10-31T07:18:25.650266+00:00",
+    "completed_utc": "2026-10-31T07:20:13.347242+00:00",
+    "build_resources": {
+      "unit": "trueos-codex-read-range-ecore-kernel.scope",
+      "control_group": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/trueos-codex-read-range-ecore-kernel.scope",
+      "period_ms": 1000,
+      "finished_utc": "2026-10-31T07:20:14.688524+00:00",
+      "observed_memory_peak": 4294967296,
+      "observed_memory_swap_peak": 0,
+      "last_events": {
+        "low": 0,
+        "high": 0,
+        "max": 6546,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "configured": {
+        "cpu": "17",
+        "quota_percent": 100,
+        "memory_max_bytes": 4294967296,
+        "swap_max_bytes": 0,
+        "jobs": 1,
+        "nice": 15
+      }
+    },
+    "app_source_freeze": {
+      "files": 43,
+      "all_match": true,
+      "sha256": "7aada65b7bda7041a50e0ac8f7097cad25aca2d433cbbd6a1d883459216e6650"
+    },
+    "source_after": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "8c487e7841d8018df569be5627f5e291e681d942e4470bd287f6f4d457a1b774"
+    },
+    "local_build_validation": "PASS",
+    "control_value": false,
+    "candidate": "A: current Ecore policy plus read-range subphases",
+    "build_log": "/tmp/trueos-codex-read-range-ecore-kernel-build.log",
+    "linked_markers": {
+      "codex-fs-native vm=": true,
+      "codex-fs-native-summary full=": true,
+      "trueos-startup-v1 request=": true,
+      "control=bsp-isolation": false
+    }
+  },
+  "B": {
+    "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+    "worktree": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+    "production_source_changes": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "2d10e94df9174434b656e30874f9f18c557ca544367b75d0aadaf90652529d18"
+    },
+    "excluded_user_wip_verified": true,
+    "ssh_identity_preserved": true,
+    "private_buildins": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev",
+    "shared_caches": [
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/cargo",
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/host"
+    ],
+    "sibling_revisions": {
+      "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+      "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+    },
+    "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image.",
+    "staged_dependency_locks": {
+      "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+      "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+    },
+    "submodule_revisions": {
+      "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+      "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+    },
+    "mission_loader_files": {
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554"
+    },
+    "diff_review": "PASS: B differs from reviewed/built A ONLY BLOCK_SERVICE_BSP_ISOLATION_CONTROL false\u2192true; all other13 kernel source hashes and portabletool/test hashes identical.",
+    "gate_values": {
+      "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+      "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+    },
+    "launch_timing_harness": {
+      "source": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_launch_timing.py",
+      "sha256": "268d62c67cfdf32f8b51d8aa0bc42b3a1572b39c1eff94ab7611d39a3a199d61",
+      "tests_passed": 5
+    },
+    "diagnostic_candidate_receipt": {
+      "path": "/tmp/trueos-native-fs-read-range-private-20261031-B.json",
+      "sha256": "c8fa7ccb25eed7a7e5e5a92682cf663eff44ba72471236ea119ec5d32c0d6726"
+    },
+    "comparison_parent_kernel_elf_sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8",
+    "placement_control": {
+      "name": "BLOCK_SERVICE_BSP_ISOLATION_CONTROL",
+      "candidate_A": false,
+      "candidate_B": true,
+      "scope": "Only prefer_eff_worker=true; current onlycaller src/usb3/skhynix.rs",
+      "purity": "Both variants call same preferEff worker picker once before control; native picker and shared cursor implementation unchanged.",
+      "bsp_contract": "workers::spawner_for_slot(0), reject actualslot!=0, missingBSP or task allocation failure returnsNotReady, no AP1/current executor fallback under control.",
+      "marker": "block-service: worker control=bsp-isolation chosen_slot=N actual_slot=0 pool_cap=N",
+      "signal_service_conservation": "Hash of entire source with only placement method/constant removed equals original5db source; service_task, signal, Request/Reply loop unchanged.",
+      "compiled_value": true
+    },
+    "paired_candidate_A": {
+      "generation": "debug.codex-startup-read-range-ecore-20261031",
+      "elf_sha256": "9fd0fffd73bbb52593342a31a9d33268599b11409e95c98f2aba7e526538086b",
+      "archive_sha256": "6ef41935a902549a35a1b460dddf0473328e14d47361d6e87f81ac726fc4a2fd"
+    },
+    "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-bsp-20261031",
+    "artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "565deb95dedbaa9ff1e38899cc85c7fff4cc95b22662f0a9a41ea565116fbbff"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63618628,
+        "sha256": "8cbb18e7060d5e42e4798d0d63745409eb84784be6fbcae8287e0623e8ae9980"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "archive_members_verified": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "565deb95dedbaa9ff1e38899cc85c7fff4cc95b22662f0a9a41ea565116fbbff"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "builtins_ready": {
+      "profile": "dev",
+      "sources": "d8b1ad50e038d5274499925afd69ebc2909fa482d96fa9c42878212301a5c886",
+      "database": {
+        "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+        "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+      },
+      "packages": {
+        "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+        "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+        "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+        "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+        "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+        "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+        "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+        "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+        "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+        "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+        "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+        "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+      }
+    },
+    "codex_cabi_compatibility": {
+      "blueprint_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "codex_elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "kernel_elf_sha256": "565deb95dedbaa9ff1e38899cc85c7fff4cc95b22662f0a9a41ea565116fbbff",
+      "required_cabi_imports": 56,
+      "kernel_resolver_entries_matched": 56,
+      "kernel_resolver_entries_total": 352,
+      "missing": [],
+      "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+      "resolver_snapshot": "/tmp/trueos-codex-read-range-bsp-resolver.rs",
+      "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+      "depfile_sha256": "e27039f33bafe34e7a84af145ec1f9edcb245ad1a4e0c22d5298d303b592b085",
+      "matched_functions": {
+        "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+        "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+        "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+        "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+        "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+        "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+        "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+        "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+        "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+        "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+        "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+        "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+        "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+        "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+        "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+        "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+        "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+        "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+        "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+        "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+        "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+        "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+        "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+        "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+        "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+        "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+        "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+        "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+        "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+        "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+        "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+        "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+        "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+        "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+        "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+        "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+        "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+        "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+        "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+        "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+        "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+        "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+        "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+        "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+        "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+        "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+        "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+        "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+        "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+        "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+        "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+        "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+        "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+        "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+      }
+    },
+    "matched_pair_immutable": true,
+    "published": false,
+    "reset": false,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 6.366,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--check",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 0.388,
+        "result": 0
+      },
+      {
+        "argv": [
+          "cargo",
+          "build",
+          "--bin",
+          "TRUEOS",
+          "--locked"
+        ],
+        "elapsed_seconds": 73.664,
+        "result": 0
+      },
+      {
+        "argv": [
+          "/home/t4ce/.rustup/toolchains/nightly-2026-07-10-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy",
+          "--strip-debug",
+          "/home/t4ce/Repositories/TRUEOS/tgt/x86_64-unknown-trueos/debug/TRUEOS",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-bsp-20261031/TRUEOS.elf"
+        ],
+        "elapsed_seconds": 0.07,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tools/trueos-boot/bundle.py",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-bsp-20261031"
+        ],
+        "elapsed_seconds": 0.274,
+        "result": 0
+      }
+    ],
+    "started_utc": "2026-10-31T07:21:24.926662+00:00",
+    "completed_utc": "2026-10-31T07:22:46.864792+00:00",
+    "build_resources": {
+      "unit": "trueos-codex-read-range-bsp-kernel.scope",
+      "control_group": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/trueos-codex-read-range-bsp-kernel.scope",
+      "period_ms": 1000,
+      "finished_utc": "2026-10-31T07:22:48.041980+00:00",
+      "observed_memory_peak": 4294967296,
+      "observed_memory_swap_peak": 0,
+      "last_events": {
+        "low": 0,
+        "high": 0,
+        "max": 1404,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "configured": {
+        "cpu": "17",
+        "quota_percent": 100,
+        "memory_max_bytes": 4294967296,
+        "swap_max_bytes": 0,
+        "jobs": 1,
+        "nice": 15
+      }
+    },
+    "app_source_freeze": {
+      "files": 43,
+      "all_match": true,
+      "sha256": "7aada65b7bda7041a50e0ac8f7097cad25aca2d433cbbd6a1d883459216e6650"
+    },
+    "source_after": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "2d10e94df9174434b656e30874f9f18c557ca544367b75d0aadaf90652529d18"
+    },
+    "local_build_validation": "PASS",
+    "control_value": true,
+    "candidate": "B: same read-range probes; preferred-disk service explicitly BSP slot0",
+    "build_log": "/tmp/trueos-codex-read-range-bsp-kernel-build.log",
+    "linked_markers": {
+      "codex-fs-native vm=": true,
+      "codex-fs-native-summary full=": true,
+      "trueos-startup-v1 request=": true,
+      "control=bsp-isolation": true
+    },
+    "matched_source_pair": {
+      "path": "/tmp/trueos-codex-read-range-source-pair.json",
+      "sha256": "fa4eaa4d97be69e1d144b169d7e649a0cbcdf5a59a42048eaeb07d565ad68564",
+      "only_differing_source": "src/disc/block.rs",
+      "only_difference": "one bool false\u2192true",
+      "A_evidence_sha256": "032a13767bf8f94374a18751572ae4712a4146ff74eec8fe631fd9c1eb27aa89"
+    }
+  },
+  "source_pair_proof": {
+    "result": "PASS",
+    "different_kernel_source_files": [
+      "src/disc/block.rs"
+    ],
+    "difference": "Exactly one compile-time bool false\u2192true; no other bytes differ in block.rs and all other13 source hashes match.",
+    "A_block_sha256": "8c487e7841d8018df569be5627f5e291e681d942e4470bd287f6f4d457a1b774",
+    "B_block_sha256": "2d10e94df9174434b656e30874f9f18c557ca544367b75d0aadaf90652529d18",
+    "diff": "--- A/src/disc/block.rs\n+++ B/src/disc/block.rs\n@@ -14,7 +14,7 @@\n const DEFAULT_DMA_ALIGNMENT: u32 = 64;\n const DEFAULT_MAX_TRANSFER_BYTES: u64 = 256 * 1024;\n // Private matched A/B diagnostic: false preserves the current worker policy.\n-const BLOCK_SERVICE_BSP_ISOLATION_CONTROL: bool = false;\n+const BLOCK_SERVICE_BSP_ISOLATION_CONTROL: bool = true;\n \n #[derive(Copy, Clone, Debug, Eq, PartialEq)]\n pub enum Error {\n",
+    "A_sources": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "8c487e7841d8018df569be5627f5e291e681d942e4470bd287f6f4d457a1b774"
+    },
+    "B_sources": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+      "src/r/fs/native_request_progress.rs": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+      "src/r/fs/trueosfs.rs": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+      "src/disc/block.rs": "2d10e94df9174434b656e30874f9f18c557ca544367b75d0aadaf90652529d18"
+    },
+    "A_receipt": "/tmp/trueos-native-fs-read-range-private-20261031-A.json",
+    "B_receipt": "/tmp/trueos-native-fs-read-range-private-20261031-B.json"
+  },
+  "comparison_controls": {
+    "one_boolean_source_difference": true,
+    "name": "BLOCK_SERVICE_BSP_ISOLATION_CONTROL",
+    "A": false,
+    "B": true,
+    "same_preference_picker_invocation": "Both call the same Ecore preference picker exactly once before the compile-time control branch; selection cursor consumption is preserved.",
+    "B_placement": "Only prefer_eff_worker=true devices use explicit registered BSP slot0; wrong/missing slot or task-token allocation failure returnsNotReady without an AP/current-executor fallback.",
+    "device_scope": "Sole existing Ecore-preferred registration caller is Skhynix UAS. Other device registrations retain existing behavior.",
+    "native_carrier_selection": "Unchanged; no recursive polling added.",
+    "compiler_flags_and_profile": "Unchanged; host build CPU17/oneCPU/nice15/jobs1/4GiB/swap0 bounds affect compilation only.",
+    "other_work": "Service task/signals/driver Request/Reply loop and callback-stripped filesystem data-read work unchanged."
+  },
+  "read_range_subphases": {
+    "legacy1_to8": "Existing queued/service/filesystem/result/publish/published/retire/finished meanings retained.",
+    "9": "Before scratch allocation; includes initial activity and parent validation before placement.",
+    "10": "Before placement_for_io_async await.",
+    "11": "Before record-cache lookup or insertion.",
+    "12": "Before lookup_via_index_async await; reset11 before later cache insertion.",
+    "13": "Before trueos_fs::read_file_range_at await.",
+    "schema_scope": "New phases9..13 accepted only for fixed operation4(read-file-range).",
+    "bounds": "Same16slots,128attempts per selected measured launch,180s window,fourrecords per5s.",
+    "limitations": [
+      "Static subphases mark entry boundaries, not CPU time or file paths.",
+      "Phase9 cannot distinguish scratch allocation from initial helper validation.",
+      "Clock reads occur only for active, nonexpired observed tickets; no-op and inactive paths read none.",
+      "Expired or absent rows never imply filesystem completion."
+    ]
+  },
+  "tests": {
+    "actual_source_tracker_broker_and_range_tests": 18,
+    "range_new_cases": 6,
+    "numeric_parser_tests": 17,
+    "actual_service_start_method_tests": 14,
+    "service_test_modes": "Seven cases each for both values of the same production method control.",
+    "source_conservation": "Callback-stripped original FS helper and broker arm are byte-identical to parent source; block source with only placement method/control removed preserves every remaining service/driver/request-reply byte.",
+    "compiler": "Pinned host rustc --test -Dwarnings --edition=2024 --target x86_64-unknown-linux-gnu.",
+    "independent_review": "ui_fairness PASS subphase and both-values control source review."
+  },
+  "immutable_B_source_snapshot": {
+    "result": "PASS",
+    "source_B_immutable_snapshot": [
+      {
+        "path": "src/allcaps.rs",
+        "sha256": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+        "bytes": 11590
+      },
+      {
+        "path": "src/allocators.rs",
+        "sha256": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+        "bytes": 83824
+      },
+      {
+        "path": "src/disc/block.rs",
+        "sha256": "2d10e94df9174434b656e30874f9f18c557ca544367b75d0aadaf90652529d18",
+        "bytes": 25567
+      },
+      {
+        "path": "src/hv/blueprint/blueprint.rs",
+        "sha256": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+        "bytes": 82729
+      },
+      {
+        "path": "src/hv/checkpoint_legacy.rs",
+        "sha256": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+        "bytes": 35368
+      },
+      {
+        "path": "src/hv/guest_run.rs",
+        "sha256": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+        "bytes": 16109
+      },
+      {
+        "path": "src/hv/launch_timing.rs",
+        "sha256": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+        "bytes": 4418
+      },
+      {
+        "path": "src/hv/launcher.rs",
+        "sha256": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+        "bytes": 7679
+      },
+      {
+        "path": "src/hv/mod.rs",
+        "sha256": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+        "bytes": 232614
+      },
+      {
+        "path": "src/r/fs/native_request_progress.rs",
+        "sha256": "2ad7543d14bf62b2ceb38dbf220d2cb3280434a7e5cb6c252d7d38caf63af4c0",
+        "bytes": 19187
+      },
+      {
+        "path": "src/r/fs/request_broker.rs",
+        "sha256": "d8e7ec2d8df11c8d7faec1097a818b7ebb85aab100cca28706307fbbea3f853c",
+        "bytes": 38274
+      },
+      {
+        "path": "src/r/fs/trueosfs.rs",
+        "sha256": "917e115e7efd4c121c0fb1c8d8c59f884e93c807a127555e352030ab59bb0c87",
+        "bytes": 147489
+      },
+      {
+        "path": "src/r/services/codex_progress_service.rs",
+        "sha256": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+        "bytes": 5407
+      },
+      {
+        "path": "src/r/threads.rs",
+        "sha256": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+        "bytes": 34003
+      },
+      {
+        "path": "src/usb3/skhynix.rs",
+        "sha256": "df967ca1f265c83d1ab681524e253af7d31c7ff06345681b6edd459719c5f43b",
+        "bytes": 65395
+      },
+      {
+        "path": "tools/codex_native_fs_report.py",
+        "sha256": "9f965d46cd9a1641ee2b22060c69a0227701d0c7e2a1a0a24381e6203d2315fb",
+        "bytes": 6786
+      },
+      {
+        "path": "tools/testpy/test_block_service_bsp_control.py",
+        "sha256": "e68fbdfe5c1bbe6f7fa6635eaeb4c51d065928ff2f01c8ae333f95f0942e8341",
+        "bytes": 8521
+      },
+      {
+        "path": "tools/testpy/test_codex_native_fs_report.py",
+        "sha256": "6e79249c5d8e82f5fb6a80bcbb0b77e09b2f24f5a4d56c8b4bedcc9864287bac",
+        "bytes": 4532
+      },
+      {
+        "path": "tools/testpy/test_native_fs_progress.py",
+        "sha256": "55adde401992740438ef42be9bcc85090007be1fed5fcecb8130a4657bc44a2a",
+        "bytes": 10006
+      },
+      {
+        "path": "tools/testpy/test_native_fs_read_range_progress.py",
+        "sha256": "34c5830efa98109af2deea2af1a63ab866a427224af1dc14fdb8810a3417a43a",
+        "bytes": 14315
+      }
+    ],
+    "B_evidence_sha256": "53f74139b4d9e23ff44b69fbc7e7d2762eb6d382ddbe13351314f7c35ba5533c",
+    "B_artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "565deb95dedbaa9ff1e38899cc85c7fff4cc95b22662f0a9a41ea565116fbbff"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63618628,
+        "sha256": "8cbb18e7060d5e42e4798d0d63745409eb84784be6fbcae8287e0623e8ae9980"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "B_generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-read-range-bsp-20261031"
+  },
+  "portable_replay": {
+    "tool": "TRUEOS/tools/codex_native_fs_report.py extended private version captured by B snapshot",
+    "tool_sha256": "9f965d46cd9a1641ee2b22060c69a0227701d0c7e2a1a0a24381e6203d2315fb",
+    "command": "python3 tools/codex_native_fs_report.py CAPTURE --start-offset N --end-offset M",
+    "snapshot_scope": "Use one kernel boot per selected window; only fixed numeric fields exported. Original5db parser accepts legacy1..8 only until extended tools are promoted."
+  },
+  "evidence_references": [
+    {
+      "path": "/tmp/trueos-codex-read-range-matched-kernels.json",
+      "sha256": "35372f73ccbe00e2518db7bd6e2a1fd149a5833f93fecdb72b61d463e5ddefda"
+    },
+    {
+      "path": "/tmp/trueos-codex-read-range-source-pair.json",
+      "sha256": "fa4eaa4d97be69e1d144b169d7e649a0cbcdf5a59a42048eaeb07d565ad68564"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-read-range-private-20261031-A.json",
+      "sha256": "1436b5bc83cf82ecbb25606c9ce090647fbd5d9124c22952d6826a0f2aa41a75"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-read-range-private-20261031-B.json",
+      "sha256": "c8fa7ccb25eed7a7e5e5a92682cf663eff44ba72471236ea119ec5d32c0d6726"
+    },
+    {
+      "path": "/tmp/trueos-codex-read-range-ecore-kernel-evidence.json",
+      "sha256": "032a13767bf8f94374a18751572ae4712a4146ff74eec8fe631fd9c1eb27aa89"
+    },
+    {
+      "path": "/tmp/trueos-codex-read-range-bsp-kernel-evidence.json",
+      "sha256": "53f74139b4d9e23ff44b69fbc7e7d2762eb6d382ddbe13351314f7c35ba5533c"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-range-production-tests.log",
+      "sha256": "55bdbb450509b6c53a3eb8c52fdb5d0910314f581606f112917afdda1e0e01f3"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-range-report-tests.log",
+      "sha256": "b1dfeb5541836ff5461bb9e1cc6a5a23eaf3c11f5bc8eb3c3264606fd4547274"
+    },
+    {
+      "path": "/tmp/trueos-block-service-bsp-control-tests.log",
+      "sha256": "977a5939230e3c77e6949088b76ac5d6c5bcf925ff0fa567a643aed559e8fd34"
+    }
+  ]
+}

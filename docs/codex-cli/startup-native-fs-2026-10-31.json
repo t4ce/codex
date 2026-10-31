@@ -1,0 +1,887 @@
+{
+  "schema": "trueos-native-fs-diagnostics/v1",
+  "date": "2026-10-31",
+  "result": "PASS",
+  "purpose": "Bounded diagnosis of native synchronous filesystem requests during measured Codex/SQLite startup, including before native carrier placement.",
+  "interpretation": {
+    "classification": "Diagnostics implementation, build provenance and observer functional validation.",
+    "outage_fix_demonstrated": false,
+    "runtime_performance_gain_claimed": false,
+    "cpu_time_inference": false,
+    "completion_from_absence_inference": false,
+    "notes": [
+      "The earlier outage retained one native synchronous broker request at stage=hull, with no placed Codex native jobs and no async-FS backlog. This does not identify the blocking layer.",
+      "G proves the diagnostic observer can emit terminal counter summaries before/without carrier-dependent output. It does not reproduce or fix the fifth-launch outage.",
+      "Later G/H/I/J/K trial comparisons and their runtime outcomes belong to the separate live-capture evidence; this document does not aggregate them.",
+      "Host build CPU affinity and sampled monotonic ages do not measure guest CPU execution time.",
+      "Missing, expired, skipped or released observations alone do not establish I/O completion."
+    ]
+  },
+  "baseline": {
+    "source_commit": "27f1144493181e21cac9669122f2c95ffeae6d57",
+    "parent_kernel_elf_sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf",
+    "same_instrumented_off_gates": {
+      "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+      "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+    },
+    "existing_profile_and_compiler_flags_unchanged": true,
+    "unrelated_original_user_wip_excluded": true,
+    "clean_sibling_revisions": {
+      "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+      "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+    }
+  },
+  "implementation": {
+    "promoted_source_files": [
+      {
+        "path": "src/r/fs/request_broker.rs",
+        "sha256": "c82c1ef1cd0e64c967666e4147058cb478bcb5be7c7aac13e69d4c706055c60e",
+        "bytes": 37617,
+        "matches_private_built_or_tested_source": true
+      },
+      {
+        "path": "src/r/fs/native_request_progress.rs",
+        "sha256": "eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7",
+        "bytes": 18896,
+        "matches_private_built_or_tested_source": true
+      },
+      {
+        "path": "src/r/services/codex_progress_service.rs",
+        "sha256": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+        "bytes": 5407,
+        "matches_private_built_or_tested_source": true
+      },
+      {
+        "path": "src/hv/mod.rs",
+        "sha256": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+        "bytes": 232614,
+        "matches_private_built_or_tested_source": true
+      }
+    ],
+    "initial_before_after_snapshot": [
+      {
+        "path": "src/r/fs/request_broker.rs",
+        "before_sha256": "a4f2b8601606ee37f680ee5077ecff621201559fb7f9c387fa007821b4c1b22b",
+        "after_sha256": "c82c1ef1cd0e64c967666e4147058cb478bcb5be7c7aac13e69d4c706055c60e",
+        "original_unchanged": true,
+        "bytes": 37617
+      },
+      {
+        "path": "src/r/fs/native_request_progress.rs",
+        "before_sha256": null,
+        "after_sha256": "eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7",
+        "original_unchanged": true,
+        "bytes": 18896
+      },
+      {
+        "path": "src/r/services/codex_progress_service.rs",
+        "before_sha256": "69f99f50aebf8438db06670fa4ec51d0083450008ed61a370230108fff9c7425",
+        "after_sha256": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+        "original_unchanged": true,
+        "bytes": 5407
+      },
+      {
+        "path": "src/hv/mod.rs",
+        "before_sha256": "0f640c89396938d4e6f6b35275f235bc62ab1a27545a85b133f502134f945fc9",
+        "after_sha256": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+        "original_unchanged": true,
+        "bytes": 232614
+      }
+    ],
+    "selection": "Measured launch Trace: codex/codex-check and sqlite names, actual VM incarnation plus unique launch request; other applications are unarmed.",
+    "bounds": {
+      "owners": 64,
+      "pending_slots": 16,
+      "attempts_per_measured_launch": 128,
+      "window_ms": 180000,
+      "observer_period_ms": 5000,
+      "max_records_per_tick": 4,
+      "clock_when": "arm once per selected measured launch, admitted nonfull selected attempts, active ticket phase changes, observer while armed/pending or new counters",
+      "no_clock_when": [
+        "unselected/invalid owner",
+        "wrong VM generation",
+        "inactive/exhausted launch",
+        "full tracker",
+        "inactive/stale ticket",
+        "quiet observer",
+        "observer limit zero"
+      ]
+    },
+    "numeric_schema": {
+      "operation": {
+        "1": "prepare-volatile-files",
+        "2": "read-file",
+        "3": "read-file-len",
+        "4": "read-file-range",
+        "5": "stat",
+        "6": "typed-stat",
+        "7": "write-file-begin",
+        "8": "write-file-begin-typed",
+        "9": "create-dir-all",
+        "10": "write-file-chunk",
+        "11": "write-file-finish",
+        "12": "write-file-abort",
+        "13": "html-tree",
+        "14": "json-all",
+        "15": "list-dir",
+        "16": "typed-list-dir",
+        "17": "remove",
+        "18": "exists"
+      },
+      "phase": {
+        "1": "queued: service future not polled",
+        "2": "service: may be waiting stream turn or owner state",
+        "3": "filesystem: entered existing filesystem operation",
+        "4": "result available",
+        "5": "completion publication entered",
+        "6": "completion publication returned",
+        "7": "owner retirement entered",
+        "8": "owner retirement returned"
+      },
+      "status": {
+        "0": "not applicable/pending",
+        "1": "ok",
+        "2": "filesystem error",
+        "3": "duplicate completion"
+      },
+      "counters": [
+        "full: selected attempts rejected by 16-slot bound",
+        "missed: full plus arm/admit contention",
+        "expired: observations discarded at deadline, not disk operations",
+        "released: observation owner dropped; this alone does not prove disk completion"
+      ]
+    },
+    "race_protocol": [
+      "Unique monotonically assigned launch-budget epoch prevents stale admission consuming a rearmed window. VM generation captured from launch context and rechecked from live VM atomic on admission.",
+      "Writer claims exact request ID to RESERVED before any slot field stores; expiry cannot reuse while reserved. Stale ticket after expiration/reuse cannot mutate or clear replacement.",
+      "Writer release fence after odd version pairs with reader acquire fence even when a relaxed field read observes a concurrent write; final version/id recheck skips it. Every field is atomic and reads never spin.",
+      "Expiration only clears numeric observation slots. It never mutates broker queue, filesystem futures, completion contents, owner requests, device state, or cancellation policy."
+    ],
+    "instrumentation_cost": "Admission clock/atomics run under the existing request queue lock; retired write abort admission also has the existing owner registry lock. This is bounded selected-request instrumentation overhead, not a free observation.",
+    "limitations": [
+      "This is diagnostics, not a demonstrated fix for the outage.",
+      "Five-second sampling can miss completed phase transitions; concurrent snapshots can skip rows.",
+      "After 180 seconds a pending operation is intentionally unobserved, not canceled or marked complete.",
+      "After the 128-attempt budget is spent, later operations are intentionally untracked. Full/missed/expired/released counters qualify missing rows.",
+      "BSP starvation can prevent the observer itself from running; absent records cannot prove that no request is pending.",
+      "Host-extracted production hooks validate diagnostic integration, not TRUEOS kernel/device behavior; an actual kernel source check/build is still required.",
+      "A publisher suspended while holding RESERVED is never reclaimed or reused until it resumes; that slot may remain unavailable, but RESERVED alone cannot keep observer clock reads active beyond the armed window."
+    ],
+    "independent_source_review": {
+      "agent": "ui_fairness",
+      "result": "PASS",
+      "reviewed": [
+        "exclusive exact-id writer claim before stores",
+        "drop/expiry cannot clear a reused id",
+        "bounded snapshot and launch epoch quota",
+        "all20 filesystem arms unchanged except observation hooks",
+        "observer before idle gate",
+        "counter summary"
+      ],
+      "final_followup": "PASS: eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7 RESERVED-only idle guard reviewed; preserves no-reuse and stops clock after window expiration."
+    },
+    "existing_filesystem_behavior": "All20 process_request completion arms are byte-identical to baseline after removing only diagnostic hooks; no index/device/I/O scheduling/cancellation policy change.",
+    "observer_location": "Native broker progress_lines is called on the BSP before the existing active-carrier idle gate. It uses bounded atomics and never takes VM or filesystem locks.",
+    "http_serial_handler_explanation": [
+      "The TrueOSFS HTTP loop awaits filesystem preparation and streaming serially, so a blocked filesystem future can prevent it from processing later Established/Closed events.",
+      "The listener is replenished while handling Established; once the spare listening socket is consumed, later connections can be refused while the HTTP task is still alive."
+    ]
+  },
+  "tests": {
+    "production_source_host_tests": 12,
+    "tracker_tests": 9,
+    "extracted_broker_hook_tests": 3,
+    "report_tests": 14,
+    "production_compile": "Pinned rustc, --test -Dwarnings --edition=2024 --target x86_64-unknown-linux-gnu; temporary host output.",
+    "production_source_items": 9,
+    "structural_checks": [
+      "observer_before_idle_gate",
+      "arm_before_guest_process_context",
+      "all20_completion_arms",
+      "service_before_owner_locks",
+      "filesystems_unchanged_after_stripping_hooks",
+      "retired_abort_owns_ticket"
+    ],
+    "portable_harness_from_other_working_directory": "PASS",
+    "optional_baseline_conservation_mode": "PASS; ordinary portable tests do not depend on a saved baseline.",
+    "promotion_tests": {
+      "utc": "2026-10-31T06:44:44Z",
+      "result": "PASS",
+      "files": [
+        {
+          "path": "src/r/fs/request_broker.rs",
+          "sha256": "c82c1ef1cd0e64c967666e4147058cb478bcb5be7c7aac13e69d4c706055c60e",
+          "bytes": 37617,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "src/r/fs/native_request_progress.rs",
+          "sha256": "eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7",
+          "bytes": 18896,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "src/r/services/codex_progress_service.rs",
+          "sha256": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df",
+          "bytes": 5407,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "src/hv/mod.rs",
+          "sha256": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+          "bytes": 232614,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "tools/testpy/test_native_fs_progress.py",
+          "sha256": "f43298acb51a9c1eb9c9199b7a5b33308058a0c45805e6906df0e57647cdc714",
+          "bytes": 9680,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "tools/codex_native_fs_report.py",
+          "sha256": "b109cc96ebb1a9a42a2a7b18a9ff8e42b566adbab12f5ccbe486961450402fae",
+          "bytes": 6630,
+          "matches_private_built_or_tested_source": true
+        },
+        {
+          "path": "tools/testpy/test_codex_native_fs_report.py",
+          "sha256": "251ce1fd63c4108ff8982567d9f1db99be042c431eeff1835e3d154193b57c0f",
+          "bytes": 3942,
+          "matches_private_built_or_tested_source": true
+        }
+      ],
+      "production_tests_passed": 12,
+      "report_tests_passed": 14,
+      "patch_sha256": "151869c99235fe74c3cbb1364f07109a454e725c29ca56caa1f83c34534d3278",
+      "runtime_source_changed_after_kernel_build": false
+    }
+  },
+  "local_build": {
+    "baseline": "27f1144493181e21cac9669122f2c95ffeae6d57",
+    "worktree": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+    "production_source_changes": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "c82c1ef1cd0e64c967666e4147058cb478bcb5be7c7aac13e69d4c706055c60e",
+      "src/r/fs/native_request_progress.rs": "eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df"
+    },
+    "excluded_user_wip_verified": true,
+    "ssh_identity_preserved": true,
+    "private_buildins": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev",
+    "shared_caches": [
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/cargo",
+      "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev/host"
+    ],
+    "sibling_revisions": {
+      "TRUEOS-Buildins": "3f1f6e90b72ff672db8e0b75b30f6c917054f8c9",
+      "TRUEOS-Blueprints": "808fe3337eff1286ddcd6ad2d7e142589640b450"
+    },
+    "comparison_limit": "Kernel baseline is clean current HEAD; running rig baseline identity is separate evidence. No assumption that committed baseline equals existing served image.",
+    "staged_dependency_locks": {
+      "Cargo.lock": "3d3967e921ce6942176a733acdbad989d9ad8aa529aa858731ae4dfc1652b84e",
+      "tools/trueos-boot/Cargo.lock": "3b3d2ed0301ab74a9a2c62089ab1bfcd43ceebb9d763684f2b1f5314be2f743c"
+    },
+    "submodule_revisions": {
+      "vendor/infer": "31bb6bbeb36084be56d18240b9405ef9998310e7",
+      "vendor/microfont": "3901ae3e1a18c1708033e2cf96983096cc3826c4"
+    },
+    "mission_loader_files": {
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "0f640c89396938d4e6f6b35275f235bc62ab1a27545a85b133f502134f945fc9",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554"
+    },
+    "diff_review": "PASS: exact reviewed4-file nativeFS progress candidate atop the unchanged instrumented-OFF baseline; no index/FS/device scheduling or cancellation changes.",
+    "gate_values": {
+      "HV_ALLOC_DETAIL_PROBES_ENABLED": false,
+      "CODEX_ALLOC_ABI_PROBES_ENABLED": false
+    },
+    "launch_timing_harness": {
+      "source": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_launch_timing.py",
+      "sha256": "268d62c67cfdf32f8b51d8aa0bc42b3a1572b39c1eff94ab7611d39a3a199d61",
+      "tests_passed": 5
+    },
+    "diagnostic_candidate_receipt": {
+      "path": "/tmp/trueos-native-fs-progress-private-20261031.json",
+      "sha256": "db9c29dfcbd82d79a77b8154bbe94d907a07316c9f7860dc967fd07a88469d32"
+    },
+    "comparison_parent_kernel_elf_sha256": "cdff48929654670fac4ee27ee9c7a52c020a6cdbd23f0ea0f4746074a759accf",
+    "generation": "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-native-fs-progress-20261031",
+    "artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63634714,
+        "sha256": "649982155897d34d33ba9600f095e297b08c24012dc2e427748c9dd9bf86d7db"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "archive_members_verified": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "builtins_ready": {
+      "profile": "dev",
+      "sources": "d8b1ad50e038d5274499925afd69ebc2909fa482d96fa9c42878212301a5c886",
+      "database": {
+        "app.db": "4a69b0ac6083e68d8af7e4251befc5b570a9d94c04fdee6cf2ab6bea28eb36d2",
+        "app.db.lz4": "583a1e1550ae829a022424baeb92a97f46a3798eb10d37ed7d78c3cfb4962204"
+      },
+      "packages": {
+        "apps": "cbd42c45f9c4748fb7a22a65584d35ebd5530249e75a08d03d7bc5dee3a8464e",
+        "commander": "96798607bb166042d8fd19d3c70b819539efe881d8b9d1f5667d958533bd5bbc",
+        "hull": "2b004f776b64dc1b31d44fccd9523695e72f67ae85cbd59e6e99a5de8fc2c2fd",
+        "hyper": "52dcd25977c059ab94253d601690f5c82e37434456d8466c684636fb7854bf0b",
+        "ssh": "c4c31aefc5cc8c5ad343f82ea6361e733bf0b5180f787f95b4885155085fe331",
+        "img": "66ea2b1d582d8680a83ece56ce4cbb5b7b8bd0b27eed8934d09aeb86c0e22a54",
+        "os": "37ee21689faa1c13b50b2e5fa75176bfaa54918f370f0143a5c701c76248c902",
+        "backup": "5ea8205a2ecf725de0274f82f666533ce03b2a48a865a15c8e8a278b94f0246b",
+        "termdir": "027e57b7f5b8670f0028bc40552d8e8dfa71760a4d4149528d45785fecc5d46a",
+        "edit": "bf7b238c0222d349c149b19e8327a7b56cda9fc403c21177f5e722444e3a2c76",
+        "share": "7541e30b450877127e625c517ca30b8d7dbdf3e1671ef672c9020a7187311104",
+        "paper": "1ead0376d3ef477b16d6ed4a429212819bb95b89425e6ae63e719161e3e39606"
+      }
+    },
+    "codex_cabi_compatibility": {
+      "blueprint_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "codex_elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "kernel_elf_sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8",
+      "required_cabi_imports": 56,
+      "kernel_resolver_entries_matched": 56,
+      "kernel_resolver_entries_total": 352,
+      "missing": [],
+      "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+      "resolver_snapshot": "/tmp/trueos-codex-native-fs-progress-resolver.rs",
+      "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+      "depfile_sha256": "e27039f33bafe34e7a84af145ec1f9edcb245ad1a4e0c22d5298d303b592b085",
+      "matched_functions": {
+        "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+        "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+        "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+        "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+        "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+        "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+        "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+        "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+        "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+        "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+        "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+        "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+        "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+        "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+        "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+        "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+        "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+        "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+        "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+        "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+        "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+        "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+        "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+        "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+        "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+        "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+        "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+        "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+        "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+        "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+        "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+        "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+        "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+        "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+        "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+        "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+        "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+        "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+        "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+        "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+        "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+        "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+        "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+        "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+        "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+        "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+        "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+        "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+        "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+        "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+        "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+        "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+        "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+        "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+      }
+    },
+    "matched_pair_immutable": true,
+    "started_utc": "2026-10-31T06:38:21.196139+00:00",
+    "completed_utc": "2026-10-31T06:40:17.618390+00:00",
+    "linked_diagnostic_markers": {
+      "codex-fs-native vm=": true,
+      "codex-fs-native-summary full=": true,
+      "trueos-startup-v1 request=": true,
+      "TRUEOS_STARTUP_REQUEST": true
+    },
+    "build_resources": {
+      "unit": "trueos-codex-native-fs-progress-kernel.scope",
+      "control_group": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/trueos-codex-native-fs-progress-kernel.scope",
+      "period_ms": 1000,
+      "finished_utc": "2026-10-31T06:40:18.292232+00:00",
+      "observed_memory_peak": 4294967296,
+      "observed_memory_swap_peak": 0,
+      "last_events": {
+        "low": 0,
+        "high": 0,
+        "max": 7783,
+        "oom": 0,
+        "oom_kill": 0,
+        "oom_group_kill": 0,
+        "sock_throttled": 0
+      },
+      "configured": {
+        "cpu": "17",
+        "cpu_quota_percent": 100,
+        "nice": 15,
+        "memory_max_bytes": 4294967296,
+        "memory_swap_max_bytes": 0,
+        "cargo_jobs": 1
+      }
+    },
+    "current_app_source_freeze": {
+      "files_checked": 43,
+      "all_match": true,
+      "manifest": "/tmp/trueos-codex-skills-app-source-freeze.json",
+      "sha256": "7aada65b7bda7041a50e0ac8f7097cad25aca2d433cbbd6a1d883459216e6650"
+    },
+    "local_build_validation": "PASS",
+    "before_snapshot": "/tmp/trueos-codex-native-fs-progress-kernel-before.json",
+    "source_after": {
+      "src/allcaps.rs": "f8ed940610bc55324b22266c1917a32656ac9a8f0fb29a9266275d03803c71b0",
+      "src/allocators.rs": "0c379ec3726870abe23ecc9096d80cd69e0d7d3ff396576f8ad1d87cb523df46",
+      "src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+      "src/hv/blueprint/blueprint.rs": "c142388fdb61aeaad6d00679dcf1f3bdde40be9334d4f4b130122fe474b93dfa",
+      "src/hv/checkpoint_legacy.rs": "b3212c42c569ff3ec4fac744e6ee316b2ad248e90e9218f59c1d03d21e8c92bd",
+      "src/hv/guest_run.rs": "a50eb550e361b51c2c9a571460b262e5a4c8aaf93f406799881a5051c58b8dd1",
+      "src/hv/launcher.rs": "2b049bddfe09f67fd9bbb18142ab98cbe8f3b430c7b14f6c4614b37f17ea40b2",
+      "src/hv/mod.rs": "6df7a085f49213adfe4c635ab680a8378ee4fc15357b40ab875f2d95d581a002",
+      "src/hv/launch_timing.rs": "d08403934d6284809cd85c7e68d17ecc571135c28ab33f2d807f744939aa5554",
+      "src/r/fs/request_broker.rs": "c82c1ef1cd0e64c967666e4147058cb478bcb5be7c7aac13e69d4c706055c60e",
+      "src/r/fs/native_request_progress.rs": "eb73cd8972fcfc89763779fdd3f10ea40f040537c423b4a686ea75235b953ba7",
+      "src/r/services/codex_progress_service.rs": "d0e79ec0fa7ee0d413a1e38b5be3e857ad597f1b04fae3b2e90ab466297ac8df"
+    },
+    "compiler_settings": "Unchanged dev kernel profile, pinned toolchain, existing flags; only host CPU/memory/jobs bounded as previously.",
+    "build_script": {
+      "path": "/tmp/trueos-codex-build-native-fs-progress-kernel.py",
+      "sha256": "b83facc71031868a3112b7b8f94dc35f5d4d53e853240ded565eaac1e1d2e274"
+    },
+    "build_log": "/tmp/trueos-codex-native-fs-progress-kernel-build.log",
+    "local_build_performed_no_publication_or_reset": true,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 12.585,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS-Buildins/tools/build.py",
+          "--check",
+          "--kernel",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS",
+          "--profile",
+          "dev",
+          "--output",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/buildins/dev"
+        ],
+        "elapsed_seconds": 0.347,
+        "result": 0
+      },
+      {
+        "argv": [
+          "cargo",
+          "build",
+          "--bin",
+          "TRUEOS",
+          "--locked"
+        ],
+        "elapsed_seconds": 101.842,
+        "result": 0
+      },
+      {
+        "argv": [
+          "/home/t4ce/.rustup/toolchains/nightly-2026-07-10-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-objcopy",
+          "--strip-debug",
+          "/home/t4ce/Repositories/TRUEOS/tgt/x86_64-unknown-trueos/debug/TRUEOS",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-native-fs-progress-20261031/TRUEOS.elf"
+        ],
+        "elapsed_seconds": 0.07,
+        "result": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tools/trueos-boot/bundle.py",
+          "/home/t4ce/Repositories/TRUEOS-codex-alloc-gates-build/TRUEOS/tgt/rig-images/debug.codex-startup-native-fs-progress-20261031"
+        ],
+        "elapsed_seconds": 0.291,
+        "result": 0
+      }
+    ]
+  },
+  "publication_independent_byte_verification": {
+    "result": "PASS",
+    "published_path": "/home/t4ce/Repositories/TRUEOS/tgt/pxe-current",
+    "resolved_generation": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/debug.codex-startup-native-fs-progress-20261031",
+    "artifacts": {
+      "TRUEOS.elf": {
+        "bytes": 73162064,
+        "sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8"
+      },
+      "TrueOS.tar.lz4": {
+        "bytes": 63634714,
+        "sha256": "649982155897d34d33ba9600f095e297b08c24012dc2e427748c9dd9bf86d7db"
+      },
+      "EFI/BOOT/BOOTX64.EFI": {
+        "bytes": 61440,
+        "sha256": "a9554f7c01a43fa71d7938c027cfb955d305186a9336d8a2cadad458d2460990"
+      },
+      "EFI/BOOT/tgl_guc_70.bin": {
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6"
+      }
+    },
+    "all12_private_source_hashes_match_build": true,
+    "reference_evidence": "/tmp/trueos-codex-native-fs-progress-kernel-evidence.json",
+    "reference_sha256": "b57df0e49dbe6203b029fe7ce7a129ee393872f4f0cb634ee01e3b71e07806ee"
+  },
+  "current_codex_compatibility": {
+    "blueprint_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+    "elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+    "elf_bytes": 219999816,
+    "blueprint_path": "/home/t4ce/Repositories/TRUEOS-Blueprints/dist/codex.bp",
+    "elf_path": "/tmp/trueos-codex-skills-app-audit/module.elf",
+    "cabi_imports": [
+      "trueos_cabi_async_fs_checked_write_begin_v1",
+      "trueos_cabi_async_fs_create_dir_all_start",
+      "trueos_cabi_async_fs_discard",
+      "trueos_cabi_async_fs_list_dir_start",
+      "trueos_cabi_async_fs_metadata_start_v2",
+      "trueos_cabi_async_fs_read_start",
+      "trueos_cabi_async_fs_remove_start",
+      "trueos_cabi_async_fs_rename_start",
+      "trueos_cabi_async_fs_result_len",
+      "trueos_cabi_async_fs_result_read",
+      "trueos_cabi_async_fs_status",
+      "trueos_cabi_async_fs_typed_list_dir_start",
+      "trueos_cabi_async_fs_typed_stat_start",
+      "trueos_cabi_async_fs_write_begin",
+      "trueos_cabi_async_fs_write_chunk",
+      "trueos_cabi_async_fs_write_commit",
+      "trueos_cabi_blueprint_child_read_v1",
+      "trueos_cabi_blueprint_child_send_v1",
+      "trueos_cabi_blueprint_child_spawn_program_v1",
+      "trueos_cabi_blueprint_child_status_v1",
+      "trueos_cabi_blueprint_child_terminate_v1",
+      "trueos_cabi_blueprint_launch_script_v1",
+      "trueos_cabi_blueprint_shutdown",
+      "trueos_cabi_blueprint_terminal_lease_current_v1",
+      "trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+      "trueos_cabi_calculator_evaluate",
+      "trueos_cabi_dns_resolve_ipv4",
+      "trueos_cabi_dobby_ui4_focus",
+      "trueos_cabi_dobby_ui4_key",
+      "trueos_cabi_dobby_ui4_observe_metadata",
+      "trueos_cabi_dobby_ui4_observe_prepare",
+      "trueos_cabi_dobby_ui4_observe_read",
+      "trueos_cabi_dobby_ui4_pointer",
+      "trueos_cabi_dobby_ui4_type",
+      "trueos_cabi_dobby_ui4_windows",
+      "trueos_cabi_env_var",
+      "trueos_cabi_log",
+      "trueos_cabi_poll_once",
+      "trueos_cabi_shell3_session_control_v1",
+      "trueos_cabi_shell3_session_open_v1",
+      "trueos_cabi_shell3_session_read_v1",
+      "trueos_cabi_shell3_session_write_v1",
+      "trueos_cabi_sleep_ms",
+      "trueos_cabi_spirit_agents_publish_v1",
+      "trueos_cabi_spirit_emotion_play",
+      "trueos_cabi_spirit_move",
+      "trueos_cabi_thread_available_parallelism",
+      "trueos_cabi_thread_configure_placement_v1",
+      "trueos_cabi_thread_current_id",
+      "trueos_cabi_thread_detach",
+      "trueos_cabi_thread_join",
+      "trueos_cabi_thread_set_name",
+      "trueos_cabi_thread_spawn",
+      "trueos_cabi_thread_swap_activity_v1",
+      "trueos_cabi_thread_swap_child_role_v1",
+      "trueos_cabi_write"
+    ],
+    "method": "actual current ELF readelf undefined symbols; BP and ELF independently SHA256 verified",
+    "resolver_proof": {
+      "blueprint_sha256": "392016b8cbf6903b705d14275e0e923f47192631c6c85e0fb3dc6dc27d62af89",
+      "codex_elf_sha256": "844197bbce5c237e1558cf370573a32d17b44ec177608ca4a6dd504e20ba7384",
+      "kernel_elf_sha256": "5db69549897dbc1ff918de5f50ff962352f79cf18bde692d710172aa6c0a7ac8",
+      "required_cabi_imports": 56,
+      "kernel_resolver_entries_matched": 56,
+      "kernel_resolver_entries_total": 352,
+      "missing": [],
+      "method": "exact compiler depfile, generated resolver typed function references, unchanged C ABI declarations and contract lock",
+      "resolver_snapshot": "/tmp/trueos-codex-native-fs-progress-resolver.rs",
+      "resolver_sha256": "c6c66ee6ac841ea3321369384da71dedb8408a2c804fcfaf29ffe951114c117a",
+      "depfile_sha256": "e27039f33bafe34e7a84af145ec1f9edcb245ad1a4e0c22d5298d303b592b085",
+      "matched_functions": {
+        "trueos_cabi_async_fs_checked_write_begin_v1": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_checked_write_begin_v1",
+        "trueos_cabi_async_fs_create_dir_all_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_create_dir_all_start",
+        "trueos_cabi_async_fs_discard": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_discard",
+        "trueos_cabi_async_fs_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_list_dir_start",
+        "trueos_cabi_async_fs_metadata_start_v2": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_metadata_start_v2",
+        "trueos_cabi_async_fs_read_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_read_start",
+        "trueos_cabi_async_fs_remove_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_remove_start",
+        "trueos_cabi_async_fs_rename_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_rename_start",
+        "trueos_cabi_async_fs_result_len": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_len",
+        "trueos_cabi_async_fs_result_read": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_result_read",
+        "trueos_cabi_async_fs_status": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_status",
+        "trueos_cabi_async_fs_typed_list_dir_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_list_dir_start",
+        "trueos_cabi_async_fs_typed_stat_start": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_typed_stat_start",
+        "trueos_cabi_async_fs_write_begin": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_begin",
+        "trueos_cabi_async_fs_write_chunk": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_chunk",
+        "trueos_cabi_async_fs_write_commit": "crate::r::io::async_fs_cabi::trueos_cabi_async_fs_write_commit",
+        "trueos_cabi_blueprint_child_read_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_read_v1",
+        "trueos_cabi_blueprint_child_send_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_send_v1",
+        "trueos_cabi_blueprint_child_spawn_program_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_spawn_program_v1",
+        "trueos_cabi_blueprint_child_status_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_status_v1",
+        "trueos_cabi_blueprint_child_terminate_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_child_terminate_v1",
+        "trueos_cabi_blueprint_launch_script_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_launch_script_v1",
+        "trueos_cabi_blueprint_shutdown": "crate::r::io::fs_cabi::trueos_cabi_blueprint_shutdown",
+        "trueos_cabi_blueprint_terminal_lease_current_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_lease_current_v1",
+        "trueos_cabi_blueprint_terminal_surface_snapshot_v1": "crate::r::io::fs_cabi::trueos_cabi_blueprint_terminal_surface_snapshot_v1",
+        "trueos_cabi_calculator_evaluate": "crate::r::io::calculator_cabi::trueos_cabi_calculator_evaluate",
+        "trueos_cabi_dns_resolve_ipv4": "crate::std_abi_shim::trueos_cabi_dns_resolve_ipv4",
+        "trueos_cabi_dobby_ui4_focus": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_focus",
+        "trueos_cabi_dobby_ui4_key": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_key",
+        "trueos_cabi_dobby_ui4_observe_metadata": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_metadata",
+        "trueos_cabi_dobby_ui4_observe_prepare": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_prepare",
+        "trueos_cabi_dobby_ui4_observe_read": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_observe_read",
+        "trueos_cabi_dobby_ui4_pointer": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_pointer",
+        "trueos_cabi_dobby_ui4_type": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_type",
+        "trueos_cabi_dobby_ui4_windows": "crate::spirit::ui4_interaction::trueos_cabi_dobby_ui4_windows",
+        "trueos_cabi_env_var": "crate::r::io::fs_cabi::trueos_cabi_env_var",
+        "trueos_cabi_log": "crate::r::io::fs_cabi::trueos_cabi_log",
+        "trueos_cabi_poll_once": "crate::r::io::fs_cabi::trueos_cabi_poll_once",
+        "trueos_cabi_shell3_session_control_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_control_v1",
+        "trueos_cabi_shell3_session_open_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_open_v1",
+        "trueos_cabi_shell3_session_read_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_read_v1",
+        "trueos_cabi_shell3_session_write_v1": "crate::r::io::shell3_sessions_cabi::trueos_cabi_shell3_session_write_v1",
+        "trueos_cabi_sleep_ms": "crate::r::io::fs_cabi::trueos_cabi_sleep_ms",
+        "trueos_cabi_spirit_agents_publish_v1": "crate::spirit::trueos_cabi_spirit_agents_publish_v1",
+        "trueos_cabi_spirit_emotion_play": "crate::ai::lumen_service::trueos_cabi_spirit_emotion_play",
+        "trueos_cabi_spirit_move": "crate::ai::lumen_service::trueos_cabi_spirit_move",
+        "trueos_cabi_thread_available_parallelism": "crate::std_abi_shim::trueos_cabi_thread_available_parallelism",
+        "trueos_cabi_thread_configure_placement_v1": "crate::std_abi_shim::trueos_cabi_thread_configure_placement_v1",
+        "trueos_cabi_thread_current_id": "crate::std_abi_shim::trueos_cabi_thread_current_id",
+        "trueos_cabi_thread_detach": "crate::std_abi_shim::trueos_cabi_thread_detach",
+        "trueos_cabi_thread_join": "crate::std_abi_shim::trueos_cabi_thread_join",
+        "trueos_cabi_thread_set_name": "crate::std_abi_shim::trueos_cabi_thread_set_name",
+        "trueos_cabi_thread_spawn": "crate::std_abi_shim::trueos_cabi_thread_spawn",
+        "trueos_cabi_thread_swap_activity_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_activity_v1",
+        "trueos_cabi_thread_swap_child_role_v1": "crate::std_abi_shim::trueos_cabi_thread_swap_child_role_v1",
+        "trueos_cabi_write": "crate::r::io::fs_cabi::trueos_cabi_write"
+      }
+    },
+    "all43_frozen_app_source_hashes_match": {
+      "files_checked": 43,
+      "all_match": true,
+      "manifest": "/tmp/trueos-codex-skills-app-source-freeze.json",
+      "sha256": "7aada65b7bda7041a50e0ac8f7097cad25aca2d433cbbd6a1d883459216e6650"
+    }
+  },
+  "functional_validation_G": {
+    "scope": "Single caller-selected kernel boot capture window; summary-only functional check.",
+    "report": {
+      "schema": 1,
+      "capture_window": {
+        "start_offset": 44117665,
+        "end_offset": 44552282,
+        "snapshot_size": 44653485,
+        "bytes": 434617,
+        "sha256": "8dc05856e4d92b9d94d14bdc3d3fc8ae11f8e7b02e79fe221e548a253bdbff4f"
+      },
+      "rows": [],
+      "summaries": [
+        {
+          "offset": 44182703,
+          "full": 0,
+          "missed": 0,
+          "expired": 0,
+          "released": 103
+        },
+        {
+          "offset": 44259832,
+          "full": 0,
+          "missed": 0,
+          "expired": 0,
+          "released": 130
+        }
+      ],
+      "requests": [],
+      "counter_first": {
+        "full": 0,
+        "missed": 0,
+        "expired": 0,
+        "released": 103
+      },
+      "counter_last": {
+        "full": 0,
+        "missed": 0,
+        "expired": 0,
+        "released": 130
+      },
+      "counter_delta": {
+        "full": 0,
+        "missed": 0,
+        "expired": 0,
+        "released": 27
+      },
+      "counter_decrease_detected": false,
+      "malformed_marker_lines": 0,
+      "oversized_lines_skipped": 0,
+      "qualifiers": [
+        "Use one boot per byte window; IDs can repeat after reboot.",
+        "At most 16 pending observations, 128 selected attempts per measured launch, 180-second deadline and four records per five-second tick.",
+        "Full/missed counters qualify incomplete coverage; expiration removes observation only and never cancels disk work.",
+        "Released counts dropped observation owners; absence or a release count alone never proves disk completion.",
+        "Rows are sampled snapshots; brief phases may be missed and BSP starvation may suppress samples."
+      ]
+    },
+    "independent_report_reference": {
+      "path": "/tmp/trueos-codex-native-fs-G-independent-report.json",
+      "sha256": "f004e5c1ae3ae00458b026ec1d4cb50d0e1c53948c5801e32bd4506f440b4c13"
+    },
+    "confirmed": [
+      "Two numeric terminal summaries were emitted.",
+      "Released counter103\u2192130; full/missed/expired remain0.",
+      "No active request row at sampled ticks; this is not proof of no intervening requests.",
+      "Exact byte-window hash matches the independently supplied root capture."
+    ]
+  },
+  "portable_tools": {
+    "source_snapshots": [
+      {
+        "path": "tools/testpy/test_native_fs_progress.py",
+        "sha256": "f43298acb51a9c1eb9c9199b7a5b33308058a0c45805e6906df0e57647cdc714",
+        "bytes": 9680,
+        "repository": "TRUEOS",
+        "original_promoted_path": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_native_fs_progress.py",
+        "source_snapshot": "#!/usr/bin/env python3\n\"\"\"Extract the private production tracker and broker hooks into a host harness.\"\"\"\nfrom pathlib import Path\nimport argparse\nimport re\nimport subprocess\nimport tempfile\n\nROOT = Path(__file__).resolve().parents[2]\nsource=(ROOT/'src/r/fs/request_broker.rs').read_text()\n\ndef item(signature):\n start=source.index(signature); opening=source.index('{',start); depth=1;pos=opening+1\n while depth:\n  if source[pos]=='{':depth+=1\n  if source[pos]=='}':depth-=1\n  pos+=1\n return source[start:pos]\n\nparts=[item(x) for x in [\n 'struct OwnedRequest {','pub(crate) fn arm_startup_diagnostics(', 'fn diagnostic_ticket(',\n 'fn operation_code(', 'pub(crate) fn progress_lines(', 'fn retire_request(',\n 'fn complete_request(', 'fn finish<T>(']]\nhead=r'''\n#![allow(dead_code)]\nextern crate alloc;\nuse core::sync::atomic::AtomicU64;\nstatic CLOCK:AtomicU64=AtomicU64::new(0);\nstatic CLOCK_CALLS:AtomicU64=AtomicU64::new(0);\nstatic RUN:AtomicU64=AtomicU64::new(10);\nmod allcaps { pub mod hv { pub const CODEX_PROGRESS_PROBES_ENABLED:bool=true; pub const VM_ID_LIMIT:usize=64; } }\nmod hv { pub(crate) fn vm_run_generation(owner:u8)->Option<u64>{(owner<64).then(||crate::RUN.load(core::sync::atomic::Ordering::Relaxed))} }\nmod r { pub mod input_timing { pub(crate) fn now_ms()->u64{crate::CLOCK_CALLS.fetch_add(1,core::sync::atomic::Ordering::Relaxed);crate::CLOCK.load(core::sync::atomic::Ordering::Relaxed)} } }\n#[macro_export] macro_rules! log_error { (target: $target:literal; $($args:tt)*)=>{{let _=format_args!($($args)*);}} }\n#[macro_export] macro_rules! log_trace { (target: $target:literal; $($args:tt)*)=>{{let _=format_args!($($args)*);}} }\nmod broker {\nuse alloc::{string::String,sync::Arc,vec::Vec};\nuse core::sync::atomic::{AtomicU64,Ordering};\nuse std::collections::BTreeMap;\n#[path=\"TRACKER\"] mod native_request_progress;\nuse native_request_progress as progress;\nstatic PROGRESS:progress::Tracker=progress::Tracker::new();\nstatic REPORTED_FULL:AtomicU64=AtomicU64::new(0);\nstatic REPORTED_MISSED:AtomicU64=AtomicU64::new(0);\nstatic REPORTED_EXPIRED:AtomicU64=AtomicU64::new(0);\nstatic REPORTED_RELEASED:AtomicU64=AtomicU64::new(0);\ntype FsResult<T>=Result<T,()>;\ntype Completion<T>=Arc<CompletionCell<FsResult<T>>>;\nstruct CompletionCell<T>{value:std::sync::Mutex<Option<T>>, observe_publish:bool}\nimpl<T> CompletionCell<T> {\n fn new(observe_publish:bool)->Self{Self{value:std::sync::Mutex::new(None),observe_publish}}\n fn complete(&self,value:T)->Result<(),T>{\n  if self.observe_publish {let row=PROGRESS.sample(crate::CLOCK.load(Ordering::Relaxed),&mut 0,4).into_iter().flatten().next().unwrap();assert_eq!(row.phase,progress::PUBLISH);}\n  let mut slot=self.value.lock().unwrap();if slot.is_some(){Err(value)}else{*slot=Some(value);Ok(())}\n }\n}\nstruct Request {completion:Completion<usize>}\nstruct Mutex<T>(std::sync::Mutex<T>);\nimpl<T> Mutex<T>{const fn new(t:T)->Self{Self(std::sync::Mutex::new(t))}fn lock(&self)->std::sync::MutexGuard<'_,T>{self.0.lock().unwrap()}}\nstruct OwnerState{requests:BTreeMap<u64,(u8,Option<u32>)>}\nstatic BROKER_OWNERS:Mutex<OwnerState>=Mutex::new(OwnerState{requests:BTreeMap::new()});\nstruct Wait;\nimpl Wait {fn notify_all(&self){}}\nstatic BROKER_WAIT:Wait=Wait;\n'''.replace('TRACKER',str(ROOT/'src/r/fs/native_request_progress.rs'))\ntests=r'''\n#[test] fn production_hooks_own_pending_work_and_publish_before_retirement() {\n crate::CLOCK.store(100,Ordering::Relaxed);arm_startup_diagnostics(0,10,6);\n let completion=Arc::new(CompletionCell::new(true));let consumer=completion.clone();\n let mut owned=OwnedRequest{request:Request{completion:completion.clone()},owner:Some(0),progress:diagnostic_ticket(Some(0),19,\"read-file\")};\n BROKER_OWNERS.lock().requests.insert(19,(0,None));drop(consumer);drop(completion);\n let row=PROGRESS.sample(101,&mut 0,4).into_iter().flatten().next().unwrap();assert_eq!((row.id,row.phase),(19,progress::QUEUED));\n owned.progress.advance(progress::SERVICE,0,||102);owned.progress.advance(progress::FILESYSTEM,0,||103);\n crate::CLOCK.store(104,Ordering::Relaxed);\n finish(19,\"read-file\",owned.request.completion.clone(),Ok(42),&mut owned.progress);\n let row=PROGRESS.sample(105,&mut 0,4).into_iter().flatten().next().unwrap();assert_eq!((row.phase,row.status),(progress::PUBLISHED,1));\n assert_eq!(*owned.request.completion.value.lock().unwrap(),Some(Ok(42)));assert!(BROKER_OWNERS.lock().requests.contains_key(&19));\n retire_request(19,&mut owned.progress);assert!(!BROKER_OWNERS.lock().requests.contains_key(&19));\n let row=PROGRESS.sample(106,&mut 0,4).into_iter().flatten().next().unwrap();assert_eq!(row.phase,progress::FINISHED);\n drop(owned);assert!(PROGRESS.sample(107,&mut 0,4).iter().all(Option::is_none));\n}\n#[test] fn production_snapshot_bounds_privacy_expiry_summary_and_quiet_clock() {\n crate::CLOCK.store(1000,Ordering::Relaxed);arm_startup_diagnostics(1,10,7);\n let tickets:Vec<_>=(100..116).map(|id|diagnostic_ticket(Some(1),id,\"typed-stat\")).collect();\n let before=crate::CLOCK_CALLS.load(Ordering::Relaxed);assert!(progress_lines(&mut 0,0).is_empty());assert_eq!(before,crate::CLOCK_CALLS.load(Ordering::Relaxed));\n let lines=progress_lines(&mut 0,usize::MAX);assert_eq!(lines.len(),4);\n for line in lines {assert!(line.starts_with(\"codex-fs-native \"));for word in line.split_whitespace().skip(1){let(key,value)=word.split_once('=').unwrap();assert!(key.bytes().all(|b|b.is_ascii_lowercase()||b==b'_'));assert!(value.bytes().all(|b|b.is_ascii_digit()));}}\n crate::CLOCK.store(500000,Ordering::Relaxed);let lines=progress_lines(&mut 0,4);assert_eq!(lines.len(),1);assert!(lines[0].starts_with(\"codex-fs-native-summary \"));assert!(lines[0].contains(\"expired=16\"));\n drop(tickets);let before=crate::CLOCK_CALLS.load(Ordering::Relaxed);assert!(progress_lines(&mut 0,4).is_empty());assert_eq!(before,crate::CLOCK_CALLS.load(Ordering::Relaxed));\n}\n#[test] fn production_generation_filter_and_all_static_operations() {\n crate::CLOCK.store(200000,Ordering::Relaxed);arm_startup_diagnostics(2,10,8);\n crate::RUN.store(11,Ordering::Relaxed);let before=crate::CLOCK_CALLS.load(Ordering::Relaxed);\n drop(diagnostic_ticket(Some(2),1000,\"stat\"));drop(diagnostic_ticket(None,1001,\"stat\"));drop(diagnostic_ticket(Some(63),1002,\"stat\"));assert_eq!(before,crate::CLOCK_CALLS.load(Ordering::Relaxed));crate::RUN.store(10,Ordering::Relaxed);\n let names=[\"prepare-volatile-files\",\"read-file\",\"read-file-len\",\"read-file-range\",\"stat\",\"typed-stat\",\"write-file-begin\",\"write-file-begin-typed\",\"create-dir-all\",\"write-file-chunk\",\"write-file-finish\",\"write-file-abort\",\"html-tree\",\"json-all\",\"list-dir\",\"typed-list-dir\",\"remove\",\"exists\"];\n for (index,name) in names.into_iter().enumerate(){assert_eq!(operation_code(name),1+index as u32);}assert_eq!(operation_code(\"unexpected/secret\"),0);\n}\n}\n'''\n# Verify actual integration locations and all unmodified filesystem call arms.\nobserver=(ROOT/'src/r/services/codex_progress_service.rs').read_text();hv=(ROOT/'src/hv/mod.rs').read_text()\nassert observer.index('request_broker::progress_lines')<observer.index('if active == 0 && !had_active')\nassert hv.index('request_broker::arm_startup_diagnostics')<hv.index('let Some(guest_state)',hv.index('pub fn stage_blueprint_launch'))\nprocess=item('async fn process_request(')\nassert process.count('finish(')==20 and process.count('&mut progress);')==23\nassert process.index('progress::SERVICE')<process.index('BROKER_OWNERS.lock()')\nassert process.index('progress::FILESYSTEM')<process.index('Request::PrepareVolatileFiles { id, root, completion } =>')\nassert 'progress: diagnostic_ticket(Some(owner), id, \"write-file-abort\")' in source\n\n\ndef check_baseline(path):\n    \"\"\"Optional historical conservation check; ordinary tests need no snapshot.\"\"\"\n    base = path.read_text()\n    begin = base.index('async fn process_request(')\n    end = base.index('\\nfn complete_request(', begin)\n    old = base[begin:end].strip()\n    new = process.replace('let OwnedRequest { request, owner, mut progress } = owned;',\n                          'let OwnedRequest { request, owner } = owned;')\n    new = re.sub(r'^    progress.advance\\(progress::(?:SERVICE|FILESYSTEM), 0, crate::r::input_timing::now_ms\\);\\n',\n                 '', new, flags=re.M)\n    new = new.replace(', &mut progress);', ');').replace('retire_request(request_id);',\n                                                       'complete_request(request_id);')\n    assert new.strip() == old, 'request behavior changed beyond observational hooks'\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--baseline', type=Path,\n                        help='optional pre-probe request_broker.rs for conservation comparison')\n    args = parser.parse_args()\n    if args.baseline is not None:\n        check_baseline(args.baseline)\n    channel = re.search(r'^channel\\s*=\\s*\"([^\"]+)\"',\n                        (ROOT / 'rust-toolchain.toml').read_text(), re.MULTILINE)\n    assert channel, 'missing pinned Rust toolchain'\n    # Production globals are exercised by one serial host test process.\n    with tempfile.TemporaryDirectory(prefix='trueos-native-fs-progress-') as directory:\n        work = Path(directory)\n        path = work / 'hooks.rs'\n        path.write_text(head + '\\n'.join(parts) + tests)\n        subprocess.run([\n            'rustc', '+' + channel.group(1), '--test', '-Dwarnings', '--edition=2024',\n            '--target', 'x86_64-unknown-linux-gnu', str(path), '-o', str(work / 'hooks'),\n        ], cwd=work, check=True)\n        subprocess.run([str(work / 'hooks'), '--test-threads=1'], cwd=work, check=True)\n    print('Native FS production hooks and integration checks passed.')\n\n\nif __name__ == '__main__':\n    main()\n"
+      },
+      {
+        "path": "tools/codex_native_fs_report.py",
+        "sha256": "b109cc96ebb1a9a42a2a7b18a9ff8e42b566adbab12f5ccbe486961450402fae",
+        "bytes": 6630,
+        "repository": "TRUEOS",
+        "original_promoted_path": "/home/t4ce/Repositories/TRUEOS/tools/codex_native_fs_report.py",
+        "source_snapshot": "#!/usr/bin/env python3\n\"\"\"Read a bounded capture window; export only fixed native-FS numeric fields.\n\nUse one boot per window: numeric launch/request IDs are scoped to a kernel boot.\nMissing/expired observations never establish request completion.\n\"\"\"\nimport argparse\nimport hashlib\nimport json\nimport os\nimport re\n\nROW_KEYS = frozenset(('vm','generation','launch','request','op','phase','status','queued_ms','service_ms','phase_ms','age_ms','full','missed','expired','released'))\nCOUNTER_KEYS = ('full','missed','expired','released')\nSUMMARY_KEYS = frozenset(COUNTER_KEYS)\nMARKER = re.compile(rb'\\bcodex-fs-native(?P<summary>-summary)?\\b(?P<fields>[^\\n]*)')\nFIELDS = re.compile(rb'(?:[ \\t]+[a-z_]+=[0-9]+)+[ \\t\\r]*\\Z')\nANSI = re.compile(rb'\\x1b\\[[0-?]*[ -/]*[@-~]')\nMAX_LINE = 65_536\nU64_MAX = (1 << 64)-1\nPHASES = {1:'queued',2:'service',3:'filesystem',4:'result',5:'publish',6:'published',7:'retire',8:'finished'}\nOPS = {1:'prepare-volatile-files',2:'read-file',3:'read-file-len',4:'read-file-range',5:'stat',6:'typed-stat',7:'write-file-begin',8:'write-file-begin-typed',9:'create-dir-all',10:'write-file-chunk',11:'write-file-finish',12:'write-file-abort',13:'html-tree',14:'json-all',15:'list-dir',16:'typed-list-dir',17:'remove',18:'exists'}\n\n\ndef parse_line(line):\n    match = MARKER.search(ANSI.sub(b'', line))\n    if match is None:\n        return None\n    tail = match['fields']\n    if FIELDS.fullmatch(tail) is None:\n        return False\n    pairs = [token.split(b'=', 1) for token in tail.split()]\n    if len(pairs) != len({key for key, _ in pairs}):\n        return False\n    try:\n        fields = {key.decode('ascii'):int(value) for key, value in pairs}\n    except (ValueError, UnicodeError):\n        return False\n    expected = SUMMARY_KEYS if match['summary'] else ROW_KEYS\n    if fields.keys() != expected or any(value > U64_MAX for value in fields.values()):\n        return False\n    if not match['summary'] and not (fields['vm'] < 64 and fields['launch'] > 0\n            and 0 < fields['request'] < U64_MAX and fields['op'] in OPS\n            and fields['phase'] in PHASES and fields['status'] <= 3):\n        return False\n    return {'summary':bool(match['summary']),'fields':fields}\n\n\ndef read_window(stream, start, end, snapshot_size):\n    if start < 0 or end < start or end > snapshot_size:\n        raise ValueError('invalid byte window')\n    stream.seek(start)\n    remaining = end-start\n    digest = hashlib.sha256()\n    buffer = b''\n    discard = False\n    offset = start\n    line_offset = start\n    rows = []\n    summaries = []\n    malformed = 0\n    oversized = 0\n    def accept(line, at):\n        nonlocal malformed\n        parsed = parse_line(line)\n        if parsed is False:\n            malformed += 1\n        elif parsed is not None:\n            fields = {'offset':at, **parsed['fields']}\n            (summaries if parsed['summary'] else rows).append(fields)\n    while remaining:\n        chunk = stream.read(min(65_536, remaining))\n        if not chunk:\n            raise ValueError('capture shrank during snapshot read')\n        digest.update(chunk)\n        remaining -= len(chunk)\n        for piece in chunk.splitlines(keepends=True):\n            ended = piece.endswith(b'\\n') or piece.endswith(b'\\r')\n            if not discard:\n                if len(buffer)+len(piece) > MAX_LINE:\n                    buffer = b''\n                    discard = True\n                    oversized += 1\n                else:\n                    buffer += piece\n            offset += len(piece)\n            if ended:\n                if not discard:\n                    accept(buffer, line_offset)\n                buffer = b''\n                discard = False\n                line_offset = offset\n    if buffer and not discard:\n        accept(buffer, line_offset)\n    groups = {}\n    for row in rows:\n        key = tuple(row[name] for name in ('vm','generation','launch','request'))\n        group = groups.setdefault(key, {'vm':key[0],'generation':key[1],'launch':key[2],\n            'request':key[3],'op':row['op'],'op_name':OPS[row['op']], 'observations':[],\n            'max_age_ms':0,'max_queued_ms':0,'max_service_ms':0,'max_phase_ms':0})\n        group['observations'].append(row)\n        for metric in ('age_ms','queued_ms','service_ms','phase_ms'):\n            group['max_'+metric] = max(group['max_'+metric],row[metric])\n        group['last_phase'] = row['phase']\n        group['last_phase_name'] = PHASES[row['phase']]\n        group['last_status'] = row['status']\n    ordered = sorted(rows+summaries,key=lambda row:row['offset'])\n    first = {key:ordered[0][key] for key in COUNTER_KEYS} if ordered else None\n    last = {key:ordered[-1][key] for key in COUNTER_KEYS} if ordered else None\n    decreased = any(later[key]<earlier[key] for earlier,later in zip(ordered,ordered[1:]) for key in COUNTER_KEYS)\n    delta = {key:last[key]-first[key] for key in COUNTER_KEYS} if ordered and not decreased else None\n    return {'schema':1,'capture_window':{'start_offset':start,'end_offset':end,\n        'snapshot_size':snapshot_size,'bytes':end-start,'sha256':digest.hexdigest()},\n        'rows':rows,'summaries':summaries,'requests':list(groups.values()),\n        'counter_first':first,'counter_last':last,'counter_delta':delta,\n        'counter_decrease_detected':decreased,'malformed_marker_lines':malformed,\n        'oversized_lines_skipped':oversized,\n        'qualifiers':['Use one boot per byte window; IDs can repeat after reboot.',\n            'At most 16 pending observations, 128 selected attempts per measured launch, 180-second deadline and four records per five-second tick.',\n            'Full/missed counters qualify incomplete coverage; expiration removes observation only and never cancels disk work.',\n            'Released counts dropped observation owners; absence or a release count alone never proves disk completion.',\n            'Rows are sampled snapshots; brief phases may be missed and BSP starvation may suppress samples.']}\n\n\ndef main():\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('capture')\n    parser.add_argument('--start-offset',type=int,default=0)\n    parser.add_argument('--end-offset',type=int)\n    args = parser.parse_args()\n    try:\n        with open(args.capture,'rb') as stream:\n            size = os.fstat(stream.fileno()).st_size\n            report = read_window(stream,args.start_offset,args.end_offset if args.end_offset is not None else size,size)\n    except (OSError,ValueError):\n        parser.exit(2,'cannot read the requested capture byte window\\n')\n    print(json.dumps(report,indent=2))\n\n\nif __name__ == '__main__':\n    main()\n"
+      },
+      {
+        "path": "tools/testpy/test_codex_native_fs_report.py",
+        "sha256": "251ce1fd63c4108ff8982567d9f1db99be042c431eeff1835e3d154193b57c0f",
+        "bytes": 3942,
+        "repository": "TRUEOS",
+        "original_promoted_path": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_codex_native_fs_report.py",
+        "source_snapshot": "#!/usr/bin/env python3\n\"\"\"Check bounded native-FS numeric capture reports without a rig.\"\"\"\nimport importlib.util,io,unittest,hashlib,subprocess,tempfile,json\nfrom pathlib import Path\nROOT=Path(__file__).resolve().parents[2]\nP=ROOT/'tools/codex_native_fs_report.py'\nspec=importlib.util.spec_from_file_location('report',P);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\ndef row(**kw):\n d=dict(vm=0,generation=11,launch=6,request=1042,op=3,phase=3,status=0,queued_ms=0,service_ms=5000,phase_ms=5000,age_ms=5000,full=0,missed=0,expired=0,released=99);d.update(kw)\n return b'prefix codex-fs-native '+b' '.join(k.encode()+b'='+str(v).encode() for k,v in d.items())+b'\\n'\ndef report(data,start=0,end=None):return m.read_window(io.BytesIO(data),start,len(data) if end is None else end,len(data))\nclass Tests(unittest.TestCase):\n def test_row_and_join(self):\n  r=report(row(phase=1)+row(age_ms=10000));self.assertEqual(len(r['requests']),1);self.assertEqual(r['requests'][0]['last_phase_name'],'filesystem');self.assertEqual(r['requests'][0]['max_age_ms'],10000)\n def test_summary_retains_qualifiers(self):\n  r=report(row()+b'codex-fs-native-summary full=1 missed=2 expired=1 released=100\\n');self.assertEqual(r['counter_delta'],dict(full=1,missed=2,expired=1,released=1));self.assertTrue(any('never proves' in q for q in r['qualifiers']))\n def test_reboot_counter_drop_detected_anywhere(self):\n  r=report(row(released=10)+row(released=0)+row(released=12));self.assertTrue(r['counter_decrease_detected']);self.assertIsNone(r['counter_delta'])\n def test_hash_exact_bounded_window(self):\n  body=row();r=report(b'junk\\n'+body+b'unread secret',5,5+len(body));self.assertEqual(r['capture_window']['sha256'],hashlib.sha256(body).hexdigest());self.assertEqual(r['rows'][0]['offset'],5)\n def test_no_unrelated_payload_output(self):\n  r=report(b'password=unrelated-secret\\n'+row()+b'codex-fs-native secret=bad-path\\n');self.assertNotIn('secret',json.dumps(r));self.assertEqual(r['malformed_marker_lines'],1)\n def test_ansi_prefix_suffix(self):self.assertEqual(len(report(b'\\x1b[1m'+row().rstrip()+b'\\x1b[0m\\r\\n')['rows']),1)\n def test_unknown_fields_rejected(self):self.assertFalse(m.parse_line(row().rstrip()+b' payload=123'))\n def test_duplicate_fields_rejected(self):self.assertFalse(m.parse_line(row().rstrip()+b' vm=1'))\n def test_invalid_numeric_limits(self):\n  for change in [dict(vm=64),dict(launch=0),dict(request=0),dict(request=m.U64_MAX),dict(op=19),dict(phase=0),dict(status=4),dict(age_ms=1<<64)]:self.assertFalse(m.parse_line(row(**change)))\n def test_oversized_line_skipped_and_recovers(self):\n  r=report(b'x'*(m.MAX_LINE+1)+b'\\n'+row());self.assertEqual(r['oversized_lines_skipped'],1);self.assertEqual(len(r['rows']),1)\n def test_chunk_split_and_crlf(self):\n  class Tiny(io.BytesIO):\n   def read(self,n):return super().read(min(n,3))\n  data=row().replace(b'\\n',b'\\r\\n')+row(request=9);r=m.read_window(Tiny(data),0,len(data),len(data));self.assertEqual([x['request'] for x in r['rows']],[1042,9])\n def test_invalid_bounds_and_shrink(self):\n  for start,end,size,data in [(-1,1,2,b'xx'),(2,1,2,b'xx'),(0,3,2,b'xx'),(0,2,2,b'x')]:\n   with self.assertRaises(ValueError):m.read_window(io.BytesIO(data),start,end,size)\n def test_empty_has_no_invented_completion(self):\n  r=report(b'');self.assertEqual(r['requests'],[]);self.assertIsNone(r['counter_last']);self.assertFalse(any('completed' in str(x) for x in r['requests']))\n def test_cli_exports_numeric_only_and_rejects_bad_bounds(self):\n  with tempfile.NamedTemporaryFile() as f:\n   f.write(row());f.flush();r=subprocess.run(['python3',str(P),f.name],capture_output=True,text=True);self.assertEqual(r.returncode,0);self.assertEqual(len(json.loads(r.stdout)['rows']),1)\n   r=subprocess.run(['python3',str(P),f.name,'--start-offset','-1'],capture_output=True,text=True);self.assertEqual(r.returncode,2);self.assertNotIn(f.name,r.stderr)\nif __name__=='__main__':unittest.main()\n"
+      }
+    ],
+    "commands_from_TRUEOS_root": [
+      "python3 tools/testpy/test_native_fs_progress.py",
+      "python3 tools/testpy/test_codex_native_fs_report.py",
+      "python3 tools/codex_native_fs_report.py bld/baremetal-logs/trueos-baremetal.2.log --start-offset 44117665 --end-offset 44552282"
+    ],
+    "capture_replay": "The parser snapshots file size, reads only the selected byte range, hashes all selected bytes, skips oversized lines, and exports only exact fixed numeric native-FS fields. Use one kernel boot per window because numeric IDs repeat after reboot.",
+    "promotion_patch": {
+      "path": "/tmp/trueos-native-fs-progress-promotion-20261031.patch",
+      "sha256": "151869c99235fe74c3cbb1364f07109a454e725c29ca56caa1f83c34534d3278",
+      "files": 7
+    },
+    "source_snapshot_phase": "Exact promoted files after private validation; original promotion identities are recorded in tests.promotion_tests."
+  },
+  "evidence_references": [
+    {
+      "path": "/tmp/trueos-native-fs-progress-private-20261031.json",
+      "sha256": "db9c29dfcbd82d79a77b8154bbe94d907a07316c9f7860dc967fd07a88469d32"
+    },
+    {
+      "path": "/tmp/trueos-codex-native-fs-progress-kernel-before.json",
+      "sha256": "85f92ec95c6f1f6c0c4f3c66d87b10f0b74d66dfce437985f0879d76bdd67664"
+    },
+    {
+      "path": "/tmp/trueos-codex-native-fs-progress-kernel-evidence.json",
+      "sha256": "b57df0e49dbe6203b029fe7ce7a129ee393872f4f0cb634ee01e3b71e07806ee"
+    },
+    {
+      "path": "/tmp/trueos-codex-native-fs-progress-kernel-build.log",
+      "sha256": "7f85065713bb19c4d7d63cb94ec79c2051313a66319677ba079464b9faa203db"
+    },
+    {
+      "path": "/tmp/trueos-codex-native-fs-progress-kernel-resource.json",
+      "sha256": "f359d0c2393f311c4bf697ab0129471acaa33ef02f5aa8f60461a78ffac1541c"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-progress-tools-20261031.json",
+      "sha256": "b41f98886214de8bef2efe88a3a838bd45081a39d29f230a438d7efda61814ad"
+    },
+    {
+      "path": "/tmp/trueos-native-fs-progress-original-promotion-20261031.json",
+      "sha256": "97d3c5ef94c7d130b889069af0a4c7312709ac889fd8ffe9b01446bbc1d184a8"
+    },
+    {
+      "path": "/tmp/trueos-codex-native-fs-publication-independent.json",
+      "sha256": "0a4b98afe6df5c2ddaf391267f3dca75211e91709de45566962cad9ed4cbe9a3"
+    }
+  ],
+  "historical_build_receipts_preserved": {
+    "docs/codex-cli/startup-build-2026-10-31-final.json": "1a7a87754d3632678540b63773a28ae82cdd58c89ef8f7e8e7af904559e3ffa5",
+    "docs/codex-cli/startup-build-2026-10-31-skills.json": "3b14408304d2d6340c475802d787a1fd306c1e8bbba463f34569cbf889084bc7"
+  }
+}
