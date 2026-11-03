@@ -504,7 +504,21 @@ impl Feature {
     }
 
     pub fn default_enabled(self) -> bool {
-        self.info().default_enabled
+        self.supported_on_target() && self.info().default_enabled
+    }
+
+    fn supported_on_target(self) -> bool {
+        // Plugins are disabled on TRUEOS. In particular, startup catalog
+        // refreshes must not run, even when shared config enables them.
+        !(cfg!(target_os = "trueos")
+            && matches!(
+                self,
+                Self::Plugins
+                    | Self::RemotePlugin
+                    | Self::RecommendedPlugins
+                    | Self::PluginSharing
+                    | Self::PluginHooks
+            ))
     }
 
     fn info(self) -> &'static FeatureSpec {
@@ -559,7 +573,7 @@ impl Features {
     pub fn with_defaults() -> Self {
         let mut set = BTreeSet::new();
         for spec in FEATURES {
-            if spec.default_enabled {
+            if spec.default_enabled && spec.id.supported_on_target() {
                 set.insert(spec.id);
             }
         }
@@ -570,7 +584,7 @@ impl Features {
     }
 
     pub fn enabled(&self, f: Feature) -> bool {
-        self.enabled.contains(&f)
+        f.supported_on_target() && self.enabled.contains(&f)
     }
 
     /// Whether a routing tier is enabled, independently of model catalog support.
@@ -602,7 +616,9 @@ impl Features {
     }
 
     pub fn enable(&mut self, f: Feature) -> &mut Self {
-        self.enabled.insert(f);
+        if f.supported_on_target() {
+            self.enabled.insert(f);
+        }
         self
     }
 
