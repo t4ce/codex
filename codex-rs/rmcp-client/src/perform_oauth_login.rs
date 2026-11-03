@@ -787,7 +787,7 @@ impl OauthLoginFlow {
                 );
             }
 
-            if webbrowser::open(auth_url).is_err() {
+            if codex_utils_process::open_browser(auth_url).is_err() {
                 if !emit_browser_url {
                     eprintln!(
                         "Authorize `{server_name}` by opening this URL in your browser:\n{auth_url}\n"

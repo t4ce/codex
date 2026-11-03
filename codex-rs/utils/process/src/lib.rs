@@ -1,9 +1,12 @@
-//! Command construction for background processes that must not allocate a Windows console.
-//! Callers retain control of environment, stdio, and process lifetime. Interactive,
+//! Platform browser launching and background process construction.
+//! Background command callers retain control of environment, stdio, and process lifetime. Interactive,
 //! detached, and private-desktop launches must select their own console policy.
 
 use std::ffi::OsStr;
 use std::process::Command;
+
+mod browser;
+pub use browser::open_browser;
 
 /// Construct a background command, suppressing console allocation on Windows.
 /// Convert with `tokio::process::Command::from` for asynchronous execution.

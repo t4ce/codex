@@ -7,6 +7,15 @@ license.workspace = true
 [lints]
 workspace = true
 
+[dependencies]
+url = { workspace = true }
+
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
+webbrowser = { workspace = true }
+
+[target.'cfg(target_os = "trueos")'.dependencies]
+trueos-v = { package = "v", path = "../../../../TRUEOS-Blueprints/crates/trueos-v" }
+
 [dev-dependencies]
 pretty_assertions = { workspace = true }
 tokio = { workspace = true, features = ["macros", "process", "rt-multi-thread"] }

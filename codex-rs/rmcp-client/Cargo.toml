@@ -24,6 +24,7 @@ codex-otel = { workspace = true }
 codex-protocol = { workspace = true }
 codex-secrets = { workspace = true }
 codex-utils-paths = { workspace = true }
+codex-utils-process = { workspace = true }
 codex-utils-pty = { workspace = true }
 bytes = { workspace = true }
 futures = { workspace = true, default-features = false, features = ["std"] }
@@ -63,7 +64,6 @@ tokio-util = { workspace = true, features = ["rt"] }
 tracing = { workspace = true, features = ["log"] }
 url = { workspace = true }
 urlencoding = { workspace = true }
-webbrowser = { workspace = true }
 which = { workspace = true }
 
 [dev-dependencies]

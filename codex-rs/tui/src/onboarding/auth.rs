@@ -965,7 +965,7 @@ impl AuthModeWidget {
                         &sign_in_state,
                         &request_frame,
                         ContinueInBrowserState { login_id, auth_url },
-                        webbrowser::open,
+                        codex_utils_process::open_browser,
                     );
                 }
                 Ok(other) => {

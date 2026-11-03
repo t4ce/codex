@@ -76,6 +76,7 @@ codex-utils-approval-presets = { workspace = true }
 codex-uds = { workspace = true }
 codex-utils-paths = { workspace = true }
 codex-utils-cli = { workspace = true }
+codex-utils-process = { workspace = true }
 codex-utils-text = { workspace = true }
 codex-utils-oss = { workspace = true }
 codex-utils-plugins = { workspace = true }
@@ -135,7 +136,6 @@ unicode-segmentation = { workspace = true }
 unicode-width = { workspace = true }
 url = { workspace = true }
 urlencoding = { workspace = true }
-webbrowser = { workspace = true }
 uuid = { workspace = true }
 
 codex-windows-sandbox = { workspace = true }

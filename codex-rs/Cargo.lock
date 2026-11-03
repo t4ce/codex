@@ -3836,7 +3836,6 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "urlencoding",
- "webbrowser",
  "wiremock",
 ]
 
@@ -4425,6 +4424,7 @@ dependencies = [
  "codex-transport",
  "codex-utils-cargo-bin",
  "codex-utils-paths",
+ "codex-utils-process",
  "codex-utils-pty",
  "futures",
  "http 1.4.0",
@@ -4451,7 +4451,6 @@ dependencies = [
  "trueos",
  "url",
  "urlencoding",
- "webbrowser",
  "which 8.0.0",
  "windows-sys 0.61.2",
  "wiremock",
@@ -4882,6 +4881,7 @@ dependencies = [
  "codex-utils-oss",
  "codex-utils-paths",
  "codex-utils-plugins",
+ "codex-utils-process",
  "codex-utils-sandbox-summary",
  "codex-utils-sleep-inhibitor",
  "codex-utils-string",
@@ -4943,7 +4943,6 @@ dependencies = [
  "uuid",
  "v",
  "vt100",
- "webbrowser",
  "which 8.0.0",
  "windows-sys 0.61.2",
  "winsplit",
@@ -5131,6 +5130,9 @@ version = "0.162.0"
 dependencies = [
  "pretty_assertions",
  "tokio",
+ "url",
+ "v",
+ "webbrowser",
 ]
 
 [[package]]

@@ -459,7 +459,7 @@ impl TranscriptOverlay {
                 Err(error) => error,
             });
         } else if let ViewAction::OpenLink(url) = action
-            && let Err(error) = webbrowser::open(&url)
+            && let Err(error) = codex_utils_process::open_browser(&url)
         {
             self.notice = Some(format!("Could not open link: {error}"));
         }

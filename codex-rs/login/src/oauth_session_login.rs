@@ -374,7 +374,7 @@ impl Drop for LoginStatusGuard<'_> {
 // The legacy CLI/TUI flow hands browser authorization directly to the user.
 pub(super) fn open_browser(url: &Url) {
     eprintln!("Authorize the model provider by opening this URL:\n{url}\n");
-    if webbrowser::open(url.as_str()).is_err() {
+    if codex_utils_process::open_browser(url.as_str()).is_err() {
         eprintln!("Browser launch failed; open the URL above manually.");
     }
 }
