@@ -46,6 +46,7 @@ fn spec(include_environment_id: bool) -> ToolSpec {
         ("text".into(), JsonSchema::string(Some("Complete replacement source text for write_file.".into()))),
         ("project".into(), JsonSchema::string(Some("Project name for open.".into()))),
         ("database".into(), JsonSchema::string(Some("Optional project database path for open; defaults to the shared IDE database.".into()))),
+        ("kind".into(), JsonSchema::string_enum(vec![json!("native"), json!("html")], Some("Project kind for open; HTML creates an index.html, main.js and style.css starter and uses a standalone preview server.".into()))),
         ("compiler".into(), JsonSchema::string_enum(vec![json!("odin-son"), json!("rustc-min")], Some("Optional compiler for open.".into()))),
         ("entry".into(), JsonSchema::string(Some("Optional project-relative compiler entry for open.".into()))),
     ]);
@@ -59,7 +60,7 @@ fn spec(include_environment_id: bool) -> ToolSpec {
     }
     ToolSpec::Function(ResponsesApiTool {
         name: "trueos_ide".into(),
-        description: "Work with a TRUEOS Edit project. open attaches to or launches a named project and returns its endpoint and context; discover lists workspaces; context returns the current revision, editor state and versioned platform API index; api_reference reads a platform API topic from that catalog without changing project files or invoking the compiler; read_file reads project source; write_file saves complete text using the revision returned by context or read_file; compile starts a build for the expected revision; build_status reports progress; cancel_build requests cancellation; run starts the built project. Use endpoint from open or discover when multiple workspaces are open. Refresh context and source after a revision conflict. Edit owns the project store and build lifecycle.".into(),
+        description: "Work with a TRUEOS Edit project. open attaches to or launches a named project and returns its endpoint and context; discover lists workspaces; context returns the current revision, editor state and versioned platform API index; api_reference reads a platform API topic from that catalog without changing project files or invoking the compiler; read_file reads project source; write_file saves complete text using the revision returned by context or read_file; compile starts a build for the expected revision; build_status reports progress; cancel_build requests cancellation; run starts the built native project, or saves and opens the HTML project through its standalone preview Blueprint. HTML projects have no compile step. Use endpoint from open or discover when multiple workspaces are open. Refresh context and source after a revision conflict. Edit owns the project store and build lifecycle.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(vec!["action".into()]), Some(false.into())),

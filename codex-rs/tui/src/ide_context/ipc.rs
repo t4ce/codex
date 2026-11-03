@@ -224,7 +224,7 @@ pub(crate) fn fetch_ide_context(
             endpoint,
             project: context.project,
             database: context.database,
-            compiler: format!("{:?}", context.compiler),
+            compiler: if context.kind == trueos_ide::protocol::ProjectKind::Html { "HTML preview".into() } else { context.compiler.map(|backend| format!("{backend:?}")).unwrap_or_else(|| "Unconfigured".into()) },
             entry: context.entry,
             revision_id: context.revision_id,
             api_reference: context.api_reference.map(|api| api.render_summary()),

@@ -45,6 +45,7 @@ pub struct OpenOptions {
     pub project: String,
     pub database: Option<String>,
     pub compiler: Option<String>,
+    pub kind: Option<String>,
     pub entry: Option<String>,
 }
 
@@ -62,6 +63,12 @@ impl OpenOptions {
                 "project and database must be nonempty literal values without newline or NUL"
                     .into(),
             );
+        }
+        if self.kind.as_deref().is_some_and(|kind| !matches!(kind, "native" | "html")) {
+            return Err("kind must be native or html".into());
+        }
+        if self.kind.as_deref() == Some("html") && self.compiler.is_some() {
+            return Err("HTML projects use preview and have no compiler".into());
         }
         if let Some(compiler) = &self.compiler {
             if !matches!(compiler.as_str(), "odin-son" | "rustc-min") {
@@ -88,6 +95,7 @@ impl OpenOptions {
         if let Some(database) = &self.database {
             script.push_str(&format!("ide-db {database}\n"));
         }
+        if let Some(kind) = &self.kind { script.push_str(&format!("ide-kind {kind}\n")); }
         if let Some(compiler) = &self.compiler {
             script.push_str(&format!("ide-compiler {compiler}\n"));
         }
@@ -200,10 +208,12 @@ async fn open_impl<T: Transport>(
             .await?;
             if let IdeResponse::Context { context } = &reply {
                 let compiler = match context.compiler {
-                    protocol::CompilerBackend::OdinSon => "odin-son",
-                    protocol::CompilerBackend::RustcMin => "rustc-min",
+                    Some(protocol::CompilerBackend::OdinSon) => "odin-son",
+                    Some(protocol::CompilerBackend::RustcMin) => "rustc-min",
+                    None => "none",
                 };
-                if options
+                let kind = if context.kind == protocol::ProjectKind::Html { "html" } else { "native" };
+                if options.kind.as_deref().is_some_and(|requested| requested != kind) || options
                     .compiler
                     .as_deref()
                     .is_some_and(|requested| requested != compiler)
@@ -377,9 +387,22 @@ mod tests {
             project: "p".into(),
             database: Some("d".into()),
             compiler: None,
+            kind: None,
             entry: None,
         }
     }
+    #[test]
+    fn html_projects_use_preview_without_a_native_compiler() {
+        let mut opt = options();
+        opt.kind = Some("html".into());
+        assert!(opt.script().unwrap().contains("ide-kind html\n"));
+        opt.compiler = Some("odin-son".into());
+        assert!(opt.script().is_err());
+        opt.compiler = None;
+        opt.kind = Some("html\nide-db other".into());
+        assert!(opt.script().is_err());
+    }
+
     #[test]
     fn startup_script_rejects_injection_and_invalid_entry() {
         for project in ["", "p\nide-db injected", "p\r", "p\0"] {
@@ -406,7 +429,9 @@ mod tests {
         let context = protocol::WorkspaceContext {
             project: "p".into(),
             database: "d".into(),
-            compiler: protocol::CompilerBackend::OdinSon,
+            kind: protocol::ProjectKind::Native,
+            compiler: Some(protocol::CompilerBackend::OdinSon),
+            preview_url: None,
             entry: "main.odin".into(),
             revision_id: 1,
             active_file: None,
@@ -446,7 +471,9 @@ mod tests {
         let context = protocol::WorkspaceContext {
             project: "p".into(),
             database: "d".into(),
-            compiler: protocol::CompilerBackend::OdinSon,
+            kind: protocol::ProjectKind::Native,
+            compiler: Some(protocol::CompilerBackend::OdinSon),
+            preview_url: None,
             entry: "main.odin".into(),
             revision_id: 1,
             active_file: None,

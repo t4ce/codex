@@ -97,7 +97,7 @@ fn render_prompt_context(context: &IdeContext) -> Option<String> {
     let mut ide_context_section = String::new();
 
     if let Some(workspace) = &context.native_workspace {
-        ide_context_section.push_str(&format!("\n## TRUEOS Edit workspace\n- Project: {}\n- Database: {}\n- Compiler: {}\n- Entry: {}\n- Endpoint: {}\n- Revision: {}\nUse this endpoint with the trueos_ide tool.\n", workspace.project, workspace.database, workspace.compiler, workspace.entry, workspace.endpoint, workspace.revision_id));
+        ide_context_section.push_str(&format!("\n## TRUEOS Edit workspace\n- Project: {}\n- Database: {}\n- Target: {}\n- Entry: {}\n- Endpoint: {}\n- Revision: {}\nUse this endpoint with the trueos_ide tool.\n", workspace.project, workspace.database, workspace.compiler, workspace.entry, workspace.endpoint, workspace.revision_id));
     }
 
     if let Some(api) = context.native_workspace.as_ref().and_then(|workspace| workspace.api_reference.as_ref()) {
