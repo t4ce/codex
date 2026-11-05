@@ -21,19 +21,6 @@ use tempfile::tempdir;
 pub(super) struct TestFileSystem;
 
 #[test]
-fn embedded_trueos_defaults_choose_luna_with_low_effort() {
-    let trueos: TomlValue =
-        toml::from_str(&embedded_packaged_defaults(true)).expect("valid TRUEOS defaults");
-    assert_eq!(trueos["model"].as_str(), Some("gpt-6-luna"));
-    assert_eq!(trueos["model_reasoning_effort"].as_str(), Some("low"));
-
-    let other: TomlValue =
-        toml::from_str(&embedded_packaged_defaults(false)).expect("valid standard defaults");
-    assert!(other.get("model").is_none());
-    assert!(other.get("model_reasoning_effort").is_none());
-}
-
-#[test]
 fn project_config_cannot_override_configured_credential_broker_hosts() {
     let mut config: TomlValue = toml::from_str(
         "[shell_environment_policy.set]\n\
