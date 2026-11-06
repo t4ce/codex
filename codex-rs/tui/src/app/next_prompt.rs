@@ -13,6 +13,7 @@ use crate::temporary_structured_request::start_temporary_thread;
 use crate::temporary_structured_request::unsubscribe_temporary_thread;
 use codex_app_server_protocol::ServerNotification;
 use codex_app_server_protocol::ThreadItem;
+use codex_app_server_protocol::ThreadItemPayload;
 use codex_app_server_protocol::ThreadSource;
 use codex_app_server_protocol::UserInput;
 use codex_protocol::ThreadId;
@@ -235,21 +236,21 @@ impl App {
 fn suggestion_prompt<'a>(items: impl IntoIterator<Item = &'a ThreadItem>) -> Option<String> {
     let mut messages = std::collections::VecDeque::new();
     for item in items {
-        let (role, text) = match item {
-            ThreadItem::UserMessage { content, .. } => (
+        let (role, text) = match &item.payload {
+            ThreadItemPayload::UserMessage { content, .. } => (
                 "user",
                 content
                     .iter()
                     .filter_map(|input| match input {
                         UserInput::Text { text, .. } => {
-                            Some(crate::ide_context::extract_prompt_request_with_offset(text).0)
+                            Some(crate::user_prompt::extract_prompt_request_with_offset(text).0)
                         }
                         _ => None,
                     })
                     .collect::<Vec<_>>()
                     .join("\n"),
             ),
-            ThreadItem::AgentMessage { text, phase, .. }
+            ThreadItemPayload::AgentMessage { text, phase, .. }
                 if !matches!(phase, Some(MessagePhase::Commentary)) =>
             {
                 ("assistant", text.clone())
