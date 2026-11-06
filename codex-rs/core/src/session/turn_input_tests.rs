@@ -113,7 +113,7 @@ async fn submit_steer_only(
 
 #[cfg(not(feature = "voice"))]
 #[tokio::test]
-async fn uploaded_audio_steering_is_admitted_without_live_voice() {
+async fn disabled_voice_rejects_new_audio_without_changing_pending_input() {
     let (session, turn, _rx) = make_session_and_context_with_rx().await;
     session
         .spawn_task(
@@ -125,26 +125,62 @@ async fn uploaded_audio_steering_is_admitted_without_live_voice() {
             },
         )
         .await;
-    let content = vec![
-        UserInput::Text {
-            text: "Transcribe this recording.".to_string(),
-            text_elements: Vec::new(),
-        },
-        UserInput::Audio {
-            audio: codex_protocol::models::AudioReference::File {
-                file_id: "file-uploaded-recording".to_string(),
-            },
-        },
-    ];
-
-    let submission = submit_steer_only(&session, content.clone(), &turn.sub_id).await;
+    let pending_text = vec![UserInput::Text {
+        text: "Keep this pending text.".to_string(),
+        text_elements: Vec::new(),
+    }];
     assert_eq!(
-        submission,
+        submit_steer_only(&session, pending_text.clone(), &turn.sub_id).await,
         TurnInputSubmission::Steered {
             root_turn_id: turn.sub_id.clone(),
             turn_id: turn.sub_id.clone(),
         }
     );
+
+    for audio in [
+        UserInput::Audio {
+            audio: codex_protocol::models::AudioReference::File {
+                file_id: "file-uploaded-recording".to_string(),
+            },
+        },
+        UserInput::Audio {
+            audio: codex_protocol::models::AudioReference::Inline {
+                audio_url: "data:audio/wav;base64,not-decoded".to_string(),
+            },
+        },
+        UserInput::LocalAudio {
+            path: "/audio-that-must-not-be-opened.wav".into(),
+        },
+    ] {
+        for mode in [
+            TurnInputMode::StartOrSteer,
+            TurnInputMode::StartIfIdle,
+            TurnInputMode::Steer {
+                expected_turn_id: turn.sub_id.clone(),
+            },
+        ] {
+            let error = handle(
+                &session,
+                TurnInputRequest::user_input(vec![
+                    UserInput::Text {
+                        text: "Reject this entire audio submission.".to_string(),
+                        text_elements: Vec::new(),
+                    },
+                    audio.clone(),
+                ]),
+                mode,
+                "rejected-audio-submission".to_string(),
+            )
+            .await
+            .expect_err("new audio must require the voice feature");
+            assert!(matches!(
+                error,
+                CodexErr::InvalidRequest(message)
+                    if message == "audio input is unavailable because voice support is disabled in this build; rebuild with the `voice` feature"
+            ));
+        }
+    }
+
     let pending = session
         .input_queue
         .get_pending_input(&session.active_turn)
@@ -156,9 +192,9 @@ async fn uploaded_audio_steering_is_admitted_without_live_voice() {
         },
     ] = pending.as_slice()
     else {
-        panic!("uploaded audio must remain pending user input");
+        panic!("the original text must remain the only pending input");
     };
-    assert_eq!(queued, &content);
+    assert_eq!(queued, &pending_text);
     session.abort_all_tasks(TurnAbortReason::Interrupted).await;
 }
 

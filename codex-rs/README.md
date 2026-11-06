@@ -75,7 +75,7 @@ authentication remain available.
 | --- | --- |
 | `bedrock` | Amazon Bedrock and AWS authentication |
 | `local-models` | Ollama and LM Studio setup/model management |
-| `voice` | Voice transport and audio processing |
+| `voice` | Voice capture/transport and new user audio input |
 | `external-agent-imports` | Import settings and history from other assistants |
 | `external-reporting` | Analytics, OTLP export, and feedback uploads |
 
@@ -89,3 +89,5 @@ Disabled builds reject Bedrock login/setup and AWS request signing with an expli
 error rather than falling back to OpenAI credentials.
 Local-model setup and new audio/voice requests likewise report that their feature
 is disabled. Text conversations and existing ChatGPT credentials remain supported.
+Shared audio decoding remains available to history and Code Mode independently of
+new user audio input admission.

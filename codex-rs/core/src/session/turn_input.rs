@@ -245,6 +245,19 @@ pub(super) async fn handle(
     submission_id: String,
 ) -> CodexResult<TurnInputSubmission> {
     let request = request.into();
+    // Shared audio decoding supports history and code mode independently of
+    // admitting new user audio in builds without the opt-in voice feature.
+    #[cfg(not(feature = "voice"))]
+    if matches!(
+        &request.request.input,
+        SubmittedTurnInput::UserInput { content, .. }
+            if content.iter().any(|item| matches!(item, UserInput::Audio { .. } | UserInput::LocalAudio { .. }))
+    ) {
+        return Err(CodexErr::InvalidRequest(
+            "audio input is unavailable because voice support is disabled in this build; rebuild with the `voice` feature".to_string(),
+        ));
+    }
+
     if request.request.start.service_tier.is_some()
         && crate::agent::host::host_child_uses_shared_service_tier(session)
     {
