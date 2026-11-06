@@ -3479,7 +3479,6 @@ fn image_data_url_payload_does_not_dominate_custom_tool_call_output_estimate() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn audio_data_url_payload_does_not_dominate_message_estimate() {
     let (audio_url, _) = pcm_wav_data_url(/*sample_count*/ 801);
     let item = ResponseItem::Message {
@@ -3503,7 +3502,6 @@ fn audio_data_url_payload_does_not_dominate_message_estimate() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn uploaded_audio_estimate_accounts_for_each_recording_instead_of_its_id() {
     let item = ResponseItem::Message {
         status: None,
@@ -3533,7 +3531,6 @@ fn uploaded_audio_estimate_accounts_for_each_recording_instead_of_its_id() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn audio_data_url_payload_does_not_dominate_function_call_output_estimate() {
     let (audio_url, _) = pcm_wav_data_url(/*sample_count*/ 800);
     let item = ResponseItem::FunctionCallOutput {
@@ -3556,7 +3553,6 @@ fn audio_data_url_payload_does_not_dominate_function_call_output_estimate() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn audio_data_url_payload_does_not_dominate_custom_tool_call_output_estimate() {
     let (audio_url, _) = pcm_wav_data_url(/*sample_count*/ 80_000);
     let item = ResponseItem::CustomToolCallOutput {
@@ -3579,7 +3575,6 @@ fn audio_data_url_payload_does_not_dominate_custom_tool_call_output_estimate() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn malformed_audio_data_url_falls_back_to_whole_url_size_cost() {
     let payload = "A".repeat(/*n*/ 100_000);
     let audio_url = format!("data:audio/wav;base64,{payload}");
@@ -3602,7 +3597,6 @@ fn malformed_audio_data_url_falls_back_to_whole_url_size_cost() {
 }
 
 #[test]
-#[cfg(feature = "voice")]
 fn record_items_omits_audio_that_exceeds_the_output_budget() {
     let (audio_url, _) = pcm_wav_data_url(/*sample_count*/ 80_000);
     let item = ResponseItem::FunctionCallOutput {

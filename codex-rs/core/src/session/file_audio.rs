@@ -8,13 +8,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::audio_utils::estimate_file_audio_tokens;
 use codex_attachment_store::FormatSpecificMetadata;
 use codex_attachment_store::ResolveRequest;
 use codex_history::ResponseItemEnvelope;
 use codex_protocol::models::AudioReference;
 use codex_protocol::models::ContentItem;
 use codex_protocol::models::ResponseItem;
-use codex_utils_audio::estimate_file_audio_tokens;
 use futures::StreamExt;
 use futures::stream;
 

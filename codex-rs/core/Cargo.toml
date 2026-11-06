@@ -7,7 +7,7 @@ version.workspace = true
 [features]
 default = []
 external-reporting = ["codex-exec-server/external-reporting", "codex-otel/external-reporting", "codex-feedback/external-reporting", "codex-analytics/external-reporting"]
-voice = ["dep:codex-utils-audio"]
+voice = []
 
 [lib]
 name = "codex_core"
@@ -81,7 +81,8 @@ codex-terminal-detection = { workspace = true }
 codex-thread-store = { workspace = true }
 codex-tools = { workspace = true }
 codex-utils-paths = { workspace = true }
-codex-utils-audio = { workspace = true, optional = true }
+# Uploaded-file decoding is shared with code mode; capture/transport stays opt-in.
+codex-utils-audio = { workspace = true }
 codex-utils-cache = { workspace = true }
 codex-utils-critical-path = { workspace = true }
 codex-utils-git-discovery = { workspace = true }
