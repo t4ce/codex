@@ -111,6 +111,57 @@ async fn submit_steer_only(
     .expect("steer-only submission should be valid")
 }
 
+#[cfg(not(feature = "voice"))]
+#[tokio::test]
+async fn uploaded_audio_steering_is_admitted_without_live_voice() {
+    let (session, turn, _rx) = make_session_and_context_with_rx().await;
+    session
+        .spawn_task(
+            Arc::clone(&turn),
+            Vec::new(),
+            NeverEndingTask {
+                kind: TaskKind::Regular,
+                listen_to_cancellation_token: true,
+            },
+        )
+        .await;
+    let content = vec![
+        UserInput::Text {
+            text: "Transcribe this recording.".to_string(),
+            text_elements: Vec::new(),
+        },
+        UserInput::Audio {
+            audio: codex_protocol::models::AudioReference::File {
+                file_id: "file-uploaded-recording".to_string(),
+            },
+        },
+    ];
+
+    let submission = submit_steer_only(&session, content.clone(), &turn.sub_id).await;
+    assert_eq!(
+        submission,
+        TurnInputSubmission::Steered {
+            root_turn_id: turn.sub_id.clone(),
+            turn_id: turn.sub_id.clone(),
+        }
+    );
+    let pending = session
+        .input_queue
+        .get_pending_input(&session.active_turn)
+        .await
+        .0;
+    let [
+        TurnInput::UserInput {
+            content: queued, ..
+        },
+    ] = pending.as_slice()
+    else {
+        panic!("uploaded audio must remain pending user input");
+    };
+    assert_eq!(queued, &content);
+    session.abort_all_tasks(TurnAbortReason::Interrupted).await;
+}
+
 #[tokio::test]
 #[expect(
     clippy::await_holding_invalid_type,
