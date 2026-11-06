@@ -122,5 +122,15 @@
     "configured_post_build_publication": "smb://t4ce@pdjb/home-share/TRUEOS_SITE/apps",
     "published_name": "codex.bp\u00a7\u00a7d69cf03c68a3f55b494e6c4879b34836d1c9e58132d8aeb3b692e0000844ac03",
     "rig_launch_performed": false
+  },
+  "historical_remote_branch_cleanup": {
+    "branch": "origin/trueos/upstream-parity-20261016",
+    "head": "c9caed277e4ac9dc35b109c6eae2abf84da1ceff",
+    "unique_commits_not_on_main": 0,
+    "fully_in_remote_origin_main": true,
+    "status": "historical_remote_ref_retained_authentication_unavailable",
+    "delete_attempt": "Lease-protected deletion failed before mutation: HTTPS username credentials unavailable.",
+    "ssh_alternative": "No usable agent key or configured default identity file available.",
+    "active_source_checkout": false
   }
 }

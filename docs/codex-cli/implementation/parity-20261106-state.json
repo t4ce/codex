@@ -160,6 +160,13 @@
       "area": "SDK whole-build cache",
       "evidence": "parity-20261106-evidence/canonical-native-package-verification.json",
       "action": "SDK reported inputs changed during build and skipped its complete success-cache stamp. Independent source/manifest/lock/plan, container, workload and direct-link checks bind the package; next SDK invocation must recheck inputs."
+    },
+    {
+      "id": "HISTORICAL-REMOTE-BRANCH",
+      "status": "authentication_unavailable",
+      "area": "October parity branch on GitHub",
+      "evidence": "parity-20261106-evidence/canonical-final-validation.json",
+      "action": "Delete origin/trueos/upstream-parity-20261016 once GitHub write authentication is available. All its commits are already on main locally and remotely; no separate source work remains there."
     }
   ],
   "commits": [
@@ -8439,7 +8446,17 @@
     "integration_branch_deleted": true,
     "recovery_archive": "/home/t4ce/.cache/codex-consolidation-20261106/source-before-consolidation.tar",
     "historical_evidence_note": "Old worktree paths in prior receipts identify historical validation inputs, not active source locations.",
-    "validation_archives": "/home/t4ce/.cache/codex-consolidation-20261106/validation-snapshots"
+    "validation_archives": "/home/t4ce/.cache/codex-consolidation-20261106/validation-snapshots",
+    "historical_remote_branch": {
+      "branch": "origin/trueos/upstream-parity-20261016",
+      "head": "c9caed277e4ac9dc35b109c6eae2abf84da1ceff",
+      "unique_commits_not_on_main": 0,
+      "fully_in_remote_origin_main": true,
+      "status": "historical_remote_ref_retained_authentication_unavailable",
+      "delete_attempt": "Lease-protected deletion failed before mutation: HTTPS username credentials unavailable.",
+      "ssh_alternative": "No usable agent key or configured default identity file available.",
+      "active_source_checkout": false
+    }
   },
   "commit_validation_scope": "Per-commit ancestry preserved; final shared/native package checks cover the integrated graph. Excluded platforms and rig runtime remain explicit limits, not per-commit execution proof."
 }

@@ -145,6 +145,13 @@
       "area": "SDK whole-build cache",
       "evidence": "parity-20261106-evidence/canonical-native-package-verification.json",
       "action": "SDK reported inputs changed during build and skipped its complete success-cache stamp. Independent source/manifest/lock/plan, container, workload and direct-link checks bind the package; next SDK invocation must recheck inputs."
+    },
+    {
+      "id": "HISTORICAL-REMOTE-BRANCH",
+      "status": "authentication_unavailable",
+      "area": "October parity branch on GitHub",
+      "evidence": "parity-20261106-evidence/canonical-final-validation.json",
+      "action": "Delete origin/trueos/upstream-parity-20261016 once GitHub write authentication is available. All its commits are already on main locally and remotely; no separate source work remains there."
     }
   ]
 }
