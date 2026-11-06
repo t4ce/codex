@@ -282,7 +282,7 @@ pub(super) async fn exercise(
     insta::assert_snapshot!(
         "managed_worktree_model_creation",
         context_snapshot::format_context_snapshot(
-            "Model request history for creating, polling and listing a task-attached checkout, then renaming another task through MCP. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.",
+            "Model request history for creating, polling and listing a task-attached checkout and optional task renaming through MCP. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.",
             &entries,
             &ContextSnapshotOptions::default()
                 .rewrite_known_segments()
