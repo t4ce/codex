@@ -18,7 +18,6 @@ use crate::http::HttpClient;
 use crate::http::HttpClientBuilder;
 use crate::http::HttpClientFactory;
 use crate::http::NetworkPolicy;
-use crate::http::NetworkPolicyDenied;
 use crate::http::OutboundProxyPolicy;
 use crate::http::OutboundProxyRoute;
 use crate::http::RequestBuilder;

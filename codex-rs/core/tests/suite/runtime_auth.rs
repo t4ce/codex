@@ -680,7 +680,7 @@ async fn upload_with_harness(
 async fn run_harness_through_proxy(server: &MockServer, test_name: &str) -> Result<()> {
     // The production destination check stays intact. A test-only CA and CONNECT proxy route
     // the real host names to wiremock, only inside this isolated test subprocess.
-    codex_utils_rustls_provider::ensure_rustls_crypto_provider();
+    codex_network_foundation::ensure_rustls_crypto_provider();
     let rcgen::CertifiedKey { cert, signing_key } = rcgen::generate_simple_self_signed(vec![
         "api.openai.com".into(),
         "auth.openai.com".into(),

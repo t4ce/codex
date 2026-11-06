@@ -747,7 +747,6 @@ async fn noise_session_resume_rejects_a_changed_noise_key_before_connecting() ->
         identity: NoiseChannelIdentity::generate()?,
         client_name: "test".to_string(),
         connect_timeout: DEFAULT_REMOTE_EXEC_SERVER_CONNECT_TIMEOUT,
-        initialize_timeout: DEFAULT_REMOTE_EXEC_SERVER_INITIALIZE_TIMEOUT,
         http_client_factory: codex_transport::http::HttpClientFactory::new(
             codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
@@ -773,7 +772,6 @@ async fn noise_session_resume_leaves_registry_retries_to_recovery() -> Result<()
         identity: identity.clone(),
         client_name: "test".to_string(),
         connect_timeout: DEFAULT_REMOTE_EXEC_SERVER_CONNECT_TIMEOUT,
-        initialize_timeout: DEFAULT_REMOTE_EXEC_SERVER_INITIALIZE_TIMEOUT,
         http_client_factory: codex_transport::http::HttpClientFactory::new(
             codex_transport::http::OutboundProxyPolicy::ReqwestDefault,
         ),
