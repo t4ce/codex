@@ -174,8 +174,8 @@ async fn disabled_voice_rejects_new_audio_without_changing_pending_input() {
             .await
             .expect_err("new audio must require the voice feature");
             assert!(matches!(
-                error,
-                CodexErr::InvalidRequest(message)
+                error.details(),
+                CodexErrorDetails::InvalidRequest(message)
                     if message == "audio input is unavailable because voice support is disabled in this build; rebuild with the `voice` feature"
             ));
         }
