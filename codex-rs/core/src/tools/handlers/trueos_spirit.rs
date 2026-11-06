@@ -169,7 +169,7 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
     }
     // Keep the root an object; per-action objects reject fields from other actions.
     let mut parameters = JsonSchema::object(BTreeMap::new(), None, None);
-    parameters.one_of = Some(variants);
+    parameters.one_of = Some(variants.into());
     ToolSpec::Function(ResponsesApiTool {
         name: "spirit".into(),
         description: "Use resident TRUEOS Spirit directly for native OS interaction. Spirit is configured automatically at OS boot, with Lilly as her avatar. /spirit shows the native integration information. Spirit manages avatar presentation, animation transitions, and paired input sequencing. windows lists live UI4 windows; focus selects one; observe returns its actual PNG and coordinate metadata. Before pointer/type/key, focus then observe the current target; observe again after focus or window geometry changes. pointer uses selected-window grid coordinates 0..1000. move positions Lilly's hardware avatar on the scanout using 0..1 coordinates. emotion requests an expression. Input actions are queued, not proof of completion: observe to verify results. Calls are serial; BUSY means nothing from this call was queued, so wait and retry it. Do not replay accepted text or clicks. This tool is available automatically in every TRUEOS Codex session.".into(),
