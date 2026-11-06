@@ -1,0 +1,396 @@
+{
+  "elf": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/module.stripped.o",
+  "elf_sha256": "0250f6eae28022a2a8e30ee968f9dba61156cc434e3b5203196c168277b7e92d",
+  "missing_import_relocation_details": {
+    "killpg": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 28,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 28
+      },
+      "target_sections": {
+        ".text": 28
+      }
+    },
+    "mlock": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "uname": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 3,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 3
+      },
+      "target_sections": {
+        ".text": 3
+      }
+    },
+    "kill": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 12,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 12
+      },
+      "target_sections": {
+        ".text": 12
+      }
+    },
+    "getrlimit": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "setrlimit": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "waitid": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "getuid": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 3,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 3
+      },
+      "target_sections": {
+        ".text": 3
+      }
+    },
+    "getpwuid_r": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 3,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 3
+      },
+      "target_sections": {
+        ".text": 3
+      }
+    },
+    "tcflush": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "sigemptyset": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "sigaddset": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "pthread_sigmask": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "getpgid": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "futimes": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "lutimes": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "getpwnam": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "pthread_atfork": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "chmod": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "symlink": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 3,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 3
+      },
+      "target_sections": {
+        ".text": 3
+      }
+    },
+    "ldexp": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "lchown": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "stderr": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 4,
+      "nonallocated_relocations": 0,
+      "types": {
+        "42": 4
+      },
+      "target_sections": {
+        ".text": 4
+      }
+    },
+    "__fprintf_chk": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 50,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 50
+      },
+      "target_sections": {
+        ".text": 50
+      }
+    },
+    "__vsnprintf_chk": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "fputc": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 10,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 10
+      },
+      "target_sections": {
+        ".text": 10
+      }
+    },
+    "__snprintf_chk": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 36,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 36
+      },
+      "target_sections": {
+        ".text": 36
+      }
+    },
+    "fclose": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "fdopen": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    },
+    "fwrite": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 11,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 11
+      },
+      "target_sections": {
+        ".text": 11
+      }
+    },
+    "ZSTD_trace_compress_begin": {
+      "bind": "WEAK",
+      "allocated_relocations": 4,
+      "nonallocated_relocations": 0,
+      "types": {
+        "9": 2,
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 4
+      }
+    },
+    "ZSTD_trace_compress_end": {
+      "bind": "WEAK",
+      "allocated_relocations": 2,
+      "nonallocated_relocations": 0,
+      "types": {
+        "9": 1,
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 2
+      }
+    },
+    "ZSTD_trace_decompress_end": {
+      "bind": "WEAK",
+      "allocated_relocations": 6,
+      "nonallocated_relocations": 0,
+      "types": {
+        "9": 3,
+        "4": 3
+      },
+      "target_sections": {
+        ".text": 6
+      }
+    },
+    "ZSTD_trace_decompress_begin": {
+      "bind": "WEAK",
+      "allocated_relocations": 4,
+      "nonallocated_relocations": 0,
+      "types": {
+        "9": 2,
+        "4": 2
+      },
+      "target_sections": {
+        ".text": 4
+      }
+    },
+    "abs": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 1,
+      "nonallocated_relocations": 0,
+      "types": {
+        "4": 1
+      },
+      "target_sections": {
+        ".text": 1
+      }
+    }
+  },
+  "all_35_have_allocated_relocation_references": true
+}

@@ -2,7 +2,7 @@
   "worktree": "/home/t4ce/Repositories/codex-parity-20261106",
   "upstream": "814347ecd21b49d25479f5499f168b9f7b7e1803",
   "fork": "0511204eb22cf136201c6aa50d1cfba888d85934",
-  "status": "source_resolved_validation_pending_workspace_lock",
+  "status": "source_resolved_host_feature_matrix_passed_native_target_still_separate",
   "owned_directories": [
     "codex-rs/transport",
     "codex-rs/network-foundation",
@@ -299,19 +299,14 @@
   "unresolvedhard_decisions": [],
   "backlog": [
     {
-      "id": "transport-native-validation",
-      "confidence": "pending tests",
-      "requirement": "Run transport+foundation+protocol tests and login/model-provider tests after shared manifests/lockfile resolve; host Linux can validate shared/native transports but does not prove trueos or Windows ABI."
-    },
-    {
-      "id": "optional-build-matrix",
-      "confidence": "pending tests",
-      "requirement": "Check model-provider default and bedrock feature; feedback default and external-reporting feature; analytics default and external-reporting feature."
-    },
-    {
       "id": "windows-proxy-auth-reqwest013",
       "confidence": "below 95% until target compilation",
       "requirement": "Upstream Windows CONNECT auth paths merged and rebased, including TLS material wrappers and pipe transport. Windows target build needed to prove reqwest 0.13 feature/API compatibility; Windows source is excluded on TRUEOS."
+    },
+    {
+      "id": "actual-native-trueos",
+      "confidence": "requires native build",
+      "requirement": "Host source-identical diagnostic overlays prove shared Rust behavior and features, not native TRUEOS ABI; root native build handles this separately."
     }
   ],
   "validation": {
@@ -322,7 +317,8 @@
     "source_conflict_markers": [],
     "old_transport_utility_imports": [],
     "git_diff_check": "passed owned source changes",
-    "runtime_tests": "pending Cargo.lock conflict resolution by root"
+    "runtime_tests": "pending Cargo.lock conflict resolution by root",
+    "host_results": "/tmp/codex-parity-20261106/host-validation.json"
   },
   "no_index_or_manifest_mutations": true
 }

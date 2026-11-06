@@ -1,0 +1,11 @@
+{
+  "canonical_source": "/home/t4ce/Repositories/codex",
+  "branch": "main",
+  "exit_code": 0,
+  "lock_sha256": "ac96b048e307bb78e00e4460f6afe53575c11a76431c8e3fca92de743d262e6f",
+  "native_patch_configs": 76,
+  "host_diagnostic_overlays": false,
+  "log": "/tmp/codex-parity-20261106/canonical-native-metadata.log",
+  "workspace_members": 168,
+  "active_packages": 1485
+}

@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-06T17:08:53.759299+00:00",
+  "scope": "Read-only audit of canonical codex main, SDK guards and kernel declarations. No source mutation, build, deployment or rig interaction; static capabilities are not runtime proof.",
+  "canonical_codex_head": "2c4a3831d3b06fb0653694f411af224056ebceab",
+  "required_workload_imports": [
+    "trueos_cabi_thread_configure_placement_v1",
+    "trueos_cabi_thread_swap_activity_v1",
+    "trueos_cabi_thread_swap_child_role_v1"
+  ],
+  "required_workload_import_rules": {
+    "binding": "GLOBAL",
+    "index": "UND",
+    "definitions_forbidden": true,
+    "weak_references_insufficient": true,
+    "receipt_order_must_match": true
+  },
+  "authoritative_sources": {
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/codex_artifact.rs": "044e549f089ef09e51fbf7828059be136c7c88e28fc025c26b666a4888e7e1c1",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/codex_workload.rs": "8f5c2f29a1ce772878dc7e178cf17db825b909bab9e08b78ea4decfaffcd5119",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/abi_guard.rs": "17f3118b027858bb700340f62316926e750fd2df13aff3bb7d6c3bcd1126ccd6",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/build_cache.rs": "c96308728e071e3cd3b71da950063e49f2a0d3463309d8d967f58b406e5e1eb4",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/cache_inputs.rs": "f2ef36dadafbc8a230990d7990fdf4c44cb61b33bd8395e28891201bcb8ffc12",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/main.rs": "58f10724ce087674564fe727046cdb538e92620f9fb73c52955439c0d3a4bf6d",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/src/artifact.rs": "6a4875fb104fbbf8352621d7f7149cfdc1f69b0b512e328ee05d642ae1c234a0",
+    "/home/t4ce/Repositories/TRUEOS/build.rs": "c0ff4f548df9815fc496e725a798a6114f02ccdf143a3769e2ccbd3122c249bb",
+    "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/blueprint.rs": "b72722d2dda45cc0c41d7bd9c88b8074851e95a8b345416fc4ced06260b6d070",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/crates/trueos-v/src/bp_abi.rs": "77d2d28666c6c59c0d11696bbe4efc5fb48c46cbf5aec24ece925e47d3c0848d",
+    "/home/t4ce/Repositories/TRUEOS/crates/trueos-v/src/bp_abi.rs": "854e3270e675eb0dc447307c2290d8cc0dc19480b6ebe33b5fbd6e5e9722c0ea",
+    "/home/t4ce/Repositories/TRUEOS/abi/portal-cabi-v2.sha256": "6069044bc778e13541d73c588bda6c41b346327f237cc4c4600df18a7f0f0978"
+  },
+  "abi_comparison": {
+    "method": "Python reproduction of production normalized Rust function signature parser and aggregate hash; no compilation.",
+    "sdk_declarations": 399,
+    "kernel_declarations": 370,
+    "shared_declarations": 357,
+    "shared_signature_mismatches": [],
+    "kernel_contract_sha256": "b8748fc59bf97b8ca55d6b631aaa03a59062c9fb51375e23bb42a03032e10ed4",
+    "kernel_lock_sha256_value": "b8748fc59bf97b8ca55d6b631aaa03a59062c9fb51375e23bb42a03032e10ed4",
+    "kernel_lock_matches": true,
+    "sdk_only_retired_kernel_names": [
+      "trueos_cabi_uart1_shell_write",
+      "trueos_cabi_ui3_frame_begin",
+      "trueos_cabi_ui3_frame_close",
+      "trueos_cabi_ui3_frame_create",
+      "trueos_cabi_ui3_frame_draw_solid_batch",
+      "trueos_cabi_ui3_frame_draw_sprite_batch",
+      "trueos_cabi_ui3_frame_end",
+      "trueos_cabi_ui3_frame_render_skybox_rgb565",
+      "trueos_cabi_ui3_frame_request_repaint",
+      "trueos_cabi_ui3_frame_set_position",
+      "trueos_cabi_ui3_frame_set_render_target",
+      "trueos_cabi_ui3_frame_set_size",
+      "trueos_cabi_ui4_font_canvas",
+      "trueos_cabi_ui4_scene_font_metrics_v1",
+      "trueos_cabi_ui4_scene_font_sprite_request_v1",
+      "trueos_cabi_ui4_scene_font_sprite_status_v1",
+      "trueos_cabi_ui4_shell2_font_scale_steps_v1",
+      "trueos_cabi_ui4_solara_font_sizes",
+      "trueos_cabi_ui4_solara_text_rows",
+      "trueos_cabi_ui4_solara_text_scene",
+      "trueos_cabi_vgpu_cloud_frame_submit",
+      "trueos_cabi_vgpu_cloud_work_graph_create",
+      "trueos_cabi_vgpu_cloud_work_graph_destroy",
+      "trueos_cabi_vgpu_ui4_prepared_raster_batch_v1",
+      "trueos_cabi_x86_address_space_create_v1",
+      "trueos_cabi_x86_address_space_destroy_v1",
+      "trueos_cabi_x86_address_space_map_v1",
+      "trueos_cabi_x86_address_space_read_v1",
+      "trueos_cabi_x86_address_space_unmap_v1",
+      "trueos_cabi_x86_address_space_write_v1",
+      "trueos_cabi_x86_context_cancel_v1",
+      "trueos_cabi_x86_context_create_v1",
+      "trueos_cabi_x86_context_debug_registers_get_v1",
+      "trueos_cabi_x86_context_debug_registers_set_v1",
+      "trueos_cabi_x86_context_destroy_v1",
+      "trueos_cabi_x86_context_extended_state_get_v1",
+      "trueos_cabi_x86_context_extended_state_set_v1",
+      "trueos_cabi_x86_context_park_v1",
+      "trueos_cabi_x86_context_registers_get_v1",
+      "trueos_cabi_x86_context_registers_set_v1",
+      "trueos_cabi_x86_context_resume_v1",
+      "trueos_cabi_x86_context_run_v1"
+    ],
+    "kernel_only_names": [
+      "trueos_cabi_fs_typed_list_dir",
+      "trueos_cabi_fs_typed_stat",
+      "trueos_cabi_fs_typed_write_begin",
+      "trueos_cabi_matrix_compute_capacity_v1",
+      "trueos_cabi_matrix_compute_v1",
+      "trueos_cabi_ui4_scene_button_regions_v1",
+      "trueos_cabi_ui4_scene_hover_regions_v1",
+      "trueos_cabi_ui4_scene_native_compute_dispatch_v1",
+      "trueos_cabi_ui4_scene_native_compute_fields_render_v1",
+      "trueos_cabi_ui4_scene_native_compute_fields_upload_v1",
+      "trueos_cabi_ui4_scene_native_compute_render_v1",
+      "trueos_cabi_ui4_scene_native_compute_render_v2",
+      "trueos_cabi_ui4_scene_native_compute_upload_v1"
+    ],
+    "interpretation": "Whole declaration sets differ. Only actual linked import names must all have compatible SDK/kernel contracts; no claim fresh Codex imports any retired name."
+  },
+  "workload_receipt_contract": {
+    "version": 1,
+    "packages": [
+      "codex-cli",
+      "codex-arg0",
+      "tokio"
+    ],
+    "source_file_count": 9,
+    "source_files_by_package": {
+      "codex-cli": [
+        "src/main.rs",
+        "src/lib.rs"
+      ],
+      "codex-arg0": [
+        "src/lib.rs",
+        "src/trueos_threads.rs",
+        "src/startup_timing.rs"
+      ],
+      "tokio": [
+        "src/runtime/trueos.rs",
+        "src/runtime/blocking/pool.rs",
+        "src/runtime/blocking/task.rs",
+        "src/runtime/scheduler/multi_thread/worker.rs"
+      ]
+    },
+    "bindings": [
+      "Cargo resolved reachable source manifests must select one local source per package",
+      "Actual compiler artifact manifests for codex-arg0 and tokio must match authored source trees",
+      "CLI hashes captured before staging must still match after staging",
+      "All nine authored source hashes rechecked before receipt creation and on cache reuse",
+      "Actual packaged ELF hash and exact workload import set stored in artifact",
+      "Actual BP SHA256 stored and checked on cache reuse"
+    ]
+  },
+  "cache_contract": {
+    "success_stamp": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/build-cache/codex.json",
+    "source_roots": "Authored app, selected dependency source trees, source-mapped dep-info and build script rerun inputs, SDK/core API, compiler/toolchain, kernel ABI declarations/lock, packer executable and build settings",
+    "outputs": [
+      "dist/codex.bp",
+      "dist/codex.workload.json"
+    ],
+    "freshness": "Key/environment digest, complete stable source snapshot and each output digest; source changes during build prevent success-stamp recording",
+    "important_limit": "A nine-file workload receipt alone does not bind the complete parity source tree; validate complete success stamp or separate mission source baseline."
+  },
+  "current_artifact_observation": {
+    "bp_path": "/home/t4ce/Repositories/TRUEOS-Blueprints/dist/codex.bp",
+    "receipt_path": "/home/t4ce/Repositories/TRUEOS-Blueprints/dist/codex.workload.json",
+    "receipt_bp_digest_matches": true,
+    "bp_sha256": "e4a519b258110a1430fa03566752286ea8e1d8b25dc5ea7d68bbafe5fec0a225",
+    "elf_sha256_from_old_receipt": "082ea701d9a1cda3aa70fa78dfc729852e2ee8caceabce22f3c43abbeee391d6",
+    "old_receipt_current_source_mismatches": [
+      "/home/t4ce/Repositories/codex/codex-rs/arg0/src/lib.rs",
+      "/home/t4ce/Repositories/codex/codex-rs/cli/src/lib.rs",
+      "/home/t4ce/Repositories/codex/codex-rs/cli/src/main.rs"
+    ],
+    "success_stamp_exists": false,
+    "module_files_present": [],
+    "interpretation": "Dist BP and receipt observed from November 5. They identify each other but three workload source hashes are stale against current parity checkout; await root-owned fresh build."
+  },
+  "fresh_package_read_only_checks": [
+    "Require terminal successful root-owned native build log plus CABI pack guard compatible=1 and Codex workload verified. A cargo compile success alone is insufficient.",
+    "Hash fresh module.stripped.o (or module.assets.o if embedding assets), compare artifact.elf_sha256; hash dist/codex.bp and compare receipt.blueprint_sha256.",
+    "Run readelf -W --symbols on the actual packaged module and require three GLOBAL UND workload hooks with no definitions; enumerate every actual undefined import, including non-CABI names.",
+    "Reject loader-blocked pthread lifecycle, POSIX directory streams, legacy trueos_tokio_tls_current_slot, trueos_gl_get_proc_address, trueos_cabi_fs_* and trueos_cabi_trueosfs_* imports as SDK abi_guard does.",
+    "Compare all actual trueos_cabi_* imports against both current normalized declaration maps and complete kernel lock; intersect actual imports with sdk_only_retired_kernel_names and require empty result.",
+    "For target-kernel loadability, find exact generated_portal_imports.rs selected by the kernel artifact build, verify every actual CABI import has a resolver arm, bind resolver hash and kernel image hash. Newest-file selection or matching declarations alone is insufficient.",
+    "Parse 24-byte TRBP v1 header, verify payload/raw lengths, LZ4 tar payload module.elf bytes hash equals packaged module/receipt, and executable _start/entry section-offset hint matches actual ELF.",
+    "Crosscheck ELF machine/class/endian/relocatable type, supported relocation classes and write bounds using current kernel loader contract.",
+    "Rehash all nine workload sources, verify exact canonical manifests and versions; bind fresh success-stamp outputs and mission source baseline. Do not reuse old October/November 5 receipt claims for parity."
+  ],
+  "historical_evidence_limits": {
+    "docs/codex-cli/implementation/pack-validation.json": "Static actual package and full linker comparison; explicitly no rig launch or publication. Earlier import counts and hashes are historical.",
+    "docs/codex-cli/startup-build-2026-10-31-final.json": "Historical compiled artifact/publication evidence; runtime comparisons separate. Marker presence is capability evidence only; kernel resolver identity matters because kernel ELF symbols stripped. Historical source hashes are not fresh parity binding.",
+    "docs/codex-cli/pack-flow.md": "October 29 workload workflow remains accurate; earlier captured October 13 target/optimization paths and old /home/t4ce/Repos paths are historical snapshot descriptions."
+  },
+  "material_findings": [
+    "Existing dist BP/receipt stale for current canonical parity sources (three workload source mismatches).",
+    "SDK exposes 42 names removed from current kernel; no shared signatures differ. This matters only if fresh ELF imports a retired name; fresh ELF not yet observed.",
+    "Kernel lock digest matches current complete normalized kernel declarations."
+  ]
+}

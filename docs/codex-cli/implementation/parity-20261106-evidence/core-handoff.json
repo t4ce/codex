@@ -1,5 +1,5 @@
 {
-  "status": "source_resolved_focused_host_validation_passed_native_build_in_progress",
+  "status": "owned_source_stable_focused_host_validation_passed_native_build_owned_by_root",
   "editedpaths": [
     "codex-rs/code-mode-quickjs/src/engine.rs",
     "codex-rs/code-mode-quickjs/src/lib.rs",
@@ -917,18 +917,14 @@
     "Uploaded-file audio now uses shared decoding-only utility exports independent of live voice capture/transport, following root decision; native voice capture remains feature-gated.",
     "TRUEOS selects service-owned NFS migration adapter; all client-side inspection/migration APIs return explicit Unsupported without creating locks or modifying images. Upstream host NFS migrator remains unchanged.",
     "Native tools consume dispatcher-captured executor attachments rather than re-resolving old snapshots; direct-call argument fallback retained.",
-    "VMX stdio discovery reuses upstream probe/late-reply/legacy-retry state instead of disabling modern local discovery."
+    "VMX stdio discovery reuses upstream probe/late-reply/legacy-retry state instead of disabling modern local discovery.",
+    "New upstream legacy-log-directory cleanup uses platform-aware database_exists, preserving service-owned logical database detection without creating absent databases."
   ],
   "backlog": [
     {
       "item": "Native target full build and rig runtime proof",
       "reason": "Root ongoing native builds; host mocked boundaries do not establish kernel ABI/service runtime correctness.",
       "confidence": "in progress"
-    },
-    {
-      "item": "Full core targeted captured-environment regression execution",
-      "reason": "Source harness passed, actual core tests await lib test build.",
-      "confidence": "pending"
     },
     {
       "item": "QuickJS upstream output copy maintenance",
@@ -947,15 +943,21 @@
     "state_host": "250/250 existing library tests passed: fs-state-host-tests.log, including upstream NFS recovery/migration and native existence checks.",
     "file_system_host": "Library compiles; 0 built-in tests in fs-state-host-tests.log.",
     "native_FS_SQLite_host": "18/18 exec-server native_ tests and 1/1 explicit native migration Unsupported/no-mutation test passed: native-fs-sqlite-host-tests-3.log.",
-    "captured_environment_selection": "3/3 exact-production-resolver source harness passed; full core real-backend and direct-call regression tests added, filtered lib test build now running in isolated host copy.",
+    "captured_environment_selection": "2/2 actual core unit tests passed, 2986 filtered: core-selected-environment-host-tests-2.log, session12470 exit0. Verifies captured actual remote backend/cwd vs stale step snapshot and direct-call argument fallback. Standalone exact-source resolver harness also3/3.",
     "VMX_host": "5/5 passed, 275 filtered: vmx-mcp-host-tests.log, session82781 exit0. Native adapter with mocked VM channel; no kernel ABI claim.",
-    "native_target": "Native build5 compiled all other core APIs, failed solely Spirit JsonSchema one_of Vec->Box conversion; minimal variants.into() fix now applied and formatted; root owns next native build.",
+    "native_target": "Root native7 session54598 includes current stable service legacy-log existence probe and Spirit Box conversion; host receipts do not establish target kernel/service runtime.",
     "output_provenance": "All five copied collector/render source/test files exactly match upstream, excluding provenance line; quickjs-output-provenance.json.",
-    "guardian_host": "69/69 extracted guardian-reviewer library tests passed: guardian-host-tests.log, session72053 exit0."
+    "guardian_host": "69/69 extracted guardian-reviewer library tests passed: guardian-host-tests.log, session72053 exit0.",
+    "legacy_log_cleanup": "7/7 existing logs maintenance tests passed after platform-aware DB existence probe: legacy-log-service-probe-host-tests.log, session87877 exit0. Host tests preserve missing/shared DB skips, contention retries, timer/pruning behavior; native service operation still requires rig.",
+    "core_Shell3_arguments": "2/2 passed: exact native text preservation and rejection of shell/login/workdir including empty workdir; core-shell3-arguments-host-tests.log session54056 exit0.",
+    "core_Guardian_native_invariants": "6/6 passed:3 WriteStdin identity/input/foreign cwd/permissions cases (core-guardian-stdin-host-tests.log) and3 executor cwd convention cases (core-guardian-cwd-host-tests.log); default host feature set, no kernel claim.",
+    "audio_default_host": "23/23 real core audio tests passed with default=[], voice off: core-audio-default-host-tests-2.log, session60334 exit0. Includes new uploaded file-audio steering admission + pending queue preservation test, token estimates, invalid-audio projection/history, compaction/output budgets.",
+    "shared_audio_decoding": "5/5 library tests passed: shared-audio-decoding-host-tests.log, session95762 exit0; measured/file budget, canonical data URLs, invalid/remote formats, metadata-preserving placeholders. Decode-only dependency has no cpal/mic capture deps."
   },
   "intentional_native_capability_limits": [
     "Client-side NFS database inspection/migration returns Unsupported because native database images and journals belong to SQLite service; host implementation retained."
   ],
   "editedpaths_scope": "All integrated owned Rust paths changed against fork base 0511204eb22cf136201c6aa50d1cfba888d85934; includes upstream changes and source adaptations.",
-  "initial_manual_source_resolution_paths": 130
+  "initial_manual_source_resolution_paths": 130,
+  "updated_utc": "2026-11-06T16:56:04.489816+00:00"
 }

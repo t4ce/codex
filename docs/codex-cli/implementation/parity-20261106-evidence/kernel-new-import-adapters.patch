@@ -1,0 +1,40 @@
+diff --git a/src/std_abi_shim.rs b/src/std_abi_shim.rs
+index 1353ef6b7..b9e8db55c 100644
+--- a/src/std_abi_shim.rs
++++ b/src/std_abi_shim.rs
+@@ -3195,0 +3196,5 @@ unsafe fn cstr_contains_byte(text: *const c_char, needle: u8) -> bool {
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn abs(value: c_int) -> c_int {
++    value.wrapping_abs()
++}
++
+@@ -6503,2 +6508 @@ pub unsafe extern "C" fn fchown(fd: c_int, _owner: u32, _group: u32) -> c_int {
+-#[unsafe(no_mangle)]
+-pub unsafe extern "C" fn futimens(fd: c_int, _times: *const c_void) -> c_int {
++fn reject_fd_timestamp_update(fd: c_int) -> c_int {
+@@ -6511,0 +6516,12 @@ pub unsafe extern "C" fn futimens(fd: c_int, _times: *const c_void) -> c_int {
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn futimens(fd: c_int, _times: *const c_void) -> c_int {
++    reject_fd_timestamp_update(fd)
++}
++
++#[unsafe(no_mangle)]
++pub unsafe extern "C" fn futimes(fd: c_int, _times: *const c_void) -> c_int {
++    // timeval and timespec have different units. Neither can set TRUEOSFS
++    // logical revisions as POSIX wall-clock timestamps; preserve that error.
++    reject_fd_timestamp_update(fd)
++}
++
+diff --git a/src/unix_compat.rs b/src/unix_compat.rs
+index 2f5c87e5a..23b8a4ce5 100644
+--- a/src/unix_compat.rs
++++ b/src/unix_compat.rs
+@@ -48 +48 @@ pub(crate) fn is_unix_import(name: &str) -> bool {
+-        "iswspace" | "iswalpha" | "iswdigit" | "iswalnum"
++        "abs" | "iswspace" | "iswalpha" | "iswdigit" | "iswalnum"
+@@ -97,0 +98 @@ pub(crate) fn is_unix_import(name: &str) -> bool {
++            | "futimes"
+@@ -228,0 +230 @@ pub(crate) fn resolve_import(name: &str) -> Option<usize> {
++        "abs" => Some(crate::std_abi_shim::abs as *const () as usize),
+@@ -282,0 +285 @@ pub(crate) fn resolve_import(name: &str) -> Option<usize> {
++        "futimes" => Some(crate::std_abi_shim::futimes as *const () as usize),

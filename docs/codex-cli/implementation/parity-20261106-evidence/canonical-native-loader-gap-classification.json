@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-06T17:35:19.812323+00:00",
+  "scope": "Independent read-only actual ELF relocation and kernel loader source audit. No source edits, build, deployment, rig execution or claim about the booted kernel. External local kernel artifact replacement is qualified separately from strict missing-import classification.",
+  "actual_codex_elf": {
+    "path": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/module.stripped.o",
+    "sha256": "0250f6eae28022a2a8e30ee968f9dba61156cc434e3b5203196c168277b7e92d",
+    "undefined_symbol_count": 254
+  },
+  "strict_typed_resolution_gap_count": 31,
+  "strict_typed_resolution_gaps": [
+    "__fprintf_chk",
+    "__snprintf_chk",
+    "__vsnprintf_chk",
+    "abs",
+    "chmod",
+    "fclose",
+    "fdopen",
+    "fputc",
+    "futimes",
+    "fwrite",
+    "getpgid",
+    "getpwnam",
+    "getpwuid_r",
+    "getrlimit",
+    "getuid",
+    "kill",
+    "killpg",
+    "lchown",
+    "ldexp",
+    "lutimes",
+    "mlock",
+    "pthread_atfork",
+    "pthread_sigmask",
+    "setrlimit",
+    "sigaddset",
+    "sigemptyset",
+    "stderr",
+    "symlink",
+    "tcflush",
+    "uname",
+    "waitid"
+  ],
+  "optional_weak_trace_hook_count": 4,
+  "optional_weak_trace_hooks": [
+    "ZSTD_trace_compress_begin",
+    "ZSTD_trace_compress_end",
+    "ZSTD_trace_decompress_begin",
+    "ZSTD_trace_decompress_end"
+  ],
+  "historical_comparison": {
+    "source": "/home/t4ce/Repositories/codex/docs/codex-cli/implementation/pack-validation.json",
+    "sha256": "cbf97bd4a7e63f4a4458dabd2ea3e31a9a6d6337de140b20dd26e58d69ffef6f",
+    "absent_map_imports_already_in_historical_elf": [
+      "ZSTD_trace_compress_begin",
+      "ZSTD_trace_compress_end",
+      "ZSTD_trace_decompress_begin",
+      "ZSTD_trace_decompress_end",
+      "__fprintf_chk",
+      "__snprintf_chk",
+      "__vsnprintf_chk",
+      "chmod",
+      "fclose",
+      "fdopen",
+      "fputc",
+      "fwrite",
+      "getpgid",
+      "getpwnam",
+      "getpwuid_r",
+      "getrlimit",
+      "getuid",
+      "kill",
+      "killpg",
+      "lchown",
+      "ldexp",
+      "lutimes",
+      "mlock",
+      "pthread_atfork",
+      "pthread_sigmask",
+      "setrlimit",
+      "sigaddset",
+      "sigemptyset",
+      "stderr",
+      "symlink",
+      "tcflush",
+      "uname",
+      "waitid"
+    ],
+    "preexisting_strong_gap_count": 29,
+    "new_strong_gaps": [
+      "abs",
+      "futimes"
+    ]
+  },
+  "allocated_relocation_evidence": {
+    "all_35_have_allocated_relocations": true,
+    "new_imports": {
+      "abs": {
+        "bind": "GLOBAL",
+        "allocated_relocations": 1,
+        "nonallocated_relocations": 0,
+        "types": {
+          "4": 1
+        },
+        "target_sections": {
+          ".text": 1
+        }
+      },
+      "futimes": {
+        "bind": "GLOBAL",
+        "allocated_relocations": 1,
+        "nonallocated_relocations": 0,
+        "types": {
+          "4": 1
+        },
+        "target_sections": {
+          ".text": 1
+        }
+      }
+    },
+    "data_import_stderr": {
+      "bind": "GLOBAL",
+      "allocated_relocations": 4,
+      "nonallocated_relocations": 0,
+      "types": {
+        "42": 4
+      },
+      "target_sections": {
+        ".text": 4
+      }
+    },
+    "details_receipt": "/tmp/codex-parity-20261106/canonical-native-missing-import-relocations.json",
+    "details_receipt_sha256": "03887c5b82463526ccc9bc47d0f0f87dcae650391114fae050e48b42e1faff4f",
+    "new_callers": [
+      {
+        "object": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/app.rooted.o",
+        "name": "futimes",
+        "target_section": ".text._RNvCs4NYPKW4W5Ju_8filetime21set_file_handle_times",
+        "offset": "0x111",
+        "enclosing_functions": []
+      },
+      {
+        "object": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/module.o",
+        "name": "futimes",
+        "target_section": ".text",
+        "offset": "0x7500551",
+        "enclosing_functions": []
+      },
+      {
+        "object": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/module.o",
+        "name": "abs",
+        "target_section": ".text",
+        "offset": "0x8306fa3",
+        "enclosing_functions": [
+          "js_dtoa_max_len"
+        ]
+      }
+    ]
+  },
+  "resolution_chain": [
+    {
+      "file": "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/blueprint.rs",
+      "line": 1119,
+      "function": "resolve_known_import",
+      "behavior": "Explicit dynamic Rust runtime/bounds matching and direct name arms; fallback resolve_runtime_abi_import -> generated resolve_cabi_import -> crate::unix_compat::resolve_import."
+    },
+    {
+      "file": "/home/t4ce/Repositories/TRUEOS/src/unix_compat.rs",
+      "line": 221,
+      "function": "resolve_import",
+      "behavior": "Reject unsupported Unix surfaces, then literal typed match arms; unknown names return None. No macro-generated aliases or further resolver delegation exists."
+    },
+    {
+      "file": "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/blueprint.rs",
+      "line": 1225,
+      "function": "resolve_import",
+      "behavior": "Reject retired/unsupported imports, then resolve_known_import(name).or_else(resolve_unresolved_import). Unknown names can receive a callable Joker stub."
+    },
+    {
+      "file": "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/blueprint.rs",
+      "line": 373,
+      "function": "resolve_unresolved_import",
+      "behavior": "Allocates one of 64 stub addresses, whose invocation logs once and returns usize zero. This does not implement the requested function/data ABI."
+    }
+  ],
+  "weak_behavior": {
+    "ELF_bindings": "All four ZSTD_trace_* imports are WEAK, verified in actual ELF symbol table.",
+    "loader_order": "rel_symbol_value and PC-relative import collection try resolve_import before the STB_WEAK null fallback. Generic Joker allocation can therefore bind non-null weak hook addresses instead of NULL.",
+    "pinned_zstd_source": "ZSTD_TraceCtx is unsigned long long. Optional begin hooks return zero when tracing disabled; end hooks run only with nonzero traceCtx and non-null hook. Current zero-return Joker behavior leaves tracing disabled, so these four hooks are not required compression/decompression APIs. This is source evidence, not native runtime proof.",
+    "strict_gap": false,
+    "source_files_sha256": {
+      "/home/t4ce/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.1.2+zstd.1.5.7/zstd/lib/common/zstd_trace.h": "17f6daa4c7e97055cd1ed7bcf4d9241a4e79b465f083c5d732fda1df2f0be11e",
+      "/home/t4ce/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.1.2+zstd.1.5.7/zstd/lib/compress/zstd_compress.c": "10c315ae609d49b2fc431521aa95908086e69fd917991c5ed9a875af3d1208e8",
+      "/home/t4ce/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zstd-sys-2.1.2+zstd.1.5.7/zstd/lib/decompress/zstd_decompress.c": "029580818b7e9cd38d9d07c63516b00ceaa943ffcfbd099fc5ccbe3628fa362f"
+    }
+  },
+  "new_gap_implications": {
+    "abs": "Actual call inside QuickJS js_dtoa_max_len. The result contributes to numeric conversion string capacity: n += 10 + abs(mul_log2_radix(e - 1, radix)). A return-zero stub does not implement integer absolute value.",
+    "futimes": "Actual retained caller is filetime::set_file_handle_times (filetime0.2.27). Its libc::futimes return zero is treated as successful timestamp mutation. A Joker return zero would claim success without changing times.",
+    "stderr": "Four R_X86_64_REX_GOTPCRELX relocations reference a data symbol. A callable Joker address is not a valid pointer to a FILE* global."
+  },
+  "loader_acceptance_vs_support": "Current prebind validates retired/unsupported surfaces and readiness, without rejecting every unresolved known-map entry. Relocation can bind generic Joker stubs. Therefore package acceptance is not proof these31 strong ABI names are implemented. Preserve them as strict functional-resolution gaps.",
+  "sources_sha256": {
+    "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/blueprint.rs": "b72722d2dda45cc0c41d7bd9c88b8074851e95a8b345416fc4ced06260b6d070",
+    "/home/t4ce/Repositories/TRUEOS/src/hv/blueprint/prebind.rs": "b87d59449f0db7da915dac680c1349f76ac5395b302d0f4e41eac2997e0d7672",
+    "/home/t4ce/Repositories/TRUEOS/src/unix_compat.rs": "7280b50ff7584aec5755fe476e3443ed49136c91a683ed8fea11f4613e0e5fb3",
+    "/home/t4ce/Repositories/TRUEOS/src/std_abi_shim.rs": "99c0e90e65463c0337694bd55923355299cf754f23060c749a7aeed5a64218ae",
+    "/home/t4ce/Repositories/TRUEOS/src/unix_abi_shim.rs": "d398650d36efc04bb1da8f9b81df219fd595b36bcac89d43b2edaa977fd886b4",
+    "/home/t4ce/Repositories/TRUEOS/src/blueprint_shims.rs": "1bcd86f1b68e4d4f84348e07951b0eab1a2554822792489cc5363072f78a0c78"
+  },
+  "audited_local_resolver_receipt": {
+    "path": "/tmp/codex-parity-20261106/native-local-kernel-resolver.json",
+    "sha256": "73a58beea6e344440d339dd1566078e0217a3bfe1e9d8d543b3e7150198c846a",
+    "generated_resolver_sha256": "f41afbcadb5150324d26b4d6a8ed87a622b4d37cc97b9e5d3076d311fd959882",
+    "generated_resolver_name_count": 358,
+    "kernel_cargo_sha256": "6ff3045a26e3f754fc42469a216dbcf24f6f67a0dfb42733c82ba50d8367afca",
+    "local_pxe_sha256": "f26c8378b55f4091804f714a275d33e76acb4b8a5c42fee6fd7c3e47dad4995b",
+    "booted_rig_identity": "Unverified. Local kernel/PXE images can be externally replaced; artifact-selection races do not remove or excuse strong resolver gaps."
+  }
+}

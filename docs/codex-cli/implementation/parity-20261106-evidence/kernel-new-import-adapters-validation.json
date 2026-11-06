@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-06T17:43:04.582860+00:00",
+  "canonical_kernel_checkout": "/home/t4ce/Repositories/TRUEOS",
+  "kernel_branch": "true",
+  "kernel_base_head": "a2cc03261b96b95fd2510d72b802465a10e83012",
+  "files": {
+    "src/std_abi_shim.rs": "00b01bbeae8fb4a8066ffcaf707f796fad305a936300d9ac080d67c97315efe2",
+    "src/unix_compat.rs": "8bd778a50a2b3756492a24b41af08cd4b9ac4766dfe3caf0a9e54f6110a2c1bc",
+    "tools/testpy/test_codex_native_imports.py": "a4d6b8efbef40e9abf6350bcb7f59189d6a7832075236e375a460eed5bd5f46d"
+  },
+  "source_edits_committed_by_this_run": false,
+  "changes": [
+    {
+      "name": "abs",
+      "reason": "New retained QuickJS js_dtoa_max_len call requires C int abs(int).",
+      "behavior": "Actual integer absolute value with wrapping behavior at C-int minimum; no errno mutation."
+    },
+    {
+      "name": "futimes",
+      "reason": "Native filetime0.2.27 retains int futimes(int,const struct timeval*).",
+      "behavior": "Shares native futimens descriptor validation and explicit -1/ENOSYS for valid descriptors or -1/EBADF for invalid descriptors. Does not read/convert timeval as timespec or claim writable POSIX timestamps."
+    }
+  ],
+  "focused_tests": {
+    "passed": 3,
+    "log": "/tmp/codex-parity-20261106/native-new-import-adapter-tests.log",
+    "log_sha256": "73f3dd03e0432117d6a5b73c04dcb44b833d568d9d9c31a80ea62f42df620883",
+    "scope": "Exact production functions; only descriptor ownership tables modeled on host. C ABI call signatures, signed arithmetic, errno and unread timestamp-pointer behavior exercised."
+  },
+  "kernel_build": {
+    "exit_code": 0,
+    "log": "/tmp/codex-parity-20261106/kernel-new-import-adapters-prepared-build.log",
+    "log_sha256": "b54c653678771621e7f2a3343fa15d3b9029055eb94d108094f3385bd8c09698",
+    "builtin_packages_prepared": 13,
+    "release_duration": "1m55s",
+    "stages": [
+      "generate API reference",
+      "prepare complete local builtin set with ABI/hash checks",
+      "cargo build --release --locked --offline"
+    ],
+    "boot_or_image_publication_performed": false
+  },
+  "initial_direct_build": {
+    "exit_code": 101,
+    "reason": "Prepared-builtins source fingerprint correctly stale after resolver edit. Retried through the normal local preparation stages; no guard bypass."
+  },
+  "codex_package": {
+    "source_unchanged": true,
+    "sha256": "d69cf03c68a3f55b494e6c4879b34836d1c9e58132d8aeb3b692e0000844ac03"
+  },
+  "runtime_limit": "New Cargo-built kernel is local. No rig launch/reboot or PXE generation publication performed by this adapter follow-up. Initial package had35 live resolver gaps; two new ones receive typed adapters,33 pre-existing remain open."
+}

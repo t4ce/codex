@@ -1,45 +1,48 @@
 {
   "run": "20261106",
-  "scope": "Uncertainty and validation backlog; no measured 95% score is asserted.",
+  "scope": "All 913 pinned upstream commits are integrated on canonical main. Resolved validation records are retained alongside explicit target/runtime limits; no excluded-platform execution or native rig runtime is claimed.",
   "items": [
     {
       "id": "NATIVE-BUILD",
-      "status": "native_daemon_lock_boundary_fix_in_progress",
-      "confidence": "not yet established",
+      "status": "resolved_release_build_and_package_integrity_passed",
+      "confidence": "Release build, package container/source/hash/lock/link checks passed; runtime resolver gaps tracked separately",
       "area": "Native Blueprint package",
-      "evidence": "/tmp/codex-parity-20261106/native-build-6.log",
-      "required_evidence": "Successful native package build and workload receipt bound to the integrated source.",
+      "evidence": "parity-20261106-evidence/canonical-native-package-verification.json",
+      "required_evidence": "Native package source/lock/ABI/import and link checks. Runtime proof tracked separately.",
       "findings": [
         "Initial staged manifest truncated multiline SQLx workspace dependency; dependency rendered on one line with unchanged TOML semantics.",
         "Native Blueprint stage successfully resolved source overlays after manifest adaptation.",
         "Actual native compile failed in nix0.29. Native unit graph identifies mxc-sdk as sole consumer; moved SDK to Windows dependencies and dev dependencies because only Windows execution and portable host tests use it.",
         "Native unit graph after fixes excludes AWS/MXC/nix/cpal/sentry/V8. Native compilation next failed at upstream NFS migration raw SQLite handle assumptions.",
-        "Native VMX new discovery watcher adapted and tested. Native build5 reached core and found one native Spirit JSON-schema Vec\u2192boxed-slice API mismatch."
+        "Native VMX new discovery watcher adapted and tested. Native build5 reached core and found one native Spirit JSON-schema Vec\u2192boxed-slice API mismatch.",
+        "Native daemon descriptor and socket metadata APIs adapted to TRUEOS std ownership.",
+        "Native placeholder-pet rendering call remains gated out with the pet capability.",
+        "All eight pending source/test edits transferred byte-for-byte to canonical main and committed before final validation."
       ]
     },
     {
       "id": "HOST-GRAPH",
-      "status": "focused_tests_passed_broader_compile_running",
-      "confidence": "not yet established",
+      "status": "host_feature_matrix_passed",
+      "confidence": "1497 transport/auth/reporting/optional-provider passing cases; host checks passed",
       "area": "Host test graph differs from native vendor graph",
-      "evidence": "/tmp/codex-parity-20261106/host-validation.json; 384 foundation/transport library and integration tests passed; Windows runtime remains untested.",
-      "action": "Use disclosed host-only copied-dependency overlay; keep native production source unchanged; separately build the actual Blueprint graph."
+      "evidence": "parity-20261106-evidence/host-validation.json",
+      "action": "Host diagnostics use disclosed manifest-only dependency overlays. Preserve their provenance separately from native package evidence."
     },
     {
       "id": "QUICKJS-OUTPUT",
-      "status": "focused_tests_passed",
-      "confidence": "37 real-engine/output tests passed on host; native build pending",
+      "status": "host_behavior_passed_native_static_package_checked",
+      "confidence": "37 real-engine/output host cases passed",
       "area": "Native QuickJS implements new upstream server output/truncation contract",
-      "action": "Server observation budgets now owned by bounded collector; original Client cell cap preserved. Validate native packaging and retain rig-only runtime uncertainty.",
+      "action": "Keep five copied upstream output collector/render modules aligned using saved provenance. Native service runtime remains in NATIVE-RUNTIME.",
       "evidence": "/tmp/codex-parity-20261106/quickjs-tests-4.log"
     },
     {
       "id": "TUI-BACKENDS",
-      "status": "validation_pending",
-      "confidence": "below 95% for complete event-loop behavior",
+      "status": "host_behavior_passed_native_static_package_checked",
+      "confidence": "27 real TUI libtests and 5 daemon reservation cases passed",
       "area": "Multi-backend TUI and native prompt/Spirit lifecycles",
-      "evidence": "17 focused source-harness cases passed, full merged TUI still requires compile/integration validation.",
-      "action": "Run TUI/app-server checks and native lifecycle tests; backlog any rig-only uncertainty explicitly."
+      "evidence": "parity-20261106-evidence/canonical-final-validation.json",
+      "action": "Native multi-backend launch/switch/resume and terminal input remain runtime checks; retain the backend identity protocol limitation separately."
     },
     {
       "id": "WINDOWS-TLS",
@@ -53,23 +56,23 @@
       "status": "feature_matrix_passed",
       "confidence": "default-off archives/no-upload and enabled exporters exercised on host",
       "area": "New local feedback save with network reporting disabled",
-      "action": "Native package still pending; default reporting settings preserved.",
+      "action": "Default reporting policy preserved; native runtime behavior remains in NATIVE-RUNTIME.",
       "evidence": "Default analytics131/feedback31 and enabled analytics133/feedback43/otel36 plus OTEL HTTP7 all passed."
     },
     {
       "id": "NATIVE-FS-SQLITE",
-      "status": "host_tests_passed_native_compile_progressing",
-      "confidence": "below 95% until tests/build pass",
+      "status": "host_boundaries_passed_native_static_package_checked",
+      "confidence": "250 state, 18 exec-server boundary and 1 native no-mutation tests passed on host",
       "area": "SQLite service ownership, typed filesystem, native auth durability",
-      "action": "Client-side NFS image inspection/migration is explicitly unsupported on TRUEOS, whose resident service owns database files. Rig-only SQLx service behavior remains outside host proof.",
+      "action": "Resident SQLite service owns database files. Native direct NFS image migration intentionally returns Unsupported. Runtime service behavior remains in NATIVE-RUNTIME.",
       "evidence": "Host state250, native service ownership boundary1 and exec-server native boundary18 tests passed; native target passed state after adapter."
     },
     {
       "id": "SHARED-SOURCE",
-      "status": "full_host_graph_checked_native_pending",
-      "confidence": "not yet established",
+      "status": "host_graphs_passed_native_static_package_checked",
+      "confidence": "Default and optional-feature-off CLI/TUI/server host checks passed",
       "area": "All clean auto-merges and new upstream APIs",
-      "action": "Finish native target build and focused TUI/feature matrix tests; retain unsupported target/runtime limits explicitly.",
+      "action": "Keep target/runtime limits explicit; imported upstream ancestry does not itself prove every runtime path.",
       "findings": [
         "Compiled source exposed wrong utils-string crate mapping; restored independent upstream crate and dependencies.",
         "Default-off telemetry tracer helper retained old BTreeMap signature; updated to upstream HashMap."
@@ -86,11 +89,11 @@
     },
     {
       "id": "SKILLS-HARNESS-API",
-      "status": "focused_fixture_passed",
-      "confidence": "production guard and request boundary exercised",
+      "status": "resolved_canonical_harnesses_passed",
+      "confidence": "Permanent kernel-side skills, plugin and dotenv harnesses run directly against canonical main",
       "area": "Existing skills source-extraction harness",
-      "evidence": "/tmp/codex-parity-20261106/skills-fixture/provenance.json; 14 host + 14 TRUEOS cases passed.",
-      "action": "Full TUI/app-server compile still required; adapted fixture leaves original production dispatcher and guards unchanged."
+      "evidence": "parity-20261106-evidence/canonical-final-validation.json",
+      "action": "Use the current kernel test scripts; temporary adapted copies are historical evidence."
     },
     {
       "id": "AWS-PROXY-SIGNING",
@@ -102,11 +105,46 @@
     },
     {
       "id": "WORKSPACE-LOCK",
-      "status": "scratch_native_seed_resolution_followup",
-      "confidence": "not yet established",
+      "status": "resolved_canonical_locked_metadata_passed",
+      "confidence": "Actual native-patched canonical locked metadata passed: 168 members, 1485 active packages",
       "area": "Full-workspace lockfile after crate consolidation",
-      "evidence": "Actual native CLI lock resolves. Broader upstream-seed workspace search stopped after >11min CPU without result. Scratch resolution uses actual native CLI seed and declared Cargo1.95 with same76 native patches.",
-      "action": "Record resulting actual native-patched workspace lock if successful; never substitute diagnostic host-overlay graph without proof of equivalence."
+      "evidence": "parity-20261106-evidence/canonical-lock-validation.json",
+      "action": "Full workspace voice-host requires registry bytes>=1.12; actual standalone native CLI excludes voice/WebRTC and selects supported bytes1.11.1 vendor patch."
+    },
+    {
+      "id": "NATIVE-RUNTIME",
+      "status": "not_run_known_resolver_gaps",
+      "area": "Native rig and kernel service runtime",
+      "evidence": "parity-20261106-evidence/canonical-final-validation.json",
+      "action": "Run native launch, backend switch/resume, prompt/Spirit lifecycle, SQLite service and QuickJS execution on a rig before claiming end-to-end runtime parity."
+    },
+    {
+      "id": "HOST-DEBUG-STACK",
+      "status": "documented_test_environment_requirement",
+      "area": "Deep ConfigToml host debug tests",
+      "evidence": "parity-20261106-evidence/host-tui-stack-provenance.json",
+      "action": "Use explicit 16MiB host test stack for deep server-config scenarios. Deserializer matches upstream after folded imports; no production deserializer or native stack cap change."
+    },
+    {
+      "id": "QUICKJS-COPY-UPKEEP",
+      "status": "ongoing_maintenance",
+      "area": "Upstream output collector source copies",
+      "evidence": "parity-20261106-evidence/quickjs-output-provenance.json",
+      "action": "Recheck five copied collector/render modules when upstream code-mode-runtime changes."
+    },
+    {
+      "id": "KERNEL-UNIX-IMPORTS",
+      "status": "known_preexisting_runtime_blocker",
+      "area": "Native kernel resolver beyond declared CABI hooks",
+      "evidence": "parity-20261106-evidence/canonical-native-loader-gap-classification.json; parity-20261106-evidence/kernel-new-import-adapters-validation.json",
+      "action": "Initial fresh ELF has35 live unsupported imports:31 GLOBAL and4 WEAK. Of these,33 pre-existed; new abs and futimes are addressed by separately tested kernel adapters. Remaining33 require native adapters or exclusion of their callers before claiming complete runtime parity. A generic Joker fallback is not proof of ABI or behavior."
+    },
+    {
+      "id": "SDK-CACHE-STAMP",
+      "status": "success_stamp_not_recorded",
+      "area": "SDK whole-build cache",
+      "evidence": "parity-20261106-evidence/canonical-native-package-verification.json",
+      "action": "SDK reported inputs changed during build and skipped its complete success-cache stamp. Independent source/manifest/lock/plan, container, workload and direct-link checks bind the package; next SDK invocation must recheck inputs."
     }
   ]
 }

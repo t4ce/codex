@@ -1,0 +1,621 @@
+{
+  "status": "complete_native_release_machine_frames_observed_statically",
+  "observed_at_utc": "2026-11-06T17:32:36.965090+00:00",
+  "scope": "Read-only static audit. No source copies, edits, checkout/branch creation, compilation, build intervention, process attachment, rig execution, or deployment. Only /tmp audit artifacts were written.",
+  "canonical_root": "/home/t4ce/Repositories/codex",
+  "source_sha256": {
+    "/home/t4ce/Repositories/codex/codex-rs/async-utils/src/lib.rs": "44f58b19c63dfe68d558c4f3c9bf1897ee1ee32da452036cb0c31bf3fcc67b4f",
+    "/home/t4ce/Repositories/codex/codex-rs/arg0/src/lib.rs": "a1fae6771035c55332bfdcdcdf76c586bd0a42df5ae100621448a5f090f3f096",
+    "/home/t4ce/Repositories/codex/codex-rs/config/src/config_toml.rs": "7790841bc62afb549b597abfb6c7daa14dfbd110f1e8d381d69d2c84d7cc39ac",
+    "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.toml": "4079041f299958d1216b273ca4aa855175c8de34718aa8a290d722239bface1a",
+    "/home/t4ce/Repositories/TRUEOS/tools/rust-std/trueos_thread.rs": "71dc65e426608729e5c065d8108754280000bc47d19018c5446c26f475144b07",
+    "/home/t4ce/Repositories/TRUEOS/src/r/threads.rs": "3afd879dbe2f82992bf739fec21e64837e2775f927f63fa17bdf4731ae31c0bb",
+    "/home/t4ce/Repositories/TRUEOS/src/r/threads/stack.rs": "21c7e37cd4b1307104703ef27fbaa02e5895a394c0631d8b871a976c760b5c3c",
+    "/home/t4ce/Repositories/TRUEOS/src/r/threads/context.rs": "96222ef2a141e5e265d756351502dd2989e0e1898cf1f36373090d741a056080",
+    "/home/t4ce/Repositories/TRUEOS/src/allcaps.rs": "340152ecd0ffa45e4e889a3edb76b35111e6ce278f5c2833537faf8947f611ff",
+    "/home/t4ce/Repositories/TRUEOS/src/std_abi_shim.rs": "99c0e90e65463c0337694bd55923355299cf754f23060c749a7aeed5a64218ae",
+    "/home/t4ce/Repositories/TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/pool.rs": "d1bc7db7658d8f0118ccb76b878112cd1f8d01957da82578b4441b6cb41d26c6",
+    "/home/t4ce/Repositories/TRUEOS/src/live_update.rs": "ceccdd453d07e88e1d021829e5f06027e995930cae690b19d772e935e7ab5777",
+    "/home/t4ce/Repositories/TRUEOS/src/cpu.rs": "a1af8b547295a8755ed6b673e4f01aa5fc2854b9f37cdfc52ee0b4a7c22c7dfa",
+    "/home/t4ce/Repositories/TRUEOS/src/limine.rs": "81dd757766b2e1423860e52c90fb0fe935036aac00483480ac68ae666dee5c3b",
+    "/home/t4ce/Repositories/TRUEOS/src/main.rs": "12d63bc9d7b594ca8bb1bf3e5f08bb243abe934d791dfe2bcd7b30edafe605c1",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/std/sysroots/95134027f6a0c06c/lib/rustlib/src/rust/library/std/src/sys/thread/trueos.rs": "71dc65e426608729e5c065d8108754280000bc47d19018c5446c26f475144b07",
+    "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/std/sysroots/95134027f6a0c06c/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs": "b78c624ee4ef59fb83c28bc7d7575fcb3007148e7ddc05fe6c58b2be19f1c9ac"
+  },
+  "configured_stacks": [
+    {
+      "kind": "Codex main logical thread",
+      "bytes": 16777216,
+      "source": "codex-rs/arg0/src/lib.rs:233, codex-rs/async-utils/src/lib.rs:9",
+      "evidence": "Builder.stack_size(THREAD_STACK_SIZE_BYTES)"
+    },
+    {
+      "kind": "Codex Tokio scheduler/blocking pool threads",
+      "bytes": 16777216,
+      "source": "codex-rs/arg0/src/lib.rs:303; TRUEOS-Buildins/vendor/tokio-1.54.1/src/runtime/blocking/pool.rs:517",
+      "evidence": "runtime builder.thread_stack_size passed through to std Thread Builder; max blocking threads8 on TRUEOS"
+    },
+    {
+      "kind": "Rust std TRUEOS default (without explicit override)",
+      "bytes": 2097152,
+      "source": "TRUEOS/tools/rust-std/trueos_thread.rs:40",
+      "evidence": "DEFAULT_MIN_STACK_SIZE in actual selected private sysroot backend; byte-identical to reference backend"
+    },
+    {
+      "kind": "Platform admitted logical-thread usable stack minimum",
+      "bytes": 65536,
+      "source": "TRUEOS/src/r/threads/stack.rs:20",
+      "evidence": "requested size is max(min64KiB), rounded up to4096byte page"
+    },
+    {
+      "kind": "Platform admitted logical-thread maximum",
+      "bytes": 67108864,
+      "source": "TRUEOS/src/r/threads.rs:28,560; TRUEOS/src/r/threads/stack.rs:21",
+      "evidence": "larger request rejected; allocator also enforces maximum"
+    },
+    {
+      "kind": "Initial guest/Hull shared stack default (separate from logical-thread stack)",
+      "bytes": 67108864,
+      "minimum_bytes": 8388608,
+      "maximum_bytes": 536870912,
+      "source": "TRUEOS/src/allcaps.rs:136",
+      "evidence": "GUEST_STACK_MIN/DEFAULT/MAX_MIB; no per-app live profile observed"
+    }
+  ],
+  "logical_thread_carrier_distinction": {
+    "source": "TRUEOS/src/r/threads/context.rs:60; TRUEOS/src/r/threads.rs:447,614",
+    "evidence": "Thread owns guarded stack; context swap stores parent RSP and loads child RSP. Application frames execute on that owned continuation stack, while scheduler resumes parent carrier stack."
+  },
+  "native_release_profile": {
+    "source": "codex-rs/cli/target/trueos-blueprint/work/codex/source-overlay-app/Cargo.toml:11",
+    "opt_level": 3,
+    "lto": "fat",
+    "codegen_units": 1,
+    "panic": "abort"
+  },
+  "config_native_artifact": {
+    "archive": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/libcodex_config-77d32e3c39c30c7c.rlib",
+    "size_bytes": 76587746,
+    "mtime_utc": "2026-11-06T17:09:12.847990+00:00",
+    "sha256": "b283d247c768ce21528e1c0cc9fc6990a381258fb01ef2c41b3f8c03ab73e92a",
+    "dep_info": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/codex_config-77d32e3c39c30c7c.d",
+    "source_paths_are_canonical": true,
+    "format": "LLVM LTO bitcode inside rlib, not final machinecode",
+    "visitor_symbols": [
+      "---------------- t <<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde_path_to_error::de::MapAccess<serde_ignored::MapAccess<&mut toml::value::MapDeserializer, codex_config::strict_config::ignored_toml_value_fields<codex_config::config_toml::ConfigToml>::{closure#0}>>>",
+      "---------------- t <<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<&mut toml::value::MapDeserializer>"
+    ],
+    "final_machine_frames_recorded_in": "native_release_config_visitors (6 root monomorphizations, including CLI, app-server, TUI instantiations)"
+  },
+  "historical_host_debug_observation": {
+    "provenance": "/tmp/codex-parity-20261106/host-tui-stack-provenance.json",
+    "visitor_debug_reservation_bytes": 190272,
+    "meaning": "Host debug build observed in gdb only; cannot substitute for native release frame or full cumulative call-chain stack."
+  },
+  "material_uncertainties": [
+    "Individual function stack reservation excludes caller/callee and recursive or data-dependent total call-chain stack demand.",
+    "Configured source sizes are not runtime allocation/high-water evidence; no native execution observed.",
+    "Native startup future size<64KiB is a type-size bound, not a whole call-chain stack bound.",
+    "Final Blueprint package/SDK link completion was not used; static measurements come from completed canonical Cargo root machine object only."
+  ],
+  "tools": {
+    "llvm_nm": "/home/t4ce/.rustup/toolchains/nightly-2026-07-10-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-nm",
+    "llvm_objdump": "/home/t4ce/.rustup/toolchains/nightly-2026-07-10-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-objdump"
+  },
+  "configured_carrier_and_boot_stacks": [
+    {
+      "kind": "Full live-update AP carrier initial scheduler stack",
+      "bytes": 2097152,
+      "source": "TRUEOS/src/live_update.rs:37,582,691; TRUEOS/src/cpu.rs:317",
+      "evidence": "transition stack stride2MiB; trampoline sets RSP then jumps to candidate AP entry; warm_ap_start enters AP executor without another visible stack swap",
+      "runtime_current_boot_path_observed": false
+    },
+    {
+      "kind": "Limine stack-size request",
+      "bytes": 16777216,
+      "source": "TRUEOS/src/limine.rs:99",
+      "evidence": "StackSizeRequest::new(16MiB); bootloader actual allocation not inspected"
+    },
+    {
+      "kind": "BSP owned kernel boot stack",
+      "bytes": 8388608,
+      "source": "TRUEOS/src/allcaps.rs:27; TRUEOS/src/main.rs:108,144",
+      "evidence": "Static BootStack uses BSP_BOOT_STACK_BYTES and entry asm selects it"
+    }
+  ],
+  "selected_native_std_backend": {
+    "path": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/std/sysroots/95134027f6a0c06c/lib/rustlib/src/rust/library/std/src/sys/thread/trueos.rs",
+    "sha256": "71dc65e426608729e5c065d8108754280000bc47d19018c5446c26f475144b07",
+    "reference_matches_exactly": true,
+    "selected_by": "std/selection.json and active canonical root rustc --sysroot argument",
+    "explicit_stack_precedence": {
+      "source": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/std/sysroots/95134027f6a0c06c/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:29",
+      "evidence": "stack_size.unwrap_or_else reads RUST_MIN_STACK/default only when builder did not supply stack_size; explicit Codex16MiB bypasses env default"
+    }
+  },
+  "native_root_object": {
+    "path": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/codex-734a36c41c24c172.o",
+    "sha256": "5c5a7192cffd15f89b04d19bffeb4ff10a4e9fe00fdab7cc26cd2ce7d9ff5833",
+    "size_bytes": 305033144,
+    "mtime_utc": "2026-11-06T17:30:32.743127+00:00",
+    "root_extra_filename": "734a36c41c24c172",
+    "root_rustc_process_1771695_exited_before_inspection": true,
+    "profile": "opt-level3 fatLTO codegen-units1 panic-abort",
+    "dep_info": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/codex-734a36c41c24c172.d",
+    "rlink": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/codex-734a36c41c24c172.rlink",
+    "immutable_during_audit_recheck_sha256": "5c5a7192cffd15f89b04d19bffeb4ff10a4e9fe00fdab7cc26cd2ce7d9ff5833",
+    "immutable_during_audit_recheck_size_bytes": 305033144
+  },
+  "native_release_config_visitors": {
+    "measurement_kind": "Machine-code fixed local stack reservation and saved-register prologue. Not cumulative whole call-chain stack.",
+    "rows": [
+      {
+        "index": 0,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessINtCs3RXDlJ7QkBQ_13serde_ignored9MapAccessQNtNtCskhSg0dWDAMa_4toml5value15MapDeserializerNCINvNtBd_13strict_config25ignored_toml_value_fieldsBY_E0EEEBd_",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-0.asm",
+        "instruction_count": 11583,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tsub\trsp, 0x1000",
+          "      11:      \tmov\tqword ptr [rsp], 0x0",
+          "      19:      \tsub\trsp, 0x1000",
+          "      20:      \tmov\tqword ptr [rsp], 0x0",
+          "      28:      \tsub\trsp, 0x1000",
+          "      2f:      \tmov\tqword ptr [rsp], 0x0",
+          "      37:      \tsub\trsp, 0x1000",
+          "      3e:      \tmov\tqword ptr [rsp], 0x0",
+          "      46:      \tsub\trsp, 0x1000",
+          "      4d:      \tmov\tqword ptr [rsp], 0x0",
+          "      55:      \tsub\trsp, 0x1000",
+          "      5c:      \tmov\tqword ptr [rsp], 0x0",
+          "      64:      \tsub\trsp, 0x1000",
+          "      6b:      \tmov\tqword ptr [rsp], 0x0",
+          "      73:      \tsub\trsp, 0xc28",
+          "      7a:      \tmov\tqword ptr [rsp + 0x10], rdi",
+          "      7f:      \tmov\tqword ptr [rsp + 0x1f40], -0x2",
+          "      8b:      \tmov\tqword ptr [rsp + 0x2270], 0x2",
+          "      97:      \tmov\tqword ptr [rsp + 0x3968], -0x1",
+          "      a3:      \tmov\tqword ptr [rsp + 0x1f00], -0x1",
+          "      af:      \tmov\tqword ptr [rsp + 0x4a30], -0x2",
+          "      bb:      \tmov\tqword ptr [rsp + 0x1f20], -0x1",
+          "      c7:      \tmov\tqword ptr [rsp + 0x3d78], -0x2",
+          "      d3:      \tmov\tqword ptr [rsp + 0x3e58], -0x2"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          4096,
+          3112
+        ],
+        "local_reservation_bytes": 31784,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 31832,
+        "epilogue_rsp_additions_bytes": [
+          31784
+        ],
+        "probe_loop_span_bytes": null,
+        "local_reservation_hex": "0x7c28",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde_path_to_error::de::MapAccess<serde_ignored::MapAccess<&mut toml::value::MapDeserializer, codex_config::strict_config::ignored_toml_value_fields<codex_config::config_toml::ConfigToml>::{closure#0}>>>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "       a:      \tsub\trsp, 0x1000",
+          "      19:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x1000",
+          "      37:      \tsub\trsp, 0x1000",
+          "      46:      \tsub\trsp, 0x1000",
+          "      55:      \tsub\trsp, 0x1000",
+          "      64:      \tsub\trsp, 0x1000",
+          "      73:      \tsub\trsp, 0xc28",
+          "   10a38:      \tadd\trsp, 0x7c28"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "02347c734aa56e12687f68b73ba6320c8029a1615ef865199bbe2128f1593f15",
+        "epilogue_lines": [
+          "   10a38:      \tadd\trsp, 0x7c28",
+          "   10a3f:      \tpop\trbx",
+          "   10a40:      \tpop\tr12",
+          "   10a42:      \tpop\tr13",
+          "   10a44:      \tpop\tr14",
+          "   10a46:      \tpop\tr15",
+          "   10a48:      \tpop\trbp",
+          "   10a49:      \tret"
+        ],
+        "instantiation_origin": "codex_config strict value-map"
+      },
+      {
+        "index": 1,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsbujTDTJRe5V_5codex",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-1.asm",
+        "instruction_count": 56728,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tmov\tr11, rsp",
+          "       d:      \tsub\tr11, 0xe000",
+          "      14:      \tsub\trsp, 0x1000",
+          "      1b:      \tmov\tqword ptr [rsp], 0x0",
+          "      23:      \tcmp\trsp, r11",
+          "      26:      \tjne\t0x14 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsbujTDTJRe5V_5codex+0x14>",
+          "      28:      \tsub\trsp, 0x2c8",
+          "      2f:      \tmov\tqword ptr [rsp + 0x28], rdi",
+          "      34:      \tmov\tqword ptr [rsp + 0x9d68], -0x2",
+          "      40:      \tmov\tqword ptr [rsp + 0x9d08], 0x2",
+          "      4c:      \tmov\tqword ptr [rsp + 0xa158], -0x1",
+          "      58:      \tmov\tqword ptr [rsp + 0x8740], -0x1",
+          "      64:      \tmov\tqword ptr [rsp + 0xb0d0], -0x2",
+          "      70:      \tmov\tqword ptr [rsp + 0x9eb8], -0x2",
+          "      7c:      \tmov\tqword ptr [rsp + 0xa4f8], -0x2",
+          "      88:      \tmov\tqword ptr [rsp + 0xaa08], -0x3",
+          "      94:      \tmov\tqword ptr [rsp + 0xa660], -0x2",
+          "      a0:      \tmov\tqword ptr [rsp + 0xa238], -0x2",
+          "      ac:      \tlea\trax, [rsi + 0x18]",
+          "      b0:      \tmov\tqword ptr [rsp + 0x3ce0], rax",
+          "      b8:      \tmov\trax, qword ptr [rsi + 0xa8]",
+          "      bf:      \tcmp\trax, qword ptr [rsi + 0xb8]",
+          "      c6:      \tmov\tqword ptr [rsp + 0xe0], rsi",
+          "      ce:      \tje\t0x5a7 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsbujTDTJRe5V_5codex+0x5a7>"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          712
+        ],
+        "local_reservation_bytes": 58056,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 58104,
+        "epilogue_rsp_additions_bytes": [
+          58056
+        ],
+        "probe_loop_span_bytes": 57344,
+        "probe_loop_stride_bytes": 4096,
+        "probe_loop_iterations": 14,
+        "local_reservation_hex": "0xe2c8",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde_path_to_error::de::MapAccess<toml::de::deserializer::table::TableMapAccess>>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "      14:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x2c8",
+          "   55d38:      \tadd\trsp, 0xe2c8"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "f9d02661d66b8ca86fff09a45b81fb2472112ad31efcf7dc185f56eeb794aef0",
+        "epilogue_lines": [
+          "   55d38:      \tadd\trsp, 0xe2c8",
+          "   55d3f:      \tpop\trbx",
+          "   55d40:      \tpop\tr12",
+          "   55d42:      \tpop\tr13",
+          "   55d44:      \tpop\tr14",
+          "   55d46:      \tpop\tr15",
+          "   55d48:      \tpop\trbp",
+          "   55d49:      \tret"
+        ],
+        "instantiation_origin": "codex CLI TableMapAccess"
+      },
+      {
+        "index": 2,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsl0aECXIXhey_16codex_app_server",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-2.asm",
+        "instruction_count": 56836,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tmov\tr11, rsp",
+          "       d:      \tsub\tr11, 0xe000",
+          "      14:      \tsub\trsp, 0x1000",
+          "      1b:      \tmov\tqword ptr [rsp], 0x0",
+          "      23:      \tcmp\trsp, r11",
+          "      26:      \tjne\t0x14 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsl0aECXIXhey_16codex_app_server+0x14>",
+          "      28:      \tsub\trsp, 0x2c8",
+          "      2f:      \tmov\tqword ptr [rsp + 0x38], rdi",
+          "      34:      \tmov\tqword ptr [rsp + 0x9d08], -0x2",
+          "      40:      \tmov\tqword ptr [rsp + 0x9e30], 0x2",
+          "      4c:      \tmov\tqword ptr [rsp + 0xa158], -0x1",
+          "      58:      \tmov\tqword ptr [rsp + 0x8740], -0x1",
+          "      64:      \tmov\tqword ptr [rsp + 0xb0d0], -0x2",
+          "      70:      \tmov\tqword ptr [rsp + 0x9eb8], -0x2",
+          "      7c:      \tmov\tqword ptr [rsp + 0xa4f8], -0x2",
+          "      88:      \tmov\tqword ptr [rsp + 0xaa08], -0x3",
+          "      94:      \tmov\tqword ptr [rsp + 0xa660], -0x2",
+          "      a0:      \tmov\tqword ptr [rsp + 0xa238], -0x2",
+          "      ac:      \tlea\trax, [rsi + 0x18]",
+          "      b0:      \tmov\tqword ptr [rsp + 0x3ce0], rax",
+          "      b8:      \tmov\trax, qword ptr [rsi + 0xa8]",
+          "      bf:      \tcmp\trax, qword ptr [rsi + 0xb8]",
+          "      c6:      \tmov\tqword ptr [rsp + 0xd8], rsi",
+          "      ce:      \tje\t0x5a7 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECsl0aECXIXhey_16codex_app_server+0x5a7>"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          712
+        ],
+        "local_reservation_bytes": 58056,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 58104,
+        "epilogue_rsp_additions_bytes": [
+          58056
+        ],
+        "probe_loop_span_bytes": 57344,
+        "probe_loop_stride_bytes": 4096,
+        "probe_loop_iterations": 14,
+        "local_reservation_hex": "0xe2c8",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde_path_to_error::de::MapAccess<toml::de::deserializer::table::TableMapAccess>>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "      14:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x2c8",
+          "   56048:      \tadd\trsp, 0xe2c8"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "dea17c8e9468dda6c9f0b045f901e1bb89d8ff5595d92e706d0b639e4dc720a4",
+        "epilogue_lines": [
+          "   56048:      \tadd\trsp, 0xe2c8",
+          "   5604f:      \tpop\trbx",
+          "   56050:      \tpop\tr12",
+          "   56052:      \tpop\tr13",
+          "   56054:      \tpop\tr14",
+          "   56056:      \tpop\tr15",
+          "   56058:      \tpop\trbp",
+          "   56059:      \tret"
+        ],
+        "instantiation_origin": "codex_app_server TableMapAccess"
+      },
+      {
+        "index": 3,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECslvoXmzHp3a5_9codex_tui",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-3.asm",
+        "instruction_count": 56999,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tmov\tr11, rsp",
+          "       d:      \tsub\tr11, 0xe000",
+          "      14:      \tsub\trsp, 0x1000",
+          "      1b:      \tmov\tqword ptr [rsp], 0x0",
+          "      23:      \tcmp\trsp, r11",
+          "      26:      \tjne\t0x14 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtCs1RMbhQrdsn0_19serde_path_to_error2de9MapAccessNtNtNtNtCskhSg0dWDAMa_4toml2de12deserializer5table14TableMapAccessEECslvoXmzHp3a5_9codex_tui+0x14>",
+          "      28:      \tsub\trsp, 0x318",
+          "      2f:      \tmov\tqword ptr [rsp + 0x20], rdi",
+          "      34:      \tmov\tqword ptr [rsp + 0x9db8], -0x2",
+          "      40:      \tmov\tqword ptr [rsp + 0x9d58], 0x2",
+          "      4c:      \tmov\tqword ptr [rsp + 0xa1a8], -0x1",
+          "      58:      \tmov\tqword ptr [rsp + 0x8738], -0x1",
+          "      64:      \tmov\tqword ptr [rsp + 0xb120], -0x2",
+          "      70:      \tmov\tqword ptr [rsp + 0x9f08], -0x2",
+          "      7c:      \tmov\tqword ptr [rsp + 0xa548], -0x2",
+          "      88:      \tmov\tbyte ptr [rsp + 0x8788], -0x1",
+          "      90:      \tmov\tqword ptr [rsp + 0xaa58], -0x3",
+          "      9c:      \tmov\tqword ptr [rsp + 0xa6b0], -0x2",
+          "      a8:      \tmov\tqword ptr [rsp + 0xa288], -0x2",
+          "      b4:      \tlea\trax, [rsi + 0x18]",
+          "      b8:      \tmov\tqword ptr [rsp + 0x3cb0], rax",
+          "      c0:      \tmov\trax, qword ptr [rsi + 0xa8]",
+          "      c7:      \tcmp\trax, qword ptr [rsi + 0xb8]",
+          "      ce:      \tmov\tqword ptr [rsp + 0xc0], rsi"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          792
+        ],
+        "local_reservation_bytes": 58136,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 58184,
+        "epilogue_rsp_additions_bytes": [
+          58136
+        ],
+        "probe_loop_span_bytes": 57344,
+        "probe_loop_stride_bytes": 4096,
+        "probe_loop_iterations": 14,
+        "local_reservation_hex": "0xe318",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde_path_to_error::de::MapAccess<toml::de::deserializer::table::TableMapAccess>>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "      14:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x318",
+          "   56038:      \tadd\trsp, 0xe318"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "9e8c239dcc9d9b031520285f0275e8b87123b17d30d9d4b330ca8ce6ed2c230b",
+        "epilogue_lines": [
+          "   56038:      \tadd\trsp, 0xe318",
+          "   5603f:      \tpop\trbx",
+          "   56040:      \tpop\tr12",
+          "   56042:      \tpop\tr13",
+          "   56044:      \tpop\tr14",
+          "   56046:      \tpop\tr15",
+          "   56048:      \tpop\trbp",
+          "   56049:      \tret"
+        ],
+        "instantiation_origin": "codex_tui TableMapAccess"
+      },
+      {
+        "index": 4,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtNtCsi59R7Eqlgnd_5serde7private2de16FlatStructAccessNtNtNtCskhSg0dWDAMa_4toml2de5error5ErrorEECsiuiK4YccfZA_17codex_agent_roles",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-4.asm",
+        "instruction_count": 18833,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tmov\tr11, rsp",
+          "       d:      \tsub\tr11, 0x9000",
+          "      14:      \tsub\trsp, 0x1000",
+          "      1b:      \tmov\tqword ptr [rsp], 0x0",
+          "      23:      \tcmp\trsp, r11",
+          "      26:      \tjne\t0x14 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapINtNtNtCsi59R7Eqlgnd_5serde7private2de16FlatStructAccessNtNtNtCskhSg0dWDAMa_4toml2de5error5ErrorEECsiuiK4YccfZA_17codex_agent_roles+0x14>",
+          "      28:      \tsub\trsp, 0x478",
+          "      2f:      \tmov\tqword ptr [rsp + 0x8], rdi",
+          "      34:      \tmov\tqword ptr [rsp + 0x46e0], -0x2",
+          "      40:      \tmov\tqword ptr [rsp + 0x4d58], 0x2",
+          "      4c:      \tmov\tqword ptr [rsp + 0x4db8], -0x1",
+          "      58:      \tmov\tqword ptr [rsp + 0x3030], -0x1",
+          "      64:      \tmov\tqword ptr [rsp + 0x2f60], 0x0",
+          "      70:      \tmov\tqword ptr [rsp + 0x6280], -0x2",
+          "      7c:      \tmov\tqword ptr [rsp + 0x2f40], -0x1",
+          "      88:      \tmov\tqword ptr [rsp + 0x5620], -0x4",
+          "      94:      \tmov\tqword ptr [rsp + 0x4910], -0x2",
+          "      a0:      \tmov\tqword ptr [rsp + 0x5210], -0x2",
+          "      ac:      \tmov\tqword ptr [rsp + 0x56a8], -0x2",
+          "      b8:      \tmov\tbyte ptr [rsp + 0x3020], -0x1",
+          "      c0:      \tmov\tqword ptr [rsp + 0x2f90], 0x0",
+          "      cc:      \tmov\tqword ptr [rsp + 0x5bb8], -0x3",
+          "      d8:      \tmov\tbyte ptr [rsp + 0x4740], -0x2",
+          "      e0:      \tmov\tqword ptr [rsp + 0x4c68], 0x0"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          1144
+        ],
+        "local_reservation_bytes": 38008,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 38056,
+        "epilogue_rsp_additions_bytes": [
+          38008
+        ],
+        "probe_loop_span_bytes": 36864,
+        "probe_loop_stride_bytes": 4096,
+        "probe_loop_iterations": 9,
+        "local_reservation_hex": "0x9478",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<serde::private::de::FlatStructAccess<toml::de::error::Error>>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "      14:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x478",
+          "   18416:      \tadd\trsp, 0x9478"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "be93d324d6ec4b3247b7de0da6e8f6fb77715c8effbfe73eb35130fe5a82d902",
+        "epilogue_lines": [
+          "   18416:      \tadd\trsp, 0x9478",
+          "   1841d:      \tpop\trbx",
+          "   1841e:      \tpop\tr12",
+          "   18420:      \tpop\tr13",
+          "   18422:      \tpop\tr14",
+          "   18424:      \tpop\tr15",
+          "   18426:      \tpop\trbp",
+          "   18427:      \tret"
+        ],
+        "instantiation_origin": "codex_agent_roles FlatStructAccess"
+      },
+      {
+        "index": 5,
+        "raw_symbol": "_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapQNtNtCskhSg0dWDAMa_4toml5value15MapDeserializerEBd_",
+        "disassembly": "/tmp/codex-parity-20261106/native-stack-visitor-5.asm",
+        "instruction_count": 12964,
+        "prologue_lines": [
+          "       0:      \tpush\trbp",
+          "       1:      \tpush\tr15",
+          "       3:      \tpush\tr14",
+          "       5:      \tpush\tr13",
+          "       7:      \tpush\tr12",
+          "       9:      \tpush\trbx",
+          "       a:      \tmov\tr11, rsp",
+          "       d:      \tsub\tr11, 0x9000",
+          "      14:      \tsub\trsp, 0x1000",
+          "      1b:      \tmov\tqword ptr [rsp], 0x0",
+          "      23:      \tcmp\trsp, r11",
+          "      26:      \tjne\t0x14 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapQNtNtCskhSg0dWDAMa_4toml5value15MapDeserializerEBd_+0x14>",
+          "      28:      \tsub\trsp, 0x268",
+          "      2f:      \tmov\tqword ptr [rsp], rdi",
+          "      33:      \tmov\tqword ptr [rsp + 0x3540], -0x2",
+          "      3f:      \tmov\tqword ptr [rsp + 0x38b0], 0x2",
+          "      4b:      \tmov\tqword ptr [rsp + 0x4f98], -0x1",
+          "      57:      \tmov\tqword ptr [rsp + 0x3500], -0x1",
+          "      63:      \tmov\tqword ptr [rsp + 0x6070], -0x2",
+          "      6f:      \tmov\tqword ptr [rsp + 0x3520], -0x1",
+          "      7b:      \tmov\tqword ptr [rsp + 0x53a0], -0x2",
+          "      87:      \tmov\tqword ptr [rsp + 0x5498], -0x2",
+          "      93:      \tmov\tqword ptr [rsp + 0x59a8], -0x3",
+          "      9f:      \tmov\tqword ptr [rsp + 0x5600], -0x2",
+          "      ab:      \tmov\tqword ptr [rsp + 0x5430], -0x2",
+          "      b7:      \tmov\trax, qword ptr [rsi + 0x70]",
+          "      bb:      \tmov\tqword ptr [rsp + 0x34c8], -0x2",
+          "      c7:      \tcmp\trax, qword ptr [rsi + 0x80]",
+          "      ce:      \tje\t0x511 <_RINvXs0_NvXNvNtCs55PxdOhphPK_12codex_config11config_tomlsa_1__NtBb_10ConfigTomlNtNtCs5BRsjlVc6Lu_10serde_core2de11Deserialize11deserializeNtB6_9___VisitorNtB1h_7Visitor9visit_mapQNtNtCskhSg0dWDAMa_4toml5value15MapDeserializerEBd_+0x511>",
+          "      d4:      \tmov\tr15, rsi"
+        ],
+        "prologue_push_count": 6,
+        "prologue_stack_subtractions_bytes": [
+          4096,
+          616
+        ],
+        "local_reservation_bytes": 37480,
+        "saved_register_bytes": 48,
+        "observed_function_entry_stack_delta_bytes": 37528,
+        "epilogue_rsp_additions_bytes": [
+          37480
+        ],
+        "probe_loop_span_bytes": 36864,
+        "probe_loop_stride_bytes": 4096,
+        "probe_loop_iterations": 9,
+        "local_reservation_hex": "0x9268",
+        "demangled_symbol": "<<codex_config::config_toml::ConfigToml as serde_core::de::Deserialize>::deserialize::__Visitor as serde_core::de::Visitor>::visit_map::<&mut toml::value::MapDeserializer>",
+        "epilogue_confirms_prologue": true,
+        "return_address_bytes_separate": 8,
+        "all_explicit_rsp_write_instructions": [
+          "      14:      \tsub\trsp, 0x1000",
+          "      28:      \tsub\trsp, 0x268",
+          "   10538:      \tadd\trsp, 0x9268"
+        ],
+        "all_push_instruction_count": 6,
+        "all_pop_instruction_count": 6,
+        "disassembly_sha256": "3709f01638759364dc13fa177bde23eeec6a23bf36f5d78c4c34922d05ef472f",
+        "epilogue_lines": [
+          "   10538:      \tadd\trsp, 0x9268",
+          "   1053f:      \tpop\trbx",
+          "   10540:      \tpop\tr12",
+          "   10542:      \tpop\tr13",
+          "   10544:      \tpop\tr14",
+          "   10546:      \tpop\tr15",
+          "   10548:      \tpop\trbp",
+          "   10549:      \tret"
+        ],
+        "instantiation_origin": "codex_config value-map"
+      }
+    ],
+    "largest_local_reservation_bytes": 58136,
+    "largest_entry_rsp_delta_bytes": 58184,
+    "application_configured_stack_bytes": 16777216,
+    "largest_entry_delta_fraction_of_configured_stack": 0.003468036651611328,
+    "each_observed_fixed_frame_fits_configured_application_stack": true,
+    "actual_native_runtime_execution_proven": false,
+    "measurement_details": "Counted six register pushes(48bytes); accounted bounded inline probe loop via sub r11 and residual sub rsp. Confirmed exact matching add rsp plus six pops on return for every instantiated ConfigToml::visit_map. Raw symbol filters required with llvm-objdump; --demangle combined with raw disassemble-symbols produced no instructions and was not used for measurements."
+  }
+}

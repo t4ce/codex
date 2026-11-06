@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-06T17:45:38.361167+00:00",
+  "canonical_checkout": "/home/t4ce/Repositories/codex",
+  "branch": "main",
+  "validated_source_head": "98411b1b19a3b8ad44beda3a155289bea0a0166d",
+  "report_source_head": "98411b1b19a3b8ad44beda3a155289bea0a0166d",
+  "upstream_tip": "814347ecd21b49d25479f5499f168b9f7b7e1803",
+  "upstream_missing": 0,
+  "one_checkout_one_branch": true,
+  "editor_workspace": "/home/t4ce/Repositories/TRUEOS.code-workspace",
+  "editor_workspace_contains_canonical_codex": true,
+  "active_tooling_references_to_removed_checkout": [],
+  "native_package_integrity_passed": true,
+  "native_runtime_import_compatibility_passed": false,
+  "sdk_complete_success_cache_recorded": false,
+  "native_package_receipt": "canonical-native-package-verification.json",
+  "final_package_kernel_binding": "canonical-native-final-bindings.json",
+  "canonical_lock_receipt": "canonical-lock-validation.json",
+  "host_tui": {
+    "passed": 27,
+    "tests": [
+      {
+        "area": "next_prompt",
+        "passed": 9,
+        "host_test_stack_bytes": 16777216,
+        "log": "/tmp/codex-parity-20261106/host-tui-next-prompt-tests-4.log",
+        "log_sha256": "235831f88136c45043787161a524dd06bf334f90925b02100e85d10760074da9"
+      },
+      {
+        "area": "prompt_inbox",
+        "passed": 11,
+        "host_test_stack_bytes": "default",
+        "log": "/tmp/codex-parity-20261106/host-tui-prompt-inbox-tests.log",
+        "log_sha256": "1530619a467dc02a7b817c1e5045b7bfdbe926fbfa73e915ae32e37c53b35d0a"
+      },
+      {
+        "area": "provider_onboarding",
+        "passed": 1,
+        "host_test_stack_bytes": "default",
+        "log": "/tmp/codex-parity-20261106/host-tui-provider-onboarding-tests.log",
+        "log_sha256": "7351c8a29389c75040cc1f94267b2d925ebcae84680d57bcaa7976365de72911"
+      },
+      {
+        "area": "startup_future",
+        "passed": 1,
+        "host_test_stack_bytes": "default",
+        "log": "/tmp/codex-parity-20261106/host-tui-startup-future-tests.log",
+        "log_sha256": "64e8a83a43feb6f46591fa9bd830c73fee8679d8f15475a0891a164e0d3d42cb"
+      },
+      {
+        "area": "backend_sessions",
+        "passed": 2,
+        "host_test_stack_bytes": 16777216,
+        "log": "/tmp/codex-parity-20261106/host-tui-final-backend-sessions.log",
+        "log_sha256": "e934e54263a5596209534ae1d42892e4dd21a2c6c45166c09e99a98daf770d35"
+      },
+      {
+        "area": "buffered_terminal",
+        "passed": 2,
+        "host_test_stack_bytes": 16777216,
+        "log": "/tmp/codex-parity-20261106/host-tui-final-buffered-terminal.log",
+        "log_sha256": "b0ebdb078e73b533fea24b0d5aa196c6767ef3bd69e9d5049a8d8b2f8dc86e0a"
+      },
+      {
+        "area": "managed_worktree_policy",
+        "passed": 1,
+        "host_test_stack_bytes": 16777216,
+        "log": "/tmp/codex-parity-20261106/host-tui-managed-worktree-reviewed-tests.log",
+        "log_sha256": "b547b8f8f68776b080c4edae14d7d344e17fc290703a30f4b8d4ba787c5cece2"
+      }
+    ],
+    "provenance": "host-tui-stack-provenance.json",
+    "scope": "Real compiled libtests in disclosed manifest-only host diagnostic environment; deep config tests use an explicit 16MiB host test stack. Native production stack settings unchanged."
+  },
+  "daemon_reservations": {
+    "passed": 5,
+    "log": "/tmp/codex-parity-20261106/host-daemon-reservation-tests.log",
+    "log_sha256": "bc4c341886a5e8da5c94af9afad5dfaa3cd1d9e5d4c9bcafcbeb67de8a8d5445"
+  },
+  "canonical_integration_harnesses": [
+    {
+      "script": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_codex_startup_skills.py",
+      "host": 14,
+      "trueos_cfg_on_host": 14,
+      "log": "/tmp/codex-parity-20261106/canonical-skills-tests.log",
+      "log_sha256": "a04b829711bb2598ed8c3e8689cfe5b4b646aaeec741630bda94b71c67839183",
+      "script_sha256": "d171966d864158e89d73674539e382def62756cc8a6d1c7d9abf48747015225f"
+    },
+    {
+      "script": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_codex_plugin_policy.py",
+      "host": 6,
+      "trueos_cfg_on_host": 6,
+      "log": "/tmp/codex-parity-20261106/canonical-plugin-tests.log",
+      "log_sha256": "3818370bd1248f9e8e9df91b2d33aab29656bb2b408c82ed151860018602c4ed",
+      "script_sha256": "f51698e047154922956ba6b8e9ff4e40ff140cd8af25203fd2974b1cb28a22a6"
+    },
+    {
+      "script": "/home/t4ce/Repositories/TRUEOS/tools/testpy/test_codex_dotenv.py",
+      "host_child": true,
+      "trueos_cfg_child": true,
+      "c_abi_cases": 6,
+      "log": "/tmp/codex-parity-20261106/canonical-dotenv-tests.log",
+      "log_sha256": "3e45380996cb69e19ff7395b04280f4fe2f13c564f4d1e53059098aca021180e",
+      "script_sha256": "f80e10663af68ec3001fca55e9e387b0209ee5de5aaf779b3f982e6f59af124e"
+    },
+    {
+      "area": "canonical_IDE_client",
+      "passed": 10,
+      "log": "/tmp/codex-parity-20261106/canonical-ide-tests.log",
+      "log_sha256": "00905866411d2976790ae22afcf050ef21d1b3660f8173ce4ffd5156078d14d9"
+    }
+  ],
+  "kernel_adapter_validation": "kernel-new-import-adapters-validation.json",
+  "kernel_adapter_artifact_followup": "native-kernel-adapter-followup.json",
+  "runtime_limit": "No native rig launch, reboot or end-to-end kernel/service execution was performed. The configured Blueprint post-build step automatically published the completed package to its SMB apps share. Static package and host behavior evidence have separate scopes.",
+  "build_result": {
+    "session_id": 45095,
+    "exit_code": 0,
+    "log": "/tmp/codex-parity-20261106/native-build-main.log",
+    "blueprint_sha256": "d69cf03c68a3f55b494e6c4879b34836d1c9e58132d8aeb3b692e0000844ac03",
+    "configured_post_build_publication": "smb://t4ce@pdjb/home-share/TRUEOS_SITE/apps",
+    "published_name": "codex.bp\u00a7\u00a7d69cf03c68a3f55b494e6c4879b34836d1c9e58132d8aeb3b692e0000844ac03",
+    "rig_launch_performed": false
+  }
+}

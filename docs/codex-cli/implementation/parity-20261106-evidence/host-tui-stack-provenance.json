@@ -1,0 +1,10 @@
+{
+  "upstream": "814347ecd2",
+  "file": "codex-rs/config/src/config_toml.rs",
+  "matches_upstream_after_only2folded_import_substitutions": true,
+  "upstream_sha256": "97273400bacd35789248e487ce5b3e9d63757c48120e7619aab7ce969829f56c",
+  "normalized_current_sha256": "97273400bacd35789248e487ce5b3e9d63757c48120e7619aab7ce969829f56c",
+  "gdb_stack_frame": "visit_map0x2e740bytes(190272)debug stack reservation; fault in stack-probe loop, with deep async server config-load frames below",
+  "trace": "/tmp/codex-parity-20261106/host-tui-live-prompt-stack-frame.log",
+  "decision": "No production deserializer or native stack-cap change; focused host debug tests explicitly use RUST_MIN_STACK=16777216."
+}

@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-11-06T17:44:48.588329+00:00",
+  "scope": "Final package/source and local Cargo kernel follow-up binding only; no native execution or rig identification. Initial 35-gap proof preserved unchanged.",
+  "package": {
+    "path": "/home/t4ce/Repositories/TRUEOS-Blueprints/dist/codex.bp",
+    "bytes": 80519989,
+    "sha256": "d69cf03c68a3f55b494e6c4879b34836d1c9e58132d8aeb3b692e0000844ac03"
+  },
+  "codex_source_baseline": {
+    "path": "/tmp/codex-parity-20261106/canonical-native-source-baseline.json",
+    "bytes": 863878,
+    "sha256": "83929ad9d8e8efe86f410ee076278b2ace558bbd50263d44a56d05ccffdeabb4"
+  },
+  "codex_source_files_checked": 6805,
+  "codex_source_changes": [],
+  "original_package_verification": {
+    "path": "/tmp/codex-parity-20261106/canonical-native-package-verification.json",
+    "bytes": 53305,
+    "sha256": "703fc70137fdfc6f8084f5444d5e41a08d4321758abd527f3472f09de7029c8f"
+  },
+  "original_kernel_audit": {
+    "path": "/tmp/codex-parity-20261106/native-local-kernel-resolver.json",
+    "bytes": 38863,
+    "sha256": "73a58beea6e344440d339dd1566078e0217a3bfe1e9d8d543b3e7150198c846a"
+  },
+  "original_35_gap_classification": {
+    "path": "/tmp/codex-parity-20261106/canonical-native-loader-gap-classification.json",
+    "bytes": 9478,
+    "sha256": "a74b45df0d8a4538453f1146743ef3a806728bd3a4fe17822b9dc6da71c6ceb2"
+  },
+  "post_adapter_kernel_audit": {
+    "path": "/tmp/codex-parity-20261106/native-kernel-adapter-followup.json",
+    "bytes": 41641,
+    "sha256": "304fda990795d93b74d6a5daec4400c85d89797383686d9136da7f1aaebab17a"
+  },
+  "kernel_adapter_build_and_tests": {
+    "path": "/tmp/codex-parity-20261106/kernel-new-import-adapters-validation.json",
+    "bytes": 2705,
+    "sha256": "d6191993db672fa7a0cfe9aeed1dc9d2afa20fbcbcdf90b02934291d72c963c2"
+  },
+  "actual_cargo_kernel": {
+    "path": "/home/t4ce/Repositories/TRUEOS/tgt/x86_64-unknown-trueos/release/TRUEOS",
+    "bytes": 32239016,
+    "sha256": "248213876c0278ad2ade9deaf9a698aec28477e7d6976d4cac0ee9cc1022234a"
+  },
+  "new_resolver_bindings": {
+    "abs": "crate::std_abi_shim::abs as *const () as usize; unsafe extern C fn(c_int)->c_int; wrapping absolute value.",
+    "futimes": "crate::std_abi_shim::futimes as *const () as usize; unsafe extern C fn(c_int,*const c_void)->c_int; shared ENOSYS/EBADF timestamp rejection policy."
+  },
+  "compiled_binding_evidence": "Successful locked/offline release build, exact release/deps executable hardlink, matching dep-info and Cargo fingerprint, current source hashes older than output. Kernel ELF has no .symtab/.dynsym; there are no standalone named exported-symbol assertions. The loader uses Rust function addresses, not ELF dynamic symbol lookup.",
+  "focused_adapter_tests_passed": 3,
+  "remaining_strong_gap_count": 29,
+  "remaining_strong_resolution_gaps": [
+    "__fprintf_chk",
+    "__snprintf_chk",
+    "__vsnprintf_chk",
+    "chmod",
+    "fclose",
+    "fdopen",
+    "fputc",
+    "fwrite",
+    "getpgid",
+    "getpwnam",
+    "getpwuid_r",
+    "getrlimit",
+    "getuid",
+    "kill",
+    "killpg",
+    "lchown",
+    "ldexp",
+    "lutimes",
+    "mlock",
+    "pthread_atfork",
+    "pthread_sigmask",
+    "setrlimit",
+    "sigaddset",
+    "sigemptyset",
+    "stderr",
+    "symlink",
+    "tcflush",
+    "uname",
+    "waitid"
+  ],
+  "optional_weak_trace_hook_count": 4,
+  "optional_weak_trace_hooks": [
+    "ZSTD_trace_compress_begin",
+    "ZSTD_trace_compress_end",
+    "ZSTD_trace_decompress_begin",
+    "ZSTD_trace_decompress_end"
+  ],
+  "remaining_all_gap_count": 33,
+  "all_remaining_gaps_preexisting": true,
+  "selected_local_pxe": {
+    "symlink": "/home/t4ce/Repositories/TRUEOS/tgt/pxe-current",
+    "resolved_directory": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/release.qt2aQy",
+    "image": {
+      "path": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/release.qt2aQy/TRUEOS.elf",
+      "sha256": "f26c8378b55f4091804f714a275d33e76acb4b8a5c42fee6fd7c3e47dad4995b",
+      "bytes": 32238928,
+      "mtime_ns": 1793986162779964157
+    },
+    "archive": {
+      "path": "/home/t4ce/Repositories/TRUEOS/tgt/rig-images/release.qt2aQy/TrueOS.tar.lz4",
+      "sha256": "2f678710b27609403b3375e38ed80dbfa67a725df15c7b9c3ae721dfa42e5003",
+      "bytes": 24015322,
+      "mtime_ns": 1793986162971967348
+    },
+    "archive_members": [
+      {
+        "name": "TRUEOS.elf",
+        "bytes": 32238928,
+        "sha256": "f26c8378b55f4091804f714a275d33e76acb4b8a5c42fee6fd7c3e47dad4995b",
+        "matches_local_member": true
+      },
+      {
+        "name": "EFI/BOOT/BOOTX64.EFI",
+        "bytes": 61440,
+        "sha256": "15c52c405e68de24ddafea9e52f7207ed8a227f7bb3395b05500a4c440e36019",
+        "matches_local_member": true
+      },
+      {
+        "name": "EFI/BOOT/tgl_guc_70.bin",
+        "bytes": 335360,
+        "sha256": "2f1f57a1b23d186f2592318d1e07a1365968932841ccb3e7177c516ba006e2f6",
+        "matches_local_member": true
+      }
+    ],
+    "cargo_to_pxe_image_binding": {
+      "pack_script_operation": "rust-objcopy --strip-debug from release/TRUEOS to immutable generation TRUEOS.elf",
+      "program_headers_identical": true,
+      "entry_address_identical": true,
+      "nonempty_allocated_sections_and_contents_identical": false,
+      "nonempty_allocated_section_count": 10,
+      "removed_zero_size_allocated_sections": [
+        ".debug_gdb_scripts"
+      ],
+      "whole_file_hashes_differ": true,
+      "explanation": "Current Cargo ELF and locally selected PXE image do not have matching loaded contents; they must be treated as different builds."
+    }
+  },
+  "pxe_matches_new_cargo_kernel": false,
+  "booted_rig_kernel_identity": "unverified",
+  "package_integrity_passed": true,
+  "mission_source_lock_binding_passed": true,
+  "new_typed_import_regressions_resolved_in_local_cargo_kernel": true,
+  "runtime_import_compatibility_passed": false,
+  "sdk_complete_success_cache_recorded": false,
+  "static_checks_passed": false,
+  "codex_package_publication": "Canonical native build automatically published codex.bp with exact d69cf03c... hash to configured SMB TRUEOS_SITE/apps. Verifier did no publication.",
+  "kernel_image_publication": "Adapter build performed preparation and Cargo compile only; no PXE/image publication, rig launch or reboot."
+}

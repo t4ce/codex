@@ -1,0 +1,13 @@
+{
+  "manifest": "/home/t4ce/Repositories/codex/codex-rs/cli/target/trueos-blueprint/work/codex/native-folds.json",
+  "manifest_sha256": "8638310539f650d6f6c60c09885023921250edc4a807af990fd84c3a6ce0398c",
+  "root_rlink": "/home/t4ce/Repositories/TRUEOS-Blueprints/target/trueos-blueprint/cargo-cache/x86_64-unknown-trueos/tokio-platform-v7-stackful-threads-3f9423ab138eadcd/x86_64-unknown-trueos/release/deps/codex-734a36c41c24c172.rlink",
+  "root_rlink_sha256": "10e251df78dbae54bc63c1f77ced32d2395bc2aa4ac9580a6bd4b608d5832300",
+  "selected_archive_count": 804,
+  "rlink_recovered_archive_count": 804,
+  "manifest_exactly_matches_rlink_order": true,
+  "folded_old_archive_stems_present": [],
+  "replacement_archive_stems_missing": [],
+  "canonical_codex_archive_sources": true,
+  "scope": "SDK-compatible independent printable-token extraction from actual selected root .rlink; existing package validator separately checks response runs and direct-link byte identity."
+}

@@ -281,6 +281,22 @@
       "covers": [
         "optional AWS/Bedrock production source compiles with upstream interfaces and TRUEOS folded transport"
       ]
+    },
+    {
+      "command": "cargo test -p codex-otel --test tests --features external-reporting otlp_http_loopback -j4 -- --test-threads=1",
+      "exit_code": 0,
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "log": "/tmp/codex-parity-20261106/host-otel-loopback-tests.log"
+    },
+    {
+      "command": "cargo test -p codex-model-provider --lib --features bedrock bedrock -j4 -- --test-threads=2",
+      "exit_code": 0,
+      "passed": 48,
+      "failed": 0,
+      "ignored": 0,
+      "log": "/tmp/codex-parity-20261106/host-bedrock-tests.log"
     }
   ],
   "source_snapshot": {
@@ -322,15 +338,24 @@
     "transport unused NetworkPolicyDenied import removal",
     "core/tests/{common,suite}/runtime_auth.rs old provider import normalization"
   ],
-  "active_commands": [
-    {
-      "command": "cargo check -p codex-model-provider --features bedrock --lib -j4",
-      "session_id": 49758,
-      "log": "/tmp/codex-parity-20261106/host-bedrock-check.log"
+  "active_commands": [],
+  "status": "host_feature_matrix_complete_all_test_commands_terminal",
+  "host_overlay_source_fidelity_checks": {
+    "reqwest": {
+      "non_Cargo_toml_differing_paths": [],
+      "source_identical_except_declared_manifest_overlays": true
     },
-    {
-      "command": "cargo test -p codex-otel --test tests --features external-reporting otlp_http_loopback -j4 -- --test-threads=1",
-      "log": "/tmp/codex-parity-20261106/host-otel-loopback-tests.log"
+    "sqlx-sqlite": {
+      "non_Cargo_toml_differing_paths": [],
+      "source_identical_except_declared_manifest_overlays": true
+    },
+    "qjs": {
+      "non_Cargo_toml_differing_paths": [],
+      "source_identical_except_declared_manifest_overlays": true
+    },
+    "crossterm": {
+      "non_Cargo_toml_differing_paths": [],
+      "source_identical_except_declared_manifest_overlays": true
     }
-  ]
+  }
 }

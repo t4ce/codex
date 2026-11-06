@@ -1,6 +1,6 @@
 {
   "owner": "parity_ui_server",
-  "status": "full_host_library_binary_graph_passed_native_validation_pending",
+  "status": "host_default_and_optional_feature_off_library_binary_graphs_passed_real_tui_libtests_compiling",
   "editedpaths": [
     "codex-rs/app-server-client/src/cloud.rs",
     "codex-rs/app-server-client/src/cloud_backend/auth.rs",
@@ -937,7 +937,11 @@
     "Preserved nativebrowser/Hull/IDE launch bridge paths and source launch-script initialization while adopting upstream split CLI dispatch/TUI future.",
     "Pending native prompts now retain logical BackendId plus thread UUID. Inflight reads keep the original owner; a different backend with identical thread UUID cannot accept already-read text. Kernel endpoint path remains unchanged.",
     "Compiler-driven adaptation: std::fs::File returned by updated open_stderr_log goes directly into Stdio; upstream d13db678cb removes macOS taskpolicy wrapper, so daemon uses the common platform constructor.",
-    "Compiler-driven adaptation: custom next-prompt generation now reads the new timed ThreadItem payload wrapper and moved user_prompt context extractor; existing live-completion tests use backend-tagged events. Bedrock capability is reexported through the existing app-server-client facade."
+    "Compiler-driven adaptation: custom next-prompt generation now reads the new timed ThreadItem payload wrapper and moved user_prompt context extractor; existing live-completion tests use backend-tagged events. Bedrock capability is reexported through the existing app-server-client facade.",
+    "Compiler-driven optional-feature adaptation: new daemon recovery/version probing and CLI log maintenance stay under install-update; removed stale Cli.managed_daemon assignment after upstream replaced the field.",
+    "Real TUI libtest compiler adaptation: removed unused obsolete cloud-config helper import; nested buffered terminal tests explicitly import pretty_assertions::assert_eq after upstream test module import changes.",
+    "Native compiler adaptation: new PID reservation probes and lock RAII use the existing DaemonLockFile platform alias, preserving actual descriptor-backed native flock and upstream host locks. New socket-readiness metadata obtains full std FileType from blocking std::fs only on TRUEOS; hosts retain Tokio metadata. Existing daemon transport capability errors remain intact.",
+    "Native compiler adaptation: new mark_pet_placeholders helper has the same not-TRUEOS gate as both pet image callers; shared terminal/composer thumbnails remain available."
   ],
   "uncertain_backlog": [
     {
@@ -970,6 +974,13 @@
       "authoritative_source": "/home/t4ce/Repositories/TRUEOS/src/r/services/codex_input_service.rs:254",
       "reason": "Kernel Scope is New or Thread([u8;16]); its receiver identity is VM/run/instance and readiness generation, with no backend owner. The in-process fix prevents already-read/inflight text crossing to a different backend exposing the same UUID. A still-open native frame or kernel-pending text across two backends sharing the same UUID remains indistinguishable at the vFile protocol boundary.",
       "next_action": "Consider a versioned backend-qualified native input scope protocol with kernel changes and migration tests; no silent kernel/protocol change was made during the Rust CLI merge."
+    },
+    {
+      "item": "Inherited host debug test stack limit",
+      "confidence": "observed, traced, source-equivalence verified",
+      "reason": "Default host test thread stack overflows in upstream-identical ConfigToml serde visit_map during deep embedded server config loading.16MiB host test stack passes targeted behavior; this is separate from native production runtime validation.",
+      "evidence": "/tmp/codex-parity-20261106/host-tui-stack-provenance.json",
+      "next_validation": "Run final focused tests with disclosed RUST_MIN_STACK=16777216 and retain default-stack failure trace. Do not change native stack cap or production deserializer merely for debug tests."
     }
   ],
   "validation": [
@@ -1025,6 +1036,26 @@
       "command": "cargo check -p codex-tui -p codex-app-server -p codex-cli --lib --bins -j4",
       "result": "passed exit0 in disclosed host validation copy; all selected libraries and binaries checked. Does not prove native cfg or runtime.",
       "log": "/tmp/codex-parity-20261106/host-ui-server-check-6.log"
+    },
+    {
+      "command": "cargo check -p codex-tui -p codex-cli --no-default-features --lib --bins -j4",
+      "result": "passed exit0 in disclosed host validation copy; optional install-update gating verified with full selected libraries and bins. Native cfg/runtime remains separate.",
+      "log": "/tmp/codex-parity-20261106/host-ui-server-no-default-check-3.log"
+    },
+    {
+      "command": "actual cargo-built codex_tui libtest app::trueos_prompt::tests",
+      "result": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 6022 filtered out; finished in 0.01s on default host test stack, disclosed host validation copy",
+      "log": "/tmp/codex-parity-20261106/host-tui-prompt-inbox-tests.log"
+    },
+    {
+      "command": "actual cargo-built codex_tui libtest provider_setup_wizards_require_eligible_onboarding",
+      "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6032 filtered out; finished in 0.10s on default host test stack, disclosed host validation copy",
+      "log": "/tmp/codex-parity-20261106/host-tui-provider-onboarding-tests.log"
+    },
+    {
+      "command": "actual cargo-built codex_tui libtest tui_startup_future_stays_bounded",
+      "result": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6032 filtered out; finished in 0.01s on default host test stack, disclosed host validation copy",
+      "log": "/tmp/codex-parity-20261106/host-tui-startup-future-tests.log"
     }
   ],
   "followup_editedpaths": [
@@ -1038,7 +1069,24 @@
     "codex-rs/tui/src/lib.rs",
     "codex-rs/tui/src/lib_tests.rs",
     "codex-rs/tui/src/onboarding/auth.rs",
-    "codex-rs/tui/tests/trueos_prompt/run.py"
+    "codex-rs/tui/tests/trueos_prompt/run.py",
+    "codex-rs/tui/src/startup_orchestration.rs",
+    "codex-rs/tui/src/app/daemon_recovery.rs",
+    "codex-rs/app-server-daemon/src/backend/pid.rs",
+    "codex-rs/app-server-daemon/src/lib.rs",
+    "codex-rs/tui/src/custom_terminal/tests/buffered_tests.rs",
+    "codex-rs/tui/src/custom_terminal.rs"
   ],
-  "host_check_record": "/tmp/codex-parity-20261106/ui-host-check.json"
+  "host_check_record": "/tmp/codex-parity-20261106/ui-host-check.json",
+  "native_lock_evidence": {
+    "capability": "Actual TRUEOS flock, not assumed host semantics",
+    "implementation": "/home/t4ce/Repositories/TRUEOS/src/std_abi_shim.rs:6093",
+    "native_worker": "TRUEOS Tokio snapshot File lacks raw descriptor, so shared DaemonLockFile alias uses std::fs::File; kernel routes flock to advisory locks or OP_BP_POSIX_FLOCK_TRY."
+  },
+  "real_tui_libtest_compilation": {
+    "result": "passed full libtest compilation after2test-only API drift fixes",
+    "log": "/tmp/codex-parity-20261106/host-tui-next-prompt-tests-2.log",
+    "runtime": "Full libtest compilation passed. Default host debug stack overflow traced to upstream-identical ConfigToml deserializer reached through server config loading; experimental test boxing did not resolve and was removed. Final focused matrix recompiling with explicitly documented16MiB host test stack; native production cap unchanged."
+  },
+  "host_debug_stack_provenance": "/tmp/codex-parity-20261106/host-tui-stack-provenance.json"
 }
