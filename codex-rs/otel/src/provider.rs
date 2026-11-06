@@ -920,7 +920,7 @@ fn build_logger(
 fn build_tracer_provider(
     resource: &Resource,
     _exporter: &OtelExporter,
-    attributes: BTreeMap<String, String>,
+    attributes: HashMap<String, String>,
     _factory: &codex_transport::http::HttpClientFactory,
 ) -> Result<SdkTracerProvider, Box<dyn Error>> {
     Ok(tracer_provider_builder(resource, attributes).build())

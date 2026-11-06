@@ -20,7 +20,7 @@ external-reporting = [
 workspace = true
 
 [dependencies]
-sentry-types = { version = "0.46.0", default-features = false }
+sentry-types = { version = "0.46.0", default-features = false, features = ["protocol"] }
 anyhow = { workspace = true }
 bytes = { workspace = true, optional = true }
 codex-transport = { workspace = true, optional = true }
