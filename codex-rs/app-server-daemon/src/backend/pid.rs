@@ -697,7 +697,7 @@ async fn reservation_lock_is_active(path: &Path) -> Result<bool> {
 }
 
 #[cfg(any(unix, windows))]
-fn probe_reservation_lock(file: fs::File) -> Result<bool> {
+fn probe_reservation_lock(file: DaemonLockFile) -> Result<bool> {
     if !try_lock_file(&file)? {
         return Ok(true);
     }
@@ -737,7 +737,7 @@ async fn inspect_empty_pid_reservation(
 }
 
 #[cfg(unix)]
-struct EmptyPidProbeLock(fs::File);
+struct EmptyPidProbeLock(DaemonLockFile);
 
 #[cfg(unix)]
 impl Drop for EmptyPidProbeLock {
@@ -756,7 +756,7 @@ impl Drop for EmptyPidProbeLock {
 #[cfg(any(unix, windows))]
 async fn inspect_empty_pid_reservation_with_file(
     pid_path: &Path,
-    file: fs::File,
+    file: DaemonLockFile,
 ) -> Result<EmptyPidReservation> {
     if !try_lock_file(&file)? {
         return Ok(EmptyPidReservation::Active);

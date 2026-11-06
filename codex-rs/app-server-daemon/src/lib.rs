@@ -906,8 +906,8 @@ impl Daemon {
             // A stopped older updater can leave its socket behind. Remove only
             // the rendezvous entry before starting, so readiness cannot be stale.
             let path = self.manual_update_socket_path();
-            if let Ok(metadata) = tokio::fs::symlink_metadata(&path).await
-                && (metadata.file_type().is_socket() || metadata.file_type().is_symlink())
+            if let Ok(file_type) = daemon_socket_file_type(&path, /*follow_symlinks*/ false).await
+                && (file_type.is_socket() || file_type.is_symlink())
             {
                 tokio::fs::remove_file(path).await?;
             }
@@ -946,9 +946,9 @@ impl Daemon {
                 // updater's restore authority. Old updaters also publish sockets.
                 let running = updater.is_starting_or_running().await?;
                 if running
-                    && tokio::fs::metadata(&path)
+                    && daemon_socket_file_type(&path, /*follow_symlinks*/ true)
                         .await
-                        .is_ok_and(|metadata| metadata.file_type().is_socket())
+                        .is_ok_and(|file_type| file_type.is_socket())
                 {
                     break;
                 }
@@ -1253,6 +1253,38 @@ fn restart_decision(
             RestartDecision::AlreadyCurrent
         }
         _ => RestartDecision::Restart,
+    }
+}
+
+// TRUEOS Tokio metadata intentionally exposes only regular files, directories,
+// and symlinks. Native socket readiness needs the full stat file type.
+#[cfg(unix)]
+async fn daemon_socket_file_type(
+    path: &Path,
+    follow_symlinks: bool,
+) -> std::io::Result<std::fs::FileType> {
+    #[cfg(target_os = "trueos")]
+    {
+        let path = path.to_path_buf();
+        tokio::task::spawn_blocking(move || {
+            let metadata = if follow_symlinks {
+                std::fs::metadata(path)
+            } else {
+                std::fs::symlink_metadata(path)
+            }?;
+            Ok(metadata.file_type())
+        })
+        .await
+        .map_err(|error| std::io::Error::other(format!("socket metadata task failed: {error}")))?
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        let metadata = if follow_symlinks {
+            tokio::fs::metadata(path).await
+        } else {
+            tokio::fs::symlink_metadata(path).await
+        }?;
+        Ok(metadata.file_type())
     }
 }
 
