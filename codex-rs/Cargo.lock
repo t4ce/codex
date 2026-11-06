@@ -2842,7 +2842,7 @@ dependencies = [
  "codex-utils-output-truncation",
  "codex-utils-string",
  "pretty_assertions",
- "qjs",
+ "hull-quickjs",
  "serde_json",
  "tokio",
  "tokio-util",
@@ -9196,6 +9196,13 @@ name = "httpdate"
 version = "1.0.3"
 
 [[package]]
+name = "hull-quickjs"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "humantime"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12426,18 +12433,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7186d3822593aa4393561d186d1393b3923e9d6163d3fbfd6e825e3e6cf3e6a8"
 dependencies = [
  "num-traits",
-]
-
-[[package]]
-name = "qjs"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cc",
- "crossterm",
- "spin 0.10.1",
- "trueos",
- "v",
 ]
 
 [[package]]

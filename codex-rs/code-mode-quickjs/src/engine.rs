@@ -3,7 +3,6 @@
 #![allow(unsafe_op_in_unsafe_fn)]
 use std::collections::HashMap;
 use std::ffi::CString;
-use std::ffi::c_char;
 use std::ffi::c_int;
 use std::ffi::c_void;
 use std::sync::Arc;
@@ -13,31 +12,19 @@ use std::time::Duration;
 use std::time::Instant;
 
 use codex_code_mode_protocol::*;
+use hull_quickjs::raw as q;
+use q::JS_ParseJSON;
+use q::JS_PromiseResult;
+use q::JS_PromiseState;
+use q::JS_SetInterruptHandler;
+use q::JS_SetMaxStackSize;
+use q::JS_SetMemoryLimit;
+use q::hull_quickjs_raw_dup_value;
+use q::hull_quickjs_raw_free_value;
 use serde_json::Value;
 use serde_json::json;
-use trueos_qjs as q;
 
 use crate::Cell;
-
-unsafe extern "C" {
-    fn native_engine_js_free_value(ctx: *mut q::JSContext, value: q::JSValue);
-    fn native_engine_js_dup_value(ctx: *mut q::JSContext, value: q::JSValue) -> q::JSValue;
-    fn JS_SetInterruptHandler(
-        rt: *mut q::JSRuntime,
-        cb: unsafe extern "C" fn(*mut q::JSRuntime, *mut c_void) -> c_int,
-        opaque: *mut c_void,
-    );
-    fn JS_SetMemoryLimit(rt: *mut q::JSRuntime, limit: usize);
-    fn JS_SetMaxStackSize(rt: *mut q::JSRuntime, limit: usize);
-    fn JS_PromiseState(ctx: *mut q::JSContext, promise: q::JSValue) -> c_int;
-    fn JS_PromiseResult(ctx: *mut q::JSContext, promise: q::JSValue) -> q::JSValue;
-    fn JS_ParseJSON(
-        ctx: *mut q::JSContext,
-        data: *const c_char,
-        len: usize,
-        filename: *const c_char,
-    ) -> q::JSValue;
-}
 
 enum Message {
     Tool(u64, Result<Value, String>),
@@ -94,7 +81,7 @@ unsafe fn js_string(ctx: *mut q::JSContext, value: &str) -> q::JSValue {
 unsafe fn exception(ctx: *mut q::JSContext) -> String {
     let error = q::JS_GetException(ctx);
     let text = string(ctx, error).unwrap_or_else(|_| "QuickJS exception".into());
-    native_engine_js_free_value(ctx, error);
+    hull_quickjs_raw_free_value(ctx, error);
     text
 }
 
@@ -314,7 +301,7 @@ unsafe fn dispatch(
             if (*state).timers.len() >= 128 {
                 return Err("QuickJS pending timer limit exceeded".into());
             }
-            let callback = native_engine_js_dup_value(ctx, arg(1));
+            let callback = hull_quickjs_raw_dup_value(ctx, arg(1));
             let id = (*state).next;
             (*state).next += 1;
             (&mut (*state).timers).insert(id, callback);
@@ -336,7 +323,7 @@ unsafe fn dispatch(
                     if let Some(task) = (&(*state).tasks).get(&id) {
                         task.abort();
                     }
-                    native_engine_js_free_value(ctx, callback);
+                    hull_quickjs_raw_free_value(ctx, callback);
                 }
             }
             Ok(q::JSValue::undefined())
@@ -370,11 +357,11 @@ impl Drop for Engine {
             let timers = std::mem::take(&mut (*state).timers);
             for pair in promises.into_values() {
                 for value in pair {
-                    native_engine_js_free_value(self.ctx, value);
+                    hull_quickjs_raw_free_value(self.ctx, value);
                 }
             }
             for callback in timers.into_values() {
-                native_engine_js_free_value(self.ctx, callback);
+                hull_quickjs_raw_free_value(self.ctx, callback);
             }
             q::JS_FreeContext(self.ctx);
             q::JS_FreeRuntime(self.rt);
@@ -459,10 +446,10 @@ pub(super) fn run(
             0,
         );
         if q::JS_SetPropertyStr(ctx, global, c"__codeModeNative".as_ptr(), callback) < 0 {
-            native_engine_js_free_value(ctx, global);
+            hull_quickjs_raw_free_value(ctx, global);
             return Err(exception(ctx));
         }
-        native_engine_js_free_value(ctx, global);
+        hull_quickjs_raw_free_value(ctx, global);
         let boot = format!(
             "{BOOTSTRAP}({}, {});",
             serde_json::to_string(&metadata).unwrap(),
@@ -477,7 +464,7 @@ pub(super) fn run(
         if initialized.is_exception() {
             return Err(exception(ctx));
         }
-        native_engine_js_free_value(ctx, initialized);
+        hull_quickjs_raw_free_value(ctx, initialized);
         let helpers = include_str!("../../code-mode-runtime/src/runtime/settled.js");
         let initialized = q::js_eval_bytes(
             ctx,
@@ -488,7 +475,7 @@ pub(super) fn run(
         if initialized.is_exception() {
             return Err(exception(ctx));
         }
-        native_engine_js_free_value(ctx, initialized);
+        hull_quickjs_raw_free_value(ctx, initialized);
         let promise = q::js_eval_bytes(
             ctx,
             request.source.as_bytes(),
@@ -537,7 +524,7 @@ pub(super) fn run(
                         let value = JS_PromiseResult(ctx, promise);
                         let error =
                             string(ctx, value).unwrap_or_else(|_| "JavaScript rejected".into());
-                        native_engine_js_free_value(ctx, value);
+                        hull_quickjs_raw_free_value(ctx, value);
                         return Err(error);
                     }
                     _ => {}
@@ -582,20 +569,20 @@ pub(super) fn run(
                         };
                         if value.is_exception() {
                             for resolver in pair {
-                                native_engine_js_free_value(ctx, resolver);
+                                hull_quickjs_raw_free_value(ctx, resolver);
                             }
                             return Err(exception(ctx));
                         }
                         let called =
                             q::JS_Call(ctx, pair[index], q::JSValue::undefined(), 1, &value);
-                        native_engine_js_free_value(ctx, value);
+                        hull_quickjs_raw_free_value(ctx, value);
                         for resolver in pair {
-                            native_engine_js_free_value(ctx, resolver);
+                            hull_quickjs_raw_free_value(ctx, resolver);
                         }
                         if called.is_exception() {
                             return Err(exception(ctx));
                         }
-                        native_engine_js_free_value(ctx, called);
+                        hull_quickjs_raw_free_value(ctx, called);
                     }
                     Message::Notification(result) => {
                         (*state).pending_notifications -= 1;
@@ -611,17 +598,17 @@ pub(super) fn run(
                                 0,
                                 std::ptr::null(),
                             );
-                            native_engine_js_free_value(ctx, callback);
+                            hull_quickjs_raw_free_value(ctx, callback);
                             if called.is_exception() {
                                 return Err(exception(ctx));
                             }
-                            native_engine_js_free_value(ctx, called);
+                            hull_quickjs_raw_free_value(ctx, called);
                         }
                     }
                 }
             }
         })();
-        native_engine_js_free_value(ctx, promise);
+        hull_quickjs_raw_free_value(ctx, promise);
         result
     }
 }

@@ -17,7 +17,7 @@ serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt", "sync", "time"] }
 tokio-util = { workspace = true, features = ["rt"] }
 
-trueos-qjs = { package = "qjs", path = "../../../TRUEOS-Blueprints/apps/qjs", default-features = false, features = ["native-engine"] }
+hull-quickjs = { path = "../../../TRUEOS-Buildins/hull/crates/quickjs-engine", features = ["raw"] }
 
 [lints]
 workspace = true

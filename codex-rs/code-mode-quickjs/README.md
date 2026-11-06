@@ -23,13 +23,18 @@ Image/audio helpers currently raise explicit unsupported errors. External
 module loading is unavailable. This is an interpreter foundation; it does not
 claim V8 API parity or a separate memory protection boundary within Codex.
 
-The `trueos-qjs/native-engine` dependency must supply engine-only C bindings and
-header-defined value ownership wrappers. Its application-wide `trueos` feature
-must not be enabled: that feature includes the qjs application's independent
-allocator/time compatibility symbols.
+Code Mode uses `hull-quickjs` with its `raw` feature from
+`TRUEOS-Buildins/hull/crates/quickjs-engine`. Hull owns the pinned C sources,
+full-pointer value ABI and header-defined ownership wrappers. Code Mode owns
+its contexts, cancellation and tool delegate; browser globals are not installed.
 
-Host validation uses the same QuickJS source used by native packaging:
+Host validation uses Hull's vendored engine without a network checkout:
 
 ```sh
-TRUEOS_QJS_QUICKJS_DIR=/path/to/pinned/quickjs cargo test -p codex-code-mode-quickjs --lib
+cargo test -p codex-code-mode-quickjs --lib
 ```
+
+Browser actions on TRUEOS open Hull. For HTML projects, the `trueos_ide` tool
+opens an Edit workspace with `kind: "html"`; `run` saves the project, starts
+Edit's preview server and opens its validated loopback URL in Hull. Native
+projects continue to use Edit's compile/run lifecycle.
