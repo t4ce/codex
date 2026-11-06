@@ -42,7 +42,7 @@ pub(super) enum DiscoveryOutcome {
     },
 }
 
-struct Discovery {
+pub(super) struct Discovery {
     finished: Option<oneshot::Sender<DiscoveryOutcome>>,
     outcome: Option<DiscoveryOutcome>,
     retry_at: Option<tokio::time::Instant>,
@@ -62,8 +62,50 @@ impl Drop for Discovery {
 }
 
 impl Discovery {
+    pub(super) fn new(timeout: Option<Duration>) -> (Self, oneshot::Receiver<DiscoveryOutcome>) {
+        let (tx, rx) = oneshot::channel();
+        (
+            Self {
+                finished: Some(tx),
+                outcome: None,
+                retry_at: timeout.and_then(|limit| {
+                    let probe_timeout = Duration::from_secs(3).clamp(limit / 2, limit - limit / 4);
+                    tokio::time::Instant::now().checked_add(probe_timeout)
+                }),
+                probe_id: None,
+                initialize_id: None,
+            },
+            rx,
+        )
+    }
+
+    pub(super) fn is_closed(&self) -> bool {
+        self.finished
+            .as_ref()
+            .is_none_or(oneshot::Sender::is_closed)
+    }
+
+    pub(super) fn retry_at(&self) -> Option<tokio::time::Instant> {
+        self.retry_at
+    }
+
+    pub(super) fn record_outgoing(&mut self, item: &TxJsonRpcMessage<RoleClient>) {
+        if let JsonRpcMessage::Request(request) = item {
+            match &request.request {
+                ClientRequest::DiscoverRequest(_) => self.probe_id = Some(request.id.clone()),
+                ClientRequest::InitializeRequest(_) => {
+                    self.initialize_id = Some(request.id.clone())
+                }
+                _ => {}
+            }
+        }
+    }
+
     /// Track discovery replies and skip messages that do not answer the active handshake.
-    fn handle_reply(&mut self, message: &mut Option<RxJsonRpcMessage<RoleClient>>) -> bool {
+    pub(super) fn handle_reply(
+        &mut self,
+        message: &mut Option<RxJsonRpcMessage<RoleClient>>,
+    ) -> bool {
         let Some(reply) = message.as_ref() else {
             self.outcome.get_or_insert(DiscoveryOutcome::RetryLegacy);
             return false;
@@ -179,19 +221,8 @@ impl LocalStdioTransport {
         &mut self,
         timeout: Option<Duration>,
     ) -> oneshot::Receiver<DiscoveryOutcome> {
-        let (tx, rx) = oneshot::channel();
-        self.discovery = Some(Discovery {
-            finished: Some(tx),
-            outcome: None,
-            // Aim for three seconds of discovery. Reserve at least a quarter of short
-            // timeouts and half of longer ones for a fresh initialize.
-            retry_at: timeout.and_then(|limit| {
-                let probe_timeout = Duration::from_secs(3).clamp(limit / 2, limit - limit / 4);
-                tokio::time::Instant::now().checked_add(probe_timeout)
-            }),
-            probe_id: None,
-            initialize_id: None,
-        });
+        let (discovery, rx) = Discovery::new(timeout);
+        self.discovery = Some(discovery);
         rx
     }
 

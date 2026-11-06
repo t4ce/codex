@@ -263,6 +263,8 @@ impl StdioServerTransport {
         match &mut self.inner {
             StdioServerTransportInner::Local(local) => Some(local.watch_discovery(timeout)),
             StdioServerTransportInner::Executor(_) => None,
+            #[cfg(any(target_os = "trueos", test))]
+            StdioServerTransportInner::Vmx(vmx) => Some(vmx.watch_discovery(timeout)),
         }
     }
 

@@ -1,5 +1,7 @@
 //! MCP protocol bytes carried by a fresh hypervisor VM, never a terminal.
 use crate::bounded_stdio_transport::MAX_MCP_STDIO_LINE_BYTES;
+use crate::local_stdio_transport::Discovery;
+use crate::local_stdio_transport::DiscoveryOutcome;
 use rmcp::service::RoleClient;
 use rmcp::service::RxJsonRpcMessage;
 use rmcp::service::TxJsonRpcMessage;
@@ -47,6 +49,7 @@ impl VmxProcess {
 pub(super) struct VmxStdioTransport {
     process: VmxProcess,
     pending: Vec<u8>,
+    discovery: Option<Discovery>,
 }
 impl VmxStdioTransport {
     fn with_channel(channel: Box<dyn VmChannel>) -> Self {
@@ -57,6 +60,7 @@ impl VmxStdioTransport {
                 writer: Mutex::new(()),
             })),
             pending: Vec::new(),
+            discovery: None,
         }
     }
     #[cfg(any(target_os = "trueos", test))]
@@ -64,6 +68,15 @@ impl VmxStdioTransport {
         let handle = trueos::child_hull::spawn_program(request).map_err(vm_error)?;
         Ok(Self::with_channel(Box::new(KernelChannel(handle))))
     }
+    pub(super) fn watch_discovery(
+        &mut self,
+        timeout: Option<Duration>,
+    ) -> tokio::sync::oneshot::Receiver<DiscoveryOutcome> {
+        let (discovery, receiver) = Discovery::new(timeout);
+        self.discovery = Some(discovery);
+        receiver
+    }
+
     pub(super) fn process(&self) -> VmxProcess {
         self.process.clone()
     }
@@ -127,6 +140,12 @@ impl Transport<RoleClient> for VmxStdioTransport {
         &mut self,
         item: TxJsonRpcMessage<RoleClient>,
     ) -> impl Future<Output = io::Result<()>> + Send + 'static {
+        if self.discovery.as_ref().is_some_and(Discovery::is_closed) {
+            self.discovery = None;
+        }
+        if let Some(discovery) = &mut self.discovery {
+            discovery.record_outgoing(&item);
+        }
         let process = self.process();
         async move {
             let mut bytes = serde_json::to_vec(&item).map_err(io::Error::other)?;
@@ -138,7 +157,26 @@ impl Transport<RoleClient> for VmxStdioTransport {
         }
     }
     fn receive(&mut self) -> impl Future<Output = Option<RxJsonRpcMessage<RoleClient>>> + Send {
-        self.receive_message()
+        async move {
+            loop {
+                let retry_at = self.discovery.as_ref().and_then(Discovery::retry_at);
+                let receive = self.receive_message();
+                let mut message = match retry_at {
+                    Some(deadline) => tokio::time::timeout_at(deadline, receive)
+                        .await
+                        .unwrap_or_default(),
+                    None => receive.await,
+                };
+                if self
+                    .discovery
+                    .as_mut()
+                    .is_some_and(|probe| probe.handle_reply(&mut message))
+                {
+                    continue;
+                }
+                return message;
+            }
+        }
     }
     async fn close(&mut self) -> io::Result<()> {
         self.process.terminate()
@@ -243,6 +281,86 @@ mod tests {
         drop(VmxStdioTransport::with_channel(Box::new(Fake(
             state.clone(),
         ))));
+        assert_eq!(state.stopped.load(Ordering::Relaxed), 1);
+    }
+    fn discover_request(id: i64) -> TxJsonRpcMessage<RoleClient> {
+        serde_json::from_value(serde_json::json!({
+            "jsonrpc": "2.0", "id": id, "method": "server/discover", "params": {},
+        }))
+        .unwrap()
+    }
+
+    fn push_discovery_reply(state: &State, id: i64) {
+        let reply = rmcp::model::ServerJsonRpcMessage::response(
+            rmcp::model::ServerResult::DiscoverResult(
+                rmcp::model::DiscoverResult::from_server_info(
+                    vec![rmcp::model::ProtocolVersion::V_2026_07_28],
+                    rmcp::model::InitializeResult::default(),
+                ),
+            ),
+            rmcp::model::RequestId::Number(id),
+        );
+        let mut bytes = serde_json::to_vec(&reply).unwrap();
+        bytes.push(b'\n');
+        state.input.lock().unwrap().extend(bytes);
+    }
+
+    #[tokio::test]
+    async fn vmx_discovery_uses_upstream_reply_tracking_and_ignores_unrelated_ids() {
+        let state = Arc::new(State::default());
+        let mut transport = VmxStdioTransport::with_channel(Box::new(Fake(state.clone())));
+        let outcome = transport.watch_discovery(None);
+        transport.send(discover_request(7)).await.unwrap();
+        state
+            .input
+            .lock()
+            .unwrap()
+            .extend(b"{\"jsonrpc\":\"2.0\",\"id\":99,\"result\":{}}\n");
+        push_discovery_reply(&state, 7);
+        assert!(transport.receive().await.is_some());
+        drop(transport);
+        assert!(matches!(outcome.await.unwrap(), DiscoveryOutcome::Reply));
+        assert_eq!(state.stopped.load(Ordering::Relaxed), 1);
+    }
+
+    #[tokio::test]
+    async fn vmx_late_discovery_retains_reply_for_fresh_handshake_selection() {
+        let state = Arc::new(State::default());
+        let mut transport = VmxStdioTransport::with_channel(Box::new(Fake(state.clone())));
+        let outcome = transport.watch_discovery(None);
+        transport.send(discover_request(7)).await.unwrap();
+        let initialize = serde_json::from_value(serde_json::json!({
+            "jsonrpc": "2.0", "id": 8, "method": "initialize",
+            "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                "clientInfo": {"name": "native-vmx-test", "version": "1"}},
+        }))
+        .unwrap();
+        transport.send(initialize).await.unwrap();
+        push_discovery_reply(&state, 7);
+        assert!(transport.receive().await.is_none());
+        drop(transport);
+        assert!(matches!(
+            outcome.await.unwrap(),
+            DiscoveryOutcome::Late {
+                after_reoffer: false,
+                ..
+            }
+        ));
+        assert_eq!(state.stopped.load(Ordering::Relaxed), 1);
+    }
+
+    #[tokio::test]
+    async fn vmx_discovery_eof_preserves_legacy_retry_signal() {
+        let state = Arc::new(State::default());
+        let mut transport = VmxStdioTransport::with_channel(Box::new(Fake(state.clone())));
+        let outcome = transport.watch_discovery(None);
+        transport.send(discover_request(7)).await.unwrap();
+        assert!(transport.receive().await.is_none());
+        drop(transport);
+        assert!(matches!(
+            outcome.await.unwrap(),
+            DiscoveryOutcome::RetryLegacy
+        ));
         assert_eq!(state.stopped.load(Ordering::Relaxed), 1);
     }
 }
