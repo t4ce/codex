@@ -561,6 +561,7 @@ where
 
     // The pet draws after the text frame. Mark its placeholder cells so the next diff
     // restores the underlying text when the sprite moves or disappears.
+    #[cfg(not(target_os = "trueos"))]
     pub(crate) fn mark_pet_placeholders(&mut self, request: Option<&crate::pets::AmbientPetDraw>) {
         if self.tmux_kitty_image_base.is_some()
             && let Some(sprite) = request
