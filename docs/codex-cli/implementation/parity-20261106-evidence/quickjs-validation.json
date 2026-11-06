@@ -1,0 +1,24 @@
+{
+  "path": "/home/t4ce/Repositories/codex-parity-quickjs-validation-20261106",
+  "source": "Exact source snapshot of host validation with latest owned Rust sources copied from parity worktree",
+  "source_count": 1551,
+  "time_utc": "2026-11-06T16:21:43.930191+00:00",
+  "production_modified": false,
+  "host_overlay_provenance": "/tmp/codex-parity-20261106/host-validation.json",
+  "targetdir": "/home/t4ce/.cache/codex-parity-20261106-quickjs-target",
+  "sources_hash": "0c3e5b6bf612db128e861ea2c3530e65b1a6dd1231a4b45898e93125830cae21",
+  "results": [
+    {
+      "command": "cargo test -p codex-code-mode-quickjs --lib -j 3",
+      "exit_code": 0,
+      "tests_passed": 37,
+      "log": "/tmp/codex-parity-20261106/quickjs-tests-4.log",
+      "limitation": "Host execution with real QuickJS and documented dependency overlays; does not prove native ABI/runtime"
+    }
+  ],
+  "fixes": [
+    "Restored new upstream codex-utils-string standalone imports after initial mistaken fold mapping.",
+    "Removed old per-cell output-token execution cap only in Server mode; retained Client-mode guard. Bounded upstream collector now owns each Server observation budget."
+  ],
+  "source_current_utc": "2026-11-06T16:27:39.001735+00:00"
+}

@@ -1,0 +1,336 @@
+{
+  "worktree_copy": "/home/t4ce/Repositories/codex-parity-host-validation-20261106",
+  "targetdir": "/home/t4ce/.cache/codex-parity-20261106-host-target",
+  "validation_kind": "HOST DIAGNOSTIC ONLY; does not prove native TRUEOS behavior",
+  "source_snapshot_utc": "2026-11-06T16:10:45.618044+00:00",
+  "upstream_lock_seed": "814347ecd21b49d25479f5499f168b9f7b7e1803:codex-rs/Cargo.lock",
+  "overlay": {
+    "original_reqwest": "/home/t4ce/Repositories/TRUEOS-Buildins/vendor/reqwest-0.13.3",
+    "copied_reqwest": "/home/t4ce/Repositories/codex-parity-host-validation-20261106/.host-validation/reqwest",
+    "Cargo_toml_original_sha256": "c9f46d2e119ca0e445715bb2951fd6423e03d9880070094d59c5b63525b93e57",
+    "Cargo_toml_overlay_sha256": "fd23eaf0c35b9365254455c2ec875551d4d0eb27800d3a5b72543ee78d6d4853",
+    "changes": [
+      "Removed only hyper dependency std-compat feature from copied reqwest Cargo.toml.",
+      "Pointed copied workspace reqwest.path to ../.host-validation/reqwest; production/shared vendor remain untouched."
+    ],
+    "reason": "Production fork requires hyper/std-compat unavailable in upstream host hyper 1.11.1.",
+    "additional_manifest_fixes": [
+      {
+        "path": "vendor/tokio-tungstenite-0.28.0-openai/Cargo.toml",
+        "change": "Removed conflicting git/rev alongside vendored path for tungstenite",
+        "reported_to_root": true
+      },
+      {
+        "path": "/home/t4ce/Repositories/codex-parity-host-validation-20261106/.host-validation/sqlx-sqlite/Cargo.toml",
+        "source": "/home/t4ce/Repositories/TRUEOS-Blueprints/vendor/sqlx-sqlite-0.9.0",
+        "change": "Copied exact sqlx-sqlite source; redirected reqwest to ../reqwest and trueos to absolute original API path; workspace sqlx-sqlite crates.io patch points to copy.",
+        "reported_to_root": true
+      },
+      {
+        "path": "/home/t4ce/Repositories/codex-parity-host-validation-20261106/.host-validation/qjs/Cargo.toml",
+        "source": "/home/t4ce/Repositories/TRUEOS-Blueprints/apps/qjs",
+        "change": "Exact source copy; external paths preserved as absolute. Redirected only crossterm to host overlay."
+      },
+      {
+        "path": "/home/t4ce/Repositories/codex-parity-host-validation-20261106/.host-validation/crossterm/Cargo.toml",
+        "source": "/home/t4ce/Repositories/TRUEOS-Buildins/vendor/crossterm-0.29.0-trueos",
+        "change": "Exact source copy; external paths preserved as absolute. Removed mio/std-compat host-inapplicable feature."
+      }
+    ]
+  },
+  "commands": [
+    {
+      "command": "CARGO_TARGET_DIR=/home/t4ce/.cache/codex-parity-20261106-host-target cargo check -p codex-network-foundation -p codex-transport -p codex-login -p codex-model-provider -p codex-feedback -p codex-analytics --lib -j 4",
+      "session_id": 65372,
+      "status": "failed",
+      "log": "/tmp/codex-parity-20261106/host-check.log",
+      "exit_code": 101
+    }
+  ],
+  "results": [
+    {
+      "command": "cargo metadata --format-version 1 --no-deps",
+      "exit_code": 0,
+      "log": "/tmp/codex-parity-20261106/host-metadata.json",
+      "initial_manifest_error": "tokio-tungstenite [dependencies.tungstenite] had both git and path; fixed in host copy and reported to root"
+    },
+    {
+      "command": "host check initial",
+      "exit_code": 101,
+      "failure": "Sibling sqlx-sqlite explicit reqwest dependency bypassed workspace-only overlay and requested unavailable hyper/std-compat",
+      "log": "/tmp/codex-parity-20261106/host-check.log"
+    },
+    {
+      "command": "host check second",
+      "exit_code": 101,
+      "failure": "Sibling QuickJS crossterm dependency requests unavailable mio/std-compat",
+      "log": "/tmp/codex-parity-20261106/host-check-2.log"
+    },
+    {
+      "command": "host check third",
+      "exit_code": 101,
+      "failure": "otel/src/provider.rs retained build_tracer_provider helper takes BTreeMap but upstream span_attributes and tracer_provider_builder use HashMap (E0308, lines270/923/926).",
+      "log": "/tmp/codex-parity-20261106/host-check-3.log",
+      "reported_to_root": true
+    },
+    {
+      "command": "cargo test -p codex-network-foundation -p codex-transport --lib --tests -j 4 -- --test-threads=2",
+      "exit_code": 0,
+      "runner": "env -u CODEX_CA_CERTIFICATE -u SSL_CERT_FILE",
+      "log": "/tmp/codex-parity-20261106/host-transport-tests.log",
+      "summaries": [
+        {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 335,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ],
+      "totals": {
+        "passed": 384,
+        "failed": 0,
+        "ignored": 0
+      },
+      "windows_proxy_auth_tests": "0 tests on Linux; explicitly unvalidated Windows code"
+    },
+    {
+      "command": "cargo test -p codex-network-proxy --lib aws_sigv4 --no-default-features -j 4 -- --test-threads=2",
+      "exit_code": 0,
+      "passed": 3,
+      "failed": 0,
+      "log": "/tmp/codex-parity-20261106/host-proxy-aws-disabled-tests.log",
+      "covers": [
+        "configuration/schema availability without SDK",
+        "disabled build does not resolve trusted secret sources",
+        "actual signing hook compilation fails closed with feature-disabled message"
+      ]
+    },
+    {
+      "command": "cargo tree -p codex-cli --edges normal --prefix none --format '{p}'",
+      "aws_sdk_entries": [],
+      "normal_graph_lines": 4777,
+      "log": "/tmp/codex-parity-20261106/host-default-cli-dependencies.txt"
+    },
+    {
+      "command": "cargo test -p codex-network-proxy --lib --features aws-signing -j 4 -- --test-threads=2",
+      "exit_code": 0,
+      "passed": 342,
+      "failed": 0,
+      "ignored": 0,
+      "log": "/tmp/codex-parity-20261106/host-proxy-aws-enabled-tests.log",
+      "covers": [
+        "upstream published IAM/SigV4 interoperability vectors",
+        "payload/hash/rejection-boundary cases",
+        "SDK trace suppression of canonical secrets",
+        "authorized TLS forwarding, chunked-body/substitution signing"
+      ]
+    },
+    {
+      "command": "cargo test -p codex-feedback -p codex-analytics -p codex-model-provider -p codex-login --lib -j4 -- --test-threads=2 (first attempt)",
+      "exit_code": 101,
+      "failure": "agent-message-board-host missing codex-transport dep; same issue concurrently fixed by UI agent, current manifest includes it. Retry with corrected resolver graph required.",
+      "log": "/tmp/codex-parity-20261106/host-auth-reporting-default-tests.log"
+    },
+    {
+      "command": "cargo test -p codex-feedback -p codex-analytics -p codex-model-provider -p codex-login --lib -j4 -- --test-threads=2 (second attempt)",
+      "exit_code": 101,
+      "failure": "core/tests/common/runtime_auth.rs used removed codex_utils_rustls_provider; core agent corrected common and suite copies to codex_network_foundation; manifests already declare it.",
+      "log": "/tmp/codex-parity-20261106/host-auth-reporting-default-tests-2.log"
+    },
+    {
+      "command": "cargo test -p codex-feedback -p codex-analytics -p codex-model-provider --lib -j4 -- --test-threads=2",
+      "exit_code": 0,
+      "package_counts": {
+        "codex-analytics": 131,
+        "codex-feedback": 31,
+        "codex-model-provider": 92
+      },
+      "passed": 254,
+      "failed": 0,
+      "ignored": 0,
+      "log": "/tmp/codex-parity-20261106/host-reporting-provider-default-tests.log",
+      "covers": [
+        "external reporting hard-disabled constructor regression",
+        "local ZIP export/schema/log consent with reporting disabled",
+        "optional Bedrock disabled build rejection",
+        "runtime identity, gateway credentials, token refresh and model discovery"
+      ]
+    },
+    {
+      "command": "cargo test -p codex-login --lib -j4 -- --test-threads=2",
+      "exit_code": 0,
+      "passed": 247,
+      "failed": 0,
+      "ignored": 0,
+      "log": "/tmp/codex-parity-20261106/host-login-tests.log",
+      "covers": [
+        "atomic credential storage replacement and durability",
+        "refresh/keyring/secrets storage",
+        "browser/device OAuth login, cancellation and revocation",
+        "workspace routing and forced-login policies"
+      ]
+    },
+    {
+      "command": "cargo test -p codex-feedback -p codex-analytics -p codex-otel --lib --features codex-feedback/external-reporting,codex-analytics/external-reporting,codex-otel/external-reporting -j4 -- --test-threads=2",
+      "exit_code": 0,
+      "package_counts": {
+        "codex-analytics": 133,
+        "codex-feedback": 43,
+        "codex-otel": 36
+      },
+      "passed": 212,
+      "failed": 0,
+      "ignored": 1,
+      "ignored_reason": "Guard-page failure child is #[ignore] in normal harness and is explicitly invoked by passing parent subprocess test via --exact --ignored.",
+      "log": "/tmp/codex-parity-20261106/host-reporting-enabled-tests.log",
+      "covers": [
+        "runtime-signed analytics delivery and redirect isolation",
+        "enabled feedback uploads, large attachments and bounded retries",
+        "OTEL exporter construction, shutdown, routing and installed global provider behavior"
+      ]
+    },
+    {
+      "command": "cargo check -p codex-model-provider --features bedrock --lib -j4",
+      "exit_code": 0,
+      "log": "/tmp/codex-parity-20261106/host-bedrock-check.log",
+      "covers": [
+        "optional AWS/Bedrock production source compiles with upstream interfaces and TRUEOS folded transport"
+      ]
+    }
+  ],
+  "source_snapshot": {
+    "rust_files": 6020,
+    "sha256_of_paths_and_digests": "b16ca9e175958b201bb629091354e57092e8de5973f97e0b645db7993cf195fb"
+  },
+  "production_checkpoint": "80d75b96d26c9aa8c2c852b3a91f898344b00bd4",
+  "resynced_source_paths": [
+    "codex-rs/app-server/src/lib.rs",
+    "codex-rs/otel/src/events/session_telemetry.rs",
+    "codex-rs/otel/tests/suite/otel_export_routing_policy.rs",
+    "codex-rs/core-plugins/src/remote.rs",
+    "codex-rs/core-plugins/src/remote/catalog_cache_tests.rs",
+    "codex-rs/exec-server-cli/src/command.rs",
+    "codex-rs/tui/src/app_server_session.rs",
+    "codex-rs/tui/src/managed_worktree_model_tests.rs",
+    "codex-rs/tui/src/clipboard_copy.rs",
+    "codex-rs/tui/src/dynamic_tools_mcp.rs",
+    "codex-rs/tui/src/lib.rs",
+    "codex-rs/tui/src/managed_worktree_tools_tests.rs",
+    "codex-rs/tui/src/lib_tests.rs",
+    "codex-rs/tui/src/clipboard_copy/disabled.rs",
+    "codex-rs/tui/src/onboarding/auth.rs",
+    "codex-rs/tui/src/app/owned_transcript.rs",
+    "codex-rs/tui/src/app/startup.rs",
+    "codex-rs/tui/src/app/tests/active_reconnect_tests.rs",
+    "codex-rs/agent-message-board-client/tests/remote_board.rs",
+    "codex-rs/agent-message-board-client/src/client.rs",
+    "codex-rs/linux-sandbox/tests/suite/managed_proxy.rs",
+    "codex-rs/ext/web-search/src/tool.rs",
+    "codex-rs/ext/guardian-v2/src/async_scorer/decisions.rs",
+    "codex-rs/ext/guardian-v2/src/async_scorer/sampler/connection_pool.rs",
+    "codex-rs/ext/guardian-v2/src/async_scorer/sampler/execution.rs",
+    "codex-rs/ext/image-generation/src/tool.rs"
+  ],
+  "post_checkpoint_synced_fixes": [
+    "otel/src/provider.rs HashMap helper parameter",
+    "root flattened workspace sqlx specification",
+    "transport unused NetworkPolicyDenied import removal",
+    "core/tests/{common,suite}/runtime_auth.rs old provider import normalization"
+  ],
+  "active_commands": [
+    {
+      "command": "cargo check -p codex-model-provider --features bedrock --lib -j4",
+      "session_id": 49758,
+      "log": "/tmp/codex-parity-20261106/host-bedrock-check.log"
+    },
+    {
+      "command": "cargo test -p codex-otel --test tests --features external-reporting otlp_http_loopback -j4 -- --test-threads=1",
+      "log": "/tmp/codex-parity-20261106/host-otel-loopback-tests.log"
+    }
+  ]
+}

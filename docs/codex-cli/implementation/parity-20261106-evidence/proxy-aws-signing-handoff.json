@@ -1,0 +1,39 @@
+{
+  "status": "implemented_host_tests_passed",
+  "source": [
+    "codex-rs/network-proxy/Cargo.toml",
+    "codex-rs/network-proxy/src/aws_sigv4.rs",
+    "codex-rs/network-proxy/src/aws_sigv4/enabled.rs",
+    "codex-rs/network-proxy/src/aws_sigv4/disabled.rs",
+    "codex-rs/network-proxy/src/aws_sigv4_disabled_tests.rs",
+    "codex-rs/network-proxy/src/mitm.rs"
+  ],
+  "feature": "aws-signing",
+  "default": false,
+  "optional_dependencies": [
+    "aws-credential-types",
+    "aws-sigv4"
+  ],
+  "architecture": "Configuration/secret-source schema, validation and environment snapshot key handling remain common. Upstream SDK engine moved into enabled module. Disabled engine is uninhabited and compile fails before credential resolution.",
+  "upstream_engine_original_backup": "/tmp/codex-parity-20261106/aws_sigv4-original.rs",
+  "validation": {
+    "disabled_tests": {
+      "passed": 3,
+      "failed": 0,
+      "log": "/tmp/codex-parity-20261106/host-proxy-aws-disabled-tests.log"
+    },
+    "enabled_full_unit_suite": {
+      "passed": 342,
+      "failed": 0,
+      "log": "/tmp/codex-parity-20261106/host-proxy-aws-enabled-tests.log"
+    },
+    "default_cli_aws_sdk_normal_dependency_entries": 0,
+    "default_graph": "/tmp/codex-parity-20261106/host-default-cli-dependencies.txt",
+    "sdk_request_planning_and_signing_body_byte_identical_to_upstream": true,
+    "sdk_body_sha256": "7e787ff24274c9b15e14a45f1e70a138857a9a96ae8a5804993e79be2a31f887"
+  },
+  "limitations": [
+    "Host diagnostic overlay tests are not native TRUEOS or Windows ABI validation."
+  ],
+  "root_action": "Stage new enabled/disabled modules and tests; commit source+manifest. Native dependency staging should now exclude SDK by default."
+}

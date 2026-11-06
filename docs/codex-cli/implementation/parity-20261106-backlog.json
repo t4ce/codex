@@ -4,26 +4,34 @@
   "items": [
     {
       "id": "NATIVE-BUILD",
-      "status": "validation_pending",
+      "status": "native_daemon_lock_boundary_fix_in_progress",
       "confidence": "not yet established",
       "area": "Native Blueprint package",
-      "evidence": "/tmp/codex-parity-20261106/native-build.log",
-      "required_evidence": "Successful native package build and workload receipt bound to the integrated source."
+      "evidence": "/tmp/codex-parity-20261106/native-build-6.log",
+      "required_evidence": "Successful native package build and workload receipt bound to the integrated source.",
+      "findings": [
+        "Initial staged manifest truncated multiline SQLx workspace dependency; dependency rendered on one line with unchanged TOML semantics.",
+        "Native Blueprint stage successfully resolved source overlays after manifest adaptation.",
+        "Actual native compile failed in nix0.29. Native unit graph identifies mxc-sdk as sole consumer; moved SDK to Windows dependencies and dev dependencies because only Windows execution and portable host tests use it.",
+        "Native unit graph after fixes excludes AWS/MXC/nix/cpal/sentry/V8. Native compilation next failed at upstream NFS migration raw SQLite handle assumptions.",
+        "Native VMX new discovery watcher adapted and tested. Native build5 reached core and found one native Spirit JSON-schema Vec\u2192boxed-slice API mismatch."
+      ]
     },
     {
       "id": "HOST-GRAPH",
-      "status": "validation_pending",
+      "status": "focused_tests_passed_broader_compile_running",
       "confidence": "not yet established",
       "area": "Host test graph differs from native vendor graph",
-      "evidence": "Copied reqwest source is byte-identical; only its copied manifest omits hyper/std-compat. Host command live in /tmp/codex-parity-20261106/host-check.log.",
+      "evidence": "/tmp/codex-parity-20261106/host-validation.json; 384 foundation/transport library and integration tests passed; Windows runtime remains untested.",
       "action": "Use disclosed host-only copied-dependency overlay; keep native production source unchanged; separately build the actual Blueprint graph."
     },
     {
       "id": "QUICKJS-OUTPUT",
-      "status": "validation_pending",
-      "confidence": "below 95% until exercised",
+      "status": "focused_tests_passed",
+      "confidence": "37 real-engine/output tests passed on host; native build pending",
       "area": "Native QuickJS implements new upstream server output/truncation contract",
-      "action": "Run copied upstream collector/renderer tests and native session tests. Preserve voice transport opt-in while sharing audio decoding types."
+      "action": "Server observation budgets now owned by bounded collector; original Client cell cap preserved. Validate native packaging and retain rig-only runtime uncertainty.",
+      "evidence": "/tmp/codex-parity-20261106/quickjs-tests-4.log"
     },
     {
       "id": "TUI-BACKENDS",
@@ -42,40 +50,63 @@
     },
     {
       "id": "FEEDBACK-OFF",
-      "status": "validation_pending",
-      "confidence": "below 95% until tests pass",
+      "status": "feature_matrix_passed",
+      "confidence": "default-off archives/no-upload and enabled exporters exercised on host",
       "area": "New local feedback save with network reporting disabled",
-      "action": "Validate archive/schema tests with external-reporting off; validate enabled exporter path separately."
+      "action": "Native package still pending; default reporting settings preserved.",
+      "evidence": "Default analytics131/feedback31 and enabled analytics133/feedback43/otel36 plus OTEL HTTP7 all passed."
     },
     {
       "id": "NATIVE-FS-SQLITE",
-      "status": "validation_pending",
+      "status": "host_tests_passed_native_compile_progressing",
       "confidence": "below 95% until tests/build pass",
       "area": "SQLite service ownership, typed filesystem, native auth durability",
-      "action": "Check service namespace and journal ownership after upstream lock/connection refactors; run relevant tests."
+      "action": "Client-side NFS image inspection/migration is explicitly unsupported on TRUEOS, whose resident service owns database files. Rig-only SQLx service behavior remains outside host proof.",
+      "evidence": "Host state250, native service ownership boundary1 and exec-server native boundary18 tests passed; native target passed state after adapter."
     },
     {
       "id": "SHARED-SOURCE",
-      "status": "validation_pending",
+      "status": "full_host_graph_checked_native_pending",
       "confidence": "not yet established",
       "area": "All clean auto-merges and new upstream APIs",
-      "action": "Use compiler/test diagnostics plus invariant audit. Zero conflict markers are not completion evidence."
+      "action": "Finish native target build and focused TUI/feature matrix tests; retain unsupported target/runtime limits explicitly.",
+      "findings": [
+        "Compiled source exposed wrong utils-string crate mapping; restored independent upstream crate and dependencies.",
+        "Default-off telemetry tracer helper retained old BTreeMap signature; updated to upstream HashMap."
+      ],
+      "evidence": "Full host CLI/TUI/app-server --lib --bins check passed with disclosed manifest-only host overlays. Native cfg validation still running."
     },
     {
       "id": "PROMPT-BACKEND-IDENTITY",
-      "status": "fix_pending",
-      "confidence": "known gap under review",
+      "status": "in_process_fix_tested_protocol_limit_open",
+      "confidence": "focused internal ownership tests passed; kernel protocol limit remains",
       "area": "Native prompt inbox thread identity across multiple backends",
-      "evidence": "Inbox scopes pending text by UUID only; two backend sessions exposing the same UUID could accept text read under the other backend.",
-      "action": "Qualify internal ownership by backend identity while retaining the kernel vFile thread path. Regress same-UUID backend switching before accepting this path."
+      "evidence": "PromptScope includes BackendId and UUID. Actual inbox passes 11 tests including same-UUID backend switch and inflight read ownership; extracted startup guard passes 3 host + 3 TRUEOS cases.",
+      "action": "Kernel vFile endpoint contains only UUID; an already open kernel frame cannot distinguish different backend sessions sharing that UUID. Track kernel protocol extension separately; do not claim full end-to-end identity proof."
     },
     {
       "id": "SKILLS-HARNESS-API",
-      "status": "fixture_adaptation_pending",
-      "confidence": "source behavior checked; executable fixture pending",
+      "status": "focused_fixture_passed",
+      "confidence": "production guard and request boundary exercised",
       "area": "Existing skills source-extraction harness",
-      "evidence": "Static assertion assumes pre-refactor SkillsListLoaded layout; current dispatch also guards Cloud results.",
-      "action": "Adapt fixture to new RequestId/SkillsListParams and execute original production guard without weakening assertions."
+      "evidence": "/tmp/codex-parity-20261106/skills-fixture/provenance.json; 14 host + 14 TRUEOS cases passed.",
+      "action": "Full TUI/app-server compile still required; adapted fixture leaves original production dispatcher and guards unchanged."
+    },
+    {
+      "id": "AWS-PROXY-SIGNING",
+      "status": "feature_matrix_passed",
+      "confidence": "default dependency exclusion and both host behaviors verified",
+      "area": "New upstream managed network proxy signing engine",
+      "evidence": "Disabled3 and enabled342 proxy tests passed. Native target graph excludes AWS SDK packages; /tmp/codex-parity-20261106/native-dependency-after.json.",
+      "action": "Keep opt-in gate in default native build; no additional feature changes planned."
+    },
+    {
+      "id": "WORKSPACE-LOCK",
+      "status": "scratch_native_seed_resolution_followup",
+      "confidence": "not yet established",
+      "area": "Full-workspace lockfile after crate consolidation",
+      "evidence": "Actual native CLI lock resolves. Broader upstream-seed workspace search stopped after >11min CPU without result. Scratch resolution uses actual native CLI seed and declared Cargo1.95 with same76 native patches.",
+      "action": "Record resulting actual native-patched workspace lock if successful; never substitute diagnostic host-overlay graph without proof of equivalence."
     }
   ]
 }

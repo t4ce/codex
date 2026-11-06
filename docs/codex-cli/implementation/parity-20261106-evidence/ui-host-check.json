@@ -1,0 +1,102 @@
+{
+  "kind": "Host diagnostic library+binary check using disclosed overlays; not native TRUEOS proof",
+  "command": "CARGO_TARGET_DIR=/home/t4ce/.cache/codex-parity-20261106-host-target cargo check -p codex-tui -p codex-app-server -p codex-cli --lib --bins -j4",
+  "cwd": "/home/t4ce/Repositories/codex-parity-host-validation-20261106/codex-rs",
+  "attempts": [
+    {
+      "session_id": 45714,
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check.log",
+      "exit_code": 101,
+      "failure": "Stale host rollout/src/policy.rs codex_utils_text::string mapping; production was already corrected. Resynced latest tracked sources."
+    },
+    {
+      "session_id": 54048,
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check-2.log",
+      "exit_code": 101,
+      "failure": "sentry-types0.46.1 protocol envelope imports v7 behind disabled protocol feature. Root fixed feedback manifest to enable protocol wire data only; no external uploader feature."
+    },
+    {
+      "session_id": 52399,
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check-3.log",
+      "status": "failed",
+      "snapshot": "/tmp/codex-parity-20261106/ui-host-sync-3.json",
+      "exit_code": 101,
+      "failure": "Daemon retained removed managed_process wrapper and obsolete File.into_std; agent-message-board-host missing codex-transport manifest dependency. All corrected from source/API evidence."
+    },
+    {
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check-4.log",
+      "status": "failed",
+      "sync_utc": "2026-11-06T16:29:57.967917+00:00",
+      "source_manifest_delta": {
+        "app-server-daemon/src/backend/pid_start.rs": "50110b15ebd3cc5162d6b5bbc7c534e59d358c99a00f4e53d7af48fb4937a346",
+        "agent-message-board-host/Cargo.toml": "bd996da24229ddb8d677774f475ad67ea7ff51dbe7932c1beacfcac65155c6ec"
+      },
+      "exit_code": 101,
+      "failure": "Reached TUI: next_prompt custom code used old ThreadItem enum/moved prompt extractor, and TUI capability path incorrectly referenced server implementation instead of existing client facade. Corrected source, existing tests adapted."
+    },
+    {
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check-5.log",
+      "status": "failed",
+      "sync_utc": "2026-11-06T16:35:10.438910+00:00",
+      "source_delta": {
+        "app-server-client/src/lib.rs": "1d9a03103c2281454468468315026a90092b1d20999ce8a13b85c764d164ca63",
+        "tui/src/lib.rs": "fc69b5ea1c7c45787a1a54857bd4a8a8754529a9f81d0c1e45bc645d48f15315",
+        "tui/src/lib_tests.rs": "4dc33681d06f95ec3bbc3611bc8a6e7c220dcdad6d516bab17082e44ede87908",
+        "tui/src/onboarding/auth.rs": "7b57507b13e3eeeb03bc4681f0770b1ed7831d3f75960632649b63c8ce9ee501",
+        "tui/src/app/next_prompt.rs": "0d6137523f3447131bf4a1d5feffc2cf15af33affbd57d5495f9d96f9f4fc6e4",
+        "tui/src/app/next_prompt_tests.rs": "2a311803fd67a94dfed99e831e423894dfddc4180970bb92ec9e2b9e9ef309f8",
+        "core/tests/common/runtime_auth.rs": "b52eef7de54cce6e0e7ecea87e66dbd122c637d313a130f4498dbcf50f499cc4",
+        "core/tests/suite/runtime_auth.rs": "b113e958f2a3a610d35de84e52c7b21a3825b24c6f9d5b9229a908923d40c964"
+      },
+      "session_id": 86610,
+      "observed_holder_pid": 1583548,
+      "observed_holder": "nightly cargo metadata for native overlay graph (active CPU)",
+      "exit_code": 101,
+      "failure": "All server/TUI libraries passed; CLI bin duplicate cloud_config name after upstream moved module into CLI library. Removed redundant bin mod; existing codex_cli::cloud_config import retained."
+    },
+    {
+      "log": "/tmp/codex-parity-20261106/host-ui-server-check-6.log",
+      "status": "passed",
+      "source_delta": [
+        "cli/src/main.rs"
+      ],
+      "session_id": 78578,
+      "exit_code": 0,
+      "duration_seconds": 3.36
+    }
+  ],
+  "synced_manifests": [
+    "mxc-sandbox/Cargo.toml (actual platform gate)",
+    "code-mode-quickjs/Cargo.toml (only codex-utils-string dependency; qjs host path retained)",
+    "feedback/Cargo.toml (protocol data feature)"
+  ],
+  "snapshot": "/tmp/codex-parity-20261106/ui-host-global-source-sync.json",
+  "no_default_check": {
+    "session_id": 76055,
+    "status": "failed",
+    "log": "/tmp/codex-parity-20261106/host-ui-server-no-default-check.log",
+    "command": "cargo check -p codex-tui -p codex-cli --no-default-features --lib --bins -j4",
+    "exit_code": 101,
+    "failure": "Two newly upstream daemon recovery calls escaped optional install-update gate, and stale cli.managed_daemon assignment referenced removed CLI field. Added capability gate around version probe; removed obsolete field assignment (local startup managed flag already initializes false)."
+  },
+  "no_default_check_2": {
+    "status": "failed",
+    "log": "/tmp/codex-parity-20261106/host-ui-server-no-default-check-2.log",
+    "session_id": 86490,
+    "exit_code": 101,
+    "failure": "TUI no-default passed; newly upstream CLI daemon stderr maintenance call lacked optional install-update gate. Added gate around maintenance call, keeping app-server runtime options intact."
+  },
+  "no_default_check_3": {
+    "status": "passed",
+    "log": "/tmp/codex-parity-20261106/host-ui-server-no-default-check-3.log",
+    "session_id": 11392,
+    "exit_code": 0,
+    "duration_seconds": 4.55
+  },
+  "tui_lib_tests": {
+    "status": "starting",
+    "filter": "next_prompt",
+    "log": "/tmp/codex-parity-20261106/host-tui-next-prompt-tests.log",
+    "snapshot": "/tmp/codex-parity-20261106/ui-host-test-source-sync.json"
+  }
+}

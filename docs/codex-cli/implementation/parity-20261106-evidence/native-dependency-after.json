@@ -1,0 +1,15 @@
+{
+  "kind": "Native Blueprint target graph after adapter fixes",
+  "graph_sha256": "9ac0d8c2113d9d7902a1d00e55b0ed0f55d1affd43d9e434bc3783c962ae096d",
+  "build_log": "/tmp/codex-parity-20261106/native-build-3.log",
+  "target_unit_packages": 829,
+  "checks": {
+    "#aws-": [],
+    "#mxc-sdk@": [],
+    "#nix@": [],
+    "#cpal@": [],
+    "#sentry@": [],
+    "#v8@": []
+  },
+  "note": "Dependency graph proof only; native compilation still running."
+}
