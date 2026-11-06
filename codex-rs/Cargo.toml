@@ -493,16 +493,8 @@ symphonia = { version = "0.6.0", default-features = false, features = [
     "wav",
 ] }
 # Keep SQLx versions in sync; when bumping, audit the SQLite constructor deny list in clippy.toml.
-sqlx = { version = "=0.9.0", default-features = false, features = [
-    "chrono",
-    "json",
-    "migrate",
-    "runtime-tokio",
-    "tls-rustls",
-    "sqlite-bundled",
-    "time",
-    "uuid",
-] }
+# Blueprint materializes inherited dependency declarations one line at a time.
+sqlx = { version = "=0.9.0", default-features = false, features = ["chrono", "json", "migrate", "runtime-tokio", "tls-rustls", "sqlite-bundled", "time", "uuid"] }
 # Derives and migration embedding do not need query macros or a host SQLite driver.
 sqlx-macros = { version = "=0.9.0", default-features = false, features = ["derive", "migrate"] }
 # Preserve the target driver's query-description support without building it on the host.
