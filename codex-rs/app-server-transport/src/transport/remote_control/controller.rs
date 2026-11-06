@@ -77,7 +77,7 @@ impl RemoteControl {
         let desired_state_tx = Arc::new(desired_state_tx);
         let current_enrollment =
             Arc::new(RemoteControlEnrollmentState::new(/*enrollment*/ None));
-        let server_name = gethostname().to_string_lossy().trim().to_string();
+        let server_name = server_name();
         let (status_tx, _) = watch::channel(RemoteControlStatusChangedNotification {
             status: if desired.is_enabled() {
                 RemoteControlConnectionStatus::Connecting
@@ -288,7 +288,7 @@ pub async fn start_remote_control(
         };
     let (status, _) = watch::channel(RemoteControlStatusChangedNotification {
         status: RemoteControlConnectionStatus::Disabled,
-        server_name: gethostname().to_string_lossy().trim().to_string(),
+        server_name: server_name(),
         installation_id: config.installation_id.clone(),
         environment_id: None,
     });

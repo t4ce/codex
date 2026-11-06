@@ -42,7 +42,6 @@ use codex_state::StateRuntime;
 use codex_utils_paths::absolute_path::test_support::PathExt;
 use futures::SinkExt;
 use futures::StreamExt;
-use gethostname::gethostname;
 use pretty_assertions::assert_eq;
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -428,7 +427,7 @@ fn remote_control_url_for_listener(listener: &TcpListener) -> String {
 }
 
 fn test_server_name() -> String {
-    gethostname().to_string_lossy().trim().to_string()
+    server_name()
 }
 
 pub(super) fn remote_control_handle_with_current_enrollment(
@@ -1722,7 +1721,7 @@ async fn remote_control_http_mode_enrolls_before_connecting() {
     let codex_home = TempDir::new().expect("temp dir should create");
     let (transport_event_tx, mut transport_event_rx) =
         mpsc::channel::<TransportEvent>(CHANNEL_CAPACITY);
-    let expected_server_name = gethostname().to_string_lossy().trim().to_string();
+    let expected_server_name = test_server_name();
     let shutdown_token = CancellationToken::new();
     let (remote_task, remote_handle) = start_remote_control(
         RemoteControlStartConfig {
@@ -2180,7 +2179,7 @@ async fn remote_control_waits_for_account_id_before_enrolling() {
         codex_login::test_support::transport_default_auth_route_config(),
     )
     .await;
-    let expected_server_name = gethostname().to_string_lossy().trim().to_string();
+    let expected_server_name = test_server_name();
     let expected_remote_control_target = normalize_remote_control_url(&remote_control_url)
         .expect("remote control target should normalize");
     let expected_enrollment = RemoteControlEnrollment {
@@ -2390,7 +2389,7 @@ async fn remote_control_http_mode_reenrolls_when_refresh_reports_stale_enrollmen
     let state_db = remote_control_state_runtime(&codex_home).await;
     let remote_control_target =
         normalize_remote_control_url(&remote_control_url).expect("target should parse");
-    let expected_server_name = gethostname().to_string_lossy().trim().to_string();
+    let expected_server_name = test_server_name();
     let stale_enrollment = RemoteControlEnrollment {
         remote_control_target: remote_control_target.clone(),
         account_id: "account_id".to_string(),
@@ -2515,7 +2514,7 @@ async fn remote_control_http_mode_reenrolls_after_explicit_missing_server_404() 
     let state_db = remote_control_state_runtime(&codex_home).await;
     let remote_control_target =
         normalize_remote_control_url(&remote_control_url).expect("target should parse");
-    let expected_server_name = gethostname().to_string_lossy().trim().to_string();
+    let expected_server_name = test_server_name();
     let stale_enrollment = RemoteControlEnrollment {
         remote_control_target: remote_control_target.clone(),
         account_id: "account_id".to_string(),

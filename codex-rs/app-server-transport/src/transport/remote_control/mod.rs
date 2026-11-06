@@ -8,6 +8,8 @@ pub use controller::start_remote_control;
 mod desired_state;
 mod enroll;
 mod host_device;
+#[cfg(any(target_os = "trueos", test))]
+mod native_hostname;
 mod protocol;
 mod segment;
 mod server_api;
@@ -45,7 +47,6 @@ use codex_app_server_protocol::RemoteControlPairingStatusResponse;
 use codex_app_server_protocol::RemoteControlStatusChangedNotification;
 use codex_login::AuthManager;
 use codex_state::StateRuntime;
-use gethostname::gethostname;
 use std::error::Error;
 use std::fmt;
 use std::io;
@@ -62,6 +63,20 @@ use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 use tracing::warn;
+
+fn server_name() -> String {
+    #[cfg(target_os = "trueos")]
+    {
+        native_hostname::from_launch_environment(|name| std::env::var_os(name))
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        gethostname::gethostname()
+            .to_string_lossy()
+            .trim()
+            .to_string()
+    }
+}
 
 pub struct RemoteControlStartConfig {
     pub remote_control_url: String,
