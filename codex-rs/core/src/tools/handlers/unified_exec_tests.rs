@@ -806,13 +806,14 @@ fn shell3_command_rejects_unix_context_options() -> anyhow::Result<()> {
         serde_json::json!({"shell": "/bin/bash"}),
         serde_json::json!({"login": false}),
         serde_json::json!({"workdir": "/tmp"}),
+        serde_json::json!({"workdir": ""}),
     ] {
         let mut input = serde_json::json!({"cmd": "\tstatus"});
         input
             .as_object_mut()
             .unwrap()
             .extend(option.as_object().unwrap().clone());
-        let environment: ExecCommandEnvironmentArgs = serde_json::from_value(input.clone())?;
+        let environment: ExecCommandWorkdirArgs = serde_json::from_value(input.clone())?;
         let args: ExecCommandArgs = serde_json::from_value(input)?;
         assert!(
             get_shell3_command(

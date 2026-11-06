@@ -1,3 +1,5 @@
+use super::approval_request::guardian_request_target_item_id;
+use super::approval_request::guardian_request_turn_id;
 use super::prompt::GuardianTranscriptHistory;
 use super::*;
 use crate::config::Config;
