@@ -39,7 +39,7 @@ use codex_tools::mcp_tool_to_responses_api_tool;
 use codex_utils_image::PromptImageMode;
 use codex_utils_image::load_data_url_for_prompt_uncached;
 use codex_utils_output_truncation::TruncationPolicy;
-use codex_utils_text::string::take_bytes_at_char_boundary;
+use codex_utils_string::take_bytes_at_char_boundary;
 use futures::future::BoxFuture;
 use serde_json::Map;
 use serde_json::Value;

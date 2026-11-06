@@ -11613,7 +11613,7 @@ async fn oversized_managed_developer_instructions_are_rejected_during_config_loa
 -> std::io::Result<()> {
     let codex_home = TempDir::new()?;
     // The policy text alone fits; rendering its required context markers must not.
-    let instructions = "x".repeat(codex_utils_text::string::approx_bytes_for_tokens(
+    let instructions = "x".repeat(codex_utils_string::approx_bytes_for_tokens(
         /*tokens*/ 10_000,
     ));
 

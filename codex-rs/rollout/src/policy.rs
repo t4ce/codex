@@ -11,7 +11,7 @@ use codex_protocol::protocol::ItemCompletedEvent;
 use codex_protocol::protocol::SubAgentActivityKind;
 use codex_protocol::protocol::ThreadHistoryMode;
 use codex_utils_output_truncation::truncate_mcp_tool_result;
-use codex_utils_text::string::truncate_middle_with_marker;
+use codex_utils_string::truncate_middle_with_marker;
 
 const PERSISTED_MCP_RESULT_MAX_BYTES: usize = 64 * 1024;
 pub(super) const PERSISTED_COMMAND_OUTPUT_MAX_BYTES: usize = 64 * 1024;

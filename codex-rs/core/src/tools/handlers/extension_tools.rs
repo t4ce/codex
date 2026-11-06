@@ -15,7 +15,7 @@ use codex_tools::ToolSearchInfo;
 use codex_tools::ToolSpec;
 use codex_tools::TurnItemEmissionFuture;
 use codex_tools::TurnItemEmitter;
-use codex_utils_text::string::to_ascii_json_string;
+use codex_utils_string::to_ascii_json_string;
 
 use crate::session::session::Session;
 use crate::session::turn_context::TurnContext;

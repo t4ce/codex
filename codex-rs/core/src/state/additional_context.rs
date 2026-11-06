@@ -15,7 +15,7 @@ use codex_otel::ADDITIONAL_CONTEXT_VALUE_BYTES_METRIC;
 use codex_otel::SessionTelemetry;
 use codex_protocol::protocol::AdditionalContextEntry;
 use codex_protocol::protocol::AdditionalContextKind;
-use codex_utils_text::string::truncate_middle_with_token_budget;
+use codex_utils_string::truncate_middle_with_token_budget;
 
 pub(crate) enum AdditionalContextFormat {
     Messages,

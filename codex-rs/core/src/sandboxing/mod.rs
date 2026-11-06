@@ -31,7 +31,7 @@ use codex_sandboxing::resolve_windows_restricted_token_filesystem_overrides;
 use codex_sandboxing::windows_sandbox_uses_elevated_backend;
 use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_paths::path_uri::PathUri;
-use codex_utils_text::string::truncate_middle_with_token_budget;
+use codex_utils_string::truncate_middle_with_token_budget;
 use std::collections::HashMap;
 
 #[derive(Debug)]

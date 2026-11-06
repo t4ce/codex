@@ -39,7 +39,7 @@ use codex_thread_store::LoadThreadHistoryParams;
 use codex_thread_store::PrepareForkParams;
 use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_paths::path_uri::PathUri;
-use codex_utils_text::string::approx_bytes_for_tokens;
+use codex_utils_string::approx_bytes_for_tokens;
 use core_test_support::PathBufExt;
 use core_test_support::create_directory_symlink;
 use core_test_support::load_default_config_for_test;

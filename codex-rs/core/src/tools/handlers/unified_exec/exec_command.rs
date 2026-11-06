@@ -34,7 +34,7 @@ use codex_tools::ToolName;
 use codex_tools::ToolSpec;
 use codex_utils_output_truncation::approx_token_count;
 use codex_utils_paths::path_uri::PathUri;
-use codex_utils_text::string::truncate_middle_chars;
+use codex_utils_string::truncate_middle_chars;
 
 use super::super::shell_spec::CommandToolOptions;
 use super::super::shell_spec::create_exec_command_tool_with_environment_id;

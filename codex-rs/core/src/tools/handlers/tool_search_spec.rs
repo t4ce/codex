@@ -2,7 +2,7 @@ use codex_tools::JsonSchema;
 use codex_tools::TOOL_SEARCH_TOOL_NAME;
 use codex_tools::ToolSearchSourceInfo;
 use codex_tools::ToolSpec;
-use codex_utils_text::string::take_bytes_at_char_boundary;
+use codex_utils_string::take_bytes_at_char_boundary;
 use std::collections::BTreeMap;
 
 const MAX_TOOL_SEARCH_SOURCE_DESCRIPTION_BYTES: usize = 512 * 1024;

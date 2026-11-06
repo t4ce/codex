@@ -8,7 +8,7 @@ use codex_features::Features;
 use codex_prompts::ResolvedSelectedPluginMessages;
 #[cfg(test)]
 use codex_protocol_test_support::ContentItemTestExt;
-use codex_utils_text::string::take_bytes_at_char_boundary;
+use codex_utils_string::take_bytes_at_char_boundary;
 
 const MAX_EXPLICIT_PLUGIN_INSTRUCTIONS_BYTES: usize = 4 * 1024;
 

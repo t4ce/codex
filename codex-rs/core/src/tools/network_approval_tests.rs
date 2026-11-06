@@ -993,7 +993,7 @@ fn approval_denial_messages_are_bounded_for_model_context() {
         panic!("approval denial should produce a rejected tool error");
     };
 
-    assert!(codex_utils_text::string::approx_token_count(&message) < 1_000);
+    assert!(codex_utils_string::approx_token_count(&message) < 1_000);
     assert!(message.contains("tokens truncated"));
 }
 

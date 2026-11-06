@@ -93,7 +93,7 @@ use codex_skills_extension::provider::SkillSearchRequest;
 use codex_thread_store::LoadThreadHistoryParams;
 use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_paths::path_uri::PathUri;
-use codex_utils_text::string::approx_token_count;
+use codex_utils_string::approx_token_count;
 use core_test_support::apps_test_server::AppsTestServer;
 use core_test_support::apps_test_server::apps_enabled_builder;
 use core_test_support::context_snapshot;

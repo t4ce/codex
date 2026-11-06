@@ -29,7 +29,7 @@ use codex_protocol::protocol::PatchApplyStatus;
 use codex_protocol::protocol::TurnDiffEvent;
 use codex_shell_command::parse_command::parse_command;
 use codex_utils_paths::path_uri::PathUri;
-use codex_utils_text::string::truncate_middle_with_token_budget;
+use codex_utils_string::truncate_middle_with_token_budget;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Duration;
