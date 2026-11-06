@@ -57,7 +57,7 @@ struct Bridge {
     tx: mpsc::Sender<Message>,
     last_yield: Instant,
     exit: bool,
-    max_output_bytes: usize,
+    max_output_bytes: Option<usize>,
     output_bytes: usize,
     callbacks_cancel: tokio_util::sync::CancellationToken,
     tasks: HashMap<u64, tokio::task::JoinHandle<()>>,
@@ -177,7 +177,10 @@ unsafe fn dispatch(
             let text = string(ctx, arg(1))?;
             ready(state)?;
             (*state).output_bytes = (*state).output_bytes.saturating_add(text.len());
-            if (*state).output_bytes > (*state).max_output_bytes {
+            if (*state)
+                .max_output_bytes
+                .is_some_and(|limit| (*state).output_bytes > limit)
+            {
                 return Err("QuickJS output limit exceeded".into());
             }
             (*state)
@@ -387,6 +390,7 @@ pub(super) fn run(
     values: Arc<Mutex<HashMap<String, Value>>>,
     cell: Arc<Cell>,
     heap_limit: usize,
+    output_truncation: CodeModeOutputTruncation,
 ) -> Result<(), String> {
     unsafe {
         let rt = q::JS_NewRuntime();
@@ -425,11 +429,18 @@ pub(super) fn run(
                 tx,
                 last_yield: Instant::now(),
                 exit: false,
-                max_output_bytes: request
-                    .max_output_tokens
-                    .unwrap_or(10_000)
-                    .saturating_mul(4)
-                    .max(1),
+                // Server mode retains bounded head/tail output and applies each
+                // observation's budget when it is delivered. A small exec budget
+                // must not stop JavaScript or constrain a later wait's budget.
+                max_output_bytes: (output_truncation == CodeModeOutputTruncation::Client).then(
+                    || {
+                        request
+                            .max_output_tokens
+                            .unwrap_or(10_000)
+                            .saturating_mul(4)
+                            .max(1)
+                    },
+                ),
                 output_bytes: 0,
             })),
         };

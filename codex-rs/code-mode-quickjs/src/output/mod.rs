@@ -7,7 +7,7 @@
 use codex_code_mode_protocol::CodeModeOutputTruncation;
 use codex_code_mode_protocol::FunctionCallOutputContentItem as OutputItem;
 use codex_utils_output_truncation::OutputBoundary;
-use codex_utils_text::string::truncate_middle_with_marker;
+use codex_utils_string::truncate_middle_with_marker;
 
 mod output_collection;
 mod output_render;

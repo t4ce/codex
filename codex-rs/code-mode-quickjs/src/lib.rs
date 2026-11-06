@@ -228,6 +228,7 @@ impl CodeModeSession for Session {
                 cells.insert(id.clone(), cell.clone());
             }
             let max_output_tokens = request.max_output_tokens;
+            let output_truncation = self.output_truncation;
             let runtime = tokio::runtime::Handle::current();
             let values = self.values.clone();
             let worker_cell = cell.clone();
@@ -246,6 +247,7 @@ impl CodeModeSession for Session {
                             values,
                             worker_cell.clone(),
                             heap_limit,
+                            output_truncation,
                         )
                     }));
                     let cancelled = worker_cell.cancel.is_cancelled();

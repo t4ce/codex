@@ -10,7 +10,7 @@ doctest = false
 [dependencies]
 codex-protocol = { workspace = true }
 codex-utils-output-truncation = { workspace = true }
-codex-utils-text = { workspace = true }
+codex-utils-string = { workspace = true }
 codex-utils-audio = { workspace = true }
 codex-code-mode-protocol = { workspace = true }
 serde_json = { workspace = true }
