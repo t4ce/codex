@@ -726,6 +726,6 @@ fn path_for_log(uri: &Uri) -> String {
 #[path = "mitm_tests.rs"]
 mod tests;
 
-#[cfg(test)]
+#[cfg(all(test, feature = "aws-signing"))]
 #[path = "mitm_forwarding_tests.rs"]
 mod forwarding_tests;

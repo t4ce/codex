@@ -16,10 +16,14 @@ path = "src/main.rs"
 [lints]
 workspace = true
 
+[features]
+default = []
+aws-signing = ["dep:aws-credential-types", "dep:aws-sigv4"]
+
 [dependencies]
 anyhow = { workspace = true }
-aws-credential-types = { workspace = true }
-aws-sigv4 = { workspace = true }
+aws-credential-types = { workspace = true, optional = true }
+aws-sigv4 = { workspace = true, optional = true }
 base64 = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
