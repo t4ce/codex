@@ -34,6 +34,9 @@ pub(super) enum RolloutItemWire<'a> {
     SessionMeta {
         payload: Cow<'a, SessionMetaLine>,
     },
+    DynamicToolsUpdated {
+        payload: DynamicToolsUpdatedPayload<'a>,
+    },
     ResponseItem {
         payload: Cow<'a, ResponseItem>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -46,7 +49,7 @@ pub(super) enum RolloutItemWire<'a> {
         payload: InterAgentCommunicationMetadataPayload,
     },
     Compacted {
-        payload: Cow<'a, CompactedItem>,
+        payload: Cow<'a, Box<CompactedItem>>,
     },
     TurnContext {
         payload: Cow<'a, TurnContextItem>,
@@ -71,11 +74,23 @@ pub(super) enum RolloutItemWire<'a> {
     },
 }
 
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub(super) struct DynamicToolsUpdatedPayload<'a> {
+    thread_id: codex_protocol::ThreadId,
+    tools: Cow<'a, [codex_protocol::dynamic_tools::DynamicToolSpec]>,
+}
+
 impl<'a> From<&'a RolloutItem> for RolloutItemWire<'a> {
     fn from(item: &'a RolloutItem) -> Self {
         match item {
             RolloutItem::SessionMeta(payload) => Self::SessionMeta {
                 payload: Cow::Borrowed(payload),
+            },
+            RolloutItem::DynamicToolsUpdated { thread_id, tools } => Self::DynamicToolsUpdated {
+                payload: DynamicToolsUpdatedPayload {
+                    thread_id: *thread_id,
+                    tools: Cow::Borrowed(tools),
+                },
             },
             RolloutItem::ResponseItem(envelope) => Self::ResponseItem {
                 payload: Cow::Borrowed(&envelope.item),
@@ -166,7 +181,13 @@ impl<'a> From<&'a RolloutItem> for RolloutItemWire<'a> {
 impl From<RolloutItemWire<'_>> for RolloutItem {
     fn from(item: RolloutItemWire<'_>) -> Self {
         match item {
-            RolloutItemWire::SessionMeta { payload } => Self::SessionMeta(payload.into_owned()),
+            RolloutItemWire::SessionMeta { payload } => {
+                Self::SessionMeta(Box::new(payload.into_owned()))
+            }
+            RolloutItemWire::DynamicToolsUpdated { payload } => Self::DynamicToolsUpdated {
+                thread_id: payload.thread_id,
+                tools: payload.tools.into_owned(),
+            },
             RolloutItemWire::ResponseItem { payload, metadata } => {
                 if let (
                     ResponseItem::Message {

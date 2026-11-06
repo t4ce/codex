@@ -53,7 +53,10 @@ impl App {
         let mut header = vec![Line::from("Daemon".bold()), Line::from(status.dim())];
         let unavailable = if !cfg!(feature = "install-update") {
             Some("Installation and updates are managed by your platform.")
-        } else if matches!(self.app_server_target, AppServerTarget::Remote { .. }) {
+        } else if matches!(
+            self.app_server_target,
+            AppServerTarget::Remote { .. } | AppServerTarget::Cloud
+        ) {
             Some(
                 "Manage this server on its host. Local daemon updates are unavailable for remote connections.",
             )
@@ -168,7 +171,10 @@ impl App {
         let Some(executable) = &self.daemon_cli_executable else {
             return;
         };
-        if matches!(self.app_server_target, AppServerTarget::Remote { .. }) {
+        if matches!(
+            self.app_server_target,
+            AppServerTarget::Remote { .. } | AppServerTarget::Cloud
+        ) {
             return;
         }
         let mut explanation = match source {

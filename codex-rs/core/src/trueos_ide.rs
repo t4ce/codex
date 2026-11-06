@@ -29,7 +29,9 @@ pub async fn initialize_launch_script() -> Result<(), String> {
     };
     let script = std::str::from_utf8(&bytes).map_err(|error| error.to_string())?;
     if let Some(endpoint) = protocol::codex_start_endpoint(script)? {
-        STARTUP_ENDPOINT.set(endpoint).map_err(|_| "Codex IDE endpoint is already initialized")?;
+        STARTUP_ENDPOINT
+            .set(endpoint)
+            .map_err(|_| "Codex IDE endpoint is already initialized")?;
     }
     Ok(())
 }
@@ -64,7 +66,11 @@ impl OpenOptions {
                     .into(),
             );
         }
-        if self.kind.as_deref().is_some_and(|kind| !matches!(kind, "native" | "html")) {
+        if self
+            .kind
+            .as_deref()
+            .is_some_and(|kind| !matches!(kind, "native" | "html"))
+        {
             return Err("kind must be native or html".into());
         }
         if self.kind.as_deref() == Some("html") && self.compiler.is_some() {
@@ -95,7 +101,9 @@ impl OpenOptions {
         if let Some(database) = &self.database {
             script.push_str(&format!("ide-db {database}\n"));
         }
-        if let Some(kind) = &self.kind { script.push_str(&format!("ide-kind {kind}\n")); }
+        if let Some(kind) = &self.kind {
+            script.push_str(&format!("ide-kind {kind}\n"));
+        }
         if let Some(compiler) = &self.compiler {
             script.push_str(&format!("ide-compiler {compiler}\n"));
         }
@@ -212,11 +220,19 @@ async fn open_impl<T: Transport>(
                     Some(protocol::CompilerBackend::RustcMin) => "rustc-min",
                     None => "none",
                 };
-                let kind = if context.kind == protocol::ProjectKind::Html { "html" } else { "native" };
-                if options.kind.as_deref().is_some_and(|requested| requested != kind) || options
-                    .compiler
+                let kind = if context.kind == protocol::ProjectKind::Html {
+                    "html"
+                } else {
+                    "native"
+                };
+                if options
+                    .kind
                     .as_deref()
-                    .is_some_and(|requested| requested != compiler)
+                    .is_some_and(|requested| requested != kind)
+                    || options
+                        .compiler
+                        .as_deref()
+                        .is_some_and(|requested| requested != compiler)
                     || options
                         .entry
                         .as_deref()
@@ -658,15 +674,32 @@ mod tests {
     #[tokio::test]
     async fn explicit_launch_endpoint_stays_bound_with_multiple_workspaces() {
         let reply = OwnerReply {
-            endpoint: 8, client_token: 12, request_id: 9,
+            endpoint: 8,
+            client_token: 12,
+            request_id: 9,
             reply: IdeResponse::Saved { revision_id: 3 },
         };
         let mock = Mock {
-            reads: RefCell::new(VecDeque::from([endpoints(&[7, 8]), protocol::encode(&reply).unwrap()])),
+            reads: RefCell::new(VecDeque::from([
+                endpoints(&[7, 8]),
+                protocol::encode(&reply).unwrap(),
+            ])),
             ..Default::default()
         };
-        assert_eq!(request_impl(&mock, Some(8), IdeRequest::Context {}, 9,
-            Duration::from_secs(1), WaitMode::Async).await.unwrap().0, 8);
+        assert_eq!(
+            request_impl(
+                &mock,
+                Some(8),
+                IdeRequest::Context {},
+                9,
+                Duration::from_secs(1),
+                WaitMode::Async
+            )
+            .await
+            .unwrap()
+            .0,
+            8
+        );
         let sent: ClientRequest = protocol::decode(&mock.writes.borrow()[1].1).unwrap();
         assert_eq!(sent.endpoint, 8);
 
@@ -675,8 +708,19 @@ mod tests {
             reads: RefCell::new(VecDeque::from([endpoints(&[7])])),
             ..Default::default()
         };
-        assert!(request_impl(&mock, Some(8), IdeRequest::Context {}, 9,
-            Duration::from_secs(1), WaitMode::Async).await.unwrap_err().contains("no longer available"));
+        assert!(
+            request_impl(
+                &mock,
+                Some(8),
+                IdeRequest::Context {},
+                9,
+                Duration::from_secs(1),
+                WaitMode::Async
+            )
+            .await
+            .unwrap_err()
+            .contains("no longer available")
+        );
         assert_eq!(mock.writes.borrow().len(), 1); // cancellation only, no request
     }
 

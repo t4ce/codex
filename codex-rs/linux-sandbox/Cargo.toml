@@ -26,6 +26,7 @@ codex-sandboxing = { workspace = true }
 codex-uds = { workspace = true }
 codex-utils-paths = { workspace = true }
 globset = { workspace = true }
+ignore = { workspace = true }
 landlock = { workspace = true }
 libc = { workspace = true }
 rustix = { workspace = true }

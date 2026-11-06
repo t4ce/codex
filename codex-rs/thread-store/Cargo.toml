@@ -36,6 +36,7 @@ zstd = { workspace = true }
 
 [dev-dependencies]
 codex-utils-paths = { workspace = true }
+codex-protocol-test-support = { workspace = true }
 pretty_assertions = { workspace = true }
 tempfile = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

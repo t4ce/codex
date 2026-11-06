@@ -22,7 +22,6 @@ use log::*;
 use std::{
     io::{self, Read, Write},
     mem::replace,
-    usize,
 };
 
 /// Indicates a Client or Server role of the websocket
@@ -820,7 +819,7 @@ impl WebSocketContext {
                         }
 
                         let incomplete_compressed =
-                            self.incomplete.as_ref().map_or(false, IncompleteMessage::compressed);
+                            self.incomplete.as_ref().is_some_and(IncompleteMessage::compressed);
                         match (incomplete_compressed, &decompressor) {
                             (false, _) => None,
                             (true, Some(_)) => decompressor,
@@ -949,7 +948,7 @@ impl WebSocketContext {
         let empty_or_pong = self
             .additional_send
             .as_ref()
-            .map_or(true, |f| f.header().opcode == OpCode::Control(OpCtl::Pong));
+            .is_none_or(|f| f.header().opcode == OpCode::Control(OpCtl::Pong));
         if empty_or_pong {
             self.additional_send.replace(add);
         }
@@ -1025,8 +1024,10 @@ impl<T> CheckConnectionReset for Result<T> {
 #[cfg(test)]
 mod tests {
     use super::{Message, Role, WebSocket, WebSocketConfig};
-    use crate::error::{CapacityError, Error};
-    use crate::extensions::ExtensionsConfig;
+    use crate::{
+        error::{CapacityError, Error},
+        extensions::ExtensionsConfig,
+    };
 
     use std::{io, io::Cursor};
 
@@ -1168,11 +1169,12 @@ mod tests {
     #[cfg(feature = "deflate")]
     #[test]
     fn per_message_compression_decompress_respects_message_size_limit() {
-        use crate::extensions::compression::deflate::test::very_compressed;
-        use crate::extensions::compression::deflate::DeflateConfig;
-        use crate::protocol::frame::{
-            coding::{Data, OpCode},
-            FrameHeader,
+        use crate::{
+            extensions::compression::deflate::{test::very_compressed, DeflateConfig},
+            protocol::frame::{
+                coding::{Data, OpCode},
+                FrameHeader,
+            },
         };
 
         let _ = env_logger::try_init();
@@ -1206,8 +1208,7 @@ mod tests {
         // With the default configuration, a short message of these frames is fine.
         {
             let input = Cursor::new(make_message(4));
-            let mut socket =
-                WebSocket::from_raw_socket(input, Role::Client, Some(base_config.clone()));
+            let mut socket = WebSocket::from_raw_socket(input, Role::Client, Some(base_config));
 
             let message = socket.read().unwrap();
             assert_eq!(
@@ -1227,7 +1228,7 @@ mod tests {
             let mut socket = WebSocket::from_raw_socket(
                 input,
                 Role::Client,
-                Some(base_config.clone().max_frame_size(Some(MAX_FRAME_SIZE))),
+                Some(base_config.max_frame_size(Some(MAX_FRAME_SIZE))),
             );
 
             let message = socket.read().unwrap();
@@ -1248,7 +1249,7 @@ mod tests {
             let mut socket = WebSocket::from_raw_socket(
                 input,
                 Role::Client,
-                Some(base_config.clone().max_message_size(Some(MAX_MESSAGE_SIZE))),
+                Some(base_config.max_message_size(Some(MAX_MESSAGE_SIZE))),
             );
 
             let error = socket.read().unwrap_err();

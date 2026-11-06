@@ -1,6 +1,9 @@
 //! Native interpreter-backed Code Mode. Each cell owns a real QuickJS module;
 //! session store/load values persist without exposing filesystem or network APIs.
 mod engine;
+mod output;
+
+use output::OutputCollector;
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -27,7 +30,18 @@ impl CodeModeSessionProvider for QuickJsCodeModeSessionProvider {
         &'a self,
         limits: CodeModeSessionCellExecutionLimits,
     ) -> CodeModeSessionProviderFuture<'a> {
+        self.create_session_with_options(CodeModeSessionOptions {
+            cell_execution_limits: limits,
+            ..CodeModeSessionOptions::default()
+        })
+    }
+
+    fn create_session_with_options<'a>(
+        &'a self,
+        options: CodeModeSessionOptions,
+    ) -> CodeModeSessionProviderFuture<'a> {
         Box::pin(async move {
+            let limits = options.cell_execution_limits;
             if limits.max_heap_size_bytes == Some(0) {
                 return Err("QuickJS heap size limit must be positive".into());
             }
@@ -37,6 +51,7 @@ impl CodeModeSessionProvider for QuickJsCodeModeSessionProvider {
                 next: AtomicU64::new(1),
                 shutdown: CancellationToken::new(),
                 limits,
+                output_truncation: options.output_truncation,
             }) as Arc<dyn CodeModeSession>)
         })
     }
@@ -48,6 +63,7 @@ struct Session {
     next: AtomicU64,
     shutdown: CancellationToken,
     limits: CodeModeSessionCellExecutionLimits,
+    output_truncation: CodeModeOutputTruncation,
 }
 
 #[derive(Clone)]
@@ -57,8 +73,9 @@ enum Completion {
 }
 
 struct CellState {
-    output: Vec<FunctionCallOutputContentItem>,
+    output: OutputCollector,
     completion: Option<Completion>,
+    completed_at: Option<Instant>,
     yield_requested: bool,
 }
 
@@ -81,7 +98,16 @@ impl Cell {
     }
 
     fn finish(&self, completion: Completion) {
-        self.state.lock().unwrap().completion = Some(completion);
+        let mut state = self.state.lock().unwrap();
+        let completion = match completion {
+            Completion::Result(Some(error)) => {
+                Completion::Result(Some(state.output.collect_error(error)))
+            }
+            other => other,
+        };
+        state.completion = Some(completion);
+        state.completed_at = Some(Instant::now());
+        drop(state);
         self.changed.send_modify(|n| *n = n.wrapping_add(1));
     }
 
@@ -89,6 +115,7 @@ impl Cell {
         &self,
         timeout: Duration,
         preempt: Option<CancellationToken>,
+        max_output_tokens: Option<usize>,
     ) -> RuntimeResponse {
         let started = Instant::now();
         let mut changed = self.changed.subscribe();
@@ -107,13 +134,23 @@ impl Cell {
         }
         let mut state = self.state.lock().unwrap();
         state.yield_requested = false;
-        let content_items = std::mem::take(&mut state.output);
+        let output = state.output.take();
+        let content_items = match &output {
+            OutputCollector::Client(_) => output.into_collected_output().into_untruncated_items(),
+            OutputCollector::Server(_) => {
+                output::render_output(output.into_collected_output(), max_output_tokens)
+            }
+        };
         let cell_id = self.id.clone();
         let response = match &state.completion {
             Some(Completion::Result(error_text)) => RuntimeResponse::Result {
                 cell_id,
                 content_items,
                 error_text: error_text.clone(),
+                result_buffered_for: state
+                    .completed_at
+                    .filter(|completed| *completed <= started)
+                    .map_or(Duration::ZERO, |completed| completed.elapsed()),
                 code_mode_host_duration: None,
             },
             Some(Completion::Terminated) => RuntimeResponse::Terminated {
@@ -147,6 +184,10 @@ impl Session {
 }
 
 impl CodeModeSession for Session {
+    fn output_truncation(&self) -> CodeModeOutputTruncation {
+        self.output_truncation
+    }
+
     fn execute<'a>(
         &'a self,
         request: ExecuteRequest,
@@ -167,8 +208,9 @@ impl CodeModeSession for Session {
                 changed,
                 cancel: self.shutdown.child_token(),
                 state: Mutex::new(CellState {
-                    output: Vec::new(),
+                    output: OutputCollector::new(self.output_truncation),
                     completion: None,
+                    completed_at: None,
                     yield_requested: false,
                 }),
             });
@@ -185,6 +227,7 @@ impl CodeModeSession for Session {
                 }
                 cells.insert(id.clone(), cell.clone());
             }
+            let max_output_tokens = request.max_output_tokens;
             let runtime = tokio::runtime::Handle::current();
             let values = self.values.clone();
             let worker_cell = cell.clone();
@@ -233,7 +276,7 @@ impl CodeModeSession for Session {
                 return Err(format!("failed to start QuickJS execution thread: {error}"));
             }
             Ok(StartedCell::from_future(id, async move {
-                Ok(cell.observe(duration, preempt).await)
+                Ok(cell.observe(duration, preempt, max_output_tokens).await)
             }))
         })
     }
@@ -249,14 +292,22 @@ impl CodeModeSession for Session {
                 return Err(format!("unknown QuickJS cell {}", request.cell_id));
             };
             Ok(WaitOutcome::LiveCell(
-                cell.observe(self.duration(request.yield_time_ms), preempt)
-                    .await,
+                cell.observe(
+                    self.duration(request.yield_time_ms),
+                    preempt,
+                    request.max_output_tokens,
+                )
+                .await,
             ))
         })
     }
 
-    fn terminate<'a>(&'a self, cell_id: CellId) -> CodeModeSessionResultFuture<'a, WaitOutcome> {
+    fn terminate<'a>(
+        &'a self,
+        request: TerminateRequest,
+    ) -> CodeModeSessionResultFuture<'a, WaitOutcome> {
         Box::pin(async move {
+            let cell_id = request.cell_id;
             let cell = self
                 .cells
                 .lock()
@@ -270,7 +321,8 @@ impl CodeModeSession for Session {
                 cell.state.lock().unwrap().completion = Some(Completion::Terminated);
             }
             Ok(WaitOutcome::LiveCell(
-                cell.observe(Duration::ZERO, None).await,
+                cell.observe(Duration::ZERO, None, request.max_output_tokens)
+                    .await,
             ))
         })
     }

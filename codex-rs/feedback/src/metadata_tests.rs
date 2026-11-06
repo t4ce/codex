@@ -1,9 +1,11 @@
 //! Exercise dynamic tag collection, upload serialization, and bounded updates.
 
-use super::*;
 use crate::CodexFeedback;
+use crate::*;
 use pretty_assertions::assert_eq;
+#[cfg(feature = "external-reporting")]
 use sentry::protocol::Envelope;
+#[cfg(feature = "external-reporting")]
 use sentry::protocol::EnvelopeItem;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -69,10 +71,14 @@ fn dynamic_tags_survive_upload_alongside_static_fields() {
         ),
     ]);
     assert_eq!(event.tags, expected);
-    let mut envelope = Envelope::new();
-    envelope.add_item(EnvelopeItem::Event(event));
-    let (_, size) = crate::upload::encode_envelope(&envelope).unwrap();
-    assert!(size < crate::MAX_EVENT_BYTES);
+    assert!(serde_json::to_vec(&event).unwrap().len() < crate::MAX_EVENT_BYTES);
+    #[cfg(feature = "external-reporting")]
+    {
+        let mut envelope = Envelope::new();
+        envelope.add_item(EnvelopeItem::Event(event));
+        let (_, size) = crate::upload::encode_envelope(&envelope).unwrap();
+        assert!(size < crate::MAX_EVENT_BYTES);
+    }
 }
 
 #[test]

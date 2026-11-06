@@ -102,7 +102,7 @@ impl ToolExecutor<ToolInvocation> for IdeHandler {
                 &invocation.step_context.environments,
                 environment_id.as_deref(),
             )?;
-            if environment.environment.is_remote() {
+            if environment.environment().is_remote() {
                 return Err(FunctionCallError::RespondToModel(
                     "trueos_ide requires a local TRUEOS environment".into(),
                 ));
@@ -176,4 +176,14 @@ impl ToolExecutor<ToolInvocation> for IdeHandler {
         })
     }
 }
-impl CoreToolRuntime for IdeHandler {}
+impl CoreToolRuntime for IdeHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+}

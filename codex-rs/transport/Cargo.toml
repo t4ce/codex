@@ -72,6 +72,9 @@ reqwest = { workspace = true, features = ["native-tls"] }
 system-configuration = { workspace = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
+curl = { version = "0.4.50", features = ["static-curl", "ntlm"] }
+socket2 = "0.6"
+tokio = { workspace = true, features = ["io-util", "net"] }
 rustls-platform-verifier = "0.7.0"
 windows-sys = { workspace = true, features = ["Win32_Foundation", "Win32_Networking_WinHttp"] }
 
@@ -102,3 +105,11 @@ path = "tests/http_ca_env.rs"
 [[bin]]
 name = "custom_ca_probe"
 path = "src/bin/custom_ca_probe.rs"
+
+[[test]]
+name = "responses_websocket_probe"
+path = "tests/responses_websocket_probe.rs"
+
+[[test]]
+name = "windows_proxy_auth_features"
+path = "tests/http/windows_proxy_auth_features.rs"

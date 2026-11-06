@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/openai-oss-forks/tungstenite-rs",
+  "revision": "db4be399bc1b8b5de2edb46c7187834edabf7e30",
+  "note": "Exact upstream fork source; only Cargo local dependency wiring differs."
+}

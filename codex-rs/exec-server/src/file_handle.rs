@@ -8,7 +8,13 @@ use std::fs::File;
 use std::future::Future;
 use std::io;
 #[cfg(target_os = "trueos")]
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::io::Read;
+#[cfg(target_os = "trueos")]
+use std::io::Seek;
+#[cfg(target_os = "trueos")]
+use std::io::SeekFrom;
+#[cfg(target_os = "trueos")]
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::MutexGuard;

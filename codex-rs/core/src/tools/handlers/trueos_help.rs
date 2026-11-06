@@ -98,7 +98,7 @@ fn selected_environment<'a>(
 ) -> Result<&'a TurnEnvironment, FunctionCallError> {
     let environment =
         resolve_tool_environment(&invocation.step_context.environments, environment_id)?;
-    if environment.environment.is_remote() {
+    if environment.environment().is_remote() {
         return Err(text_error(
             "help describes local TRUEOS Shell3; the selected environment is remote",
         ));
@@ -156,7 +156,9 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
         String::from(
             "execution=interactive CMD AppDB names launch in shell context; AKA aliases launch in every interactive mode without Matrix slot selection",
         ),
-        String::from("appdb=this local help catalog does not enumerate installed apps; exec_command with cmd=\"cmd help\" reads the live installed AppDB and AKA names"),
+        String::from(
+            "appdb=this local help catalog does not enumerate installed apps; exec_command with cmd=\"cmd help\" reads the live installed AppDB and AKA names",
+        ),
     ];
 
     let mut static_groups = 0usize;
@@ -290,6 +292,16 @@ impl ToolExecutor<ToolInvocation> for HelpHandler {
 }
 
 impl CoreToolRuntime for HelpHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }

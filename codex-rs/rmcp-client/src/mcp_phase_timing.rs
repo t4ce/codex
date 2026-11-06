@@ -1,8 +1,10 @@
 //! Fixed-field TRUEOS diagnostics for MCP operation and HTTP progress.
 //! No endpoint, credentials, request identifiers, or message content is retained.
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{Duration, Instant};
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering;
+use std::time::Duration;
+use std::time::Instant;
 
 static NEXT_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 

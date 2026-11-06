@@ -1,0 +1,5 @@
+{
+  "repository": "https://github.com/openai-oss-forks/tokio-tungstenite",
+  "revision": "02cb49fa827411e9279e3688d19ab9e82661b0e8",
+  "note": "Exact upstream fork source; only Cargo local dependency wiring differs."
+}

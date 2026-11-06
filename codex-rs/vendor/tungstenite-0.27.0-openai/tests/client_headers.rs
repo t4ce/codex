@@ -47,6 +47,8 @@ fn test_headers() {
         }
     });
 
+    // The handshake callback API requires an unboxed ErrorResponse.
+    #[allow(clippy::result_large_err)]
     let callback = |req: &Request, mut response: Response| {
         println!("Received a new ws handshake");
         println!("The request's path is: {}", req.uri().path());

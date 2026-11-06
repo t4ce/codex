@@ -11,7 +11,7 @@ impl AccountRequestProcessor {
         &self,
         _params: BedrockDiscoverParams,
     ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
-        self.ensure_bedrock_login_allowed()?;
+        self.ensure_provider_login_allowed(super::CloudLoginProvider::AmazonBedrock)?;
         Ok(None)
     }
 
@@ -19,7 +19,7 @@ impl AccountRequestProcessor {
         &self,
         _params: BedrockSetupParams,
     ) -> Result<Option<ClientResponsePayload>, JSONRPCErrorError> {
-        self.ensure_bedrock_login_allowed()?;
+        self.ensure_provider_login_allowed(super::CloudLoginProvider::AmazonBedrock)?;
         Ok(None)
     }
 }

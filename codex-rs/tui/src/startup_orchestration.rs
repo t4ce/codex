@@ -40,7 +40,6 @@ pub(super) async fn run_main_inner(
     #[cfg(all(windows, feature = "install-update"))]
     let elevated_warning = if explicit_remote_endpoint.is_none()
         && !cli.no_daemon
-        && !cli.agents_overview
         && codex_app_server_daemon::is_elevated().map_err(std::io::Error::other)?
     {
         cli.no_daemon = true;
@@ -79,6 +78,7 @@ pub(super) async fn run_main_inner(
         .take_auto_review_config_overrides(&mut cli.config_overrides);
 
     // Map the legacy --search flag to the canonical web_search mode.
+    let overrides_before_search = cli.config_overrides.raw_overrides.len();
     if cli.web_search {
         cli.config_overrides
             .raw_overrides
@@ -238,6 +238,14 @@ pub(super) async fn run_main_inner(
         std::env::var_os(codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR).as_deref(),
     );
     let reuse_implicit_local_daemon = daemon_exclusion.is_none();
+    let search_forces_embedded = cli.web_search
+        && daemon_startup::config_exclusion(
+            &cli_kv_overrides[..overrides_before_search],
+            &launch_loader_overrides,
+            strict_config,
+            cli.bypass_hook_trust,
+        )
+        .is_none();
     let search_only_config_override = !workload_identity_selected
         && cli.web_search
         && startup_preflight::has_only_search_config_override(&cli_kv_overrides)
@@ -329,6 +337,19 @@ pub(super) async fn run_main_inner(
             err
         }
     })?;
+    if std::io::stdin().is_terminal() && std::io::stdout().is_terminal() {
+        codex_cloud_config::ensure_config_server_login(
+            embedded_network_policy.bind_bootstrap_auth(bootstrap_auth_config(
+                &codex_home,
+                &presentation.bootstrap_config,
+            )?),
+            presentation
+                .bootstrap_config
+                .config_layer_stack
+                .requirements_toml(),
+        )
+        .await?;
+    }
     codex_arg0::startup_timing::mark("presentation_config_done");
     codex_arg0::startup_timing::mark("terminal_init_begin");
     // Keep normal terminal signals available until local configuration is ready. Once raw
@@ -387,6 +408,7 @@ pub(super) async fn run_main_inner(
         workload_identity_selected,
         std::env::var_os(codex_exec_server::CODEX_EXEC_SERVER_URL_ENV_VAR).as_deref(),
     )?;
+    let cloud_preview_available = app_server_target.uses_embedded_network_policy();
     let remote_cwd_override = cli
         .cwd
         .clone()
@@ -557,10 +579,11 @@ pub(super) async fn run_main_inner(
         startup_draft
             .run_until(codex_arg0::startup_timing::measure(
                 "tui.cloud_auth_storage",
-                cloud_config_bundle_loader_for_storage(
+                managed_config_bundle_loader_for_storage(
                     embedded_network_policy.bind_bootstrap_auth(
                         app_server_target.auth_config_for_cloud_loader(config.auth_config()),
                     ),
+                    config.config_layer_stack.requirements_toml(),
                     /*enable_codex_api_key_env*/ false,
                 ),
             ))
@@ -596,19 +619,19 @@ pub(super) async fn run_main_inner(
     } else {
         None
     };
-    let auto_start_daemon = cfg!(feature = "install-update")
-        && config.features.enabled(Feature::DaemonAutoStart)
+    let auto_start_daemon = cfg!(all(feature = "install-update", any(unix, windows)))
+        && (cli.agents_overview || config.features.enabled(Feature::DaemonAutoStart))
         && implicit_connection
-        && !cli.agents_overview
         && !cli.no_daemon
         && !app_server_target.uses_remote_workspace();
     if auto_start_daemon
         && daemon_exclusion.is_none()
-        && should_show_bedrock_setup_wizard(
+        && should_show_provider_setup_wizard(
             LoginStatus::NotAuthenticated,
             config.model_provider.requires_openai_auth,
             &config,
             &AppServerTarget::Embedded,
+            Feature::GcpSetupWizard,
         )
         && startup_draft
             .run_until(
@@ -621,8 +644,8 @@ pub(super) async fn run_main_inner(
             .flatten()
             .is_none()
     {
-        // The Bedrock wizard configures its provider through the embedded server.
-        daemon_exclusion = Some("Bedrock sign-in");
+        // GCP setup resolves credential paths and runs gcloud in the launch environment.
+        daemon_exclusion = Some("GCP sign-in");
         app_server_target = AppServerTarget::Embedded;
     }
     if auto_start_daemon
@@ -632,20 +655,20 @@ pub(super) async fn run_main_inner(
     {
         daemon_exclusion = Some(daemon_startup::WSL_DRVFS_EXCLUSION);
     }
-    let mut daemon_features = daemon_startup::server_features(&cli_kv_overrides);
-    // Disabling shared services requires confirmation, even on a fresh auto-start.
-    daemon_features.retain(|_, enabled| *enabled);
     #[cfg_attr(not(feature = "install-update"), allow(unused_mut))]
-    let mut managed_daemon = cli.managed_daemon;
+    let mut managed_daemon = false;
     #[cfg(feature = "install-update")]
     if auto_start_daemon && daemon_exclusion.is_none() {
         let output = startup_draft
             .run_until(async {
                 // Daemon startup needs no terminal input. Keep the composer visible and
                 // responsive while it checks the running server or prepares an installation.
-                let result = codex_app_server_daemon::start_with_features(&daemon_features).await;
+                // Preserve saved daemon settings until any mismatch is confirmed in recovery.
+                let result =
+                    codex_app_server_daemon::start_with_features_classified(&Default::default())
+                        .await;
                 daemon_telemetry::record_start(&config, &result).await;
-                match result {
+                match result.map_err(|err| err.error) {
                     Ok(output) => Ok(Some(output)),
                     #[cfg(windows)]
                     Err(err) if err.is::<codex_app_server_daemon::DetachedLaunchRestricted>() => {
@@ -671,19 +694,14 @@ pub(super) async fn run_main_inner(
             daemon_exclusion = Some("this Windows launcher");
         }
     }
-    // The overview must inspect the shared server's agents regardless of local settings.
-    let compatibility_warning = if cli.agents_overview {
-        None
-    } else {
-        daemon_recovery::check(
-            &mut startup_draft,
-            &app_server_target,
-            &config,
-            &cli_kv_overrides,
-            managed_daemon,
-        )
-        .await?
-    };
+    let compatibility_warning = daemon_recovery::check(
+        &mut startup_draft,
+        &app_server_target,
+        &config,
+        &cli_kv_overrides,
+        managed_daemon,
+    )
+    .await?;
     if compatibility_warning.is_some() {
         app_server_target = AppServerTarget::Embedded;
         daemon_exclusion = Some("daemon feature settings");
@@ -763,6 +781,7 @@ pub(super) async fn run_main_inner(
     }
     let selection_reason = match (&app_server_target, daemon_exclusion) {
         (AppServerTarget::Remote { .. }, _) => "explicit_remote",
+        (AppServerTarget::Cloud, _) => "cloud",
         _ if cli.agents_overview => "agents",
         _ if elevated_warning.is_some() => "elevated_windows",
         (_, Some("--no-daemon")) => "explicit_no_daemon",
@@ -794,22 +813,17 @@ pub(super) async fn run_main_inner(
             },
         ),
     ]);
-    // Record the first connection attempt's actual mode, including embedded fallback; never reconnects.
-    let launch_telemetry = move |target: &AppServerTarget, connected: bool| {
+    let selected_local_daemon = matches!(app_server_target, AppServerTarget::LocalDaemon { .. });
+    let launch_telemetry = move |app_server_mode| {
         let Some(metrics) = metrics else {
             return Vec::new();
-        };
-        let app_server_mode = match (connected, target) {
-            (false, _) => "unconfirmed",
-            (true, AppServerTarget::Embedded) => "in_process",
-            (true, AppServerTarget::LocalDaemon { .. }) => "local_daemon",
-            (true, AppServerTarget::Remote { .. }) => "remote",
         };
         // Use a fixed category, not the versioned or user-provided terminal identifier.
         let terminal_info = codex_terminal_detection::terminal_info();
         let terminal_name = match terminal_info.name {
             TerminalName::AppleTerminal => "apple_terminal",
             TerminalName::Ghostty => "ghostty",
+            TerminalName::Rex => "rex",
             TerminalName::Iterm2 => "iterm2",
             TerminalName::WarpTerminal => "warp",
             TerminalName::VsCode => "vscode",
@@ -834,6 +848,43 @@ pub(super) async fn run_main_inner(
             ("multiplexer", multiplexer),
         ]);
         let _ = metrics.counter("codex.tui.start", /*inc*/ 1, &launch_tags);
+        if app_server_mode == "in_process" {
+            let reason = match daemon_exclusion {
+                _ if elevated_warning.is_some() => "windows_elevated",
+                Some("--no-daemon") => "explicit_no_daemon",
+                Some("--profile") => "profile",
+                Some("--oss") => "oss",
+                Some("--strict-config") => "strict_config",
+                Some("--dangerously-bypass-hook-trust") => "bypass_hook_trust",
+                Some("workload identity") => "workload_identity",
+                Some("executor selection (CODEX_EXEC_SERVER_URL)") => "exec_server_url",
+                Some("custom configuration loader") => "custom_config_loader",
+                Some(
+                    "command-line configuration overrides (-c, --enable, --disable, or --search)",
+                ) => {
+                    if search_forces_embedded {
+                        "search"
+                    } else {
+                        "config_override"
+                    }
+                }
+                Some("GCP sign-in") => "gcp_sign_in",
+                Some(daemon_startup::WSL_DRVFS_EXCLUSION) => "wsl_drvfs",
+                Some("this Windows launcher") => "windows_detach_restricted",
+                Some("daemon feature settings") => "daemon_compatibility",
+                None if selection_reason == "auto_start_disabled" => {
+                    "auto_start_disabled_no_daemon"
+                }
+                None if selected_local_daemon => "daemon_connection_failed",
+                None if selection_reason == "agents" => "agents_no_daemon_discovered",
+                Some(_) | None => "unclassified",
+            };
+            let _ = metrics.counter(
+                "codex.tui.embedded_start",
+                /*inc*/ 1,
+                &[("reason", reason)],
+            );
+        }
         launch_tags.retain(|(key, _)| !matches!(*key, "terminal_columns" | "terminal_rows"));
         launch_tags
     };
@@ -871,7 +922,7 @@ pub(super) async fn run_main_inner(
             if let Some(worktree) = managed_worktree.as_ref() {
                 worktree.report_startup_failure();
             }
-            launch_telemetry.record(&app_server_target, /*connected*/ false);
+            drop(launch_telemetry);
             if let Some(otel) = otel {
                 let _ = otel
                     .shutdown_with_timeout(INTERACTIVE_OTEL_SHUTDOWN_TIMEOUT)
@@ -892,7 +943,7 @@ pub(super) async fn run_main_inner(
             if let Some(worktree) = managed_worktree.as_ref() {
                 worktree.report_startup_failure();
             }
-            launch_telemetry.record(&app_server_target, /*connected*/ false);
+            drop(launch_telemetry);
             if let Some(otel) = otel {
                 let _ = otel
                     .shutdown_with_timeout(INTERACTIVE_OTEL_SHUTDOWN_TIMEOUT)
@@ -991,7 +1042,7 @@ pub(super) async fn run_main_inner(
     }
 
     // Keep the large app future off the enclosing CLI startup stack during transitions.
-    let app_result = Box::pin(run_ratatui_app(
+    let app_result = crate::boxed_future!(run_ratatui_app(
         cli,
         arg0_paths,
         loader_overrides,
@@ -1008,6 +1059,7 @@ pub(super) async fn run_main_inner(
         state_db,
         environment_manager,
         embedded_network_policy,
+        cloud_preview_available,
         managed_worktree.clone(),
         daemon_startup_warning,
         managed_daemon,

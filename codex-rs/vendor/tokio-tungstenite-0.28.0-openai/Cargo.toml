@@ -10,7 +10,7 @@ documentation = "https://docs.rs/tokio-tungstenite/0.28.0"
 repository = "https://github.com/snapview/tokio-tungstenite"
 version = "0.28.0"
 edition = "2018"
-rust-version = "1.63"
+rust-version = "1.95"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 
 [package.metadata.docs.rs]
@@ -111,4 +111,4 @@ required-features = ["handshake"]
 
 [[example]]
 name = "proxy-client"
-required-features = ["proxy"]
+required-features = ["connect", "proxy"]

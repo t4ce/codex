@@ -15,11 +15,11 @@ pub(super) fn copy_to_clipboard(
     Err(UNAVAILABLE.into())
 }
 
-pub(super) fn osc52_sequence(_text: &str, _tmux: bool) -> Result<String, String> {
+pub(super) fn osc52_sequence(_text: &str, _target: super::Osc52Target) -> Result<String, String> {
     Err(UNAVAILABLE.into())
 }
 
-pub(super) fn osc52_copy(_text: &str) -> Result<(), String> {
+pub(super) fn write_osc52(_text: &str) -> Result<(), String> {
     Err(UNAVAILABLE.into())
 }
 
@@ -36,8 +36,8 @@ mod tests {
             |_| panic!("disabled backend must not write to the terminal"),
         );
         assert_eq!(result.err().as_deref(), Some(UNAVAILABLE));
-        assert!(osc52_sequence("hello", false).is_err());
-        assert!(osc52_copy("hello").is_err());
+        assert!(osc52_sequence("hello", super::super::Osc52Target::Direct).is_err());
+        assert!(write_osc52("hello").is_err());
         assert!(!crate::clipboard_copy::primary::available());
     }
 

@@ -18,14 +18,17 @@ external-reporting = []
 
 [dependencies]
 codex-transport = { workspace = true }
+codex-features = { workspace = true }
 codex-app-server-protocol = { workspace = true }
 codex-git-utils = { workspace = true }
+codex-runtime-agent-instance = { workspace = true }
 codex-login = { workspace = true }
 codex-model-provider = { workspace = true }
 codex-plugin = { workspace = true }
 codex-protocol = { workspace = true }
 codex-state = { workspace = true }
 codex-utils-paths = { workspace = true }
+http = { workspace = true }
 os_info = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -38,4 +41,6 @@ tracing = { workspace = true, features = ["log"] }
 
 [dev-dependencies]
 codex-utils-paths = { workspace = true }
+codex-model-provider-info = { workspace = true }
+wiremock = { workspace = true }
 pretty_assertions = { workspace = true }

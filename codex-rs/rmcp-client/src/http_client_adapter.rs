@@ -15,6 +15,8 @@ use std::sync::PoisonError;
 use std::time::Duration;
 use std::time::Instant;
 
+use crate::AuthProviderResolver;
+use bytes::Bytes;
 use codex_exec_server::ExecServerError;
 use codex_exec_server::HttpClient;
 use codex_exec_server::HttpHeader;
@@ -78,7 +80,7 @@ pub enum StreamableHttpRedirectMode {
 pub(crate) struct StreamableHttpClientAdapter {
     http_client: Arc<dyn HttpClient>,
     default_headers: HeaderMap,
-    auth_provider: Option<SharedAuthProvider>,
+    auth_provider: Option<Arc<dyn AuthProviderResolver>>,
     event_stream_cancellations: Arc<Mutex<HashMap<RequestId, oneshot::Sender<()>>>>,
     has_configured_headers: bool,
     redirect_mode: StreamableHttpRedirectMode,
@@ -101,6 +103,8 @@ impl Drop for EventStreamCancellation {
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum StreamableHttpClientAdapterError {
+    #[error(transparent)]
+    Auth(#[from] codex_transport::api::AuthError),
     #[error("streamable HTTP session expired with 404 Not Found")]
     SessionExpired404,
     #[error(transparent)]
@@ -115,7 +119,7 @@ impl StreamableHttpClientAdapter {
     pub(crate) fn new(
         http_client: Arc<dyn HttpClient>,
         default_headers: HeaderMap,
-        auth_provider: Option<SharedAuthProvider>,
+        auth_provider: Option<Arc<dyn AuthProviderResolver>>,
         has_configured_headers: bool,
         redirect_mode: StreamableHttpRedirectMode,
         initialize_deadline: Arc<Mutex<Option<Instant>>>,
@@ -147,6 +151,19 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         auth_token: Option<String>,
         custom_headers: HashMap<HeaderName, HeaderValue>,
     ) -> std::result::Result<StreamableHttpPostResponse, StreamableHttpError<Self::Error>> {
+        if let JsonRpcMessage::Notification(notification) = &message
+            && let ClientNotification::CancelledNotification(cancelled) = &notification.notification
+            && let Some(request_id) = cancelled.params.request_id.as_ref()
+            && let Some(cancellation) = self
+                .event_stream_cancellations
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner)
+                .remove(request_id)
+        {
+            let _ = cancellation.send(());
+            return Ok(StreamableHttpPostResponse::Accepted);
+        }
+
         let (mcp_method, mcp_request_id) = client_jsonrpc_message_fields(&message);
         let phase_capture =
             crate::mcp_phase_timing::Capture::new("http", mcp_method.as_deref(), None);
@@ -156,7 +173,7 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         let has_session_id = session_id.is_some();
         let mut headers = self.default_headers.clone();
         headers.extend(custom_headers);
-        self.add_auth_headers(&mut headers);
+        self.add_auth_headers(&mut headers).await?;
         insert_header(
             &mut headers,
             ACCEPT,
@@ -230,18 +247,6 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
         let request_span = crate::trace_context::request_span(&body);
         let body = serde_json::to_vec(&body).map_err(StreamableHttpError::Deserialize)?;
         let has_authorization_header = headers.contains_key(AUTHORIZATION);
-        if let JsonRpcMessage::Notification(notification) = &message
-            && let ClientNotification::CancelledNotification(cancelled) = &notification.notification
-            && let Some(request_id) = cancelled.params.request_id.as_ref()
-            && let Some(cancellation) = self
-                .event_stream_cancellations
-                .lock()
-                .unwrap_or_else(PoisonError::into_inner)
-                .remove(request_id)
-        {
-            let _ = cancellation.send(());
-            return Ok(StreamableHttpPostResponse::Accepted);
-        }
 
         if let Some(phase) = prepare_phase.as_mut() {
             phase.finish(false);
@@ -509,7 +514,7 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
     ) -> std::result::Result<(), StreamableHttpError<Self::Error>> {
         let mut headers = self.default_headers.clone();
         headers.extend(custom_headers);
-        self.add_auth_headers(&mut headers);
+        self.add_auth_headers(&mut headers).await?;
         if let Some(auth_token) = auth_token {
             insert_header(
                 &mut headers,
@@ -566,7 +571,7 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
     > {
         let mut headers = self.default_headers.clone();
         headers.extend(custom_headers);
-        self.add_auth_headers(&mut headers);
+        self.add_auth_headers(&mut headers).await?;
         insert_header(
             &mut headers,
             ACCEPT,
@@ -651,10 +656,23 @@ impl StreamableHttpClient for StreamableHttpClientAdapter {
 }
 
 impl StreamableHttpClientAdapter {
-    fn add_auth_headers(&self, headers: &mut HeaderMap) {
-        if let Some(auth_provider) = &self.auth_provider {
-            headers.extend(auth_provider.to_auth_headers());
+    async fn add_auth_headers(
+        &self,
+        headers: &mut HeaderMap,
+    ) -> Result<(), StreamableHttpError<StreamableHttpClientAdapterError>> {
+        if let Some(resolver) = &self.auth_provider {
+            let provider = resolver
+                .resolve(headers)
+                .await
+                .map_err(StreamableHttpClientAdapterError::from)
+                .map_err(StreamableHttpError::Client)?;
+            *headers = provider
+                .apply_auth_headers(std::mem::take(headers))
+                .await
+                .map_err(StreamableHttpClientAdapterError::from)
+                .map_err(StreamableHttpError::Client)?;
         }
+        Ok(())
     }
 }
 
@@ -828,10 +846,15 @@ fn mcp_redirect_policy(
     headers: &HeaderMap,
     has_configured_headers: bool,
 ) -> HttpRedirectPolicy {
-    if headers
-        .get(HEADER_MCP_PROTOCOL_VERSION)
-        .and_then(|value| value.to_str().ok())
-        == Some(ProtocolVersion::V_2026_07_28.as_str())
+    if headers.contains_key("x-openai-agent-assertion")
+        || headers
+            .get(AUTHORIZATION)
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.starts_with("AgentAssertion "))
+        || headers
+            .get(HEADER_MCP_PROTOCOL_VERSION)
+            .and_then(|value| value.to_str().ok())
+            == Some(ProtocolVersion::V_2026_07_28.as_str())
         || (mode == StreamableHttpRedirectMode::AgentPluginV1
             && (has_configured_headers || headers.contains_key(AUTHORIZATION)))
     {
@@ -934,11 +957,11 @@ pub(super) fn legacy_discovery_fallback_response(
 }
 
 fn only_known_legacy_protocol_versions(versions: &[ProtocolVersion]) -> bool {
-    !versions.is_empty()
-        && versions.iter().all(|version| {
-            ProtocolVersion::KNOWN_VERSIONS.contains(version)
-                && version < &ProtocolVersion::V_2026_07_28
-        })
+    !versions.is_empty() && versions.iter().all(is_known_legacy_protocol_version)
+}
+
+pub(super) fn is_known_legacy_protocol_version(version: &ProtocolVersion) -> bool {
+    ProtocolVersion::KNOWN_VERSIONS.contains(version) && version < &ProtocolVersion::V_2026_07_28
 }
 
 fn explicitly_rejects_modern_protocol_version(message: &str) -> bool {

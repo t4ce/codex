@@ -252,7 +252,7 @@ impl ToolExecutor<ToolInvocation> for CalculatorHandler {
                 &invocation.step_context.environments,
                 args.environment_id.as_deref(),
             )?;
-            if environment.environment.is_remote() {
+            if environment.environment().is_remote() {
                 return Err(FunctionCallError::RespondToModel(
                     "calculate uses the local TRUEOS calculator ABI; the selected environment is remote".into(),
                 ));
@@ -266,6 +266,16 @@ impl ToolExecutor<ToolInvocation> for CalculatorHandler {
 }
 
 impl CoreToolRuntime for CalculatorHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }

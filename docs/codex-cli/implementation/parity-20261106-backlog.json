@@ -1,0 +1,81 @@
+{
+  "run": "20261106",
+  "scope": "Uncertainty and validation backlog; no measured 95% score is asserted.",
+  "items": [
+    {
+      "id": "NATIVE-BUILD",
+      "status": "validation_pending",
+      "confidence": "not yet established",
+      "area": "Native Blueprint package",
+      "evidence": "/tmp/codex-parity-20261106/native-build.log",
+      "required_evidence": "Successful native package build and workload receipt bound to the integrated source."
+    },
+    {
+      "id": "HOST-GRAPH",
+      "status": "validation_pending",
+      "confidence": "not yet established",
+      "area": "Host test graph differs from native vendor graph",
+      "evidence": "Copied reqwest source is byte-identical; only its copied manifest omits hyper/std-compat. Host command live in /tmp/codex-parity-20261106/host-check.log.",
+      "action": "Use disclosed host-only copied-dependency overlay; keep native production source unchanged; separately build the actual Blueprint graph."
+    },
+    {
+      "id": "QUICKJS-OUTPUT",
+      "status": "validation_pending",
+      "confidence": "below 95% until exercised",
+      "area": "Native QuickJS implements new upstream server output/truncation contract",
+      "action": "Run copied upstream collector/renderer tests and native session tests. Preserve voice transport opt-in while sharing audio decoding types."
+    },
+    {
+      "id": "TUI-BACKENDS",
+      "status": "validation_pending",
+      "confidence": "below 95% for complete event-loop behavior",
+      "area": "Multi-backend TUI and native prompt/Spirit lifecycles",
+      "evidence": "17 focused source-harness cases passed, full merged TUI still requires compile/integration validation.",
+      "action": "Run TUI/app-server checks and native lifecycle tests; backlog any rig-only uncertainty explicitly."
+    },
+    {
+      "id": "WINDOWS-TLS",
+      "status": "excluded_target_validation",
+      "confidence": "not claimed for Windows execution",
+      "area": "Upstream Windows proxy authentication with reqwest 0.13",
+      "action": "Retain gates/imports/source consistency. Windows runtime not exercised by native TRUEOS validation; report this limit."
+    },
+    {
+      "id": "FEEDBACK-OFF",
+      "status": "validation_pending",
+      "confidence": "below 95% until tests pass",
+      "area": "New local feedback save with network reporting disabled",
+      "action": "Validate archive/schema tests with external-reporting off; validate enabled exporter path separately."
+    },
+    {
+      "id": "NATIVE-FS-SQLITE",
+      "status": "validation_pending",
+      "confidence": "below 95% until tests/build pass",
+      "area": "SQLite service ownership, typed filesystem, native auth durability",
+      "action": "Check service namespace and journal ownership after upstream lock/connection refactors; run relevant tests."
+    },
+    {
+      "id": "SHARED-SOURCE",
+      "status": "validation_pending",
+      "confidence": "not yet established",
+      "area": "All clean auto-merges and new upstream APIs",
+      "action": "Use compiler/test diagnostics plus invariant audit. Zero conflict markers are not completion evidence."
+    },
+    {
+      "id": "PROMPT-BACKEND-IDENTITY",
+      "status": "fix_pending",
+      "confidence": "known gap under review",
+      "area": "Native prompt inbox thread identity across multiple backends",
+      "evidence": "Inbox scopes pending text by UUID only; two backend sessions exposing the same UUID could accept text read under the other backend.",
+      "action": "Qualify internal ownership by backend identity while retaining the kernel vFile thread path. Regress same-UUID backend switching before accepting this path."
+    },
+    {
+      "id": "SKILLS-HARNESS-API",
+      "status": "fixture_adaptation_pending",
+      "confidence": "source behavior checked; executable fixture pending",
+      "area": "Existing skills source-extraction harness",
+      "evidence": "Static assertion assumes pre-refactor SkillsListLoaded layout; current dispatch also guards Cloud results.",
+      "action": "Adapt fixture to new RequestId/SkillsListParams and execute original production guard without weakening assertions."
+    }
+  ]
+}

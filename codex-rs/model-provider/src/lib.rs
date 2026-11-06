@@ -5,10 +5,19 @@ mod bearer_auth_provider;
 #[cfg(not(feature = "bedrock"))]
 mod bedrock_disabled;
 mod capabilities;
+mod catalog_factory;
+mod chatgpt_base_url;
+mod client_auth;
 mod combined_auth;
+mod gateway_auth;
+mod gateway_export;
+mod gcp;
 mod models_endpoint;
 mod models_identity;
 mod provider;
+mod request_preparation;
+mod request_setup;
+mod runtime_auth;
 mod shared_state;
 pub mod test_support;
 mod workspace_routing;
@@ -24,8 +33,10 @@ pub use amazon_bedrock::is_supported_amazon_bedrock_region;
 #[cfg(feature = "bedrock")]
 pub use amazon_bedrock::resolve_amazon_bedrock_region;
 pub use auth::AgentIdentitySessionFallback;
+pub use auth::ProviderAuthContext;
 pub use auth::ProviderAuthScope;
 pub use auth::ResolvedProviderAuth;
+pub use auth::auth_provider_for_request;
 pub use auth::auth_provider_from_auth;
 pub use auth::auth_provider_from_auth_manager;
 pub use auth::unauthenticated_auth_provider;
@@ -38,11 +49,17 @@ pub use bedrock_disabled::is_supported_amazon_bedrock_region;
 #[cfg(not(feature = "bedrock"))]
 pub use bedrock_disabled::resolve_amazon_bedrock_region;
 pub use capabilities::ProviderCapabilities;
+pub use catalog_factory::ModelCatalogFactory;
+pub use chatgpt_base_url::ChatgptBaseUrl;
+pub use chatgpt_base_url::DEFAULT_CHATGPT_BASE_URL;
+pub use client_auth::ClientAuth;
 pub use codex_model_provider_info::AMAZON_BEDROCK_PROVIDER_ID;
 pub use codex_model_provider_info::AMAZON_BEDROCK_RUNTIME_PROVIDER_ID;
 pub use codex_model_provider_info::CHATGPT_CODEX_BASE_URL;
+pub use codex_model_provider_info::GCP_PROVIDER_ID;
 pub use codex_model_provider_info::RemoteCompactionSupport;
 pub use codex_protocol::account::ProviderAccount;
+pub use gateway_auth::GatewayAuthManager;
 pub use provider::ModelProvider;
 pub use provider::ModelProviderFuture;
 pub use provider::ProviderAccountError;
@@ -52,7 +69,16 @@ pub use provider::ProviderAuthRecoveryMessages;
 pub use provider::ProviderUnauthorizedRecovery;
 pub use provider::SharedModelProvider;
 pub use provider::create_model_provider;
+pub use provider::provider_uses_first_party_auth_path;
+pub use provider::resolve_api_provider;
 
-#[cfg(test)]
-#[path = "workspace_routing_tests.rs"]
-mod workspace_routing_tests;
+pub use request_preparation::prepare_provider_request;
+pub use request_setup::ResolvedProviderRequest;
+pub use request_setup::request_auth_owner;
+pub use request_setup::resolve_request;
+pub use runtime_auth::runtime_auth_for_url;
+pub(crate) use runtime_auth::select_runtime_auth_for_source;
+pub use runtime_auth::select_runtime_provider;
+pub use runtime_auth::validate_runtime_destination;
+pub use runtime_auth::validate_runtime_environment;
+pub use runtime_auth::validate_runtime_selectors;

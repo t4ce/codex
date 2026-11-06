@@ -1,11 +1,14 @@
 use super::*;
-use crate::protocol::{FsCreateDirectoryParams, FsReadFileParams, FsWriteFileParams};
+use crate::protocol::FsCreateDirectoryParams;
+use crate::protocol::FsReadFileParams;
+use crate::protocol::FsWriteFileParams;
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD;
 use codex_protocol::models::PermissionProfile;
-use codex_protocol::permissions::{
-    FileSystemAccessMode, FileSystemSandboxEntry, FileSystemSandboxPolicy, NetworkSandboxPolicy,
-};
+use codex_protocol::permissions::FileSystemAccessMode;
+use codex_protocol::permissions::FileSystemSandboxEntry;
+use codex_protocol::permissions::FileSystemSandboxPolicy;
+use codex_protocol::permissions::NetworkSandboxPolicy;
 
 fn uri(path: &std::path::Path) -> PathUri {
     PathUri::from_host_native_path(path).expect("native path")

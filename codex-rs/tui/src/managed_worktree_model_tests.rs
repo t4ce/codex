@@ -23,7 +23,11 @@ async fn model_call(
     } else {
         responses::ev_function_call_with_namespace(
             tool,
-            "mcp__codex_worktrees",
+            if server.uses_embedded_app_server() {
+                "mcp__codex_worktrees"
+            } else {
+                "mcp__codex_tui"
+            },
             tool,
             &arguments.to_string(),
         )
@@ -56,7 +60,7 @@ async fn model_call(
     let approvals = tokio::time::timeout(Duration::from_secs(/*secs*/ 30), async {
         let mut approvals = 0;
         while let Some(event) = server.next_event().await {
-            match event {
+            match event.event {
                 AppServerEvent::ServerRequest(request) => {
                     let ServerRequest::McpServerElicitationRequest { request_id, params } = *request else { panic!("unexpected server request: {request:?}"); };
                     assert_eq!(params.thread_id, thread);
@@ -106,6 +110,7 @@ pub(super) async fn exercise(
     model: &wiremock::MockServer,
     config: &Config,
     repository: &Path,
+    existing_thread: &str,
 ) -> color_eyre::Result<()> {
     let mut config = config.clone();
     config.cwd = codex_utils_paths::absolute_path::AbsolutePathBuf::from_absolute_path(
@@ -144,7 +149,12 @@ pub(super) async fn exercise(
     let mut overrides = None;
     server.thread_tool_transport().configure_mcp(&mut overrides);
     let overrides = overrides.unwrap();
-    let mcp = &overrides["mcp_servers.codex_worktrees"];
+    let mcp_key = if server.uses_embedded_app_server() {
+        "mcp_servers.codex_worktrees"
+    } else {
+        "mcp_servers.codex_tui"
+    };
+    let mcp = &overrides[mcp_key];
     let client = codex_transport::http::HttpClientBuilder::new().build_direct()?;
     tokio::time::timeout(Duration::from_secs(/*secs*/ 20), async {
         loop {
@@ -180,6 +190,22 @@ pub(super) async fn exercise(
     history.extend(requests);
     assert_eq!(approvals, 0);
     assert_eq!(listed["data"][0]["root"], created["worktree"]["root"]);
+    if started.task_tools_available {
+        let (renamed, requests, approvals) = model_call(
+            server,
+            model,
+            &thread,
+            "set_thread_title",
+            json!({"threadId":existing_thread,"title":"Checkout preparation"}),
+        )
+        .await?;
+        history.extend(requests);
+        assert_eq!(approvals, 0);
+        assert_eq!(
+            renamed,
+            json!({"threadId":existing_thread,"title":"Checkout preparation"})
+        );
+    }
     let other_attachments: ThreadAttachmentListResponse = server
         .request_handle()
         .request_typed(ClientRequest::ThreadAttachmentList {
@@ -208,11 +234,18 @@ pub(super) async fn exercise(
         .map(|request| {
             let mut body = request.body_json();
             // Keep every request and input item, but focus schema fingerprints on
-            // the worktree tools so unrelated built-in changes do not churn this test.
+            // the local TUI namespace so unrelated built-ins do not churn this test.
             body["tools"]
                 .as_array_mut()
                 .expect("request tools")
-                .retain(|tool| tool["name"] == "mcp__codex_worktrees");
+                .retain(|tool| {
+                    tool["name"]
+                        == if server.uses_embedded_app_server() {
+                            "mcp__codex_worktrees"
+                        } else {
+                            "mcp__codex_tui"
+                        }
+                });
             let mut text = body.to_string();
             for (path, label) in [
                 (&root.join(""), "<WORKTREE>/"),
@@ -249,7 +282,7 @@ pub(super) async fn exercise(
     insta::assert_snapshot!(
         "managed_worktree_model_creation",
         context_snapshot::format_context_snapshot(
-            "Model request history for creating, polling and listing a task-attached checkout through MCP, without a separate creation confirmation. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.",
+            "Model request history for creating, polling and listing a task-attached checkout, then renaming another task through MCP. Separate assertions verify retained cwd/environment roots, not sandbox enforcement.",
             &entries,
             &ContextSnapshotOptions::default()
                 .rewrite_known_segments()

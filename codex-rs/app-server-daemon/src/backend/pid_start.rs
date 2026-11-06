@@ -10,6 +10,7 @@ use super::PidFileState;
 use super::PidRecord;
 use super::read_process_start_time;
 use crate::managed_install::executable_identity;
+use crate::telemetry::StartFailure;
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::bail;
@@ -95,49 +96,7 @@ impl PidBackend {
             } else {
                 None
             };
-        let stderr_log = match self.open_stderr_log().await {
-            Ok(stderr_log) => stderr_log,
-            Err(err) => {
-                if replacement.is_none() {
-                    let _ = fs::remove_file(&self.pid_file).await;
-                }
-                return Err(err);
-            }
-        };
-        // Older or pinned managed binaries may predate this optional startup flag.
-        let managed_app_server =
-            matches!(self.command_kind, super::PidCommandKind::AppServer { .. });
-        let managed_daemon_supported = managed_app_server
-            && matches!(
-                tokio::time::timeout(
-                    std::time::Duration::from_secs(5),
-                    Command::new(&codex_bin)
-                        .args(["app-server", "--managed-daemon", "--help"])
-                        .stdin(Stdio::null())
-                        .stdout(Stdio::null())
-                        .stderr(Stdio::null())
-                        .kill_on_drop(true)
-                        .status(),
-                ).await,
-                Ok(Ok(status)) if status.success()
-            );
-        if managed_app_server && !managed_daemon_supported {
-            let codex_home = self
-                .pid_file
-                .parent()
-                .and_then(std::path::Path::parent)
-                .context("daemon pid path has no Codex home")?;
-            let recovery_file = codex_app_server_transport::daemon_recovery_file_path(codex_home);
-            match fs::remove_file(&recovery_file).await {
-                Ok(()) => {}
-                Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
-                Err(err) => {
-                    tracing::warn!(path = %recovery_file.display(), %err, "failed to clear daemon recovery state before legacy launch");
-                }
-            }
-        }
-        let command = crate::background_command::managed_process(&codex_bin).await;
-        let mut command = match command {
+        let mut command = match crate::background_command::managed_process(&codex_bin).await {
             Ok(command) => Command::from(command),
             Err(err) => {
                 if replacement.is_none() {
@@ -151,15 +110,55 @@ impl PidBackend {
                 });
             }
         };
+        let stderr_log = match self.open_stderr_log().await {
+            Ok(stderr_log) => stderr_log,
+            Err(err) => {
+                if replacement.is_none() {
+                    let _ = fs::remove_file(&self.pid_file).await;
+                }
+                return Err(err);
+            }
+        };
         command
             // Handoff suppression belongs to the foreground CLI, not its long-lived children.
             .env_remove(crate::telemetry::HANDOFF_ENV)
             .args(self.command_args().iter().map(std::borrow::Cow::as_ref))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .stderr(Stdio::from(stderr_log));
-        if managed_daemon_supported {
+            .stderr(Stdio::from(stderr_log.into_std().await));
+        // Older or pinned managed binaries may predate this optional startup flag.
+        let managed_app_server =
+            matches!(self.command_kind, super::PidCommandKind::AppServer { .. });
+        if managed_app_server
+            && matches!(
+                tokio::time::timeout(
+                    std::time::Duration::from_secs(5),
+                    Command::new(&codex_bin)
+                        .args(["app-server", "--managed-daemon", "--help"])
+                        .stdin(Stdio::null())
+                        .stdout(Stdio::null())
+                        .stderr(Stdio::null())
+                        .kill_on_drop(true)
+                        .status(),
+                ).await,
+                Ok(Ok(status)) if status.success()
+            )
+        {
             command.arg("--managed-daemon");
+        } else if managed_app_server {
+            let codex_home = self
+                .pid_file
+                .parent()
+                .and_then(std::path::Path::parent)
+                .context("daemon pid path has no Codex home")?;
+            let recovery_file = codex_app_server_transport::daemon_recovery_file_path(codex_home);
+            match fs::remove_file(&recovery_file).await {
+                Ok(()) => {}
+                Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+                Err(err) => {
+                    tracing::warn!(path = %recovery_file.display(), %err, "failed to clear daemon recovery state before legacy launch");
+                }
+            }
         }
         if let Some((key, value)) = self.command_env() {
             command.env(key, value);
@@ -230,7 +229,7 @@ impl PidBackend {
         #[cfg(not(windows))]
         let child = command.spawn().map_err(anyhow::Error::from);
         let child = crate::diagnostics::result("process_spawn", started, child);
-        let child = match child {
+        let mut child = match child {
             Ok(child) => child,
             Err(err) => {
                 if replacement.is_none() {
@@ -242,10 +241,10 @@ impl PidBackend {
                     } else {
                         ""
                     };
-                    format!(
+                    StartFailure::Spawn(format!(
                         "failed to spawn detached app-server process using {}{job_hint}",
                         self.codex_bin.display()
-                    )
+                    ))
                 });
             }
         };
@@ -274,14 +273,21 @@ impl PidBackend {
         let record = match crate::diagnostics::result("process_identity", started, record) {
             Ok(record) => record,
             Err(err) => {
-                let _ = self.terminate_process(pid);
+                let exited = managed_app_server && matches!(child.try_wait(), Ok(Some(_)));
+                if !exited {
+                    let _ = self.terminate_process(pid);
+                }
                 let mut context =
                     format!("failed to record pid-managed app-server process {pid} startup");
                 super::super::append_stderr_log_tail_context(&self.pid_file, &mut context).await;
                 if replacement.is_none() {
                     let _ = fs::remove_file(&self.pid_file).await;
                 }
-                return Err(err).context(context);
+                return if exited {
+                    Err(err).context(StartFailure::EarlyChildExit(context))
+                } else {
+                    Err(err).context(context)
+                };
             }
         };
         let contents = serde_json::to_vec(&record).context("failed to serialize pid record")?;

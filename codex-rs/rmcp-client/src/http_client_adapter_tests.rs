@@ -89,6 +89,29 @@ fn authorization_redirects_depend_on_mode() {
 }
 
 #[test]
+fn runtime_assertions_stop_redirects_in_both_mcp_modes() {
+    for mode in [
+        StreamableHttpRedirectMode::Legacy,
+        StreamableHttpRedirectMode::AgentPluginV1,
+    ] {
+        for (name, value) in [
+            ("x-openai-agent-assertion", "1.protected.payload.signature"),
+            (
+                "authorization",
+                "AgentAssertion 1.protected.payload.signature",
+            ),
+        ] {
+            let mut headers = HeaderMap::new();
+            headers.insert(name, HeaderValue::from_static(value));
+            assert_eq!(
+                mcp_redirect_policy(mode, &headers, /*has_configured_headers*/ false),
+                HttpRedirectPolicy::Stop,
+            );
+        }
+    }
+}
+
+#[test]
 fn lf_terminators_reset_the_event_limit() {
     let mut limit = SseEventSizeLimit::new(Some(8));
 
@@ -454,5 +477,176 @@ async fn stalled_body_reports_received_progress_without_starting_json_decode() -
     );
     drop(chunks);
     server.abort();
+    Ok(())
+}
+
+struct AsyncRequestAuth {
+    requests: std::sync::atomic::AtomicUsize,
+}
+
+impl crate::AuthProviderResolver for AsyncRequestAuth {
+    fn resolve<'a>(
+        &'a self,
+        _headers: &'a HeaderMap,
+    ) -> futures::future::BoxFuture<
+        'a,
+        Result<codex_transport::api::SharedAuthProvider, codex_transport::api::AuthError>,
+    > {
+        Box::pin(async move {
+            tokio::task::yield_now().await;
+            let id = self
+                .requests
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            Ok(std::sync::Arc::new(SelectedRequestAuth(id))
+                as codex_transport::api::SharedAuthProvider)
+        })
+    }
+}
+
+struct SelectedRequestAuth(usize);
+
+impl codex_transport::api::AuthProvider for SelectedRequestAuth {
+    fn add_auth_headers(
+        &self,
+        headers: &mut HeaderMap,
+    ) -> Result<(), codex_transport::api::AuthError> {
+        headers.remove("x-openai-agent-assertion");
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("AgentAssertion proof-{}", self.0)).unwrap(),
+        );
+        Ok(())
+    }
+
+    fn apply_auth_headers(
+        &self,
+        mut headers: HeaderMap,
+    ) -> codex_transport::api::AuthHeadersFuture<'_> {
+        Box::pin(async move {
+            self.add_auth_headers(&mut headers)?;
+            Ok(headers)
+        })
+    }
+}
+
+#[tokio::test]
+async fn requests_await_auth_and_stop_assertion_redirects() -> anyhow::Result<()> {
+    use codex_exec_server::RouteAwareHttpClient;
+    use codex_transport::http::HttpClientFactory;
+    use codex_transport::http::OutboundProxyPolicy;
+    use futures::StreamExt;
+    use rmcp::transport::streamable_http_client::StreamableHttpClient;
+    use std::collections::HashMap;
+    use std::sync::Arc;
+    use wiremock::Mock;
+    use wiremock::MockServer;
+    use wiremock::ResponseTemplate;
+    use wiremock::matchers::method;
+    use wiremock::matchers::path;
+
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/mcp"))
+        .respond_with(ResponseTemplate::new(202))
+        .expect(2)
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(path("/mcp"))
+        .respond_with(ResponseTemplate::new(200).insert_header("content-type", "text/event-stream"))
+        .expect(2)
+        .mount(&server)
+        .await;
+    Mock::given(method("DELETE"))
+        .and(path("/mcp"))
+        .respond_with(ResponseTemplate::new(200))
+        .expect(1)
+        .mount(&server)
+        .await;
+    Mock::given(path("/redirect"))
+        .respond_with(
+            ResponseTemplate::new(307)
+                .insert_header("location", format!("{}/leaked", server.uri())),
+        )
+        .expect(1)
+        .mount(&server)
+        .await;
+    let mut headers = HeaderMap::new();
+    headers.insert(AUTHORIZATION, HeaderValue::from_static("Bearer stale"));
+    headers.insert(
+        "x-openai-agent-assertion",
+        HeaderValue::from_static("stale-proof"),
+    );
+    let adapter = super::StreamableHttpClientAdapter::new(
+        Arc::new(RouteAwareHttpClient::new(HttpClientFactory::new(
+            OutboundProxyPolicy::ReqwestDefault,
+        ))),
+        headers,
+        Some(Arc::new(AsyncRequestAuth {
+            requests: Default::default(),
+        })),
+        /*has_configured_headers*/ false,
+        StreamableHttpRedirectMode::Legacy,
+        Default::default(),
+    );
+    let uri: Arc<str> = format!("{}/mcp", server.uri()).into();
+    let notification: rmcp::model::ClientJsonRpcMessage =
+        serde_json::from_value(serde_json::json!({
+            "jsonrpc": "2.0", "method": "notifications/initialized",
+        }))?;
+    for _ in 0..2 {
+        adapter
+            .post_message(
+                uri.clone(),
+                notification.clone(),
+                /*session_id*/ None,
+                /*auth_token*/ None,
+                HashMap::new(),
+            )
+            .await?;
+    }
+    for _ in 0..2 {
+        let mut stream = adapter
+            .get_stream(
+                uri.clone(),
+                Some("session-a".into()),
+                /*last_event_id*/ None,
+                /*auth_token*/ None,
+                HashMap::new(),
+            )
+            .await?;
+        assert!(stream.next().await.is_none());
+    }
+    adapter
+        .delete_session(
+            uri,
+            "session-a".into(),
+            /*auth_token*/ None,
+            HashMap::new(),
+        )
+        .await?;
+    assert!(
+        adapter
+            .post_message(
+                format!("{}/redirect", server.uri()).into(),
+                notification,
+                /*session_id*/ None,
+                /*auth_token*/ None,
+                HashMap::new()
+            )
+            .await
+            .is_err()
+    );
+    let requests = server.received_requests().await.unwrap();
+    assert_eq!(requests.len(), 6);
+    for (id, request) in requests.iter().enumerate() {
+        assert_eq!(
+            request.headers["authorization"],
+            format!("AgentAssertion proof-{id}")
+        );
+        assert!(!request.headers.contains_key("x-openai-agent-assertion"));
+        assert_ne!(request.url.path(), "/leaked");
+    }
+    server.verify().await;
     Ok(())
 }

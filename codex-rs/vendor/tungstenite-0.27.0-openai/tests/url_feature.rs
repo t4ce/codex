@@ -37,6 +37,8 @@ fn test_with_url() {
 
     let client_handler = server.incoming().next().unwrap();
 
+    // The handshake callback API requires an unboxed ErrorResponse.
+    #[allow(clippy::result_large_err)]
     let closing =
         accept_hdr(client_handler.unwrap(), |_: &Request, r: Response| Ok(r)).unwrap().close(None);
     assert!(closing.is_ok());

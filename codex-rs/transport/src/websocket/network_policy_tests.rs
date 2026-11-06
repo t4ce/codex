@@ -1,9 +1,9 @@
 //! Split readers keep their revocation wakeup and report denial even when writers fail first.
 
-use super::*;
 use crate::http::DestinationPolicy;
 use crate::http::NetworkPolicyController;
 use crate::http::OutboundProxyPolicy::ReqwestDefault;
+use crate::websocket::*;
 use futures::SinkExt;
 use futures::StreamExt;
 use std::sync::atomic::AtomicBool;

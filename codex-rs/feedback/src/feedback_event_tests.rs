@@ -1,27 +1,41 @@
 //! Feedback event contracts for titles, report grouping, and lossless comment bodies.
 
 use crate::CodexFeedback;
+#[cfg(feature = "external-reporting")]
 use crate::FeedbackUploadOptions;
+#[cfg(feature = "external-reporting")]
 use crate::UPLOAD_TIMEOUT;
+#[cfg(feature = "external-reporting")]
 use codex_transport::http::HttpClientFactory;
+#[cfg(feature = "external-reporting")]
 use codex_transport::http::OutboundProxyPolicy;
+#[cfg(feature = "external-reporting")]
 use flate2::read::GzDecoder;
+#[cfg(feature = "external-reporting")]
 use http::StatusCode;
 use pretty_assertions::assert_eq;
-use sentry::protocol::Event;
-use sentry::protocol::Exception;
-use sentry::protocol::Level;
-use sentry::protocol::Value;
-use sentry::protocol::Values;
-use sentry::protocol::value::to_value;
+use sentry_types::protocol::v7::Event;
+use sentry_types::protocol::v7::Exception;
+use sentry_types::protocol::v7::Level;
+use sentry_types::protocol::v7::Value;
+use sentry_types::protocol::v7::Values;
+use sentry_types::protocol::v7::value::to_value;
 use std::collections::BTreeMap;
+#[cfg(feature = "external-reporting")]
 use std::io::Read;
+#[cfg(feature = "external-reporting")]
 use std::time::Instant;
+#[cfg(feature = "external-reporting")]
 use wiremock::Mock;
+#[cfg(feature = "external-reporting")]
 use wiremock::MockServer;
+#[cfg(feature = "external-reporting")]
 use wiremock::ResponseTemplate;
+#[cfg(feature = "external-reporting")]
 use wiremock::matchers::header;
+#[cfg(feature = "external-reporting")]
 use wiremock::matchers::method;
+#[cfg(feature = "external-reporting")]
 use wiremock::matchers::path;
 
 #[test]
@@ -180,6 +194,7 @@ fn reason_tag_previews_preserve_full_comments_in_the_exception() {
 }
 
 #[tokio::test]
+#[cfg(feature = "external-reporting")]
 async fn feedback_upload_sends_safe_reason_tag_and_full_comment() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))

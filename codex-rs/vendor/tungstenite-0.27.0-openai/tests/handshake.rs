@@ -44,6 +44,8 @@ fn server_thread(port: u16, server_subprotocols: Option<Vec<String>>) {
         let server = TcpListener::bind(("127.0.0.1", port))
             .expect("Can't listen, is this port already in use?");
 
+        // The handshake callback API requires an unboxed ErrorResponse.
+        #[allow(clippy::result_large_err)]
         let callback = |_request: &Request, mut response: Response| {
             if let Some(subprotocols) = server_subprotocols {
                 let headers = response.headers_mut();

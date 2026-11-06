@@ -1,7 +1,8 @@
 # Unreleased (0.28.0)
 * Reduce `Error` size 136 -> **32** by boxing internals of `Error::Http`, `Error::WriteBufferFull`,
   `ProtocolError::InvalidHeader`, `TlsError::Native`, `TlsError::Rustls`.
-- Raise MSRV to 1.75 and use the pure-Rust `zlib-rs` backend for `permessage-deflate`.
+- Raise the minimum supported Rust version to 1.95.
+- Use the pure-Rust `zlib-rs` backend for `permessage-deflate`.
 
 # 0.27.0
 - Fix large message read performance by enforcing max `read_buffer_size` read chunks.

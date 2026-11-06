@@ -298,7 +298,7 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
                 &invocation.step_context.environments,
                 environment_id.as_deref(),
             )?;
-            if environment.environment.is_remote() {
+            if environment.environment().is_remote() {
                 return Err(error(
                     "spirit uses local TRUEOS hardware; the selected environment is remote",
                 ));
@@ -321,6 +321,16 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
 }
 
 impl CoreToolRuntime for SpiritHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }

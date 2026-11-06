@@ -20,6 +20,7 @@ external-reporting = [
 workspace = true
 
 [dependencies]
+sentry-types = { version = "0.46.0", default-features = false }
 anyhow = { workspace = true }
 bytes = { workspace = true, optional = true }
 codex-transport = { workspace = true, optional = true }
@@ -38,6 +39,7 @@ tempfile = { workspace = true }
 tokio = { workspace = true, features = ["time"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+zip = { workspace = true }
 
 [dev-dependencies]
 log = { workspace = true }

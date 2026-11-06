@@ -138,7 +138,7 @@ impl ChatWidget {
     pub(crate) fn pet_picker_preview_draw(&self) -> Option<crate::pets::AmbientPetDraw> {
         self.bottom_pane
             .selected_index_for_active_view(crate::pets::PET_PICKER_VIEW_ID)?;
-        let area = self.pet_picker_preview_state.area()?;
+        let area = self.pet_picker_preview_state.take_area()?;
         let request = self
             .pet_picker_preview_pet
             .as_ref()?
@@ -210,19 +210,19 @@ impl ChatWidget {
         true
     }
 
-    pub(crate) fn pet_image_support(&self) -> crate::pets::PetImageSupport {
+    pub(crate) fn pet_image_support(&self) -> crate::terminal_image::PetImageSupport {
         #[cfg(test)]
         if let Some(support) = self.pet_image_support_override {
             return support;
         }
 
         #[cfg(test)]
-        return crate::pets::PetImageSupport::Unsupported(
-            crate::pets::PetImageUnsupportedReason::Terminal,
+        return crate::terminal_image::PetImageSupport::Unsupported(
+            crate::terminal_image::PetImageUnsupportedReason::Terminal,
         );
 
         #[cfg(not(test))]
-        crate::pets::detect_pet_image_support()
+        crate::terminal_image::detect_pet_image_support()
     }
 
     /// Set the pet preselected by the TUI picker in the widget's local settings.
@@ -383,7 +383,7 @@ impl ChatWidget {
     #[cfg(test)]
     pub(crate) fn set_pet_image_support_for_tests(
         &mut self,
-        support: crate::pets::PetImageSupport,
+        support: crate::terminal_image::PetImageSupport,
     ) {
         self.pet_image_support_override = Some(support);
         self.apply_ambient_pet_image_support_override_for_tests();

@@ -333,6 +333,7 @@ async fn cleared_timer_tasks_remain_bounded_until_the_runtime_reaps_them() {
         next: AtomicU64::new(1),
         shutdown: CancellationToken::new(),
         limits: CodeModeSessionCellExecutionLimits::default(),
+        output_truncation: CodeModeOutputTruncation::Client,
     });
     let delegate = Arc::new(Delegate::default());
     let started = session
@@ -429,7 +430,7 @@ async fn infinite_loop_yields_observation_and_can_be_cancelled_and_cleaned_up() 
         .unwrap()
         .unwrap();
     assert!(matches!(response, RuntimeResponse::Yielded { .. }));
-    let stopped = tokio::time::timeout(Duration::from_secs(2), session.terminate(id))
+    let stopped = tokio::time::timeout(Duration::from_secs(2), session.terminate(id.into()))
         .await
         .unwrap()
         .unwrap();
@@ -474,6 +475,7 @@ async fn preemption_keeps_the_real_cell_alive_until_wait_and_heap_limits_are_enf
             WaitRequest {
                 cell_id: id,
                 yield_time_ms: 1000,
+                max_output_tokens: None,
             },
             None,
         )
@@ -536,6 +538,7 @@ async fn explicit_yield_retains_the_cell_and_notifications_finish_before_cleanup
             WaitRequest {
                 cell_id: id,
                 yield_time_ms: 1000,
+                max_output_tokens: None,
             },
             None,
         )
@@ -691,4 +694,73 @@ async fn output_limit_rejects_excess_text_without_leaking_it_to_the_delegate() {
         matches!(result,RuntimeResponse::Result{content_items,error_text:Some(error),code_mode_host_duration:Some(_),..} if content_items.is_empty()&&error.contains("output limit"))
     );
     assert!(delegate.calls.lock().unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn server_output_mode_budgets_text_and_errors_before_returning_them() {
+    let session = QuickJsCodeModeSessionProvider
+        .create_session_with_options(CodeModeSessionOptions {
+            output_truncation: CodeModeOutputTruncation::Server,
+            ..CodeModeSessionOptions::default()
+        })
+        .await
+        .unwrap();
+    assert_eq!(
+        session.output_truncation(),
+        CodeModeOutputTruncation::Server
+    );
+    let mut input = request("text('large-output-'.repeat(10000));throw Error('script failed')");
+    input.max_output_tokens = Some(0);
+    let response = execute(&session, input, Arc::new(Delegate::default())).await;
+    let RuntimeResponse::Result {
+        content_items,
+        error_text,
+        ..
+    } = response
+    else {
+        panic!("execution must finish");
+    };
+    assert!(error_text.unwrap().contains("script failed"));
+    let serialized = serde_json::to_string(&content_items).unwrap();
+    assert!(!serialized.contains("large-output-"));
+    assert!(!serialized.contains("script failed"));
+    assert!(serialized.len() < 2048);
+}
+
+#[tokio::test]
+async fn server_output_mode_uses_each_observations_own_budget() {
+    let session = QuickJsCodeModeSessionProvider
+        .create_session_with_options(CodeModeSessionOptions {
+            output_truncation: CodeModeOutputTruncation::Server,
+            ..CodeModeSessionOptions::default()
+        })
+        .await
+        .unwrap();
+    let mut input = request(
+        "text('first');yield_control();await new Promise(r=>setTimeout(r,30));text('second')",
+    );
+    input.max_output_tokens = Some(0);
+    let started = session
+        .execute(input, Arc::new(Delegate::default()), None)
+        .await
+        .unwrap();
+    let id = started.cell_id.clone();
+    let first = started.initial_response().await.unwrap();
+    assert!(matches!(first, RuntimeResponse::Yielded { .. }));
+    assert!(!serde_json::to_string(&first).unwrap().contains("first"));
+    let WaitOutcome::LiveCell(second) = session
+        .wait(
+            WaitRequest {
+                cell_id: id,
+                yield_time_ms: 1000,
+                max_output_tokens: Some(100),
+            },
+            None,
+        )
+        .await
+        .unwrap()
+    else {
+        panic!("cell remains live across observations");
+    };
+    assert_eq!(texts(second), vec!["second"]);
 }

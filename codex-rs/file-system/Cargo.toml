@@ -13,6 +13,7 @@ codex-protocol = { workspace = true }
 codex-utils-paths = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+tokio = { workspace = true, features = ["rt", "sync"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 rustix = { workspace = true, features = ["fs"] }

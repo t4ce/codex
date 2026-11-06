@@ -1,4 +1,4 @@
-//! Approval-gated MCP transport for task tools owned by a local-daemon TUI.
+//! Approval-gated MCP transport for task tools owned by a local TUI.
 
 use crate::app_event_sender::AppEventSender;
 use crate::dynamic_tools;

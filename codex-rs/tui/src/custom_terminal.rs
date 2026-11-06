@@ -82,8 +82,8 @@ pub struct Frame<'a> {
     /// The buffer that is used to draw the current frame
     pub(crate) buffer: &'a mut Buffer,
 
-    /// Fullscreen graphics to send after text, before the synchronized frame is committed.
-    pub(crate) transcript_images: Vec<crate::transcript_image::ImagePlacement>,
+    /// Frame graphics to send after text, before the synchronized frame is committed.
+    pub(crate) image_placements: Vec<crate::transcript_image::ImagePlacement>,
 }
 
 impl Frame<'_> {
@@ -139,6 +139,7 @@ where
 {
     /// The backend used to interface with the terminal
     backend: B,
+    pub(crate) tmux_kitty_image_base: Option<u32>,
     /// Holds the results of the current and previous draw calls. The two are compared at the end
     /// of each draw pass to output the necessary updates to the terminal
     buffers: [Buffer; 2],
@@ -227,6 +228,7 @@ where
     ) -> Self {
         Self {
             backend,
+            tmux_kitty_image_base: None,
             buffers: [Buffer::empty(Rect::ZERO), Buffer::empty(Rect::ZERO)],
             current: 0,
             hidden_cursor: false,
@@ -262,7 +264,7 @@ where
     /// Get a Frame object which provides a consistent view into the terminal state for rendering.
     pub fn get_frame(&mut self) -> Frame<'_> {
         Frame {
-            transcript_images: Vec::new(),
+            image_placements: Vec::new(),
             cursor_position: None,
             cursor_style: SetCursorStyle::DefaultUserShape,
             viewport_area: self.viewport_area,
@@ -367,6 +369,28 @@ where
         self.draw_with_size(screen_size, &mut Vec::new(), render_callback)
     }
 
+    /// Remove graphics on the screen that owns them before switching buffers or yielding the terminal.
+    pub(crate) fn clear_frame_images(
+        &mut self,
+        images: &mut Vec<crate::transcript_image::ImagePlacement>,
+    ) -> io::Result<()> {
+        if images.is_empty() {
+            return Ok(());
+        }
+        let text = self.previous_buffer().clone();
+        let cursor = (!self.hidden_cursor).then_some(self.last_known_cursor_pos);
+        let style = self
+            .last_cursor_style
+            .unwrap_or(SetCursorStyle::DefaultUserShape);
+        self.draw_with_size(self.last_known_screen_size, images, |frame| {
+            *frame.buffer = text;
+            if let Some(cursor) = cursor {
+                frame.set_cursor_position(cursor);
+                frame.set_cursor_style(style);
+            }
+        })
+    }
+
     /// Draws a single frame using a screen size already obtained by the caller.
     pub(crate) fn draw_with_size<F>(
         &mut self,
@@ -391,15 +415,25 @@ where
         // Buffer. Thus, we're taking the important data out of the Frame and dropping it.
         let cursor_position = frame.cursor_position;
         let cursor_style = frame.cursor_style;
-        let images = std::mem::take(&mut frame.transcript_images);
+        let mut images = std::mem::take(&mut frame.image_placements);
+        let first_id = if let Some(base) = self.tmux_kitty_image_base {
+            images.truncate(254); // The last two pane IDs belong to the pet and picker.
+            base
+        } else {
+            crate::transcript_image::FIRST_IMAGE_ID
+        };
         let changed = *retained_images != images;
         if changed {
+            if self.tmux_kitty_image_base.is_some() && !retained_images.is_empty() {
+                // tmux retains placeholder text after Ghostty deletes the associated pixels.
+                self.invalidate_viewport();
+            }
             // Remove old graphics before text painting, including when switching to overlays.
             for (index, placement) in retained_images.iter().enumerate() {
                 match placement.image.protocol {
                     crate::terminal_image::ImageProtocol::Kitty
                     | crate::terminal_image::ImageProtocol::KittyLocalFile => {
-                        let id = crate::transcript_image::FIRST_IMAGE_ID + index as u32;
+                        let id = first_id + index as u32;
                         self.backend
                             .write_all(crate::terminal_image::kitty_delete_image(id).as_bytes())?;
                     }
@@ -430,10 +464,20 @@ where
         if repaint_images {
             *retained_images = images;
             for (index, placement) in retained_images.iter_mut().enumerate() {
-                let id = crate::transcript_image::FIRST_IMAGE_ID + index as u32;
+                let id = first_id + index as u32;
+                let kitty_placement = if self.tmux_kitty_image_base.is_some() {
+                    crate::terminal_image::KittyPlacement::Virtual(id)
+                } else {
+                    crate::terminal_image::KittyPlacement::Cursor(id)
+                };
                 placement.file = placement
                     .image
-                    .draw(&mut self.backend, placement.area, placement.first_row, id)
+                    .draw(
+                        &mut self.backend,
+                        placement.area,
+                        placement.first_row,
+                        kitty_placement,
+                    )
                     .map_err(io::Error::other)?;
             }
         }
@@ -513,6 +557,18 @@ where
         // Reset the back buffer to make sure the next update will redraw everything.
         self.invalidate_viewport();
         Ok(())
+    }
+
+    // The pet draws after the text frame. Mark its placeholder cells so the next diff
+    // restores the underlying text when the sprite moves or disappears.
+    pub(crate) fn mark_pet_placeholders(&mut self, request: Option<&crate::pets::AmbientPetDraw>) {
+        if self.tmux_kitty_image_base.is_some()
+            && let Some(sprite) = request
+        {
+            for pos in sprite.area().intersection(self.viewport_area).positions() {
+                self.previous_buffer_mut()[pos].set_diff_option(CellDiffOption::AlwaysUpdate);
+            }
+        }
     }
 
     /// Force the next draw pass to repaint the entire viewport after raw terminal
@@ -936,9 +992,10 @@ mod tests {
         image::RgbaImage::from_pixel(32, 32, image::Rgba([10, 110, 200, 255]))
             .save(&path)
             .unwrap();
-        for protocol in [
-            crate::terminal_image::ImageProtocol::Kitty,
-            crate::terminal_image::ImageProtocol::KittyLocalFile,
+        for (protocol, tmux_base) in [
+            (crate::terminal_image::ImageProtocol::Kitty, None),
+            (crate::terminal_image::ImageProtocol::KittyLocalFile, None),
+            (crate::terminal_image::ImageProtocol::Kitty, Some(0x80_0100)),
         ] {
             let image = std::sync::Arc::new(
                 crate::transcript_image::TranscriptImage::load(&path, /*width*/ 40, protocol)
@@ -946,6 +1003,7 @@ mod tests {
             );
             let mut terminal =
                 Terminal::with_options(CaptureBackend::new(/*width*/ 40, /*height*/ 12)).unwrap();
+            terminal.tmux_kitty_image_base = tmux_base;
             let size = terminal.last_known_screen_size;
             terminal.set_viewport_area(Rect::new(
                 /*x*/ 0,
@@ -968,7 +1026,7 @@ mod tests {
                             frame.buffer_mut(),
                         );
                         frame
-                            .transcript_images
+                            .image_placements
                             .push(crate::transcript_image::ImagePlacement {
                                 image: std::sync::Arc::clone(&image),
                                 area: Rect::new(
@@ -986,6 +1044,15 @@ mod tests {
             let output = terminal.backend().output();
             assert_eq!(output.matches("_Ga=T").count(), 2);
             assert_eq!(output.matches("_Ga=d").count(), 0);
+            if tmux_base.is_some() {
+                assert!(output.contains("i=8388864,U=1"));
+                let (_, grid) = output.split_once("\x1b[38;2;128;1;0m").unwrap();
+                let (grid, _) = grid.split_once("\x1b[39m").unwrap();
+                insta::assert_snapshot!(
+                    "fullscreen_tmux_image_cells",
+                    grid.replace('\x1b', "\nESC").trim()
+                );
+            }
             if protocol == crate::terminal_image::ImageProtocol::KittyLocalFile {
                 assert!(output.contains("t=f") && output.contains("C=1"));
                 assert!(retained[0].file.as_ref().unwrap().path().exists());

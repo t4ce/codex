@@ -149,8 +149,7 @@ fn should_bypass_proxy(host: &str, port: u16) -> Result<bool> {
             return Ok(true);
         }
 
-        if token_host.starts_with('.') {
-            let token_host = &token_host[1..];
+        if let Some(token_host) = token_host.strip_prefix('.') {
             if host == token_host || host.ends_with(&format!(".{token_host}")) {
                 return Ok(true);
             }

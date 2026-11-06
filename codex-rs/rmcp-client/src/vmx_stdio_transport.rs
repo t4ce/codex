@@ -1,18 +1,15 @@
 //! MCP protocol bytes carried by a fresh hypervisor VM, never a terminal.
 use crate::bounded_stdio_transport::MAX_MCP_STDIO_LINE_BYTES;
-use rmcp::{
-    service::{RoleClient, RxJsonRpcMessage, TxJsonRpcMessage},
-    transport::Transport,
-};
-use std::{
-    future::Future,
-    io,
-    sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    },
-    time::Duration,
-};
+use rmcp::service::RoleClient;
+use rmcp::service::RxJsonRpcMessage;
+use rmcp::service::TxJsonRpcMessage;
+use rmcp::transport::Transport;
+use std::future::Future;
+use std::io;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering;
+use std::time::Duration;
 use tokio::sync::Mutex;
 const CHUNK: usize = 3000;
 const POLL: Duration = Duration::from_millis(10);
@@ -180,10 +177,9 @@ impl VmChannel for KernelChannel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::{
-        collections::VecDeque,
-        sync::{Mutex as StdMutex, atomic::AtomicUsize},
-    };
+    use std::collections::VecDeque;
+    use std::sync::Mutex as StdMutex;
+    use std::sync::atomic::AtomicUsize;
     #[derive(Default)]
     struct State {
         input: StdMutex<VecDeque<u8>>,

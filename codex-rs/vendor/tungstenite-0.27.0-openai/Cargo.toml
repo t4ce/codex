@@ -11,7 +11,7 @@ documentation = "https://docs.rs/tungstenite/0.27.0"
 repository = "https://github.com/snapview/tungstenite-rs"
 version = "0.27.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.95"
 include = ["benches/**/*", "src/**/*", "examples/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
 [package.metadata.docs.rs]

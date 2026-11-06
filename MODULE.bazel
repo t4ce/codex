@@ -155,7 +155,7 @@ single_version_override(
     module_name = "rules_cc",
     patch_strip = 1,
     patches = [
-        "//patches:rules_cc_rusty_v8_custom_libcxx.patch",
+        "//patches:rules_cc_windows_native_llvm.patch",
     ],
 )
 
@@ -383,8 +383,13 @@ crate.from_cargo(
     ],
 )
 
-bazel_dep(name = "zstd", version = "1.5.7")
+bazel_dep(name = "zstd", version = "1.5.7.bcr.2")
 
+crate.annotation(
+    # Keep Windows proxy authentication aligned with codex-rs/.cargo/config.toml.
+    build_script_env = {"CFLAGS": "-DCURL_ENABLE_NTLM"},
+    crate = "curl-sys",
+)
 crate.annotation(
     # Daemon tests repeatedly hash large CLI binaries, even in fastbuild mode.
     # Optimize the native backends as well as the Rust implementation.
@@ -396,13 +401,18 @@ crate.annotation(
     },
     rustc_flags = ["-Copt-level=3"],
 )
+
+# Match the CodeModeHost response-compression benchmark's zstd level.
+crate.annotation(
+    crate = "tonic",
+    patch_args = ["-p1"],
+    patches = ["//patches:tonic-zstd-level1.patch"],
+    version = "0.14.3",
+)
 crate.annotation(
     crate = "zstd-sys",
-    gen_build_script = "on",
-    patch_args = ["-p1"],
-    patches = [
-        "//patches:zstd-sys_windows_msvc_include_dirs.patch",
-    ],
+    gen_build_script = "off",
+    deps = ["@zstd"],
 )
 crate.annotation(
     crate = "ring",
@@ -508,23 +518,24 @@ crate.annotation(
     workspace_cargo_toml = "rust/runfiles/Cargo.toml",
 )
 
-# MXC keeps its Rust workspace below the repository root.
-[
-    crate.annotation(
-        crate = name,
-        workspace_cargo_toml = "src/Cargo.toml",
-    )
-    for name in [
-        "appcontainer_common",
-        "learning_mode_core",
-        "learning_mode_windows",
-        "mxc_config_contract",
-        "mxc_telemetry",
-        "process_security_environment_spec",
-        "sandbox_spec",
-        "wxc_common",
-    ]
-]
+# MXC's resource compiler lookup needs an explicit path for Windows GNU targets.
+crate.annotation(
+    build_script_deps = [
+        "@crates//:cc-1.2.55",
+        "@crates//:winresource-0.1.34",
+    ],
+    build_script_env = {
+        "RC_PATH": "$(execpath @llvm//tools:llvm-rc)",
+    },
+    build_script_tools = [
+        "@llvm//tools:clang",
+        "@llvm//tools:llvm-rc",
+    ],
+    crate = "mxc-sdk",
+    patch_args = ["-p1"],
+    patches = ["//patches:mxc-sdk_utf8_resources.patch"],
+    workspace_cargo_toml = "src/Cargo.toml",
+)
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -660,11 +671,14 @@ crate.annotation(
         "@rules_foreign_cc//toolchains:current_ninja_toolchain",
     ],
     crate = "opusic-sys",
+    patch_args = ["-p1"],
+    patches = ["//patches:opusic_sys_install_headers.patch"],
 )
 
 # The musl CLI's allocator needs declared native tools and consistent header flags.
 crate.annotation(
     build_script_env = {
+        "JEMALLOC_SYS_WITH_MALLOC_CONF": "narenas_ratio:0.25",
         "MAKE": "$${pwd}/$(MAKE)",
         "NM": "$${pwd}/$(execpath @llvm//tools:llvm-nm)",
         "RANLIB": "$${pwd}/$(execpath @llvm//tools:llvm-ranlib)",
@@ -809,28 +823,66 @@ inject_repo(crate, "alsa_lib")
     ]
 ]
 
-bazel_dep(name = "v8", version = "15.2.124.1")
-archive_override(
-    module_name = "v8",
+bazel_dep(name = "rules_license", version = "1.0.0")
+
+engine_repository = use_repo_rule("//third_party/v8:engine_repository.bzl", "engine_repository")
+
+engine_repository(
+    name = "v8",
     integrity = "sha256-aNN5G427qQbP/5o+NXONgXR8ZvS6mjf6mfAI6jtxyzI=",
     patch_strip = 3,
     patches = [
-        "//patches:v8_module_deps.patch",
-        "//patches:v8_bazel_rules.patch",
         "//patches:v8_source_portability.patch",
         "//patches:v8_array_sort_elements_kind.patch",
+        "//third_party/v8:v8_defs.patch",
     ],
     strip_prefix = "v8-15.2.124.1",
     urls = ["https://github.com/v8/v8/archive/refs/tags/15.2.124.1.tar.gz"],
 )
 
+# All V8 inputs are owned here, including the pinned Python generator inputs.
+pip.parse(
+    extra_pip_args = ["--require-hashes"],
+    hub_name = "v8_python_deps",
+    python_version = "3.11",
+    requirements_lock = "@v8//:bazel/requirements.txt",
+    simpleapi_skip = [
+        "jinja2",
+        "markupsafe",
+    ],
+)
+use_repo(pip, "v8_python_deps")
+
+native_windows_llvm = use_repo_rule("//third_party/v8:native_windows.bzl", "native_windows_llvm")
+
+native_windows_llvm(name = "v8_native_windows_llvm")
+
+native_windows_cc = use_repo_rule("//third_party/v8:native_windows.bzl", "native_windows_cc")
+
+native_windows_cc(
+    name = "v8_native_windows_cc",
+    native_llvm = "@v8_native_windows_llvm//:BUILD.bazel",
+)
+
+v8_dependencies = use_extension("//third_party/v8:dependencies.bzl", "dependencies")
+use_repo(
+    v8_dependencies,
+    "v8_abseil",
+    "v8_dragonbox",
+    "v8_fast_float",
+    "v8_fp16",
+    "v8_highway",
+    "v8_icu",
+    "v8_simdutf",
+)
+
 http_archive(
     name = "v8_crate_152_2_0",
     build_file = "//third_party/v8:v8_crate.BUILD.bazel",
-    sha256 = "a10fe1a92da5c32c7c7f838ce36c0ccfcfd5edf0865b58bdde820aa64cea9888",
-    strip_prefix = "v8-152.2.0",
+    sha256 = "b0b188d1f1d851abd78337818a28a15e84f143b082ce966976e9206617684373",
+    strip_prefix = "rusty_v8-90a65f887a0c0f048f3784afbcb320b373c8a2e0",
     type = "tar.gz",
-    urls = ["https://static.crates.io/crates/v8/v8-152.2.0.crate"],
+    urls = ["https://github.com/openai-oss-forks/rusty_v8/archive/90a65f887a0c0f048f3784afbcb320b373c8a2e0.tar.gz"],
 )
 
 git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")

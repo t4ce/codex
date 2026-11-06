@@ -415,7 +415,7 @@ impl ToolExecutor<ToolInvocation> for ReadFileHandler {
                 .turn
                 .granted_permissions(&environment.selection.environment_id);
             let sandbox = environment.sandbox_context(granted_permissions);
-            let fs = environment.environment.get_filesystem();
+            let fs = environment.environment().get_filesystem();
             let metadata = fs
                 .get_metadata(&path, GetMetadataOptions::default(), Some(&sandbox))
                 .await
@@ -479,7 +479,7 @@ impl ToolExecutor<ToolInvocation> for ListDirectoryHandler {
                 .turn
                 .granted_permissions(&environment.selection.environment_id);
             let sandbox = environment.sandbox_context(granted_permissions);
-            let fs = environment.environment.get_filesystem();
+            let fs = environment.environment().get_filesystem();
             let entries = fs
                 .read_directory(&path, Some(&sandbox))
                 .await
@@ -510,6 +510,16 @@ impl ToolExecutor<ToolInvocation> for ListDirectoryHandler {
 }
 
 impl CoreToolRuntime for ListDirectoryHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }
@@ -545,7 +555,7 @@ impl ToolExecutor<ToolInvocation> for FileInfoHandler {
                 .turn
                 .granted_permissions(&environment.selection.environment_id);
             let sandbox = environment.sandbox_context(granted_permissions);
-            let fs = environment.environment.get_filesystem();
+            let fs = environment.environment().get_filesystem();
             let metadata = fs
                 .get_metadata(&path, GetMetadataOptions::default(), Some(&sandbox))
                 .await
@@ -563,12 +573,32 @@ impl ToolExecutor<ToolInvocation> for FileInfoHandler {
 }
 
 impl CoreToolRuntime for FileInfoHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }
 }
 
 impl CoreToolRuntime for ReadFileHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }
@@ -631,7 +661,7 @@ impl ToolRuntime<WriteRequest, Value> for WriteRuntime {
         &req.environment
     }
     fn uses_executor_managed_process_sandbox(&self, req: &WriteRequest) -> bool {
-        req.environment.environment.is_remote()
+        req.environment.environment().is_remote()
             || codex_exec_server::uses_native_file_system_sandbox()
     }
     fn sandbox_cwd<'a>(&self, req: &'a WriteRequest) -> Option<&'a PathUri> {
@@ -661,7 +691,7 @@ impl ToolRuntime<WriteRequest, Value> for WriteRuntime {
             windows_sandbox_proxy_settings_mode: None,
             use_legacy_landlock: attempt.use_legacy_landlock,
         });
-        let fs = req.environment.environment.get_filesystem();
+        let fs = req.environment.environment().get_filesystem();
         fs.write_file(
             &req.path,
             req.content.as_bytes().to_vec(),
@@ -732,7 +762,7 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
             let sandbox = environment.sandbox_context(granted_permissions);
             let policy_context =
                 file_system_sandbox_policy_context_for_cwd(&sandbox, environment.cwd());
-            let route = if environment.environment.is_remote()
+            let route = if environment.environment().is_remote()
                 || codex_exec_server::uses_native_file_system_sandbox()
             {
                 PatchSandboxRoute::ExecutorManaged
@@ -783,7 +813,7 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
                 additional,
             );
             let change = if let Some(expected) = options.expected_sha256 {
-                let fs = environment.environment.get_filesystem();
+                let fs = environment.environment().get_filesystem();
                 let previous = read_bounded(fs.as_ref(), &path, MAX_TEXT_BYTES, Some(&sandbox))
                     .await
                     .map_err(|error| {
@@ -845,6 +875,16 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
 }
 
 impl CoreToolRuntime for WriteFileHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+
     fn is_builtin_control_tool(&self) -> bool {
         true
     }
