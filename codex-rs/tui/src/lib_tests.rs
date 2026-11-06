@@ -189,7 +189,7 @@ gcp_setup_wizard = true
             let expected = expected
                 && (feature != Feature::BedrockSetupWizard
                     || !matches!(&target, AppServerTarget::Embedded)
-                    || codex_app_server::bedrock_support_available());
+                    || codex_app_server_client::bedrock_support_available());
             assert_eq!(
                 should_show_provider_setup_wizard(
                     login_status,

@@ -2595,7 +2595,8 @@ fn should_show_provider_setup_wizard(
 ) -> bool {
     let supported_target = match app_server_target {
         AppServerTarget::Embedded => {
-            feature != Feature::BedrockSetupWizard || codex_app_server::bedrock_support_available()
+            feature != Feature::BedrockSetupWizard
+                || codex_app_server_client::bedrock_support_available()
         }
         AppServerTarget::LocalDaemon { .. } => feature == Feature::BedrockSetupWizard,
         AppServerTarget::Remote { .. } | AppServerTarget::Cloud => false,

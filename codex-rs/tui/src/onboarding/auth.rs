@@ -1462,7 +1462,7 @@ mod tests {
         );
         assert_eq!(
             widget.bedrock_setup_enabled,
-            codex_app_server::bedrock_support_available()
+            codex_app_server_client::bedrock_support_available()
         );
         // The remainder covers the menu renderer when a capable server offers Bedrock.
         widget.bedrock_setup_enabled = true;

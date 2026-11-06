@@ -42,6 +42,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 pub use codex_app_server::app_server_control_socket_path;
+pub use codex_app_server::bedrock_support_available;
 pub use codex_app_server::in_process::DEFAULT_IN_PROCESS_CHANNEL_CAPACITY;
 pub use codex_app_server::in_process::EmbeddedNetworkPolicy;
 pub use codex_app_server::in_process::InProcessServerEvent;
