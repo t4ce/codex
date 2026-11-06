@@ -41,7 +41,7 @@ use crate::tools::handlers::apply_granted_turn_permissions;
 use crate::tools::handlers::apply_patch::write_permissions_for_paths;
 use crate::tools::handlers::file_system_sandbox_policy_context_for_cwd;
 use crate::tools::handlers::parse_arguments;
-use crate::tools::handlers::resolve_tool_environment;
+use crate::tools::handlers::selected_tool_environment;
 use crate::tools::orchestrator::ToolOrchestrator;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::ToolExecutor;
@@ -405,7 +405,8 @@ impl ToolExecutor<ToolInvocation> for ReadFileHandler {
             if !(1..=MAX_TEXT_BYTES).contains(&max_bytes) {
                 return Err(text_error("max_bytes must be between 1 and 1048576"));
             }
-            let environment = resolve_tool_environment(
+            let environment = selected_tool_environment(
+                &invocation.environments,
                 &invocation.step_context.environments,
                 args.environment_id.as_deref(),
             )?;
@@ -468,7 +469,8 @@ impl ToolExecutor<ToolInvocation> for ListDirectoryHandler {
             if !(1..=MAX_DIRECTORY_ENTRIES).contains(&max_entries) {
                 return Err(text_error("max_entries must be between 1 and 1000"));
             }
-            let environment = resolve_tool_environment(
+            let environment = selected_tool_environment(
+                &invocation.environments,
                 &invocation.step_context.environments,
                 args.environment_id.as_deref(),
             )?;
@@ -544,7 +546,8 @@ impl ToolExecutor<ToolInvocation> for FileInfoHandler {
                 return Err(text_error("file_info requires function arguments"));
             };
             let args: FileInfoArgs = parse_arguments(arguments)?;
-            let environment = resolve_tool_environment(
+            let environment = selected_tool_environment(
+                &invocation.environments,
                 &invocation.step_context.environments,
                 args.environment_id.as_deref(),
             )?;
@@ -749,7 +752,8 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
             };
             let args: WriteArgs = parse_arguments(arguments)?;
             let options = write_options(&args)?;
-            let environment = resolve_tool_environment(
+            let environment = selected_tool_environment(
+                &invocation.environments,
                 &invocation.step_context.environments,
                 args.environment_id.as_deref(),
             )?

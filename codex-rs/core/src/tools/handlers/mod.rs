@@ -223,6 +223,19 @@ pub(crate) fn selected_executor<'a>(
     }
 }
 
+/// Use the executor captured by dispatch; direct handler callers can still select by argument.
+#[cfg(any(target_os = "trueos", test))]
+fn selected_tool_environment<'a>(
+    environments: &'a ToolEnvironments,
+    snapshot: &'a TurnEnvironmentSnapshot,
+    environment_id: Option<&str>,
+) -> Result<&'a TurnEnvironment, FunctionCallError> {
+    match environments {
+        ToolEnvironments::All => resolve_tool_environment(snapshot, environment_id),
+        _ => selected_executor(environments, snapshot),
+    }
+}
+
 pub(crate) fn resolve_tool_environment<'a>(
     environments: &'a TurnEnvironmentSnapshot,
     environment_id: Option<&str>,
@@ -474,6 +487,68 @@ mod tests {
     use codex_utils_paths::path_uri::PathUri;
     use pretty_assertions::assert_eq;
     use tempfile::tempdir;
+
+    #[tokio::test]
+    async fn selected_tool_environment_uses_captured_backend_over_step_snapshot() {
+        let (_session, turn) = crate::session::tests::make_session_and_context().await;
+        let original = turn
+            .initial_environments
+            .primary()
+            .expect("local environment");
+        assert!(!original.environment().is_remote());
+        let mut selection = original.selection.clone();
+        selection.cwd = PathUri::parse("file:///dispatcher-cwd").unwrap();
+        let backend = std::sync::Arc::new(
+            codex_exec_server::Environment::create_for_tests(Some(
+                "http://127.0.0.1:1".to_string(),
+            ))
+            .unwrap(),
+        );
+        let selected = crate::session::turn_context::TurnEnvironment::new(
+            selection,
+            original.config_origin,
+            backend,
+            original.shell.clone(),
+        );
+        let environments = crate::tools::context::ToolEnvironments::single_executor(&selected);
+        let resolved = super::selected_tool_environment(
+            &environments,
+            &turn.initial_environments,
+            Some("rewritten-id-must-not-retarget"),
+        )
+        .unwrap();
+        assert!(resolved.environment().is_remote());
+        assert_eq!(resolved.cwd(), selected.cwd());
+        assert!(std::sync::Arc::ptr_eq(
+            resolved.environment(),
+            selected.environment()
+        ));
+    }
+
+    #[tokio::test]
+    async fn selected_tool_environment_preserves_direct_call_argument_selection() {
+        let (_session, turn) = crate::session::tests::make_session_and_context().await;
+        let mut snapshot = turn.initial_environments;
+        let mut selected = snapshot.primary().expect("local environment").clone();
+        selected.selection.environment_id = "direct-selected".to_string();
+        selected.selection.cwd = PathUri::parse("file:///direct-cwd").unwrap();
+        snapshot
+            .environments
+            .push(crate::environment_selection::TurnEnvironmentState::Ready(
+                selected,
+            ));
+        let resolved = super::selected_tool_environment(
+            &crate::tools::context::ToolEnvironments::All,
+            &snapshot,
+            Some("direct-selected"),
+        )
+        .unwrap();
+        assert_eq!(resolved.selection.environment_id, "direct-selected");
+        assert_eq!(
+            resolved.cwd(),
+            &PathUri::parse("file:///direct-cwd").unwrap()
+        );
+    }
 
     fn network_permissions() -> AdditionalPermissionProfile {
         AdditionalPermissionProfile {

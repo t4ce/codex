@@ -15,7 +15,7 @@ use crate::tools::context::ToolInvocation;
 use crate::tools::context::ToolPayload;
 use crate::tools::context::boxed_tool_output;
 use crate::tools::handlers::parse_arguments;
-use crate::tools::handlers::resolve_tool_environment;
+use crate::tools::handlers::selected_tool_environment;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::ToolExecutor;
 
@@ -98,7 +98,8 @@ impl ToolExecutor<ToolInvocation> for IdeHandler {
                     ));
                 }
             };
-            let environment = resolve_tool_environment(
+            let environment = selected_tool_environment(
+                &invocation.environments,
                 &invocation.step_context.environments,
                 environment_id.as_deref(),
             )?;

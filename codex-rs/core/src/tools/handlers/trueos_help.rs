@@ -17,7 +17,7 @@ use crate::tools::context::ToolInvocation;
 use crate::tools::context::ToolPayload;
 use crate::tools::context::boxed_tool_output;
 use crate::tools::handlers::parse_arguments;
-use crate::tools::handlers::resolve_tool_environment;
+use crate::tools::handlers::selected_tool_environment;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::ToolExecutor;
 
@@ -96,8 +96,11 @@ fn selected_environment<'a>(
     invocation: &'a ToolInvocation,
     environment_id: Option<&str>,
 ) -> Result<&'a TurnEnvironment, FunctionCallError> {
-    let environment =
-        resolve_tool_environment(&invocation.step_context.environments, environment_id)?;
+    let environment = selected_tool_environment(
+        &invocation.environments,
+        &invocation.step_context.environments,
+        environment_id,
+    )?;
     if environment.environment().is_remote() {
         return Err(text_error(
             "help describes local TRUEOS Shell3; the selected environment is remote",
