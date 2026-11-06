@@ -22,4 +22,5 @@ codex-message-board = { workspace = true }
 codex-protocol = { workspace = true }
 codex-state = { workspace = true }
 codex-thread-store = { workspace = true }
+codex-transport = { workspace = true }
 futures = { workspace = true }
