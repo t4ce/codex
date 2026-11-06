@@ -16,6 +16,13 @@ mod extract;
 pub mod log_db;
 mod migrations;
 mod model;
+#[cfg(all(test, not(target_os = "trueos")))]
+#[path = "nfs_migration_service.rs"]
+mod native_nfs_migration_tests;
+#[cfg(not(target_os = "trueos"))]
+mod nfs_migration;
+#[cfg(target_os = "trueos")]
+#[path = "nfs_migration_service.rs"]
 mod nfs_migration;
 mod paths;
 mod runtime;
