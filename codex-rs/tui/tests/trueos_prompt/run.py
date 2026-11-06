@@ -17,6 +17,8 @@ fixture = Path(tempfile.mkdtemp(prefix="trueos-prompt-ingress-"))
 (fixture / "src").mkdir()
 (fixture / "src/lib.rs").write_text(
     '#![allow(dead_code, unexpected_cfgs)]\n'
+    f'#[path = "{TUI / "src/backend_id.rs"}"]\n'
+    'mod backend_id;\n'
     f'#[path = "{TUI / "src/app/trueos_prompt.rs"}"]\n'
     'mod trueos_prompt;\n'
 )
@@ -28,6 +30,7 @@ edition = "2024"
 [dependencies]
 tokio = { version = "=1.54.1", features = ["rt", "macros", "sync", "time", "test-util"] }
 tracing = "=0.1.44"
+uuid = { version = "1", features = ["v4"] }
 ''')
 env = dict(os.environ)
 env.setdefault("CARGO_TARGET_DIR", "/tmp/trueos-prompt-ingress-target")

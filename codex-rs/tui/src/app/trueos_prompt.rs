@@ -2,7 +2,10 @@
 //!
 //! The reader owns each async filesystem operation through completion. A UI
 //! event must never cancel a read after the kernel has handed over its text.
+//! A pending statement keeps its logical backend and conversation identity even when another
+//! connection exposes the same thread UUID. Only the thread UUID reaches the kernel endpoint.
 
+use crate::backend_id::BackendId;
 use std::future::Future;
 use std::time::Duration;
 use tokio::sync::mpsc;
@@ -14,15 +17,30 @@ const POLL_INTERVAL: Duration = Duration::from_millis(200);
 const RETRY_INTERVAL: Duration = Duration::from_secs(2);
 const MAX_PROMPT_BYTES: usize = 16 * 1024;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(super) struct PromptScope {
+    backend_id: BackendId,
+    thread_id: String,
+}
+
+impl PromptScope {
+    pub(super) fn new(backend_id: BackendId, thread_id: String) -> Self {
+        Self {
+            backend_id,
+            thread_id,
+        }
+    }
+}
+
 struct Prompt {
-    scope: String,
+    scope: PromptScope,
     text: String,
     accepted: oneshot::Sender<()>,
 }
 
 pub(super) struct PromptInbox {
     task: JoinHandle<()>,
-    scope: Option<watch::Sender<Option<String>>>,
+    scope: Option<watch::Sender<Option<PromptScope>>>,
     receiver: mpsc::Receiver<Prompt>,
     pending: Option<Prompt>,
 }
@@ -40,7 +58,7 @@ impl PromptInbox {
         R: FnMut(String) -> F + Send + 'static,
         F: Future<Output = Result<Vec<u8>, i32>> + Send,
     {
-        let (scope, mut scope_rx) = watch::channel::<Option<String>>(None);
+        let (scope, mut scope_rx) = watch::channel::<Option<PromptScope>>(None);
         let (sender, receiver) = mpsc::channel(1);
         let task = tokio::spawn(async move {
             let mut last_error = None;
@@ -48,7 +66,9 @@ impl PromptInbox {
                 let active_scope = scope_rx.borrow_and_update().clone();
                 let path = format!(
                     "vFile:codex-input/{}",
-                    active_scope.as_deref().unwrap_or("offline")
+                    active_scope
+                        .as_ref()
+                        .map_or("offline", |scope| scope.thread_id.as_str())
                 );
                 // This await deliberately lives outside select!: it must not
                 // lose a prompt when another UI event wakes the main loop.
@@ -122,7 +142,7 @@ impl PromptInbox {
         }
     }
 
-    pub(super) fn set_scope(&self, scope: Option<String>) {
+    pub(super) fn set_scope(&self, scope: Option<PromptScope>) {
         if let Some(sender) = self.scope.as_ref()
             && *sender.borrow() != scope
         {
@@ -158,11 +178,15 @@ impl PromptInbox {
         }
     }
 
-    pub(super) fn try_deliver(&mut self, scope: Option<&str>, submit: impl FnOnce(String) -> bool) {
+    pub(super) fn try_deliver(
+        &mut self,
+        scope: Option<&PromptScope>,
+        submit: impl FnOnce(String) -> bool,
+    ) {
         let Some(prompt) = self.pending.as_ref() else {
             return;
         };
-        if scope == Some(prompt.scope.as_str()) && submit(prompt.text.clone()) {
+        if scope == Some(&prompt.scope) && submit(prompt.text.clone()) {
             let prompt = self.pending.take().expect("matched pending prompt");
             let _ = prompt.accepted.send(());
         }
@@ -191,6 +215,11 @@ mod tests {
     use super::*;
     use std::sync::Arc;
     use tokio::sync::Notify;
+
+    fn scope(thread_id: &str) -> PromptScope {
+        static OWNER: std::sync::OnceLock<BackendId> = std::sync::OnceLock::new();
+        PromptScope::new(*OWNER.get_or_init(BackendId::new), thread_id.into())
+    }
 
     fn inbox_with_text(text: &str) -> (PromptInbox, mpsc::UnboundedReceiver<String>) {
         let (paths, paths_rx) = mpsc::unbounded_channel();
@@ -228,18 +257,18 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn a_pending_statement_is_delivered_once_and_stops_further_reads() {
         let (mut inbox, mut paths) = inbox_with_text("first\nsecond");
-        inbox.set_scope(Some("main".into()));
+        inbox.set_scope(Some(scope("main")));
         inbox.receive().await;
         assert_eq!(paths.recv().await.unwrap(), "vFile:codex-input/main");
         tokio::time::advance(Duration::from_secs(5)).await;
         assert!(paths.try_recv().is_err());
         assert!(!inbox.can_receive());
         let mut delivered = Vec::new();
-        inbox.try_deliver(Some("main"), |text| {
+        inbox.try_deliver(Some(&scope("main")), |text| {
             delivered.push(text);
             true
         });
-        inbox.try_deliver(Some("main"), |_| panic!("duplicate delivery"));
+        inbox.try_deliver(Some(&scope("main")), |_| panic!("duplicate delivery"));
         assert_eq!(delivered, ["first\nsecond"]);
         assert!(inbox.can_receive());
         tokio::task::yield_now().await;
@@ -250,30 +279,81 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn scope_changes_never_retarget_text_and_original_view_can_resume() {
         let (mut inbox, mut paths) = inbox_with_text("for original");
-        inbox.set_scope(Some("original".into()));
+        inbox.set_scope(Some(scope("original")));
         inbox.receive().await;
         paths.recv().await.unwrap();
-        inbox.set_scope(Some("other".into()));
-        inbox.try_deliver(Some("other"), |_| panic!("wrong conversation"));
+        inbox.set_scope(Some(scope("other")));
+        inbox.try_deliver(Some(&scope("other")), |_| panic!("wrong conversation"));
         inbox.try_deliver(None, |_| panic!("blocked view"));
         tokio::time::advance(Duration::from_secs(5)).await;
         assert!(paths.try_recv().is_err());
-        inbox.set_scope(Some("original".into()));
-        inbox.try_deliver(Some("original"), |text| text == "for original");
+        inbox.set_scope(Some(scope("original")));
+        inbox.try_deliver(Some(&scope("original")), |text| text == "for original");
+        assert!(inbox.can_receive());
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn identical_thread_ids_on_another_backend_never_accept_a_pending_statement() {
+        let original = PromptScope::new(BackendId::new(), "same-thread".into());
+        let other = PromptScope::new(BackendId::new(), "same-thread".into());
+        let (mut inbox, mut paths) = inbox_with_text("original backend only");
+        inbox.set_scope(Some(original.clone()));
+        inbox.receive().await;
+        assert_eq!(paths.recv().await.unwrap(), "vFile:codex-input/same-thread");
+
+        inbox.set_scope(Some(other.clone()));
+        inbox.try_deliver(Some(&other), |_| panic!("wrong backend"));
+        assert!(!inbox.can_receive());
+        tokio::time::advance(Duration::from_secs(5)).await;
+        assert!(paths.try_recv().is_err());
+
+        inbox.set_scope(Some(original.clone()));
+        inbox.try_deliver(Some(&original), |text| text == "original backend only");
+        assert!(inbox.can_receive());
+    }
+
+    #[tokio::test]
+    async fn an_inflight_read_keeps_its_original_backend_when_the_same_thread_is_selected_elsewhere()
+     {
+        let original = PromptScope::new(BackendId::new(), "same-thread".into());
+        let other = PromptScope::new(BackendId::new(), "same-thread".into());
+        let finish = Arc::new(Notify::new());
+        let read_finish = Arc::clone(&finish);
+        let (started, mut starts) = mpsc::unbounded_channel();
+        let mut inbox = PromptInbox::spawn_with_reader(move |path| {
+            let finish = Arc::clone(&read_finish);
+            let _ = started.send(path);
+            async move {
+                finish.notified().await;
+                Ok(b"read for original backend".to_vec())
+            }
+        });
+        inbox.set_scope(Some(original.clone()));
+        assert_eq!(
+            starts.recv().await.unwrap(),
+            "vFile:codex-input/same-thread"
+        );
+        inbox.set_scope(Some(other.clone()));
+        finish.notify_one();
+        inbox.receive().await;
+        inbox.try_deliver(Some(&other), |_| panic!("inflight read retargeted"));
+        assert!(!inbox.can_receive());
+        inbox.set_scope(Some(original.clone()));
+        inbox.try_deliver(Some(&original), |text| text == "read for original backend");
         assert!(inbox.can_receive());
     }
 
     #[tokio::test]
     async fn rejected_submission_remains_owned_until_acceptance() {
         let (mut inbox, _) = inbox_with_text("keep this");
-        inbox.set_scope(Some("main".into()));
+        inbox.set_scope(Some(scope("main")));
         inbox.receive().await;
-        inbox.try_deliver(Some("main"), |text| {
+        inbox.try_deliver(Some(&scope("main")), |text| {
             assert_eq!(text, "keep this");
             false
         });
         assert!(!inbox.can_receive());
-        inbox.try_deliver(Some("main"), |text| text == "keep this");
+        inbox.try_deliver(Some(&scope("main")), |text| text == "keep this");
         assert!(inbox.can_receive());
     }
 
@@ -290,7 +370,7 @@ mod tests {
                 Ok(b"still here".to_vec())
             }
         });
-        inbox.set_scope(Some("main".into()));
+        inbox.set_scope(Some(scope("main")));
         assert_eq!(starts.recv().await.unwrap(), "vFile:codex-input/main");
         assert!(
             tokio::time::timeout(POLL_INTERVAL, inbox.receive())
@@ -299,14 +379,14 @@ mod tests {
         );
         finish.notify_one();
         inbox.receive().await;
-        inbox.try_deliver(Some("main"), |text| text == "still here");
+        inbox.try_deliver(Some(&scope("main")), |text| text == "still here");
         assert!(inbox.can_receive());
     }
 
     #[tokio::test]
     async fn shutdown_retires_a_reader_waiting_for_ui_acceptance() {
         let (mut inbox, mut paths) = inbox_with_text("one handed-over prompt");
-        inbox.set_scope(Some("main".into()));
+        inbox.set_scope(Some(scope("main")));
         inbox.receive().await;
         paths.recv().await.unwrap();
 
@@ -332,7 +412,7 @@ mod tests {
                 Ok(Vec::new())
             }
         });
-        inbox.set_scope(Some("main".into()));
+        inbox.set_scope(Some(scope("main")));
         starts.recv().await.unwrap();
         let shutdown = tokio::spawn(inbox.shutdown());
         tokio::task::yield_now().await;
@@ -355,7 +435,7 @@ mod tests {
         assert!(paths_rx.try_recv().is_err());
         tokio::time::advance(Duration::from_secs(1)).await;
         assert_eq!(paths_rx.recv().await.unwrap(), "vFile:codex-input/offline");
-        inbox.set_scope(Some("new".into()));
+        inbox.set_scope(Some(scope("new")));
         assert_eq!(paths_rx.recv().await.unwrap(), "vFile:codex-input/new");
         inbox.set_scope(None);
         assert_eq!(paths_rx.recv().await.unwrap(), "vFile:codex-input/offline");

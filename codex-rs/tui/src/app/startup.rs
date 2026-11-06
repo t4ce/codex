@@ -1590,12 +1590,17 @@ See the Codex keymap documentation for supported actions and examples."
                         && app.chat_widget.thread_id() == app.primary_thread_id
                         && app.chat_widget.trueos_prompt_ready()
                     {
-                        app.primary_thread_id.map(|thread_id| thread_id.to_string())
+                        app.primary_thread_id.map(|thread_id| {
+                            super::trueos_prompt::PromptScope::new(
+                                displayed_owner,
+                                thread_id.to_string(),
+                            )
+                        })
                     } else {
                         None
                     };
                     native_prompt_inbox.set_scope(scope.clone());
-                    native_prompt_inbox.try_deliver(scope.as_deref(), |text| {
+                    native_prompt_inbox.try_deliver(scope.as_ref(), |text| {
                         app.chat_widget.submit_trueos_prompt(text)
                     });
                 }
