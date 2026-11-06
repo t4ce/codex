@@ -59,7 +59,6 @@ static ALLOCATOR: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
     any(target_os = "macos", target_os = "windows")
 ))]
 mod app_cmd;
-mod cloud_config;
 mod config_override_args;
 #[cfg(feature = "install-update")]
 mod daemon_install;
