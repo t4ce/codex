@@ -612,7 +612,7 @@ impl SqliteConfig {
         let Some(path) = self.legacy_logs_db_path() else {
             return Ok(None);
         };
-        if !tokio::fs::try_exists(&path).await? {
+        if !self.database_exists(&path).await? {
             return Ok(None);
         }
         if self.enforce_delete_on_nfs && self.is_nfs().await? {
