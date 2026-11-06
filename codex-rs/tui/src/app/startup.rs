@@ -1599,7 +1599,10 @@ See the Codex keymap documentation for supported actions and examples."
                     } else {
                         None
                     };
-                    native_prompt_inbox.set_scope(scope.clone());
+                    native_prompt_inbox.set_scope(
+                        scope.clone(),
+                        backends.native_prompt_legacy_owner(&app.config.features),
+                    );
                     native_prompt_inbox.try_deliver(scope.as_ref(), |text| {
                         app.chat_widget.submit_trueos_prompt(text)
                     });

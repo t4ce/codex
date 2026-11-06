@@ -27,6 +27,47 @@ fn approval_request(thread_id: ThreadId, request_id: i64) -> ServerRequest {
 }
 
 #[tokio::test]
+async fn native_prompt_legacy_requires_effective_single_backend_configuration() -> Result<()> {
+    let [(initial, _initial_events), (other, other_events)] = std::array::from_fn(|_| {
+        let (client, _, events) = CloudClient::channel(/*capacity*/ 1);
+        (
+            AppServerSession::new(
+                BackendId::new(),
+                AppServerClient::Cloud(client),
+                ThreadParamsMode::Cloud,
+            ),
+            events,
+        )
+    });
+    let original = initial.backend_id();
+    let other_id = other.backend_id();
+    let mut backends = BackendSessions::new(initial);
+    let mut features = crate::legacy_core::config::ManagedFeatures::default();
+    features.disable(Feature::TuiMultiBackend)?;
+    assert_eq!(
+        backends.native_prompt_legacy_owner(&features),
+        Some(original)
+    );
+    features.enable(Feature::TuiMultiBackend)?;
+    assert_eq!(backends.native_prompt_legacy_owner(&features), None);
+    features.disable(Feature::TuiMultiBackend)?;
+    assert_eq!(
+        backends.native_prompt_legacy_owner(&features),
+        Some(original)
+    );
+
+    backends.insert(other);
+    assert_eq!(backends.native_prompt_legacy_owner(&features), None);
+    drop(other_events);
+    let (owner, event) = backends.next_event(/*paused_backend*/ None).await;
+    assert_eq!(owner, other_id);
+    assert!(event.is_none());
+    assert!(!backends.is_listening(other_id));
+    assert_eq!(backends.native_prompt_legacy_owner(&features), None);
+    Ok(())
+}
+
+#[tokio::test]
 async fn backend_sessions_parked_request_does_not_hide_disconnect() -> Result<()> {
     let [
         (displayed, _displayed_events),

@@ -128,6 +128,17 @@ impl BackendSessions {
         self.session_at(self.displayed).backend_id()
     }
 
+    #[cfg(any(target_os = "trueos", test))]
+    pub(super) fn native_prompt_legacy_owner(
+        &self,
+        features: &crate::legacy_core::config::ManagedFeatures,
+    ) -> Option<BackendId> {
+        // Include disconnected entries: losing a connection must not make a
+        // multi-backend run eligible for UUID-only kernel frame ownership.
+        (!features.enabled(codex_features::Feature::TuiMultiBackend) && self.entries.len() == 1)
+            .then(|| self.entries[0].session.backend_id())
+    }
+
     pub(super) fn picker_views(&self) -> Vec<AppServerSession> {
         let displayed_owner = self.displayed_owner();
         self.entries
