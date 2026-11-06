@@ -1,0 +1,13 @@
+{
+  "old_lock_sha256": "6b780cadb86fb89a97a989fc64357c6be4c5861f89a21e7dd666413e81dd2a00",
+  "candidate_lock_sha256": "ac96b048e307bb78e00e4460f6afe53575c11a76431c8e3fca92de743d262e6f",
+  "final_lock_sha256": "ac96b048e307bb78e00e4460f6afe53575c11a76431c8e3fca92de743d262e6f",
+  "exit_code": 0,
+  "source_audit": "/tmp/codex-parity-20261106/native-lock-audit.json",
+  "native_patches": 76,
+  "host_diagnostic_overlays": false,
+  "metadata": "/tmp/codex-parity-20261106/root-final-native-metadata.json",
+  "log": "/tmp/codex-parity-20261106/root-final-native-metadata.log",
+  "workspace_members": 168,
+  "active_packages": 1485
+}

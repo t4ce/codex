@@ -1,0 +1,53 @@
+{
+  "status": "complete_metadata_candidate_only_production_lock_untouched",
+  "candidate_lock": "/home/t4ce/Repositories/codex-parity-native-lock-audit-20261106/codex-rs/Cargo.lock",
+  "candidate_sha256": "ac96b048e307bb78e00e4460f6afe53575c11a76431c8e3fca92de743d262e6f",
+  "production_lock_sha256": "6b780cadb86fb89a97a989fc64357c6be4c5861f89a21e7dd666413e81dd2a00",
+  "seed": "native standalone CLI source-overlay-app/Cargo.lock",
+  "toolchain": "cargo1.95.0 per codex-rs/rust-toolchain.toml",
+  "native_patch_command_provenance": "/tmp/codex-parity-20261106/root-native-lock-command.json",
+  "diagnostic_host_overlays_used": false,
+  "resolution_seconds": 1.1,
+  "locked_online_metadata_seconds": 0.97,
+  "lock_packages": 1495,
+  "metadata_packages": 1485,
+  "declared_workspace_members": 161,
+  "metadata_workspace_members": 168,
+  "missing_declared_members": [],
+  "auto_workspace_members": [
+    "app-server/tests/common",
+    "chatgpt",
+    "core/tests/common",
+    "message-history",
+    "vendor/tokio-tungstenite-0.28.0-openai",
+    "vendor/tungstenite-0.27.0-openai",
+    "windows-sandbox-rs"
+  ],
+  "host_overlay_manifest_paths": [],
+  "removed_folded_package_identities_present": [],
+  "exact_duplicate_package_identities": [],
+  "new_folded_crates": [
+    "codex-network-foundation",
+    "codex-transport",
+    "codex-utils-paths",
+    "codex-utils-text"
+  ],
+  "scope_caveat": {
+    "package": "codex-voice-host",
+    "dependencies": "rtc=0.20.3 and webrtc=0.20.3 require bytes^1.12",
+    "full_workspace_selection": "registry bytes1.12.1; native bytes1.11.1 patch unused",
+    "standalone_native_cli_selection": "native vendored bytes1.11.1",
+    "meaning": "Full workspace lock is resolved and valid metadata, not evidence all-platform/native voice helper compiles. Native CLI keeps its own proven graph."
+  },
+  "artifact_files": [
+    "/tmp/codex-parity-20261106/native-lock-audit-seeded-stable-result.json",
+    "/tmp/codex-parity-20261106/native-lock-audit-seeded-online-result.json",
+    "/tmp/codex-parity-20261106/native-lock-audit-seeded-online-metadata.json"
+  ],
+  "nightly_consumes_generated_lock": {
+    "exit_code": 0,
+    "seconds": 1.42
+  },
+  "stable_nightly_identical_package_id_set": true,
+  "stable_nightly_identical_workspace_member_set": true
+}

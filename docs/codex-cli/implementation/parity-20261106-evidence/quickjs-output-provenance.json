@@ -1,0 +1,27 @@
+[
+  {
+    "file": "codex-rs/code-mode-quickjs/src/output/output_render_tests.rs",
+    "same_upstream_logic": true,
+    "sha256": "82a188ba3dfe6cdd2cbe6a2a0eae5e4290dc8164833754dc0966617afbc5daf8"
+  },
+  {
+    "file": "codex-rs/code-mode-quickjs/src/output/mod.rs",
+    "same_upstream_logic": true,
+    "sha256": "5b71e2c851713ba4a23c4d702966ab1e22109bb0877d9dc5c1079a4569af0499"
+  },
+  {
+    "file": "codex-rs/code-mode-quickjs/src/output/output_render.rs",
+    "same_upstream_logic": true,
+    "sha256": "7c24225da6809654f57e6c9099a1c201604f896c32369deb52d8fbdb8e8434ea"
+  },
+  {
+    "file": "codex-rs/code-mode-quickjs/src/output/output_collection.rs",
+    "same_upstream_logic": true,
+    "sha256": "56b174b4105613dd52b8db2a9315dbda52579e2e8316bed69501db2c50ccc37f"
+  },
+  {
+    "file": "codex-rs/code-mode-quickjs/src/output/output_collection_tests.rs",
+    "same_upstream_logic": true,
+    "sha256": "0629da2a323bc9fd3b35dc6cda2619a8334274e083464a22e0f438bac991aa0c"
+  }
+]
