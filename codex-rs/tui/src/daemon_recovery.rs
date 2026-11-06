@@ -48,6 +48,7 @@ pub(super) async fn check(
     if !(io::stdin().is_terminal() && io::stdout().is_terminal()) {
         return Err(io::Error::other(issue));
     }
+    #[cfg(feature = "install-update")]
     if !managed_daemon && issue.restart_features.is_some() {
         managed_daemon = startup
             .run_until(codex_app_server_daemon::run(

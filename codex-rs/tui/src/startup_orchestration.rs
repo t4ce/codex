@@ -22,7 +22,6 @@ pub(super) async fn run_main_inner(
             ));
         }
         cli.no_daemon = true;
-        cli.managed_daemon = false;
     }
     if cli.oss || cli.oss_provider.is_some() {
         codex_utils_oss::ensure_local_models_enabled()?;

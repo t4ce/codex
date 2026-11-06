@@ -1322,6 +1322,7 @@ async fn dispatch_cli(
                         listen
                     };
                     let auth = auth.try_into_settings()?;
+                    #[cfg(feature = "install-update")]
                     if managed_daemon
                         && matches!(
                             &transport,
