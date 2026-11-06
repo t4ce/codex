@@ -96,20 +96,7 @@ impl PidBackend {
             } else {
                 None
             };
-        let mut command = match crate::background_command::managed_process(&codex_bin).await {
-            Ok(command) => Command::from(command),
-            Err(err) => {
-                if replacement.is_none() {
-                    let _ = fs::remove_file(&self.pid_file).await;
-                }
-                return Err(err).with_context(|| {
-                    format!(
-                        "failed to spawn detached app-server process using {}",
-                        self.codex_bin.display()
-                    )
-                });
-            }
-        };
+        let mut command = Command::from(codex_utils_process::background_command(&codex_bin));
         let stderr_log = match self.open_stderr_log().await {
             Ok(stderr_log) => stderr_log,
             Err(err) => {
@@ -125,7 +112,7 @@ impl PidBackend {
             .args(self.command_args().iter().map(std::borrow::Cow::as_ref))
             .stdin(Stdio::null())
             .stdout(Stdio::null())
-            .stderr(Stdio::from(stderr_log.into_std().await));
+            .stderr(Stdio::from(stderr_log));
         // Older or pinned managed binaries may predate this optional startup flag.
         let managed_app_server =
             matches!(self.command_kind, super::PidCommandKind::AppServer { .. });
