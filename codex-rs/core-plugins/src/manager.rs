@@ -2938,7 +2938,11 @@ impl PluginsManager {
         })
     }
 
-    /// Starts background tasks and sends marketplace upgrade warnings through the supplied channel.
+    /// Refreshes installed plugins and configured marketplaces without prefetching discovery.
+    ///
+    /// Catalog discovery stays on the explicit plugin-list path; even a background catalog fetch
+    /// can exhaust memory on constrained targets. Installed plugin runtime refreshes remain eager.
+    /// Marketplace upgrade warnings are sent through the supplied channel.
     pub fn maybe_start_plugin_startup_tasks_for_config(
         self: &Arc<Self>,
         config: &PluginsConfigInput,

@@ -15,7 +15,7 @@ use toml::Table;
 use toml::Value as TomlValue;
 
 #[test]
-fn plugin_features_respect_the_platform_policy() {
+fn plugin_features_support_explicit_toggles_on_all_targets() {
     for feature in [
         Feature::Plugins,
         Feature::RemotePlugin,
@@ -24,21 +24,18 @@ fn plugin_features_respect_the_platform_policy() {
         Feature::PluginHooks,
     ] {
         let mut features = Features::with_defaults();
-        if cfg!(target_os = "trueos") {
-            assert!(!feature.default_enabled());
-            assert!(!features.enabled(feature));
-        }
+        assert_eq!(features.enabled(feature), feature.default_enabled());
         features.enable(feature);
-        assert_eq!(features.enabled(feature), !cfg!(target_os = "trueos"));
+        assert!(features.enabled(feature));
         features.set_enabled(feature, false);
         assert!(!features.enabled(feature));
         features.set_enabled(feature, true);
-        assert_eq!(features.enabled(feature), !cfg!(target_os = "trueos"));
+        assert!(features.enabled(feature));
     }
 }
 
 #[test]
-fn plugin_platform_policy_applies_to_config_toggles() {
+fn plugin_features_support_config_toggles_on_all_targets() {
     let mut features = Features::with_defaults();
     features.apply_map(&BTreeMap::from([
         ("plugins".to_string(), true),
@@ -52,23 +49,22 @@ fn plugin_platform_policy_applies_to_config_toggles() {
         Feature::RecommendedPlugins,
         Feature::PluginSharing,
     ] {
-        assert_eq!(features.enabled(feature), !cfg!(target_os = "trueos"));
+        assert!(features.enabled(feature));
+        features.apply_map(&BTreeMap::from([(feature.key().to_string(), false)]));
+        assert!(!features.enabled(feature));
     }
 }
 
 #[test]
-fn plugin_platform_policy_also_filters_imported_feature_sets() {
+fn plugin_features_preserve_imported_feature_sets() {
     let mut features = Features::default();
     // Exercise a set populated without the normal enable/config entry point.
     features.enabled.insert(Feature::Plugins);
-    assert_eq!(
-        features.enabled(Feature::Plugins),
-        !cfg!(target_os = "trueos")
-    );
+    assert!(features.enabled(Feature::Plugins));
 }
 
 #[test]
-fn plugin_platform_policy_preserves_apps_and_other_features() {
+fn plugin_recommendations_keep_their_feature_dependencies() {
     let mut features = Features::default();
     for feature in [Feature::Apps, Feature::Sqlite, Feature::ToolSuggest] {
         features.enable(feature);
@@ -76,10 +72,9 @@ fn plugin_platform_policy_preserves_apps_and_other_features() {
     }
     features.enable(Feature::Plugins);
     features.enable(Feature::RecommendedPlugins);
-    assert_eq!(
-        features.plugin_recommendations_enabled(),
-        !cfg!(target_os = "trueos")
-    );
+    assert!(features.plugin_recommendations_enabled());
+    features.disable(Feature::Plugins);
+    assert!(!features.plugin_recommendations_enabled());
 }
 
 #[test]

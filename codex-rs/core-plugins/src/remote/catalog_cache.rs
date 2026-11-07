@@ -17,7 +17,10 @@ use serde::de::Visitor;
 use std::fmt;
 use std::fs::File;
 use std::io;
-use std::io::Read;
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::BufWriter;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -28,6 +31,7 @@ use tracing::warn;
 const REMOTE_PLUGIN_CATALOG_DISK_CACHE_SCHEMA_VERSION: u8 = 1;
 const REMOTE_PLUGIN_CATALOG_DISK_CACHE_DIR: &str = "cache/remote_plugin_catalog";
 const REMOTE_PLUGIN_CATALOG_DISK_CACHE_TTL: Duration = Duration::from_secs(60 * 60 * 3);
+const CATALOG_IO_BUFFER_SIZE: usize = 8 * 1024;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 struct RemotePluginCatalogCacheKey {
@@ -116,8 +120,8 @@ pub(super) fn load_cached_directory_plugins<T: DeserializeOwned>(
     }
     let cache_key = RemotePluginCatalogCacheKey::new(config, auth, scope, collection)?;
     let cache_path = cache_path(codex_home, &cache_key);
-    let bytes = match read_catalog_bytes(&cache_path, cache_mode) {
-        Ok(bytes) => bytes?,
+    let reader = match open_catalog_reader(&cache_path, cache_mode) {
+        Ok(reader) => reader?,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => return None,
         Err(err) => {
             warn!(
@@ -127,7 +131,7 @@ pub(super) fn load_cached_directory_plugins<T: DeserializeOwned>(
             return None;
         }
     };
-    let cache: RemotePluginCatalogDiskCache<Vec<T>> = match serde_json::from_slice(&bytes) {
+    let cache: RemotePluginCatalogDiskCache<Vec<T>> = match serde_json::from_reader(reader) {
         Ok(cache) => cache,
         Err(err) => {
             warn!(
@@ -156,27 +160,21 @@ pub(super) fn load_cached_directory_plugins<T: DeserializeOwned>(
     })
 }
 
-fn read_catalog_bytes(
+fn open_catalog_reader(
     path: &Path,
     cache_mode: RemotePluginCatalogCacheMode,
-) -> io::Result<Option<Vec<u8>>> {
-    let mut file = File::open(path)?;
-    let mut bytes = Vec::new();
+) -> io::Result<Option<BufReader<File>>> {
+    let mut reader = BufReader::with_capacity(CATALOG_IO_BUFFER_SIZE, File::open(path)?);
     if cache_mode == RemotePluginCatalogCacheMode::PreferFreshCache {
         const PREFIX_LEN: usize = 256;
-        bytes.reserve_exact(PREFIX_LEN);
-        file.by_ref()
-            .take(PREFIX_LEN as u64)
-            .read_to_end(&mut bytes)?;
-        if bytes.len() < PREFIX_LEN {
-            return Ok(Some(bytes));
-        }
-        if CatalogHeader::is_stale_prefix(&bytes, Utc::now()) {
+        let prefix = reader.fill_buf()?;
+        if prefix.len() >= PREFIX_LEN
+            && CatalogHeader::is_stale_prefix(&prefix[..PREFIX_LEN], Utc::now())
+        {
             return Ok(None);
         }
     }
-    file.read_to_end(&mut bytes)?;
-    Ok(Some(bytes))
+    Ok(Some(reader))
 }
 
 #[derive(Default)]
@@ -274,14 +272,49 @@ pub(crate) fn write_cached_directory_plugins(
         return;
     };
     let cache_path = cache_path(codex_home, &cache_key);
-    let Ok(contents) = serde_json::to_string_pretty(&RemotePluginCatalogDiskCache {
+    let cache = RemotePluginCatalogDiskCache {
         schema_version: REMOTE_PLUGIN_CATALOG_DISK_CACHE_SCHEMA_VERSION,
         fetched_at: Some(Utc::now()),
         plugins,
-    }) else {
-        return;
     };
-    let _ = codex_utils_paths::path::write_atomically(&cache_path, &contents);
+    if let Err(err) = write_catalog_atomically(&cache_path, &cache) {
+        warn!(
+            cache_path = %cache_path.display(),
+            "failed to write remote plugin catalog disk cache: {err}"
+        );
+    }
+}
+
+fn write_catalog_atomically(path: &Path, cache: &impl Serialize) -> io::Result<()> {
+    let parent = path
+        .parent()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "catalog path has no parent"))?;
+    std::fs::create_dir_all(parent)?;
+    let mut tmp = tempfile::NamedTempFile::new_in(parent)?;
+    write_catalog(&mut tmp, cache)?;
+    tmp.persist(path)?;
+    Ok(())
+}
+
+fn write_catalog(writer: impl Write, cache: &impl Serialize) -> io::Result<()> {
+    // A catalog can contain large embedded assets. Avoid a complete serialized copy,
+    // and bound writes even when BufWriter bypasses its buffer for a large string.
+    let mut writer = BufWriter::with_capacity(CATALOG_IO_BUFFER_SIZE, CatalogWriter(writer));
+    serde_json::to_writer(&mut writer, cache).map_err(io::Error::other)?;
+    writer.flush()
+}
+
+struct CatalogWriter<W>(W);
+
+impl<W: Write> Write for CatalogWriter<W> {
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        self.0
+            .write(&bytes[..bytes.len().min(CATALOG_IO_BUFFER_SIZE)])
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.0.flush()
+    }
 }
 
 pub(crate) fn remove_cached_directory_plugins(

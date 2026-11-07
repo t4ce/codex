@@ -245,3 +245,135 @@ fn header_auth_does_not_cache_private_catalogs_without_a_stable_identity() {
         );
     }
 }
+
+#[test]
+fn large_catalog_fields_are_streamed_in_bounded_writes() {
+    #[derive(Default)]
+    struct CountingWriter {
+        bytes: usize,
+        largest_write: usize,
+    }
+
+    impl Write for CountingWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.bytes += bytes.len();
+            self.largest_write = self.largest_write.max(bytes.len());
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    // Exceed the catalog size that exhausted contiguous allocations on TRUEOS,
+    // including a single field that would bypass an ordinary BufWriter.
+    let asset = "x".repeat(57 * 1024 * 1024);
+    let mut writer = CountingWriter::default();
+    write_catalog(&mut writer, &[&asset]).expect("stream catalog");
+    assert_eq!(writer.bytes, asset.len() + 4);
+    assert_eq!(writer.largest_write, CATALOG_IO_BUFFER_SIZE);
+}
+
+#[test]
+fn failed_catalog_serialization_preserves_previous_cache() {
+    struct InvalidCache;
+
+    impl Serialize for InvalidCache {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            use serde::ser::SerializeSeq;
+            let mut sequence = serializer.serialize_seq(Some(2))?;
+            sequence.serialize_element(&"x".repeat(CATALOG_IO_BUFFER_SIZE * 2))?;
+            Err(serde::ser::Error::custom("catalog serialization failed"))
+        }
+    }
+
+    let dir = tempfile::tempdir().expect("create cache directory");
+    let path = dir.path().join("catalog.json");
+    std::fs::write(&path, b"previous catalog").expect("write previous cache");
+
+    assert!(write_catalog_atomically(&path, &InvalidCache).is_err());
+    assert_eq!(
+        std::fs::read(&path).expect("read old cache"),
+        b"previous catalog"
+    );
+    assert_eq!(
+        std::fs::read_dir(dir.path())
+            .expect("read cache directory")
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn catalog_writer_reports_flush_errors() {
+    struct FailingWriter;
+
+    impl Write for FailingWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Err(io::Error::other("cache flush failed"))
+        }
+    }
+
+    let err = write_catalog(FailingWriter, &[0_u8; 0]).expect_err("flush must fail");
+    assert_eq!(err.to_string(), "cache flush failed");
+}
+
+#[test]
+fn streamed_cache_roundtrip_preserves_assets_and_rejects_trailing_json() {
+    let codex_home = tempfile::tempdir().expect("create codex home");
+    let config = RemotePluginServiceConfig::new(
+        "https://chatgpt.com/backend-api".to_string(),
+        crate::test_support::test_http_client_factory(),
+        /*product_sku*/ None,
+    );
+    let auth = CodexAuth::Headers(AuthHeaders::new(http::HeaderMap::new()));
+    let scope = RemotePluginScope::Global;
+    let key = RemotePluginCatalogCacheKey::new(&config, &auth, scope, /*collection*/ None)
+        .expect("global cache key");
+    let path = cache_path(codex_home.path(), &key);
+    let assets = vec!["line\n\"\\ä".repeat(CATALOG_IO_BUFFER_SIZE)];
+    write_catalog_atomically(
+        &path,
+        &RemotePluginCatalogDiskCache {
+            schema_version: REMOTE_PLUGIN_CATALOG_DISK_CACHE_SCHEMA_VERSION,
+            fetched_at: Some(Utc::now()),
+            plugins: &assets,
+        },
+    )
+    .expect("stream cache to disk");
+
+    let cached = load_cached_directory_plugins::<String>(
+        codex_home.path(),
+        &config,
+        &auth,
+        scope,
+        /*collection*/ None,
+        RemotePluginCatalogCacheMode::PreferFreshCache,
+    )
+    .expect("read streamed cache");
+    assert_eq!(cached.plugins, assets);
+    assert_eq!(cached.freshness, RemotePluginCatalogCacheFreshness::Fresh);
+
+    let mut file = std::fs::OpenOptions::new()
+        .append(true)
+        .open(&path)
+        .expect("open cache for appending");
+    file.write_all(b" {}").expect("append trailing JSON");
+    assert!(
+        load_cached_directory_plugins::<String>(
+            codex_home.path(),
+            &config,
+            &auth,
+            scope,
+            /*collection*/ None,
+            RemotePluginCatalogCacheMode::PreferCache,
+        )
+        .is_none()
+    );
+    assert!(!path.exists());
+}

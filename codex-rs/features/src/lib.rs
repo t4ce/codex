@@ -577,21 +577,7 @@ impl Feature {
     }
 
     pub fn default_enabled(self) -> bool {
-        self.supported_on_target() && self.info().default_enabled
-    }
-
-    fn supported_on_target(self) -> bool {
-        // Plugins are disabled on TRUEOS. In particular, startup catalog
-        // refreshes must not run, even when shared config enables them.
-        !(cfg!(target_os = "trueos")
-            && matches!(
-                self,
-                Self::Plugins
-                    | Self::RemotePlugin
-                    | Self::RecommendedPlugins
-                    | Self::PluginSharing
-                    | Self::PluginHooks
-            ))
+        self.info().default_enabled
     }
 
     fn info(self) -> &'static FeatureSpec {
@@ -646,7 +632,7 @@ impl Features {
     pub fn with_defaults() -> Self {
         let mut set = BTreeSet::new();
         for spec in FEATURES {
-            if spec.default_enabled && spec.id.supported_on_target() {
+            if spec.default_enabled {
                 set.insert(spec.id);
             }
         }
@@ -657,7 +643,7 @@ impl Features {
     }
 
     pub fn enabled(&self, f: Feature) -> bool {
-        f.supported_on_target() && self.enabled.contains(&f)
+        self.enabled.contains(&f)
     }
 
     /// Whether to advertise GIF output in the image-generation tool.
@@ -694,9 +680,7 @@ impl Features {
     }
 
     pub fn enable(&mut self, f: Feature) -> &mut Self {
-        if f.supported_on_target() {
-            self.enabled.insert(f);
-        }
+        self.enabled.insert(f);
         self
     }
 
