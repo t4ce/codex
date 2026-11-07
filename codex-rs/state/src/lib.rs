@@ -115,6 +115,7 @@ pub use runtime::collect_runtime_db_backups;
 pub use runtime::is_sqlite_corruption_error;
 pub use runtime::open_thread_history_db;
 pub use runtime::recovery::RuntimeDbBackup;
+pub use runtime::recovery::RuntimeDbBackupLocation;
 pub use runtime::runtime_db_path_for_corruption_error;
 pub use runtime::sqlite_error_detail_is_lock;
 pub use runtime::sqlite_integrity_check;

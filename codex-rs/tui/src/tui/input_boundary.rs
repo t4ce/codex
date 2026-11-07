@@ -1,10 +1,10 @@
 //! Restore terminal ownership on initialization failures and quarantine protected-screen input.
 
 use std::io;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::io::IsTerminal;
 use std::io::Result;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::io::stdin;
 use std::time::Duration;
 use std::time::Instant;
@@ -64,7 +64,7 @@ pub(crate) fn discard_pending_terminal_input() -> Result<()> {
 }
 
 /// Check Crossterm's terminal input source without consuming input or changing descriptor flags.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub(super) fn terminal_input_is_readable() -> Result<bool> {
     use std::os::fd::AsRawFd;
 
@@ -94,6 +94,17 @@ pub(super) fn terminal_input_is_readable() -> Result<bool> {
         )));
     }
     Ok(result > 0 && fd.revents & libc::POLLIN != 0)
+}
+
+/// Probe the native attached input through the same reader used for events.
+/// A partial sequence remains quarantined and keeps the drain loop active.
+#[cfg(target_os = "trueos")]
+pub(super) fn terminal_input_is_readable() -> Result<bool> {
+    if crossterm::event::poll(Duration::ZERO)? {
+        return Ok(true);
+    }
+    Ok(crossterm::event::discard_buffered_input()?
+        != crossterm::event::InputDiscardStatus::Complete)
 }
 
 /// Check the same Windows console input queue consumed by Crossterm.

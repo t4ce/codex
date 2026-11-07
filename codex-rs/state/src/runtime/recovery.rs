@@ -40,8 +40,29 @@ pub async fn collect_runtime_db_backups<T>(
 pub struct RuntimeDbBackup {
     /// Path where the runtime database or sidecar lived before it was moved.
     pub original_path: PathBuf,
-    /// Path where the runtime database or sidecar was backed up.
-    pub backup_path: PathBuf,
+    /// The storage owner and location of the preserved image.
+    pub backup: RuntimeDbBackupLocation,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum RuntimeDbBackupLocation {
+    ClientFile(PathBuf),
+    SqliteService { instance: String, database: String, locator: String },
+}
+
+impl RuntimeDbBackupLocation {
+    pub fn local_path(&self) -> Option<&Path> {
+        match self { Self::ClientFile(path) => Some(path), Self::SqliteService { .. } => None }
+    }
+}
+
+impl std::fmt::Display for RuntimeDbBackupLocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ClientFile(path) => path.display().fmt(f),
+            Self::SqliteService { locator, .. } => f.write_str(locator),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -96,6 +117,27 @@ impl std::error::Error for RuntimeDbInitError {
 pub async fn backup_runtime_db_for_fresh_start(
     db_path: &Path,
 ) -> std::io::Result<Vec<RuntimeDbBackup>> {
+    #[cfg(target_os = "trueos")]
+    let backups = {
+        // The logical filename selects a service database. Its persisted image
+        // and archive belong to SQLite, so local filesystem recovery is invalid.
+        let receipt = sqlx::sqlite::SqliteConnectOptions::new().filename(db_path)
+            .recover_codex_database().await.map_err(std::io::Error::other)?;
+        vec![RuntimeDbBackup {
+            original_path: db_path.to_path_buf(),
+            backup: RuntimeDbBackupLocation::SqliteService {
+                instance: receipt.instance, database: receipt.database, locator: receipt.backup_locator,
+            },
+        }]
+    };
+    #[cfg(not(target_os = "trueos"))]
+    let backups = backup_client_runtime_db(db_path).await?;
+    let _ = RECOVERY_BACKUPS.try_with(|report| report.borrow_mut().extend(backups.iter().cloned()));
+    Ok(backups)
+}
+
+#[cfg(not(target_os = "trueos"))]
+async fn backup_client_runtime_db(db_path: &Path) -> std::io::Result<Vec<RuntimeDbBackup>> {
     let sqlite_home = db_path.parent().ok_or_else(|| {
         std::io::Error::other(format!(
             "database path does not have a parent directory: {}",
@@ -114,7 +156,6 @@ pub async fn backup_runtime_db_for_fresh_start(
         }
         Err(err) => Err(err),
     }?;
-    let _ = RECOVERY_BACKUPS.try_with(|report| report.borrow_mut().extend(backups.iter().cloned()));
     Ok(backups)
 }
 
@@ -191,7 +232,7 @@ async fn backup_sqlite_paths(
             tokio::fs::rename(path.as_path(), backup_path.as_path()).await?;
             backups.push(RuntimeDbBackup {
                 original_path: path,
-                backup_path,
+                backup: RuntimeDbBackupLocation::ClientFile(backup_path),
             });
         }
     }
@@ -222,7 +263,7 @@ async fn backup_blocking_sqlite_home(sqlite_home: &Path) -> std::io::Result<Vec<
     tokio::fs::create_dir_all(sqlite_home).await?;
     Ok(vec![RuntimeDbBackup {
         original_path: sqlite_home.to_path_buf(),
-        backup_path,
+        backup: RuntimeDbBackupLocation::ClientFile(backup_path),
     }])
 }
 

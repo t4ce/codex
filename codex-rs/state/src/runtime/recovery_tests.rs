@@ -38,10 +38,10 @@ async fn backup_moves_only_requested_runtime_db_files_to_backup_folder() -> std:
     for backup in backups {
         assert!(
             backup
-                .backup_path
+                .backup.local_path().unwrap()
                 .starts_with(sqlite_home.join(BACKUP_DIR_NAME))
         );
-        assert!(tokio::fs::try_exists(backup.backup_path.as_path()).await?);
+        assert!(tokio::fs::try_exists(backup.backup.local_path().unwrap()).await?);
     }
     Ok(())
 }
@@ -64,10 +64,10 @@ async fn backup_replaces_blocking_sqlite_home_file() -> std::io::Result<()> {
     assert!(tokio::fs::metadata(sqlite_home.as_path()).await?.is_dir());
     assert!(
         backups[0]
-            .backup_path
+            .backup.local_path().unwrap()
             .starts_with(temp_dir.join(format!("sqlite-home.{BACKUP_DIR_NAME}")))
     );
-    assert!(tokio::fs::try_exists(backups[0].backup_path.as_path()).await?);
+    assert!(tokio::fs::try_exists(backups[0].backup.local_path().unwrap()).await?);
     Ok(())
 }
 

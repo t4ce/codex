@@ -572,7 +572,7 @@ impl SqliteConfig {
                 for backup in backups {
                     tracing::warn!(
                         database = %backup.original_path.display(),
-                        backup = %backup.backup_path.display(),
+                        backup = %backup.backup,
                         "Preserved corrupt SQLite database before rebuilding"
                     );
                 }

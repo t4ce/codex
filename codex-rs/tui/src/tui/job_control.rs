@@ -206,6 +206,7 @@ impl PreparedResumeAction {
 }
 
 /// Deliver SIGTSTP after restoring terminal state, then re-applies terminal modes once resumed.
+#[cfg(not(target_os = "trueos"))]
 fn suspend_process() -> Result<()> {
     static JOB_RESUMED: AtomicBool = AtomicBool::new(false);
     extern "C" fn record_job_resumed(_signal: libc::c_int) {
@@ -279,6 +280,22 @@ fn suspend_process() -> Result<()> {
     suspend_result
         .and(restore_mask_result)
         .and(restore_result)
+        .and(super::terminal_stderr::resume())
+        .and(super::set_modes().map(drop))
+}
+
+/// Shell3 owns terminal parking and reentry; a Blueprint does not suspend a
+/// Unix process group or install SIGCONT handlers.
+#[cfg(target_os = "trueos")]
+fn suspend_process() -> Result<()> {
+    let lease = trueos_v::vshell::terminal_initial_lease().map_err(std::io::Error::other)?;
+    super::restore()?;
+    super::terminal_stderr::pause()?;
+    let result = lease.release_to_shell()
+        .and_then(|ticket| ticket.wait_for_reentry())
+        .map(drop)
+        .map_err(std::io::Error::other);
+    result
         .and(super::terminal_stderr::resume())
         .and(super::set_modes().map(drop))
 }

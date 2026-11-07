@@ -22,6 +22,9 @@ pub(crate) fn is_auto_backup_recoverable(startup_error: &LocalStateDbStartupErro
 }
 
 fn sqlite_home_is_blocking_file(startup_error: &LocalStateDbStartupError) -> bool {
+    #[cfg(target_os = "trueos")]
+    { let _ = startup_error; return false; }
+    #[cfg(not(target_os = "trueos"))]
     startup_error
         .database_path()
         .parent()
@@ -30,8 +33,16 @@ fn sqlite_home_is_blocking_file(startup_error: &LocalStateDbStartupError) -> boo
 }
 
 pub(crate) fn print_auto_backup_start(startup_error: &LocalStateDbStartupError) {
+    #[cfg(target_os = "trueos")]
+    {
+        eprintln!("Codex couldn't start because its SQLite service database appears to be damaged.");
+        eprintln!("Asking SQLite to preserve the damaged image and prepare a fresh database.");
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
     eprintln!("Codex couldn't start because its local database appears to be damaged.");
     eprintln!("Moving the damaged local database aside so Codex can rebuild it from saved data.");
+    }
     print_technical_details(startup_error);
 }
 
@@ -45,6 +56,13 @@ pub(crate) fn confirm_fresh_start_rebuild(
     startup_error: &LocalStateDbStartupError,
     backups: &[RuntimeDbBackup],
 ) -> std::io::Result<()> {
+    #[cfg(target_os = "trueos")]
+    {
+        eprintln!("Codex rebuilt its SQLite service database.");
+        for backup in backups { eprintln!("SQLite-owned backup: {}", backup.backup); }
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
     eprintln!("Codex rebuilt its local database.");
     eprintln!(
         "Codex detected a damaged local database, moved it into a backup folder, and will continue startup with a fresh database."
@@ -55,13 +73,14 @@ pub(crate) fn confirm_fresh_start_rebuild(
     } else {
         eprintln!("Backup folder: unavailable");
     }
+    }
 
     if std::io::stdin().is_terminal() && std::io::stderr().is_terminal() {
         eprintln!("Press Enter to continue.");
         let mut input = String::new();
         std::io::stdin().read_line(&mut input)?;
     } else {
-        eprintln!("Continuing startup with a fresh local database...");
+        eprintln!("Continuing startup with a fresh database...");
     }
     Ok(())
 }
@@ -86,7 +105,7 @@ fn print_technical_details(startup_error: &LocalStateDbStartupError) {
 }
 
 fn backup_folder(backups: &[RuntimeDbBackup]) -> Option<&Path> {
-    backups.first()?.backup_path.parent()
+    backups.first()?.backup.local_path()?.parent()
 }
 
 #[cfg(test)]
@@ -119,7 +138,7 @@ mod tests {
         );
         assert!(!tokio::fs::try_exists(failed_db_path.as_path()).await?);
         assert!(tokio::fs::try_exists(state_path.as_path()).await?);
-        assert!(tokio::fs::try_exists(backups[0].backup_path.as_path()).await?);
+        assert!(tokio::fs::try_exists(backups[0].backup.local_path().unwrap()).await?);
         Ok(())
     }
 
@@ -137,7 +156,7 @@ mod tests {
 
         assert_eq!(backups.len(), 1);
         assert!(tokio::fs::metadata(sqlite_home.as_path()).await?.is_dir());
-        assert!(tokio::fs::try_exists(backups[0].backup_path.as_path()).await?);
+        assert!(tokio::fs::try_exists(backups[0].backup.local_path().unwrap()).await?);
         Ok(())
     }
 
@@ -145,7 +164,7 @@ mod tests {
     fn backup_folder_uses_parent_of_first_backup_path() {
         let backups = vec![RuntimeDbBackup {
             original_path: PathBuf::from("/tmp/state_5.sqlite"),
-            backup_path: PathBuf::from("/tmp/db-backups/sqlite-1-0/state_5.sqlite"),
+            backup: codex_state::RuntimeDbBackupLocation::ClientFile(PathBuf::from("/tmp/db-backups/sqlite-1-0/state_5.sqlite")),
         }];
 
         assert_eq!(

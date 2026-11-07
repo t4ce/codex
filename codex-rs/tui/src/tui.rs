@@ -482,13 +482,26 @@ fn restore_keep_raw(handoff: TerminalHandoff) -> Result<()> {
 
 /// Flush the underlying stdin buffer to clear any input that may be buffered at the terminal level.
 /// For example, clears any user input that occurred while the crossterm EventStream was dropped.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn flush_terminal_input_buffer() {
     // Safety: flushing the stdin queue is safe and does not move ownership.
     let result = unsafe { libc::tcflush(libc::STDIN_FILENO, libc::TCIFLUSH) };
     if result != 0 {
         let err = std::io::Error::last_os_error();
         tracing::warn!("failed to tcflush stdin: {err}");
+    }
+}
+
+#[cfg(target_os = "trueos")]
+fn flush_terminal_input_buffer() {
+    // Panic cleanup must not wait on a reader that the panicking task may own.
+    // The native lease boundary clears transport input and its next generation
+    // resets Crossterm's parser before presentation resumes.
+    if std::thread::panicking() {
+        return;
+    }
+    if let Err(error) = input_boundary::discard_pending_terminal_input() {
+        tracing::warn!(%error, "failed to discard native terminal input");
     }
 }
 
