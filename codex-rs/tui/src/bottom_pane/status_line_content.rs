@@ -58,8 +58,6 @@ impl StatusLineRenderer {
         let mut props = RowProps::default();
         props.gap = 1;
         let tree = UiNode::Row { props, children };
-        Some(FooterContent::Extension {
-            content: UiTree(Some(tree)),
-        })
+        Some(UiTree(Some(tree)).into())
     }
 }
