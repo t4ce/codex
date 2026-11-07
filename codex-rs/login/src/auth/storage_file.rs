@@ -7,6 +7,27 @@ use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 
+/// Validate the native owner-keyed tree before reading or publishing secrets.
+#[cfg(target_os = "trueos")]
+pub(super) fn assert_private_path(path: &Path) -> io::Result<()> {
+    trueos::async_fs::block_on(trueos::async_fs::assert_private_path(
+        path.as_os_str().as_encoded_bytes(),
+    ))
+    .map_err(|code| {
+        let kind = match code {
+            -1 | -4 | -6 => io::ErrorKind::InvalidInput,
+            -8 => io::ErrorKind::NotFound,
+            -19 => io::ErrorKind::PermissionDenied,
+            -20 => io::ErrorKind::Unsupported,
+            _ => io::ErrorKind::Other,
+        };
+        io::Error::new(
+            kind,
+            format!("credential path requires a native owner-authorized workspace ({code})"),
+        )
+    })
+}
+
 pub(super) fn resolve_auth_file(mut path: PathBuf) -> io::Result<PathBuf> {
     for _ in 0..40 {
         match std::fs::symlink_metadata(&path) {
@@ -32,6 +53,8 @@ pub(super) fn resolve_auth_file(mut path: PathBuf) -> io::Result<PathBuf> {
 }
 
 pub(super) fn check_replaceable(path: &Path) -> io::Result<()> {
+    #[cfg(target_os = "trueos")]
+    assert_private_path(path)?;
     let metadata = match std::fs::metadata(path) {
         Ok(metadata) => metadata,
         Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
@@ -43,7 +66,7 @@ pub(super) fn check_replaceable(path: &Path) -> io::Result<()> {
             "credential file is read-only",
         ));
     }
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::MetadataExt;
         if metadata.nlink() > 1 && metadata.is_file() {

@@ -1,3 +1,4 @@
+mod path_aliases;
 pub mod startup_timing;
 
 #[cfg(any(target_os = "trueos", test))]
@@ -149,6 +150,8 @@ pub fn arg0_dispatch() -> Option<Arg0PathEntryGuard> {
         std::env::var_os("PATH"),
         prepare_path_entry_for_codex_aliases,
     );
+    #[cfg(target_os = "trueos")]
+    startup_timing::mark("path_aliases_native_in_process");
     startup_timing::mark("path_aliases_done");
     if let Some(updated_path_env_var) = updated_path_env_var {
         // It is safe to call set_var() because our process is single-threaded at
@@ -166,17 +169,12 @@ fn prepare_path_env_var_with_aliases(
     prepare_aliases: impl FnOnce(Option<OsString>) -> std::io::Result<(Arg0PathEntryGuard, OsString)>,
 ) -> (Option<Arg0PathEntryGuard>, Option<OsString>) {
     let package_path = path_env_with_package_path_dir(install_context, existing_path.clone());
-    let path_for_aliases = package_path.clone().or(existing_path);
-
-    match prepare_aliases(path_for_aliases) {
-        Ok((path_entry, updated_path_env_var)) => (Some(path_entry), Some(updated_path_env_var)),
-        Err(err) => {
-            // It is possible that Codex will proceed successfully even if
-            // creating helper aliases fails, so warn the user and move on.
-            eprintln!("WARNING: proceeding, even though we could not create PATH aliases: {err}");
-            (None, package_path)
-        }
-    }
+    path_aliases::prepare(
+        cfg!(target_os = "trueos"),
+        package_path,
+        existing_path,
+        prepare_aliases,
+    )
 }
 
 /// While we want to deploy the Codex CLI as a single executable for simplicity,
@@ -216,7 +214,7 @@ where
     // would be nice to avoid leaving temporary directories behind, if possible.
     let path_entry_guard = arg0_dispatch();
     startup_timing::mark("arg0_dispatch_done");
-    let current_exe = std::env::current_exe().ok();
+    let current_exe = path_aliases::current_exe(cfg!(target_os = "trueos"), std::env::current_exe);
 
     // Regular invocation. Run the async entry point on a thread with the same
     // stack budget as Tokio workers; `Runtime::block_on` otherwise runs the

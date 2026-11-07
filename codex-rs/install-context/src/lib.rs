@@ -119,7 +119,10 @@ impl InstallContext {
 
     pub fn current() -> &'static Self {
         INSTALL_CONTEXT.get_or_init(|| {
+            #[cfg(not(target_os = "trueos"))]
             let current_exe = std::env::current_exe().ok();
+            #[cfg(target_os = "trueos")]
+            let current_exe: Option<PathBuf> = None;
             let method_override = if std::env::var_os("CODEX_MANAGED_BY_VITE_PLUS").is_some() {
                 Some(InstallMethod::VitePlus)
             } else if std::env::var_os("CODEX_MANAGED_BY_PNPM").is_some() {

@@ -5,9 +5,9 @@ use std::io::Seek;
 use std::io::SeekFrom;
 use std::io::Write;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::OpenOptionsExt;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::PermissionsExt;
 
 use codex_utils_paths::absolute_path::AbsolutePathBuf;
@@ -23,7 +23,7 @@ pub async fn resolve_installation_id(codex_home: &AbsolutePathBuf) -> Result<Str
         let mut options = OpenOptions::new();
         options.read(true).write(true).create(true);
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         {
             options.mode(0o644);
         }
@@ -53,7 +53,7 @@ pub async fn resolve_installation_id(codex_home: &AbsolutePathBuf) -> Result<Str
             file.read_to_string(&mut contents)?;
         }
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         {
             let metadata = file.metadata()?;
             let current_mode = metadata.permissions().mode() & 0o777;

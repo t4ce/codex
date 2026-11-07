@@ -194,15 +194,17 @@ pub(crate) async fn prepare_exec_request_with_telemetry(
     let sandbox_helper_paths = params
         .arg0
         .iter()
-        .map(|_| runtime_paths.codex_self_exe.clone())
+        .filter_map(|_| runtime_paths.helper_executable().cloned())
         .collect::<Vec<_>>();
     // Bubblewrap launches the configured helper, which may re-enter this executable to apply
     // seccomp, so the outer filesystem sandbox must expose both paths.
     #[cfg(target_os = "linux")]
     let sandbox_helper_paths = {
         let mut sandbox_helper_paths = sandbox_helper_paths;
-        if !sandbox_helper_paths.contains(&runtime_paths.codex_self_exe) {
-            sandbox_helper_paths.push(runtime_paths.codex_self_exe.clone());
+        if let Some(helper) = runtime_paths.helper_executable()
+            && !sandbox_helper_paths.contains(helper)
+        {
+            sandbox_helper_paths.push(helper.clone());
         }
         sandbox_helper_paths.extend(runtime_paths.codex_linux_sandbox_exe.iter().cloned());
         sandbox_helper_paths
@@ -237,23 +239,18 @@ pub(crate) async fn prepare_exec_request_with_telemetry(
         .split_first()
         .ok_or_else(|| invalid_params("argv must not be empty".to_string()))?;
     #[cfg(unix)]
-    let (program, args) = params.arg0.as_ref().map_or_else(
-        || (program.into(), args.to_vec()),
-        |arg0| {
-            let mut helper_args = Vec::with_capacity(params.argv.len() + 2);
-            helper_args.push(CODEX_ARG0_EXEC_HELPER_ARG1.to_string());
-            helper_args.push(arg0.clone());
-            helper_args.extend(params.argv.iter().cloned());
-            (
-                runtime_paths
-                    .codex_self_exe
-                    .as_path()
-                    .as_os_str()
-                    .to_owned(),
-                helper_args,
-            )
-        },
-    );
+    let (program, args) = if let Some(arg0) = params.arg0.as_ref() {
+        let helper = runtime_paths.helper_executable().ok_or_else(|| {
+            invalid_params("executor does not support re-executable argv0 helpers".to_owned())
+        })?;
+        let mut helper_args = Vec::with_capacity(params.argv.len() + 2);
+        helper_args.push(CODEX_ARG0_EXEC_HELPER_ARG1.to_string());
+        helper_args.push(arg0.clone());
+        helper_args.extend(params.argv.iter().cloned());
+        (helper.as_path().as_os_str().to_owned(), helper_args)
+    } else {
+        (program.into(), args.to_vec())
+    };
     #[cfg(not(unix))]
     let (program, args) = (program.into(), args.to_vec());
     #[cfg(windows)]
@@ -290,7 +287,7 @@ pub(crate) async fn prepare_exec_request_with_telemetry(
             network: None,
             sandbox_policy_cwd,
             sandbox_exe: if cfg!(windows) {
-                Some(runtime_paths.codex_self_exe.as_path())
+                runtime_paths.helper_executable().map(|path| path.as_path())
             } else {
                 runtime_paths.codex_linux_sandbox_exe.as_deref()
             },

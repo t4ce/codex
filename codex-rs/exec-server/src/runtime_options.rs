@@ -9,7 +9,11 @@ use codex_utils_paths::absolute_path::AbsolutePathBuf;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExecServerRuntimeOptions {
     /// Stable path to the Codex executable used to launch hidden helper modes.
+    #[cfg(not(target_os = "trueos"))]
     pub codex_self_exe: AbsolutePathBuf,
+    /// Native command sessions do not have a Unix re-executable file.
+    #[cfg(target_os = "trueos")]
+    pub codex_self_exe: Option<AbsolutePathBuf>,
     /// Path to the Linux sandbox helper alias used when the platform sandbox
     /// needs to re-enter Codex by argv0.
     pub codex_linux_sandbox_exe: Option<AbsolutePathBuf>,
@@ -29,6 +33,22 @@ impl ExecServerRuntimeOptions {
         codex_self_exe: Option<PathBuf>,
         codex_linux_sandbox_exe: Option<PathBuf>,
     ) -> std::io::Result<Self> {
+        #[cfg(target_os = "trueos")]
+        if codex_self_exe.is_none() {
+            if codex_linux_sandbox_exe.is_some() {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Unsupported,
+                    "native command sessions cannot use a Unix sandbox executable",
+                ));
+            }
+            return Ok(Self {
+                codex_self_exe: None,
+                codex_linux_sandbox_exe: None,
+                linux_sandbox_pid_namespace: LinuxSandboxPidNamespace::default(),
+                proxy_private_ips_via_upstream: false,
+                prefer_mxc: None,
+            });
+        }
         let codex_self_exe = codex_self_exe.ok_or_else(|| {
             std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,
@@ -46,11 +66,27 @@ impl ExecServerRuntimeOptions {
             linux_sandbox_pid_namespace: LinuxSandboxPidNamespace::default(),
             proxy_private_ips_via_upstream: false,
             prefer_mxc: None,
+            #[cfg(not(target_os = "trueos"))]
             codex_self_exe: absolute_path(codex_self_exe)?,
+            #[cfg(target_os = "trueos")]
+            codex_self_exe: Some(absolute_path(codex_self_exe)?),
             codex_linux_sandbox_exe: codex_linux_sandbox_exe.map(absolute_path).transpose()?,
             #[cfg(target_os = "macos")]
             allowed_symlinked_codex_home: None,
         })
+    }
+
+    /// The actual executable capability, when this executor can re-enter Codex.
+    /// Native in-process filesystem and Shell3 sessions require no such path.
+    pub fn helper_executable(&self) -> Option<&AbsolutePathBuf> {
+        #[cfg(target_os = "trueos")]
+        {
+            self.codex_self_exe.as_ref()
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            Some(&self.codex_self_exe)
+        }
     }
 
     /// Applies the PID namespace policy chosen by trusted executor provisioning.

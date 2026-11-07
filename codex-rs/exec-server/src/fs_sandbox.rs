@@ -157,7 +157,9 @@ impl FileSystemSandboxRunner {
         workspace_roots: &[AbsolutePathBuf],
         sandbox_context: &FileSystemSandboxContext,
     ) -> Result<SandboxExecRequest, JSONRPCErrorError> {
-        let helper = &self.runtime_paths.codex_self_exe;
+        let helper = self.runtime_paths.helper_executable().ok_or_else(|| {
+            invalid_request("executor does not support re-executable filesystem helpers".to_owned())
+        })?;
         let sandbox_manager = SandboxManager::for_file_system_helpers()
             .with_linux_sandbox_pid_namespace(self.runtime_paths.linux_sandbox_pid_namespace);
         #[cfg(target_os = "macos")]
@@ -205,7 +207,9 @@ impl FileSystemSandboxRunner {
                     network: None,
                     sandbox_policy_cwd: &cwd.uri,
                     sandbox_exe: if cfg!(windows) {
-                        Some(self.runtime_paths.codex_self_exe.as_path())
+                        self.runtime_paths
+                            .helper_executable()
+                            .map(|path| path.as_path())
                     } else {
                         self.runtime_paths.codex_linux_sandbox_exe.as_deref()
                     },
@@ -241,7 +245,11 @@ fn native_workspace_root(root: &PathUri) -> Result<AbsolutePathBuf, JSONRPCError
 }
 
 fn helper_read_roots(runtime_paths: &ExecServerRuntimeOptions) -> Vec<AbsolutePathBuf> {
-    let mut roots = vec![runtime_paths.codex_self_exe.clone()];
+    let mut roots: Vec<_> = runtime_paths
+        .helper_executable()
+        .cloned()
+        .into_iter()
+        .collect();
     if let Some(path) = &runtime_paths.codex_linux_sandbox_exe
         && !roots.contains(path)
     {

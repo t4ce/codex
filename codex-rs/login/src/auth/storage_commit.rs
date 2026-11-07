@@ -37,13 +37,15 @@ impl CommittedStorage {
             Err(error) => return Err(error),
         }
         .with_extension("json.lock");
+        #[cfg(target_os = "trueos")]
+        storage_file::assert_private_path(&path)?;
         std::fs::create_dir_all(
             path.parent()
                 .ok_or_else(|| std::io::Error::other("credential lock has no parent"))?,
         )?;
         let mut options = OpenOptions::new();
         options.read(true).write(true).create(true).truncate(false);
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         {
             use std::os::unix::fs::OpenOptionsExt;
             options.mode(0o600);
@@ -88,6 +90,8 @@ impl AuthStorageBackend for CommittedStorage {
         self.inner.compare_and_save(expected, auth)
     }
     fn delete(&self) -> std::io::Result<bool> {
+        #[cfg(target_os = "trueos")]
+        storage_file::assert_private_path(&get_auth_file(&self.home))?;
         // A missing file-store directory contains no credentials to delete.
         // Linearize this no-op before any concurrent creator, without creating
         // a directory just to leave a lock behind. Secure stores may still have

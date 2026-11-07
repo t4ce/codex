@@ -170,6 +170,8 @@ pub(super) fn get_auth_file(codex_home: &Path) -> PathBuf {
 
 pub(super) fn delete_file_if_exists(codex_home: &Path) -> std::io::Result<bool> {
     let auth_file = get_auth_file(codex_home);
+    #[cfg(target_os = "trueos")]
+    storage_file::assert_private_path(&auth_file)?;
     match std::fs::remove_file(&auth_file) {
         Ok(()) => Ok(true),
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(false),
@@ -197,6 +199,8 @@ pub(super) trait AuthStorageBackend: Debug + Send + Sync {
     ) -> std::io::Result<(std::sync::MutexGuard<'static, ()>, Option<File>)> {
         let guard = auth_storage_commit_guard()?;
         let file = if let Some(home) = self.persistent_home() {
+            #[cfg(target_os = "trueos")]
+            storage_file::assert_private_path(&home.join("auth.lock"))?;
             std::fs::create_dir_all(home)?;
             let file = OpenOptions::new()
                 .read(true)
@@ -245,6 +249,8 @@ impl FileAuthStorage {
     /// Attempt to read and parse the `auth.json` file in the given `CODEX_HOME` directory.
     /// Returns the full AuthDotJson structure.
     pub(super) fn try_read_auth_json(&self, auth_file: &Path) -> std::io::Result<AuthDotJson> {
+        #[cfg(target_os = "trueos")]
+        storage_file::assert_private_path(auth_file)?;
         let mut file = File::open(auth_file)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -273,13 +279,16 @@ impl AuthStorageBackend for FileAuthStorage {
 
     fn save(&self, auth_dot_json: &AuthDotJson) -> std::io::Result<()> {
         let auth_file = storage_file::resolve_auth_file(get_auth_file(&self.codex_home))?;
+        #[cfg(target_os = "trueos")]
+        storage_file::assert_private_path(&auth_file)?;
         let parent = auth_file
             .parent()
             .ok_or_else(|| std::io::Error::other("auth file has no parent"))?;
         std::fs::create_dir_all(parent)?;
         let json_data = serde_json::to_string_pretty(auth_dot_json)?;
         storage_file::check_replaceable(&auth_file)?;
-        // tempfile creates a private (0600 on Unix) file in the same filesystem.
+        // tempfile inherits the native workspace's access key on TRUEOS and
+        // creates a private 0600 file on Unix hosts in the same filesystem.
         // Readers see the complete old or new document, never a truncated auth.json.
         let mut replacement = storage_file::replacement(&auth_file)?;
         replacement.write_all(json_data.as_bytes())?;
