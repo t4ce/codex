@@ -1316,6 +1316,13 @@ async fn dispatch_cli(
             }
             match subcommand {
                 None => {
+                    #[cfg(target_os = "trueos")]
+                    if managed_daemon {
+                        return Err(std::io::Error::new(
+                            std::io::ErrorKind::Unsupported,
+                            "detached app-server lifecycle is unavailable on TRUEOS; use the embedded app server or an explicit remote WebSocket endpoint",
+                        ).into());
+                    }
                     let transport = if stdio {
                         codex_app_server::AppServerTransport::Stdio
                     } else {

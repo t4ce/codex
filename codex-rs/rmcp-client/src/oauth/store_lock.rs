@@ -100,6 +100,14 @@ impl OAuthStoreLock {
         mode: OAuthStoreLockMode,
     ) -> Result<Self, OAuthStoreLockFailure> {
         let path = oauth_store_lock_path(codex_home, store);
+        #[cfg(target_os = "trueos")]
+        super::native_storage::assert_private_path(&path).map_err(|source| {
+            OAuthStoreLockFailure::Open {
+                store,
+                path: path.clone(),
+                source,
+            }
+        })?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).map_err(|source| OAuthStoreLockFailure::CreateDir {
                 store,

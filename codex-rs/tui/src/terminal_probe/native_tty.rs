@@ -1,6 +1,7 @@
 //! Exclusive terminal probes use the attached native console, not Unix files.
 use std::io;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use std::time::Instant;
 
 unsafe extern "C" {
     fn trueos_cabi_blueprint_terminal_lease_current_v1(expected: u64, epoch: *mut u64) -> i32;
@@ -71,7 +72,10 @@ impl Tty {
         max_bytes: usize,
     ) -> io::Result<()> {
         current_lease(self.lease)?;
-        let count = self.pending.len().min(max_bytes.saturating_sub(buffer.len()));
+        let count = self
+            .pending
+            .len()
+            .min(max_bytes.saturating_sub(buffer.len()));
         buffer.extend(self.pending.drain(..count));
         let mut chunk = [0; 256];
         while buffer.len() < max_bytes && Instant::now() < deadline {
@@ -105,7 +109,10 @@ impl Tty {
             if remaining.is_zero() {
                 return Ok(false);
             }
-            let millis = remaining.as_nanos().div_ceil(1_000_000).min(u128::from(u64::MAX)) as u64;
+            let millis = remaining
+                .as_nanos()
+                .div_ceil(1_000_000)
+                .min(u128::from(u64::MAX)) as u64;
             let code = unsafe { trueos_cabi_shell_attached_wait_after_v1(observed, millis) };
             if code < 0 {
                 return Err(io::Error::new(

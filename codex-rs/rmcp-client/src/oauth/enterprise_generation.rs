@@ -43,9 +43,11 @@ impl EnterpriseOAuthGenerationFile {
         };
         let name = format!("{:x}.{suffix}", Sha256::digest(key.as_bytes()));
         let path = find_codex_home()?.join("mcp-oauth-locks").join(name);
+        #[cfg(target_os = "trueos")]
+        super::native_storage::assert_private_path(&path)?;
         let mut options = OpenOptions::new();
         options.read(true).write(true).create(true).truncate(false);
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         {
             use std::os::unix::fs::OpenOptionsExt;
             options

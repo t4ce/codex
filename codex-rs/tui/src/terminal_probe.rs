@@ -43,10 +43,10 @@ pub(crate) struct DefaultColors {
 #[cfg_attr(test, allow(dead_code))]
 mod imp {
     use super::DefaultColors;
-    use super::parse_default_colors;
-    use super::startup_replay::startup_replay_input;
     #[cfg(target_os = "trueos")]
     use super::native_tty::Tty;
+    use super::parse_default_colors;
+    use super::startup_replay::startup_replay_input;
     use super::terminal_identity;
     #[cfg(not(target_os = "trueos"))]
     use std::fs::File;
@@ -767,6 +767,7 @@ mod imp {
         }
 
         #[test]
+        #[cfg(not(target_os = "trueos"))]
         fn missing_identity_remains_unknown_at_the_deadline() {
             let mut tty = tty_with_buffered_input(b"\x1b[?1;2c");
             let mut buffer = Vec::new();
@@ -782,6 +783,7 @@ mod imp {
         }
 
         #[test]
+        #[cfg(not(target_os = "trueos"))]
         fn startup_probe_finds_responses_after_large_typeahead() {
             let mut input = vec![b'x'; 2_048];
             input.extend_from_slice(

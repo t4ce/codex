@@ -14,8 +14,8 @@ use codex_login::AuthManager;
 use codex_login::CodexAuth;
 use codex_login::read_codex_access_token_from_env;
 use codex_protocol::auth::AuthMode;
-use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use codex_utils_cli::CliConfigOverrides;
+use codex_utils_paths::absolute_path::AbsolutePathBuf;
 use std::io::BufRead;
 use std::io::Read;
 use std::sync::Arc;
@@ -30,30 +30,41 @@ const REMOTE_AUTH_MODES: &[AuthMode] = &[
 ];
 
 pub(super) fn read_chatgpt_stdin_auth(account_id: Option<String>) -> anyhow::Result<CodexAuth> {
-    const MAX_FRAME_BYTES: u64 = 64 * 1024;
-    let stdin = codex_exec_server::credential_stdin()?;
-    #[cfg(unix)]
+    #[cfg(target_os = "trueos")]
     {
-        use std::os::fd::AsFd;
-        use std::os::unix::fs::FileTypeExt;
-        let kind = std::fs::File::from(stdin.as_fd().try_clone_to_owned()?)
-            .metadata()?
-            .file_type();
-        anyhow::ensure!(
-            kind.is_fifo() || kind.is_socket(),
-            "ChatGPT token stdin must be a pipe or socket"
-        );
+        let _ = account_id;
+        // Native attached console input does not establish a private pipe from
+        // the launcher. Keep this gate even if the provider changes later.
+        codex_exec_server::credential_stdin()?;
+        anyhow::bail!("TRUEOS does not provide a verified parent-owned credential pipe");
     }
-    #[cfg(not(unix))]
-    anyhow::ensure!(
-        !std::io::IsTerminal::is_terminal(&stdin),
-        "ChatGPT token stdin must be piped"
-    );
+    #[cfg(not(target_os = "trueos"))]
+    {
+        const MAX_FRAME_BYTES: u64 = 64 * 1024;
+        let stdin = codex_exec_server::credential_stdin()?;
+        #[cfg(unix)]
+        {
+            use std::os::fd::AsFd;
+            use std::os::unix::fs::FileTypeExt;
+            let kind = std::fs::File::from(stdin.as_fd().try_clone_to_owned()?)
+                .metadata()?
+                .file_type();
+            anyhow::ensure!(
+                kind.is_fifo() || kind.is_socket(),
+                "ChatGPT token stdin must be a pipe or socket"
+            );
+        }
+        #[cfg(not(unix))]
+        anyhow::ensure!(
+            !std::io::IsTerminal::is_terminal(&stdin),
+            "ChatGPT token stdin must be piped"
+        );
 
-    // The launcher keeps the pipe open for --exit-on-stdin-close after this line.
-    let mut line = String::new();
-    stdin.lock().take(MAX_FRAME_BYTES).read_line(&mut line)?;
-    chatgpt_auth_from_line(&line, account_id)
+        // The launcher keeps the pipe open for --exit-on-stdin-close after this line.
+        let mut line = String::new();
+        stdin.lock().take(MAX_FRAME_BYTES).read_line(&mut line)?;
+        chatgpt_auth_from_line(&line, account_id)
+    }
 }
 
 fn chatgpt_auth_from_line(line: &str, account_id: Option<String>) -> anyhow::Result<CodexAuth> {

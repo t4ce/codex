@@ -20,6 +20,8 @@ mod credential_store;
 mod ema_identity;
 mod enterprise_generation;
 mod issuer_binding;
+#[cfg(target_os = "trueos")]
+mod native_storage;
 mod refresh_lock;
 mod refresh_transaction;
 mod resolved_store;
@@ -1104,6 +1106,8 @@ fn fallback_file_path() -> Result<PathBuf> {
 
 fn read_fallback_file_unlocked() -> Result<Option<FallbackFile>> {
     let path = fallback_file_path()?;
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(&path)?;
     let contents = match fs::read_to_string(&path) {
         Ok(contents) => contents,
         Err(err) if err.kind() == ErrorKind::NotFound => return Ok(None),
@@ -1125,9 +1129,11 @@ fn read_fallback_file_unlocked() -> Result<Option<FallbackFile>> {
 }
 
 fn open_fallback_file_for_write(path: &std::path::Path) -> Result<fs::File> {
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(path)?;
     let mut options = fs::OpenOptions::new();
     options.write(true).create(true).truncate(false);
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options
@@ -1150,6 +1156,8 @@ fn open_fallback_file_for_write(path: &std::path::Path) -> Result<fs::File> {
 
 fn write_fallback_file(store: &FallbackFile) -> Result<()> {
     let path = fallback_file_path()?;
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(&path)?;
 
     if store.is_empty() {
         if path.exists() {
@@ -1165,7 +1173,7 @@ fn write_fallback_file(store: &FallbackFile) -> Result<()> {
 
     let serialized = serde_json::to_string(store)?;
     let mut file = open_fallback_file_for_write(&path)?;
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::PermissionsExt;
         file.set_permissions(fs::Permissions::from_mode(0o600))?;

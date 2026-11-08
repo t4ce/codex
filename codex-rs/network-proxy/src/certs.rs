@@ -41,6 +41,10 @@ use std::time::UNIX_EPOCH;
 use tracing::info;
 use tracing::warn;
 
+#[cfg(target_os = "trueos")]
+#[path = "native_ca_storage.rs"]
+mod native_storage;
+
 pub(super) struct ManagedMitmCa {
     issuer: Issuer<'static, KeyPair>,
     certificate_path: PathBuf,
@@ -81,6 +85,8 @@ impl ManagedMitmCa {
     }
 
     fn create(proxy_dir: &Path) -> Result<Self> {
+        #[cfg(target_os = "trueos")]
+        native_storage::assert_private_path(proxy_dir)?;
         fs::create_dir_all(proxy_dir)
             .with_context(|| format!("failed to create {}", proxy_dir.display()))?;
 
@@ -186,6 +192,10 @@ impl ManagedMitmCa {
 }
 
 fn read_external_ca_file(path: &Path, field: &str, private: bool) -> Result<String> {
+    #[cfg(target_os = "trueos")]
+    if private {
+        native_storage::assert_private_path(path)?;
+    }
     // Do not accept a caller-provided signing key where its access controls cannot be verified.
     #[cfg(not(unix))]
     anyhow::ensure!(
@@ -195,7 +205,7 @@ fn read_external_ca_file(path: &Path, field: &str, private: bool) -> Result<Stri
 
     let mut options = OpenOptions::new();
     options.read(true);
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::OpenOptionsExt as _;
         options.custom_flags(libc::O_NOFOLLOW);
@@ -214,7 +224,7 @@ fn read_external_ca_file(path: &Path, field: &str, private: bool) -> Result<Stri
         metadata.len() <= MAX_EXTERNAL_CA_FILE_BYTES,
         "{field} exceeds {MAX_EXTERNAL_CA_FILE_BYTES} bytes"
     );
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::PermissionsExt as _;
         anyhow::ensure!(
@@ -612,6 +622,8 @@ pub fn is_managed_mitm_ca_trust_bundle_path(path: &str) -> bool {
 }
 
 fn persist_managed_ca_trust_bundle(proxy_dir: &Path, trust_bundle: &str) -> Result<PathBuf> {
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(proxy_dir)?;
     fs::create_dir_all(proxy_dir)
         .with_context(|| format!("failed to create {}", proxy_dir.display()))?;
     let hash = Sha256::digest(trust_bundle.as_bytes());
@@ -678,6 +690,8 @@ fn managed_ca_certificate_lock_path(certificate_path: &Path) -> Option<PathBuf> 
 }
 
 fn open_managed_ca_lock(path: &Path) -> Result<File> {
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(path)?;
     if fs::symlink_metadata(path)
         .ok()
         .is_some_and(|metadata| metadata.file_type().is_symlink())
@@ -688,12 +702,12 @@ fn open_managed_ca_lock(path: &Path) -> Result<File> {
         ));
     }
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     use std::os::unix::fs::OpenOptionsExt;
 
     let mut options = OpenOptions::new();
     options.read(true).write(true).create(true).truncate(false);
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     options.mode(0o600);
     options
         .open(path)
@@ -816,6 +830,8 @@ fn generate_ca() -> Result<(String, KeyPair)> {
 }
 
 fn write_atomic_create_new(path: &Path, contents: &[u8], mode: u32) -> Result<()> {
+    #[cfg(target_os = "trueos")]
+    native_storage::assert_private_path(path)?;
     let parent = path
         .parent()
         .ok_or_else(|| anyhow!("missing parent directory"))?;
@@ -837,6 +853,17 @@ fn write_atomic_create_new(path: &Path, contents: &[u8], mode: u32) -> Result<()
 
     // Create the final file using "create-new" semantics (no overwrite). `rename` on Unix can
     // overwrite existing files, so prefer a hard-link, which fails if the destination exists.
+    #[cfg(target_os = "trueos")]
+    if let Err(error) = native_storage::rename_without_replace(&tmp_path, path) {
+        let _ = fs::remove_file(&tmp_path);
+        return Err(error).with_context(|| {
+            format!(
+                "failed to publish {} without replacing existing data",
+                path.display()
+            )
+        });
+    }
+    #[cfg(not(target_os = "trueos"))]
     match fs::hard_link(&tmp_path, path) {
         Ok(()) => {
             fs::remove_file(&tmp_path)
@@ -911,7 +938,7 @@ fn write_atomic_create_new_or_reuse(path: &Path, contents: &[u8], mode: u32) -> 
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn open_create_new_with_mode(path: &Path, mode: u32) -> Result<File> {
     use std::os::unix::fs::OpenOptionsExt;
 
@@ -923,7 +950,17 @@ fn open_create_new_with_mode(path: &Path, mode: u32) -> Result<File> {
         .with_context(|| format!("failed to create {}", path.display()))
 }
 
-#[cfg(not(unix))]
+#[cfg(target_os = "trueos")]
+fn open_create_new_with_mode(path: &Path, _mode: u32) -> Result<File> {
+    native_storage::assert_private_path(path)?;
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .with_context(|| format!("failed to create native CA artifact {}", path.display()))
+}
+
+#[cfg(not(any(unix, target_os = "trueos")))]
 fn open_create_new_with_mode(path: &Path, _mode: u32) -> Result<File> {
     OpenOptions::new()
         .write(true)

@@ -269,7 +269,7 @@ impl ExecServerCommand {
                 let ExecutorCredentialPipe {
                     provider,
                     parent_closed,
-                } = ExecutorCredentialPipe::from_stdin(environment_id.trim().to_string());
+                } = ExecutorCredentialPipe::from_stdin(environment_id.trim().to_string())?;
                 provider.wait_for_initial().await?;
                 parent_lifetime = ParentLifetime::MonitoredStdin(parent_closed);
                 credential_provider = Some(Arc::clone(&provider));

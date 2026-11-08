@@ -573,9 +573,19 @@ impl AuthProvider for StaticBearerAuthProvider {
 
 /// Return stdin after protecting the credential pipe and process memory on Linux.
 pub fn credential_stdin() -> std::io::Result<std::io::Stdin> {
-    #[cfg(target_os = "linux")]
-    rustix::process::set_dumpable_behavior(rustix::process::DumpableBehavior::NotDumpable)?;
-    Ok(std::io::stdin())
+    #[cfg(target_os = "trueos")]
+    {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "TRUEOS does not provide a verified parent-owned credential pipe",
+        ))
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        #[cfg(target_os = "linux")]
+        rustix::process::set_dumpable_behavior(rustix::process::DumpableBehavior::NotDumpable)?;
+        Ok(std::io::stdin())
+    }
 }
 
 /// Read a single newline-terminated registration bearer from a parent-owned pipe.

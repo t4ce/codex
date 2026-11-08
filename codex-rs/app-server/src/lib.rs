@@ -140,7 +140,7 @@ mod gateway_oauth_notifications;
 mod image_url;
 pub mod in_process;
 mod log_write_warning;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod managed_daemon;
 mod mcp_refresh;
 mod message_processor;
@@ -539,6 +539,13 @@ pub async fn run_main_with_transport_options(
     auth: WebsocketAuthSettings,
     runtime_options: AppServerRuntimeOptions,
 ) -> IoResult<AppServerExit> {
+    #[cfg(target_os = "trueos")]
+    if runtime_options.managed_daemon {
+        return Err(std::io::Error::new(
+            ErrorKind::Unsupported,
+            "TRUEOS uses embedded or foreground app servers; a Unix-managed daemon is unavailable",
+        ));
+    }
     let cloud_skill_provider = match runtime_options.cloud_skills_snapshot {
         Some(path) => {
             let provider = tokio::task::spawn_blocking(move || {
@@ -555,7 +562,7 @@ pub async fn run_main_with_transport_options(
     let _registered_core = codex_windows_sandbox::registered_core_requested();
     let managed_daemon = matches!(&transport, AppServerTransport::UnixSocket { .. })
         && runtime_options.managed_daemon;
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     let nofile_limit_result = managed_daemon.then(managed_daemon::raise_nofile_limit);
     let loader_overrides = loader_overrides_with_test_user_config_file(
         loader_overrides,
@@ -793,7 +800,7 @@ pub async fn run_main_with_transport_options(
         .with(log_db_layer)
         .with(otel_layers)
         .try_init();
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     if let Some(Err(err)) = nofile_limit_result {
         warn!(%err, "failed to raise managed app-server file descriptor limit");
     }
@@ -1443,7 +1450,8 @@ struct SqliteRecoveryNotice {
 
 struct RecoveredSqliteDatabase {
     database_path: String,
-    backup_folder: String,
+    backup_location: String,
+    service_owned: bool,
 }
 
 struct StateDbInitResult {
@@ -1471,11 +1479,17 @@ async fn init_sqlite_state_db_with_fresh_start_on_corruption(
 
             if !attempted_backups.insert(database_path.clone()) {
                 return Err(anyhow::anyhow!(
-                    "failed to initialize sqlite state runtime after moving damaged database file into a backup folder: {err}"
+                    "failed to initialize sqlite state runtime after preserving the damaged database: {err}"
                 ));
             }
 
             let original_error = err.to_string();
+            #[cfg(target_os = "trueos")]
+            emit_state_db_backup_warning(&format!(
+                "Codex database {} appears damaged. Asking SQLite to preserve its image and prepare a fresh database.",
+                database_path.display()
+            ));
+            #[cfg(not(target_os = "trueos"))]
             emit_state_db_backup_warning(&format!(
                 "Codex local database at {} appears damaged. Moving it into a backup folder so the app server can rebuild it from saved data.",
                 database_path.display()
@@ -1484,32 +1498,21 @@ async fn init_sqlite_state_db_with_fresh_start_on_corruption(
                 .await
                 .map_err(|backup_err| {
                     anyhow::anyhow!(
-                        "failed to move damaged sqlite state database files into a backup folder: {backup_err}; original error: {original_error}"
+                        "failed to preserve damaged sqlite state database: {backup_err}; original error: {original_error}"
                     )
                 })?;
             for backup in &backups {
                 emit_state_db_backup_warning(&format!(
-                    "Moved damaged Codex local database file {} to {}",
+                    "Preserved damaged Codex database {} at {}",
                     backup.original_path.display(),
-                    backup.backup_path.display()
+                    backup.backup
                 ));
             }
         }
     })
     .await;
     let state_db = result?;
-    let mut recovered_databases = Vec::new();
-    let mut backup_folders = HashSet::new();
-    for backup in backups {
-        if let Some(folder) = backup.backup_path.parent()
-            && backup_folders.insert(folder.to_path_buf())
-        {
-            recovered_databases.push(RecoveredSqliteDatabase {
-                database_path: backup.original_path.display().to_string(),
-                backup_folder: folder.display().to_string(),
-            });
-        }
-    }
+    let recovered_databases = recovered_sqlite_databases(&backups);
     let recovery_notice = sqlite_recovery_notice(&recovered_databases);
     if let Some(notice) = &recovery_notice {
         emit_state_db_backup_warning(SQLITE_RECOVERY_CONFIG_WARNING_SUMMARY);
@@ -1521,7 +1524,53 @@ async fn init_sqlite_state_db_with_fresh_start_on_corruption(
     })
 }
 
+fn recovered_sqlite_databases(
+    backups: &[codex_state::RuntimeDbBackup],
+) -> Vec<RecoveredSqliteDatabase> {
+    let mut recovered = Vec::new();
+    let mut locations = HashSet::new();
+    for backup in backups {
+        let (identity, backup_location, service_owned) = match &backup.backup {
+            codex_state::RuntimeDbBackupLocation::ClientFile(path) => {
+                let Some(folder) = path.parent() else {
+                    continue;
+                };
+                let location = folder.display().to_string();
+                (
+                    (String::new(), String::new(), location.clone()),
+                    location,
+                    false,
+                )
+            }
+            codex_state::RuntimeDbBackupLocation::SqliteService {
+                instance,
+                database,
+                locator,
+            } => (
+                (instance.clone(), database.clone(), locator.clone()),
+                locator.clone(),
+                true,
+            ),
+        };
+        if locations.insert(identity) {
+            recovered.push(RecoveredSqliteDatabase {
+                database_path: backup.original_path.display().to_string(),
+                backup_location,
+                service_owned,
+            });
+        }
+    }
+    recovered
+}
+
 fn sqlite_home_is_blocking_file(database_path: &Path) -> bool {
+    #[cfg(target_os = "trueos")]
+    {
+        // Service-owned databases are not client files beneath this path.
+        let _ = database_path;
+        false
+    }
+    #[cfg(not(target_os = "trueos"))]
     database_path
         .parent()
         .and_then(|path| std::fs::metadata(path).ok())
@@ -1538,16 +1587,21 @@ fn sqlite_recovery_notice(
     let details = recovered_databases
         .iter()
         .map(|recovered_database| {
+            let label = if recovered_database.service_owned {
+                "SQLite-owned backup"
+            } else {
+                "Backup folder"
+            };
             format!(
-                "Database path: {}\nBackup folder: {}",
-                recovered_database.database_path, recovered_database.backup_folder
+                "Database path: {}\n{label}: {}",
+                recovered_database.database_path, recovered_database.backup_location
             )
         })
         .collect::<Vec<_>>()
         .join("\n\n");
     Some(SqliteRecoveryNotice {
         details: format!(
-            "Damaged local databases were rebuilt. Saved conversations remain in rollout files and can restore the thread list and history. Some database-only metadata may be unavailable. The original database files were preserved at the backup locations below.\n\n{details}"
+            "Damaged SQLite databases were rebuilt. Saved conversations remain in rollout files and can restore the thread list and history. Some database-only metadata may be unavailable. The original database images were preserved at the backup locations below.\n\n{details}"
         ),
     })
 }

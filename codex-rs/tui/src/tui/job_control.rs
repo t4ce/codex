@@ -288,13 +288,15 @@ fn suspend_process() -> Result<()> {
 /// Unix process group or install SIGCONT handlers.
 #[cfg(target_os = "trueos")]
 fn suspend_process() -> Result<()> {
-    let lease = trueos_v::vshell::terminal_initial_lease().map_err(std::io::Error::other)?;
+    let lease = trueos_v::vshell::terminal_initial_lease()
+        .map_err(|error| std::io::Error::other(error.to_string()))?;
     super::restore()?;
     super::terminal_stderr::pause()?;
-    let result = lease.release_to_shell()
+    let result = lease
+        .release_to_shell()
         .and_then(|ticket| ticket.wait_for_reentry())
         .map(drop)
-        .map_err(std::io::Error::other);
+        .map_err(|error| std::io::Error::other(error.to_string()));
     result
         .and(super::terminal_stderr::resume())
         .and(super::set_modes().map(drop))

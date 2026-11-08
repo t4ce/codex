@@ -82,11 +82,15 @@ pub async fn remove_thread_name_entries(
         return Ok(());
     }
     with_session_index_lock(codex_home, move || {
-        let contents = match std::fs::read_to_string(&path) {
-            Ok(contents) => contents,
+        // Retain the exact capability whose bytes we read. A later pathname
+        // lookup could refer to a replacement with a different access policy.
+        let mut source = match File::open(&path) {
+            Ok(source) => source,
             Err(err) if err.kind() == ErrorKind::NotFound => return Ok(()),
             Err(err) => return Err(err),
         };
+        let mut contents = String::new();
+        std::io::Read::read_to_string(&mut source, &mut contents)?;
         let mut removed = false;
         let mut remaining = String::with_capacity(contents.len());
         for line in contents.lines() {
@@ -105,14 +109,31 @@ pub async fn remove_thread_name_entries(
         let mut temporary = tempfile::Builder::new()
             .prefix("session-index-")
             .tempfile_in(path.parent().unwrap_or(Path::new(".")))?;
+        #[cfg(not(target_os = "trueos"))]
         temporary
             .as_file()
-            .set_permissions(std::fs::metadata(&path)?.permissions())?;
+            .set_permissions(source.metadata()?.permissions())?;
+        #[cfg(target_os = "trueos")]
+        verify_session_index_access(&source, temporary.as_file())?;
         temporary.write_all(remaining.as_bytes())?;
+        #[cfg(target_os = "trueos")]
+        verify_session_index_access(&source, temporary.as_file())?;
         temporary.persist(&path).map_err(|error| error.error)?;
         Ok(())
     })
     .await
+}
+
+#[cfg(target_os = "trueos")]
+fn verify_session_index_access(source: &File, destination: &File) -> std::io::Result<()> {
+    if source.has_same_access_key(destination)? {
+        Ok(())
+    } else {
+        Err(std::io::Error::new(
+            ErrorKind::PermissionDenied,
+            "session index replacement must preserve native access-key requirements",
+        ))
+    }
 }
 
 /// Serialize index mutations within and across processes, including cancelled updates.

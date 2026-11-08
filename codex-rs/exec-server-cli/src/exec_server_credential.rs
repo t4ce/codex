@@ -33,8 +33,9 @@ pub(super) struct ExecutorCredentialPipe {
 }
 
 impl ExecutorCredentialPipe {
-    pub(super) fn from_stdin(environment_id: String) -> Self {
-        Self::spawn_with_reader(environment_id, std::io::stdin)
+    pub(super) fn from_stdin(environment_id: String) -> std::io::Result<Self> {
+        let stdin = codex_exec_server::credential_stdin()?;
+        Ok(Self::spawn_with_reader(environment_id, move || stdin))
     }
 
     fn spawn_with_reader<R: std::io::Read, F: FnOnce() -> R + Send + 'static>(

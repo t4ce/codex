@@ -52,6 +52,8 @@ impl RefreshCredentialLock {
         let path = codex_home
             .join(REFRESH_LOCK_DIR)
             .join(format!("{:x}.lock", hasher.finalize()));
+        #[cfg(target_os = "trueos")]
+        super::native_storage::assert_private_path(&path)?;
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
