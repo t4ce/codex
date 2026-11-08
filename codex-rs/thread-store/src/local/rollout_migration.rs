@@ -65,6 +65,7 @@ use publish::compressed_staged_rollout_path;
 use publish::decompress_rollout_to_path;
 use publish::decompressed_staged_rollout_path;
 use publish::migration_journal_path;
+use publish::open_staged_rollout;
 use publish::pending_migration_thread_ids;
 use publish::remove_file_if_present;
 use publish::rewrite_subagent_history_boundary;
@@ -786,11 +787,19 @@ impl LocalThreadStore {
 
             // SQLite projection only starts after every staged-file mutation is durable.
             let modified_at = source_modified;
+            #[cfg(target_os = "trueos")]
+            let native_source = source_path.to_path_buf();
             let path = staged_path.clone();
             tokio::task::spawn_blocking(move || {
                 let file = std::fs::OpenOptions::new().write(true).open(path)?;
+                #[cfg(not(target_os = "trueos"))]
                 if let Some(modified_at) = modified_at {
                     file.set_times(std::fs::FileTimes::new().set_modified(modified_at))?;
+                }
+                #[cfg(target_os = "trueos")]
+                {
+                    let _ = modified_at;
+                    publish::verify_native_access(&std::fs::File::open(native_source)?, &file)?;
                 }
                 file.sync_all()
             })
@@ -845,9 +854,17 @@ impl LocalThreadStore {
             let current_source_metadata = tokio::fs::metadata(rollout_path)
                 .await
                 .map_err(migration_error)?;
-            if current_source_metadata.len() != source_metadata.len()
-                || current_source_metadata.modified().ok() != source_modified
-            {
+            #[cfg(target_os = "trueos")]
+            let source_changed = current_source_metadata.root_id() != source_metadata.root_id()
+                || current_source_metadata.file_id().is_none()
+                || current_source_metadata.file_id() != source_metadata.file_id()
+                || current_source_metadata.revision().is_none()
+                || current_source_metadata.revision() != source_metadata.revision()
+                || current_source_metadata.len() != source_metadata.len();
+            #[cfg(not(target_os = "trueos"))]
+            let source_changed = current_source_metadata.len() != source_metadata.len()
+                || current_source_metadata.modified().ok() != source_modified;
+            if source_changed {
                 return Err(ThreadStoreError::Conflict {
                     message: "rollout changed while migration was staging it; close older Codex processes and retry".to_string(),
                 });
@@ -926,17 +943,13 @@ impl LocalThreadStore {
         items: Vec<RolloutItem>,
         limiter: &mut RolloutMigrationRateLimiter,
     ) -> ThreadStoreResult<(u64, u64)> {
-        let staged_file = tokio::fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(input.staged_path)
-            .await
-            .map_err(migration_error)?;
-        staged_file
-            .set_permissions(input.source_permissions.clone())
-            .await
-            .map_err(migration_error)?;
+        let staged_file = open_staged_rollout(
+            input.source_path,
+            input.staged_path,
+            input.source_permissions.clone(),
+        )
+        .await
+        .map_err(migration_error)?;
         let mut staged = BufWriter::with_capacity(PROJECTION_BATCH_BYTES as usize, staged_file);
         let mut canonicalizer = LegacyRolloutCanonicalizer::new(input.thread_id);
         let written = canonicalizer
@@ -971,15 +984,15 @@ impl LocalThreadStore {
         let source_file = File::open(input.source_path)
             .await
             .map_err(migration_error)?;
-        let staged_file = tokio::fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(input.staged_path)
-            .await
-            .map_err(migration_error)?;
-        staged_file
-            .set_permissions(input.source_permissions.clone())
+        let staged_file = open_staged_rollout(
+            input.source_path,
+            input.staged_path,
+            input.source_permissions.clone(),
+        )
+        .await
+        .map_err(migration_error)?;
+        #[cfg(target_os = "trueos")]
+        publish::verify_native_open_access(&source_file, &staged_file)
             .await
             .map_err(migration_error)?;
         let mut source = BufReader::with_capacity(PROJECTION_BATCH_BYTES as usize, source_file);

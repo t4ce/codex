@@ -17,9 +17,9 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::SystemTime;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::OpenOptionsExt;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::PermissionsExt;
 
 use codex_protocol::ThreadId;
@@ -89,6 +89,56 @@ fn staged_path(rollout_path: &Path, suffix: &str) -> ThreadStoreResult<PathBuf> 
     Ok(rollout_path.with_file_name(format!(".{filename}.{suffix}.tmp")))
 }
 
+/// Native staging verifies effective access requirements before any payload is
+/// written. Equality includes captured and current ancestor/leaf requirements;
+/// this never copies a Unix permission value or mutates an access key.
+#[cfg(target_os = "trueos")]
+pub(super) fn verify_native_access(
+    source: &std::fs::File,
+    destination: &std::fs::File,
+) -> io::Result<()> {
+    if !source.has_same_access_key(destination)? {
+        return Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "rollout staging has different native access requirements",
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "trueos")]
+pub(super) async fn verify_native_open_access(source: &File, destination: &File) -> io::Result<()> {
+    let source = source.try_clone().await?.into_std().await;
+    let destination = destination.try_clone().await?.into_std().await;
+    verify_native_access(&source, &destination)
+}
+
+pub(super) async fn open_staged_rollout(
+    source_path: &Path,
+    destination_path: &Path,
+    permissions: Permissions,
+) -> io::Result<File> {
+    let mut options = tokio::fs::OpenOptions::new();
+    options.create(true).write(true);
+    #[cfg(not(target_os = "trueos"))]
+    options.truncate(true);
+    let file = options.open(destination_path).await?;
+    #[cfg(target_os = "trueos")]
+    {
+        let _ = permissions;
+        let source = std::fs::File::open(source_path)?;
+        let destination = file.try_clone().await?.into_std().await;
+        verify_native_access(&source, &destination)?;
+        file.set_len(0).await?;
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        let _ = source_path;
+        file.set_permissions(permissions).await?;
+    }
+    Ok(file)
+}
+
 pub(super) async fn decompress_rollout_to_path(
     compressed_path: &Path,
     plain_path: &Path,
@@ -100,13 +150,22 @@ pub(super) async fn decompress_rollout_to_path(
     tokio::task::spawn_blocking(move || -> io::Result<()> {
         let _locks = locks;
         let input = std::fs::File::open(compressed_path)?;
+        #[cfg(target_os = "trueos")]
+        let source_access = input.try_clone()?;
         let mut decoder = zstd::stream::read::Decoder::new(input)?;
         let mut options = std::fs::OpenOptions::new();
-        options.create(true).truncate(true).write(true);
-        #[cfg(unix)]
+        options.create(true).write(true);
+        #[cfg(not(target_os = "trueos"))]
+        options.truncate(true);
+        #[cfg(all(unix, not(target_os = "trueos")))]
         options.mode(0o600);
         let mut output = options.open(plain_path)?;
-        #[cfg(unix)]
+        #[cfg(target_os = "trueos")]
+        {
+            verify_native_access(&source_access, &output)?;
+            output.set_len(0)?;
+        }
+        #[cfg(all(unix, not(target_os = "trueos")))]
         output.set_permissions(Permissions::from_mode(0o600))?;
         io::copy(&mut decoder, &mut output)?;
         output.flush()
@@ -129,17 +188,30 @@ pub(super) async fn compress_rollout_to_path(
     tokio::task::spawn_blocking(move || -> io::Result<()> {
         let _locks = locks;
         let mut input = std::fs::File::open(plain_path)?;
-        let output = std::fs::OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&compressed_path)?;
+        let mut options = std::fs::OpenOptions::new();
+        options.create(true).write(true);
+        #[cfg(not(target_os = "trueos"))]
+        options.truncate(true);
+        let output = options.open(&compressed_path)?;
+        #[cfg(target_os = "trueos")]
+        {
+            verify_native_access(&input, &output)?;
+            output.set_len(0)?;
+        }
         let mut encoder = zstd::stream::write::Encoder::new(output, 3)?;
         io::copy(&mut input, &mut encoder)?;
         let output = encoder.finish()?;
-        output.set_permissions(permissions)?;
-        if let Some(modified_at) = modified_at {
-            output.set_times(std::fs::FileTimes::new().set_modified(modified_at))?;
+        #[cfg(not(target_os = "trueos"))]
+        {
+            output.set_permissions(permissions)?;
+            if let Some(modified_at) = modified_at {
+                output.set_times(std::fs::FileTimes::new().set_modified(modified_at))?;
+            }
+        }
+        #[cfg(target_os = "trueos")]
+        {
+            let _ = (permissions, modified_at);
+            verify_native_access(&input, &output)?;
         }
         output.sync_all()?;
 
@@ -185,15 +257,7 @@ pub(super) async fn rewrite_subagent_history_boundary(
     };
     session_meta.meta.subagent_history_start_ordinal = Some(boundary);
 
-    let rewritten = tokio::fs::OpenOptions::new()
-        .create(true)
-        .truncate(true)
-        .write(true)
-        .open(&rewritten_path)
-        .await
-        .map_err(migration_error)?;
-    rewritten
-        .set_permissions(permissions)
+    let rewritten = open_staged_rollout(staged_path, &rewritten_path, permissions)
         .await
         .map_err(migration_error)?;
     let mut rewritten = BufWriter::new(rewritten);

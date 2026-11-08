@@ -33,8 +33,10 @@ unsafe extern "C" {
 #[cfg(target_os = "trueos")]
 pub(super) fn copy(source: &File, destination: &File) -> io::Result<()> {
     if !source.has_same_access_key(destination)? {
-        return Err(io::Error::new(io::ErrorKind::PermissionDenied,
-            "replacement file has different native access requirements"));
+        return Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "replacement file has different native access requirements",
+        ));
     }
     Ok(())
 }

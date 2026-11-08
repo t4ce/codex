@@ -341,8 +341,14 @@ type BlockingLineReader = std::io::Lines<std::io::BufReader<Box<dyn Read + Send>
 
 #[cfg(target_os = "trueos")]
 mod worker {
-    pub(super) fn spawn(_codex_home: std::path::PathBuf, trigger: super::RolloutCompressionTrigger) {
-        tracing::warn!(trigger = trigger.tag(), "cold rollout compression unavailable: TRUEOSFS does not record wall-clock modification age; existing compressed rollout reads remain supported");
+    pub(super) fn spawn(
+        _codex_home: std::path::PathBuf,
+        trigger: super::RolloutCompressionTrigger,
+    ) {
+        tracing::warn!(
+            trigger = trigger.tag(),
+            "cold rollout compression unavailable: TRUEOSFS does not record wall-clock modification age; existing compressed rollout reads remain supported"
+        );
     }
 }
 

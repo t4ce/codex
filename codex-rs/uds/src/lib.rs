@@ -215,7 +215,9 @@ mod platform {
 #[path = "native.rs"]
 mod platform;
 #[cfg(target_os = "trueos")]
-pub use platform::{prepare_shared_daemon_socket_directory, shared_daemon_socket_directory};
+pub use platform::prepare_shared_daemon_socket_directory;
+#[cfg(target_os = "trueos")]
+pub use platform::shared_daemon_socket_directory;
 
 #[cfg(windows)]
 mod platform {

@@ -6,17 +6,17 @@ use std::time::SystemTime;
 #[cfg(windows)]
 use std::time::UNIX_EPOCH;
 
-#[cfg(all(unix, not(target_os = "trueos")))]
-mod unix;
 #[cfg(target_os = "trueos")]
 mod native;
+#[cfg(all(unix, not(target_os = "trueos")))]
+mod unix;
 #[cfg(windows)]
 mod windows;
 
-#[cfg(all(unix, not(target_os = "trueos")))]
-use unix as imp;
 #[cfg(target_os = "trueos")]
 use native as imp;
+#[cfg(all(unix, not(target_os = "trueos")))]
+use unix as imp;
 #[cfg(windows)]
 use windows as imp;
 
