@@ -8,13 +8,17 @@
 //! unavailable, and reports `None` when a response is unavailable.
 //!
 //! Probes run only while the crossterm event stream is absent or paused. Unix hosts replay
-//! consumed startup input through crossterm. TRUEOS discards consumed input after extracting
-//! terminal responses, preserving its terminal handoff behavior.
+//! consumed startup input through crossterm. TRUEOS replay is scoped to the captured native
+//! terminal lease, so bytes cannot cross a terminal handoff.
 
 use std::time::Duration;
 
-#[cfg(all(unix, not(target_os = "trueos")))]
+#[cfg(unix)]
 mod startup_replay;
+
+#[cfg(target_os = "trueos")]
+#[path = "terminal_probe/native_tty.rs"]
+mod native_tty;
 
 #[cfg(unix)]
 mod terminal_identity;
@@ -40,14 +44,20 @@ pub(crate) struct DefaultColors {
 mod imp {
     use super::DefaultColors;
     use super::parse_default_colors;
-    #[cfg(not(target_os = "trueos"))]
     use super::startup_replay::startup_replay_input;
+    #[cfg(target_os = "trueos")]
+    use super::native_tty::Tty;
     use super::terminal_identity;
+    #[cfg(not(target_os = "trueos"))]
     use std::fs::File;
+    #[cfg(not(target_os = "trueos"))]
     use std::fs::OpenOptions;
     use std::io;
+    #[cfg(not(target_os = "trueos"))]
     use std::io::Write;
+    #[cfg(not(target_os = "trueos"))]
     use std::os::fd::AsRawFd;
+    #[cfg(not(target_os = "trueos"))]
     use std::os::fd::FromRawFd;
     use std::sync::atomic::AtomicBool;
     use std::sync::atomic::Ordering;
@@ -87,12 +97,14 @@ mod imp {
     /// controlling terminal without terminal stdio; in that case the handle falls back to
     /// `/dev/tty`. Only the reader is switched to nonblocking mode, and its original file status
     /// flags are restored when the handle is dropped.
+    #[cfg(not(target_os = "trueos"))]
     struct Tty {
         reader: File,
         writer: File,
         original_flags: libc::c_int,
     }
 
+    #[cfg(not(target_os = "trueos"))]
     impl Tty {
         /// Opens an isolated reader and writer for terminal probes.
         ///
@@ -233,6 +245,7 @@ mod imp {
         }
     }
 
+    #[cfg(not(target_os = "trueos"))]
     impl Drop for Tty {
         fn drop(&mut self) {
             let _ =
@@ -241,6 +254,7 @@ mod imp {
     }
 
     /// Duplicates a process stdio descriptor so probe cleanup owns only the duplicate.
+    #[cfg(not(target_os = "trueos"))]
     fn dup_file(fd: libc::c_int) -> io::Result<File> {
         let duplicated = unsafe { libc::dup(fd) };
         if duplicated == -1 {
@@ -291,8 +305,8 @@ mod imp {
 
     /// Runs the optional terminal queries needed during TUI startup under one shared deadline.
     ///
-    /// Unix hosts replay interleaved user input through crossterm after parsing responses.
-    /// TRUEOS retains its terminal handoff behavior by discarding consumed input.
+    /// Replay interleaved user input through crossterm after parsing responses.
+    /// Native replay requires the same terminal lease that supplied those bytes.
     pub(crate) fn startup(
         timeout: Duration,
         keyboard_probe: StartupKeyboardEnhancementProbe,
@@ -325,6 +339,8 @@ mod imp {
         );
         #[cfg(not(target_os = "trueos"))]
         crossterm::event::buffer_input(&startup_replay_input(&buffer))?;
+        #[cfg(target_os = "trueos")]
+        tty.replay_input(&startup_replay_input(&buffer))?;
         let saw_da1 = find_primary_device_attributes(&buffer).is_some();
         DA1_SUPPORTED.store(saw_da1, Ordering::Relaxed);
         result
@@ -578,9 +594,12 @@ mod imp {
     mod tests {
         use super::*;
         use pretty_assertions::assert_eq;
+        #[cfg(not(target_os = "trueos"))]
         use std::os::fd::OwnedFd;
+        #[cfg(not(target_os = "trueos"))]
         use std::os::unix::net::UnixStream;
 
+        #[cfg(not(target_os = "trueos"))]
         fn tty_with_buffered_input(input: &[u8]) -> Tty {
             let (reader, mut writer) = UnixStream::pair().expect("create terminal input pair");
             writer.write_all(input).expect("buffer terminal input");
@@ -591,6 +610,7 @@ mod imp {
         }
 
         #[test]
+        #[cfg(not(target_os = "trueos"))]
         fn terminal_probe_stops_reading_when_its_deadline_expires() {
             let mut tty = tty_with_buffered_input(b"still queued");
             let mut buffer = Vec::new();
@@ -612,6 +632,7 @@ mod imp {
         }
 
         #[test]
+        #[cfg(not(target_os = "trueos"))]
         fn terminal_probe_leaves_input_queued_after_reaching_its_byte_budget() {
             for max_bytes in [MAX_TERMINAL_PROBE_BYTES, MAX_STARTUP_PROBE_BYTES] {
                 let input = [b'x'; 256];

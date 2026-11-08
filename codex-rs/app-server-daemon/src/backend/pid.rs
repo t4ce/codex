@@ -94,6 +94,8 @@ enum PidCommandKind {
 
 impl PidBackend {
     pub(crate) async fn running_executable_identity(&self) -> Result<Option<ExecutableIdentity>> {
+        #[cfg(target_os = "trueos")]
+        crate::ensure_supported_platform()?;
         match self.read_pid_file_state().await? {
             PidFileState::Running(record) if self.record_is_active(&record).await? => {
                 // Updaters can exec a different release without changing PID. Only the
@@ -140,6 +142,8 @@ impl PidBackend {
     }
 
     pub(crate) async fn is_starting_or_running(&self) -> Result<bool> {
+        #[cfg(target_os = "trueos")]
+        crate::ensure_supported_platform()?;
         loop {
             match self.read_pid_file_state().await? {
                 PidFileState::Missing => return Ok(false),
@@ -157,12 +161,17 @@ impl PidBackend {
         }
     }
 
-    #[cfg(any(unix, windows))]
+    #[cfg(all(any(unix, windows), not(target_os = "trueos")))]
     pub(crate) async fn start(&self) -> Result<Option<u32>> {
         self.start_inner(/*replacement*/ None).await
     }
 
-    #[cfg(not(any(unix, windows)))]
+    #[cfg(target_os = "trueos")]
+    pub(crate) async fn start(&self) -> Result<Option<u32>> {
+        native_process_unavailable()
+    }
+
+    #[cfg(not(any(unix, windows, target_os = "trueos")))]
     pub(crate) async fn start(&self) -> Result<Option<u32>> {
         bail!("pid-managed app-server startup is unsupported on this platform")
     }
@@ -172,6 +181,8 @@ impl PidBackend {
     }
 
     pub(crate) async fn stop_with_grace(&self, grace_seconds: u32) -> Result<()> {
+        #[cfg(target_os = "trueos")]
+        crate::ensure_supported_platform()?;
         loop {
             let Some(record) = self.wait_for_pid_start().await? else {
                 return Ok(());
@@ -520,7 +531,7 @@ async fn read_log_tail(path: &Path, byte_limit: u64) -> Result<Option<String>> {
     Ok(Some(contents))
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn process_exists(pid: u32) -> bool {
     let Ok(pid) = libc::pid_t::try_from(pid) else {
         return false;
@@ -529,7 +540,7 @@ fn process_exists(pid: u32) -> bool {
     result == 0 || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn terminate_process(pid: u32) -> Result<()> {
     let raw_pid = libc::pid_t::try_from(pid)
         .with_context(|| format!("pid-managed app server pid {pid} is out of range"))?;
@@ -544,7 +555,7 @@ fn terminate_process(pid: u32) -> Result<()> {
     Err(err).with_context(|| format!("failed to terminate pid-managed app server {pid}"))
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn force_terminate_process(pid: u32) -> Result<()> {
     let raw_pid = libc::pid_t::try_from(pid)
         .with_context(|| format!("pid-managed app server pid {pid} is out of range"))?;
@@ -559,7 +570,7 @@ fn force_terminate_process(pid: u32) -> Result<()> {
     Err(err).with_context(|| format!("failed to force terminate pid-managed app server {pid}"))
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn terminate_process_group(pid: u32) -> Result<()> {
     let raw_pid = libc::pid_t::try_from(pid)
         .with_context(|| format!("pid-managed updater pid {pid} is out of range"))?;
@@ -574,7 +585,7 @@ fn terminate_process_group(pid: u32) -> Result<()> {
     Err(err).with_context(|| format!("failed to terminate pid-managed updater group {pid}"))
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn force_terminate_process_group(pid: u32) -> Result<()> {
     let raw_pid = libc::pid_t::try_from(pid)
         .with_context(|| format!("pid-managed updater pid {pid} is out of range"))?;
@@ -604,7 +615,7 @@ fn force_terminate_process_group(_pid: u32) -> Result<()> {
     bail!("pid-managed updater shutdown is unsupported on this platform")
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn process_matches_record(record: &PidRecord) -> Result<bool> {
     if !process_exists(record.pid) {
         return Ok(false);
@@ -660,7 +671,18 @@ enum EmptyPidReservation {
     Record(PidRecord),
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "trueos")]
+fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
+    match file.try_lock() {
+        Ok(()) => Ok(true),
+        Err(std::fs::TryLockError::WouldBlock) => Ok(false),
+        Err(std::fs::TryLockError::Error(error)) => {
+            Err(error).context("failed to lock pid reservation")
+        }
+    }
+}
+
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
     use std::os::fd::AsRawFd;
 
@@ -701,7 +723,10 @@ fn probe_reservation_lock(file: DaemonLockFile) -> Result<bool> {
     if !try_lock_file(&file)? {
         return Ok(true);
     }
-    #[cfg(unix)]
+    #[cfg(target_os = "trueos")]
+    file.unlock()
+        .context("failed to unlock pid reservation probe")?;
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::fd::AsRawFd;
 
@@ -742,13 +767,20 @@ struct EmptyPidProbeLock(DaemonLockFile);
 #[cfg(unix)]
 impl Drop for EmptyPidProbeLock {
     fn drop(&mut self) {
-        use std::os::fd::AsRawFd;
-
-        // Closing alone leaves the lock held by any concurrent fork. Release it
-        // on every exit, including errors and cancellation while inspecting the PID.
-        if unsafe { libc::flock(self.0.as_raw_fd(), libc::LOCK_UN) } != 0 {
-            let error = std::io::Error::last_os_error();
+        #[cfg(target_os = "trueos")]
+        if let Err(error) = self.0.unlock() {
             tracing::warn!(%error, "failed to unlock empty pid reservation probe");
+        }
+        #[cfg(not(target_os = "trueos"))]
+        {
+            use std::os::fd::AsRawFd;
+
+            // Closing alone leaves the lock held by any concurrent fork. Release it
+            // on every exit, including errors and cancellation while inspecting the PID.
+            if unsafe { libc::flock(self.0.as_raw_fd(), libc::LOCK_UN) } != 0 {
+                let error = std::io::Error::last_os_error();
+                tracing::warn!(%error, "failed to unlock empty pid reservation probe");
+            }
         }
     }
 }
@@ -792,12 +824,12 @@ async fn inspect_empty_pid_reservation(
     Ok(EmptyPidReservation::Stale)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn read_process_start_time(pid: u32) -> Result<String> {
     Ok(read_process_details(pid).await?.1)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn read_process_details(pid: u32) -> Result<(String, String)> {
     let output = Command::new("ps")
         .args(["-p", &pid.to_string(), "-o", "stat=", "-o", "lstart="])
@@ -861,3 +893,37 @@ mod windows;
 #[cfg(any(unix, windows))]
 #[path = "pid_start.rs"]
 mod start;
+
+#[cfg(target_os = "trueos")]
+fn native_process_unavailable<T>() -> Result<T> {
+    Err(std::io::Error::new(std::io::ErrorKind::Unsupported,
+        "detached process identity and lifecycle are unavailable with native TRUEOS command sessions").into())
+}
+#[cfg(target_os = "trueos")]
+fn terminate_process(_pid: u32) -> Result<()> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+fn force_terminate_process(_pid: u32) -> Result<()> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+fn terminate_process_group(_pid: u32) -> Result<()> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+fn force_terminate_process_group(_pid: u32) -> Result<()> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+async fn process_matches_record(_record: &PidRecord) -> Result<bool> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+async fn read_process_start_time(_pid: u32) -> Result<String> {
+    native_process_unavailable()
+}
+#[cfg(target_os = "trueos")]
+async fn read_process_details(_pid: u32) -> Result<(String, String)> {
+    native_process_unavailable()
+}

@@ -65,7 +65,9 @@ pub(super) fn exclusion(
     workload_identity_selected: bool,
     exec_server_url: Option<&std::ffi::OsStr>,
 ) -> Option<&'static str> {
-    if cli.no_daemon {
+    if cfg!(target_os = "trueos") {
+        Some("native TRUEOS command sessions")
+    } else if cli.no_daemon {
         Some("--no-daemon")
     } else if cli.oss {
         Some("--oss")

@@ -21,7 +21,21 @@ struct Manifest {
     entrypoint: String,
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "trueos")]
+fn selection_identity(current: &Path) -> Result<String> {
+    let meta = current.symlink_metadata()?;
+    let id = meta
+        .file_id()
+        .context("selection has no native object identity")?;
+    let revision = meta
+        .revision()
+        .context("selection has no native revision")?;
+    // The revision detects changes to the selection without inventing Unix
+    // change timestamps. Both values are supplied by the native filesystem.
+    Ok(format!("{} {id} {revision}", meta.root_id()))
+}
+
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn selection_identity(current: &Path) -> Result<String> {
     use std::os::unix::fs::MetadataExt;
     let meta = current.symlink_metadata()?;
@@ -108,7 +122,7 @@ fn owned_mount(path: &Path) -> Result<u64> {
         // Volume mount points on Windows are reparse points.
         Ok(0)
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", not(target_os = "trueos")))]
     {
         use std::os::fd::AsRawFd;
         use std::os::unix::fs::OpenOptionsExt;
@@ -124,7 +138,13 @@ fn owned_mount(path: &Path) -> Result<u64> {
             .parse()
             .context("invalid package mount")
     }
-    #[cfg(all(unix, not(target_os = "linux")))]
+    #[cfg(target_os = "trueos")]
+    {
+        // Native storage roots identify filesystem boundaries directly; there
+        // is no descriptor namespace or same-root bind-mount alias to inspect.
+        Ok(u64::from(meta.root_id()))
+    }
+    #[cfg(all(unix, not(any(target_os = "linux", target_os = "trueos"))))]
     {
         use std::os::unix::fs::MetadataExt;
         Ok(meta.dev())

@@ -116,6 +116,7 @@ pub struct BootstrapOptions {
 /// Passively probes an existing app-server socket and returns its reported
 /// app-server version.
 pub async fn probe_app_server_version(socket_path: &Path) -> Result<String> {
+    ensure_supported_platform()?;
     Ok(client::probe(socket_path).await?.app_server_version)
 }
 
@@ -309,6 +310,7 @@ pub use backend::stderr_log::stderr_writer;
 /// Full queues and oversized records are dropped; shutdown never waits for disk I/O.
 /// Native and other-process stderr writes remain best effort during pruning.
 pub fn maintain_stderr_log() -> Result<()> {
+    ensure_supported_platform()?;
     backend::stderr_log::start(
         Daemon::from_environment()?
             .pid_file
@@ -326,12 +328,20 @@ pub async fn update(
     update_loop::request_manual_update(&Daemon::from_environment()?, http_client_factory).await
 }
 
-#[cfg(any(unix, windows))]
+#[cfg(all(any(unix, windows), not(target_os = "trueos")))]
 fn ensure_supported_platform() -> Result<()> {
     Ok(())
 }
 
-#[cfg(not(any(unix, windows)))]
+#[cfg(target_os = "trueos")]
+fn ensure_supported_platform() -> Result<()> {
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Unsupported,
+        "detached app-server lifecycle is unavailable on TRUEOS; use the embedded app server or an explicit remote WebSocket endpoint",
+    ).into())
+}
+
+#[cfg(not(any(unix, windows, target_os = "trueos")))]
 fn ensure_supported_platform() -> Result<()> {
     Err(anyhow!(
         "codex app-server daemon lifecycle is only supported on Unix and Windows platforms"
@@ -1288,8 +1298,7 @@ async fn daemon_socket_file_type(
     }
 }
 
-// Lock ownership needs a real descriptor; TRUEOS Tokio snapshot files do not
-// have one. Keep the native file alive until the daemon operation completes.
+// Keep the actual native file capability alive for operation-lock ownership.
 #[cfg(target_os = "trueos")]
 type DaemonLockFile = std::fs::File;
 #[cfg(not(target_os = "trueos"))]
@@ -1320,7 +1329,18 @@ async fn open_daemon_lock_file(path: &Path) -> std::io::Result<DaemonLockFile> {
     }
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "trueos")]
+fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
+    match file.try_lock() {
+        Ok(()) => Ok(true),
+        Err(std::fs::TryLockError::WouldBlock) => Ok(false),
+        Err(std::fs::TryLockError::Error(error)) => {
+            Err(error).context("failed to lock daemon operation")
+        }
+    }
+}
+
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn try_lock_file(file: &DaemonLockFile) -> Result<bool> {
     use std::os::fd::AsRawFd;
 

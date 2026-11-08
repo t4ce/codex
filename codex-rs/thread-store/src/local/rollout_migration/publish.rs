@@ -110,7 +110,7 @@ pub(super) fn verify_native_access(
 pub(super) async fn verify_native_open_access(source: &File, destination: &File) -> io::Result<()> {
     let source = source.try_clone().await?.into_std().await;
     let destination = destination.try_clone().await?.into_std().await;
-    verify_native_access(&source, &destination)
+    verify_native_access(source.as_native_file()?, destination.as_native_file()?)
 }
 
 pub(super) async fn open_staged_rollout(
@@ -128,7 +128,7 @@ pub(super) async fn open_staged_rollout(
         let _ = permissions;
         let source = std::fs::File::open(source_path)?;
         let destination = file.try_clone().await?.into_std().await;
-        verify_native_access(&source, &destination)?;
+        verify_native_access(&source, destination.as_native_file()?)?;
         file.set_len(0).await?;
     }
     #[cfg(not(target_os = "trueos"))]

@@ -27,6 +27,7 @@ use codex_protocol::auth::AuthMode;
 use codex_protocol::config_types::ForcedLoginMethod;
 use codex_rmcp_client::EnterpriseOAuthCredentialGuard;
 use codex_utils_cli::CliConfigOverrides;
+#[cfg(not(target_os = "trueos"))]
 use std::fs::OpenOptions;
 use std::io::IsTerminal;
 use std::io::Read;
@@ -66,6 +67,7 @@ fn init_login_file_logging(config: &Config) -> Option<WorkerGuard> {
         }
     };
 
+    #[cfg(not(target_os = "trueos"))]
     if let Err(err) = std::fs::create_dir_all(&log_dir) {
         eprintln!(
             "Warning: failed to create login log directory {}: {err}",
@@ -74,17 +76,23 @@ fn init_login_file_logging(config: &Config) -> Option<WorkerGuard> {
         return None;
     }
 
+    #[cfg(not(target_os = "trueos"))]
     let mut log_file_opts = OpenOptions::new();
+    #[cfg(not(target_os = "trueos"))]
     log_file_opts.create(true).append(true);
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use std::os::unix::fs::OpenOptionsExt;
         log_file_opts.mode(0o600);
     }
 
     let log_path = log_dir.join("codex-login.log");
-    let log_file = match log_file_opts.open(&log_path) {
+    #[cfg(target_os = "trueos")]
+    let opened = codex_core::native_fs::open_private_log(&log_path, true);
+    #[cfg(not(target_os = "trueos"))]
+    let opened = log_file_opts.open(&log_path);
+    let log_file = match opened {
         Ok(log_file) => log_file,
         Err(err) => {
             eprintln!(

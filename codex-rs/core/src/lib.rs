@@ -11,6 +11,8 @@ mod audio_utils;
 mod client;
 mod client_common;
 mod model_request;
+#[cfg(target_os = "trueos")]
+pub mod native_fs;
 mod realtime_context;
 mod realtime_conversation;
 mod realtime_history;

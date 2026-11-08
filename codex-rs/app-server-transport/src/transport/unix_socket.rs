@@ -71,6 +71,19 @@ pub async fn start_control_socket_acceptor(
 
 /// Binds a private daemon socket, retaining its advertised path as a rendezvous
 /// alias on Unix. Keep the guard alive for as long as the listener is in use.
+/// TRUEOS requires a native IPC capability; filesystem access keys alone do not
+/// provide a listener or authenticate its peers.
+#[cfg(target_os = "trueos")]
+pub async fn bind_private_daemon_socket(
+    _socket_path: &Path,
+) -> IoResult<(UnixListener, DaemonSocketFileGuard)> {
+    Err(std::io::Error::new(
+        ErrorKind::Unsupported,
+        "TRUEOS does not provide local daemon socket transport",
+    ))
+}
+
+#[cfg(not(target_os = "trueos"))]
 pub async fn bind_private_daemon_socket(
     socket_path: &Path,
 ) -> IoResult<(UnixListener, DaemonSocketFileGuard)> {
@@ -270,6 +283,7 @@ async fn run_daemon_shutdown(
 }
 
 // Unix callers hold the physical socket's startup lock through bind and publication.
+#[cfg(not(target_os = "trueos"))]
 async fn prepare_control_socket_path(socket_path: &Path) -> IoResult<()> {
     #[cfg(windows)]
     let (socket_path, _directory_guard) = codex_uds::validate_private_socket_path(socket_path)?;
@@ -325,6 +339,15 @@ async fn prepare_control_socket_path(socket_path: &Path) -> IoResult<()> {
 
 /// Return a verified local socket endpoint, independent of the advertised Unix alias.
 /// A socket bound directly at the advertised path (e.g. SSH forwarding) is not ours on Unix.
+#[cfg(target_os = "trueos")]
+pub fn verified_local_daemon_socket(_socket_path: &Path) -> IoResult<Option<AbsolutePathBuf>> {
+    Err(std::io::Error::new(
+        ErrorKind::Unsupported,
+        "TRUEOS does not provide local daemon socket peer verification",
+    ))
+}
+
+#[cfg(not(target_os = "trueos"))]
 pub fn verified_local_daemon_socket(socket_path: &Path) -> IoResult<Option<AbsolutePathBuf>> {
     #[cfg(unix)]
     {
@@ -353,7 +376,7 @@ pub fn verified_local_daemon_socket(socket_path: &Path) -> IoResult<Option<Absol
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn protected_socket_path(rendezvous_path: &Path) -> IoResult<std::path::PathBuf> {
     use sha2::Digest;
     use sha2::Sha256;
@@ -485,10 +508,28 @@ impl Drop for AppServerStartupLock {
 
 #[cfg(unix)]
 fn startup_lock_file_matches_path(file: &std::fs::File, path: &Path) -> IoResult<bool> {
+    #[cfg(not(target_os = "trueos"))]
     use std::os::unix::fs::MetadataExt;
 
     let locked_metadata = file.metadata()?;
     match std::fs::metadata(path) {
+        #[cfg(target_os = "trueos")]
+        Ok(path_metadata) => {
+            let locked_id = locked_metadata.file_id().ok_or_else(|| {
+                std::io::Error::new(
+                    ErrorKind::Unsupported,
+                    "startup lock has no native object identity",
+                )
+            })?;
+            let path_id = path_metadata.file_id().ok_or_else(|| {
+                std::io::Error::new(
+                    ErrorKind::Unsupported,
+                    "startup lock path has no native object identity",
+                )
+            })?;
+            Ok(locked_metadata.root_id() == path_metadata.root_id() && locked_id == path_id)
+        }
+        #[cfg(not(target_os = "trueos"))]
         Ok(path_metadata) => Ok(locked_metadata.dev() == path_metadata.dev()
             && locked_metadata.ino() == path_metadata.ino()),
         Err(err) if err.kind() == ErrorKind::NotFound => Ok(false),
@@ -496,7 +537,7 @@ fn startup_lock_file_matches_path(file: &std::fs::File, path: &Path) -> IoResult
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn set_control_socket_permissions(socket_path: &Path) -> IoResult<()> {
     use std::os::unix::fs::PermissionsExt;
 

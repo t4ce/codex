@@ -116,6 +116,21 @@ impl ShellSnapshot {
         credential_broker: Option<watch::Sender<SnapshotCredentialBrokerState>>,
         prefer_executor_snapshots: bool,
     ) -> Self {
+        // Native command sessions do not provide shell environment snapshots.
+        // Keep the optional task absent rather than invoking a Unix capture.
+        #[cfg(target_os = "trueos")]
+        {
+            let _ = (
+                codex_home,
+                session_id,
+                session_telemetry,
+                state_db,
+                credential_broker,
+                prefer_executor_snapshots,
+            );
+            Self::disabled()
+        }
+        #[cfg(not(target_os = "trueos"))]
         Self {
             config: Some(Arc::new(ShellSnapshotConfig {
                 codex_home,
@@ -1022,6 +1037,24 @@ async fn validate_snapshot(
     .map(|_| ())
 }
 
+#[cfg(target_os = "trueos")]
+async fn run_script_with_timeout(
+    _shell: &Shell,
+    _script: &str,
+    _snapshot_timeout: Duration,
+    _shell_mode: SnapshotShellMode<'_>,
+    _cwd: &AbsolutePathBuf,
+    _credential_broker: Option<&SnapshotCredentialBroker>,
+    _sandbox: Option<&ShellSnapshotSandbox>,
+) -> Result<String> {
+    Err(std::io::Error::new(
+        std::io::ErrorKind::Unsupported,
+        "shell environment snapshots are unavailable with native TRUEOS command sessions",
+    )
+    .into())
+}
+
+#[cfg(not(target_os = "trueos"))]
 async fn run_script_with_timeout(
     shell: &Shell,
     script: &str,
@@ -1086,7 +1119,7 @@ async fn run_script_with_timeout(
     }
     handler.env_remove(CODEX_TOOL_CALL_ID_ENV_VAR);
     codex_protocol::shell_environment::scrub_non_inheritable_env_vars(handler.as_std_mut());
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     let output = {
         let settings = handler.as_std();
         // Preserve original inputs: std replaces strings containing NUL bytes.
@@ -1105,7 +1138,10 @@ async fn run_script_with_timeout(
             .process_mode(codex_utils_pty::ProcessMode::NewSession);
         async move { command.spawn()?.wait_with_output().await }
     };
-    #[cfg(not(unix))]
+    // Native TRUEOS has no external Unix child/session capture provider.
+    // Its process API reports Unsupported; ordinary Sh3 execution has its own
+    // native provider and does not use this optional shell snapshot launcher.
+    #[cfg(any(target_os = "trueos", not(unix)))]
     let output = handler.kill_on_drop(true).output();
     let output = timeout(snapshot_timeout, output)
         .await

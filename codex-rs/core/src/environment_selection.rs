@@ -944,7 +944,7 @@ impl ThreadEnvironments {
         selected.resolution = futures::future::ready(Ok(ResolvedEnvironment {
             shell_snapshot,
             shell_snapshot_cache: Arc::default(),
-            shell_snapshot_v2_supported: cfg!(unix)
+            shell_snapshot_v2_supported: cfg!(all(unix, not(target_os = "trueos")))
                 && !self.shell_snapshot.should_rebuild_inherited(),
             ..resolved
         }))
@@ -1067,7 +1067,7 @@ impl ThreadEnvironments {
                 Some(local_shell),
                 PathUri::from_host_native_path("~").ok(),
                 Some(EnvironmentInfo::local_temporary_directories()),
-                cfg!(unix),
+                cfg!(all(unix, not(target_os = "trueos"))),
             )
         };
         let shell_snapshot_builder = shell_snapshot.clone();

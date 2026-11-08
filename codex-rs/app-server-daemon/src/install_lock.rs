@@ -25,7 +25,7 @@ impl Drop for InstallLock {
 pub(crate) async fn acquire_install_lock(root: &Path) -> Result<InstallLock> {
     let lock = root.join("install.lock");
     let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     let use_lockf = {
         // Match the installer so both processes coordinate on the same lock.
         let choice = tokio::process::Command::new("/bin/sh")
@@ -102,7 +102,14 @@ pub(crate) async fn acquire_install_lock(root: &Path) -> Result<InstallLock> {
     }
     loop {
         let acquired = options.open(&lock);
-        #[cfg(unix)]
+        // Native files already expose an owned advisory-lock capability. There
+        // are no shell installers or Unix descriptors to coordinate with here.
+        #[cfg(target_os = "trueos")]
+        let acquired = acquired.and_then(|file| {
+            file.try_lock().map_err(std::io::Error::from)?;
+            Ok(file)
+        });
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let acquired = acquired.and_then(|file| {
             {
                 use std::os::fd::AsRawFd;

@@ -954,19 +954,26 @@ pub(super) async fn run_main_inner(
 
     let (tui_file_layer, _tui_file_log_guard) = if config_toml_log_dir_configured {
         let log_dir = config.log_dir.clone();
+        #[cfg(not(target_os = "trueos"))]
         std::fs::create_dir_all(&log_dir)?;
+        #[cfg(not(target_os = "trueos"))]
         let mut log_file_opts = OpenOptions::new();
+        #[cfg(not(target_os = "trueos"))]
         log_file_opts.create(true).append(true);
 
         // Ensure the file is only readable and writable by the current user.
         // Doing the equivalent to `chmod 600` on Windows is quite a bit more
         // code and requires the Windows API crates.
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         {
             use std::os::unix::fs::OpenOptionsExt;
             log_file_opts.mode(0o600);
         }
 
+        #[cfg(target_os = "trueos")]
+        let log_file =
+            codex_core::native_fs::open_private_log(&log_dir.join(TUI_LOG_FILE_NAME), true)?;
+        #[cfg(not(target_os = "trueos"))]
         let log_file = log_file_opts.open(log_dir.join(TUI_LOG_FILE_NAME))?;
         let (non_blocking, guard) = non_blocking(log_file);
         let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {

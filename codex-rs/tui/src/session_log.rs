@@ -1,4 +1,5 @@
 use std::fs::File;
+#[cfg(not(target_os = "trueos"))]
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -27,20 +28,25 @@ impl SessionLogger {
     }
 
     fn open(&self, path: PathBuf) -> std::io::Result<()> {
-        let mut opts = OpenOptions::new();
-        opts.create(true).truncate(true).write(true);
+        #[cfg(not(target_os = "trueos"))]
+        let file = {
+            let mut opts = OpenOptions::new();
+            opts.create(true).truncate(true).write(true);
 
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)?;
-        }
+            if let Some(parent) = path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
 
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            opts.mode(0o600);
-        }
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::OpenOptionsExt;
+                opts.mode(0o600);
+            }
 
-        let file = opts.open(path)?;
+            opts.open(&path)?
+        };
+        #[cfg(target_os = "trueos")]
+        let file = codex_core::native_fs::open_private_log(&path, false)?;
         self.file.get_or_init(|| Mutex::new(file));
         Ok(())
     }
