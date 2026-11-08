@@ -83,6 +83,15 @@ const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/codex/config.toml";
 #[cfg(windows)]
 const DEFAULT_PROGRAM_DATA_DIR_WINDOWS: &str = r"C:\ProgramData";
 
+#[cfg(target_os = "trueos")]
+const EMBEDDED_PACKAGED_DEFAULTS: &str = concat!(
+    include_str!("../../defaults.toml"),
+    "\n",
+    include_str!("../../defaults.trueos.toml")
+);
+#[cfg(not(target_os = "trueos"))]
+const EMBEDDED_PACKAGED_DEFAULTS: &str = include_str!("../../defaults.toml");
+
 // Project-local config comes from repository contents, so it should not get to
 // choose where a user's credentials are sent or which local commands are run.
 // These settings are still supported from user, system, managed, and runtime
@@ -195,7 +204,7 @@ pub async fn load_config_layers_state(
         let file = Some(AbsolutePathBuf::from_absolute_path(
             std::env::current_exe()?
         )?);
-        let raw_toml = include_str!("../../defaults.toml");
+        let raw_toml = EMBEDDED_PACKAGED_DEFAULTS;
         let config = toml::from_str(raw_toml).map_err(|error| {
             io::Error::new(
                 io::ErrorKind::InvalidData,

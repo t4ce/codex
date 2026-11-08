@@ -594,7 +594,7 @@ async fn embedded_packaged_defaults_keep_source_and_resolution_base() {
             file: expected_file
         }
     );
-    let embedded = include_str!("../../defaults.toml");
+    let embedded = EMBEDDED_PACKAGED_DEFAULTS;
     assert_eq!(layer.raw_toml(), Some(embedded));
     assert_eq!(
         layer.raw_toml_base_dir().map(|base| base.as_path()),
@@ -606,6 +606,135 @@ async fn embedded_packaged_defaults_keep_source_and_resolution_base() {
     assert_eq!(layer.name.precedence(), -10);
     assert_eq!(layer.config_folder(), None);
     assert_eq!(layer.hooks_config_folder(), None);
+}
+
+#[tokio::test]
+async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
+    async fn load(
+        home: &Path,
+        overrides: LoaderOverrides,
+        cli: &[(String, TomlValue)],
+    ) -> io::Result<ConfigLayerStack> {
+        load_config_layers_state(
+            &TestFileSystem,
+            home,
+            None,
+            cli,
+            overrides,
+            &crate::NoopThreadConfigLoader,
+        )
+        .await
+    }
+    let tmp = tempdir().expect("tempdir");
+    let system_config_path = tmp.path().join("system.toml");
+    let mut overrides = LoaderOverrides::without_managed_config_for_tests();
+    overrides.system_config_path = Some(system_config_path.clone());
+    let stack = load(tmp.path(), overrides.clone(), &[])
+        .await
+        .expect("embedded defaults");
+    let config: ConfigToml = stack.effective_config().try_into().expect("typed config");
+    assert_eq!(
+        config.mcp_servers.contains_key("xerj"),
+        cfg!(target_os = "trueos")
+    );
+    if !cfg!(target_os = "trueos") {
+        return;
+    }
+    let server = &config.mcp_servers["xerj"];
+    assert!(server.enabled);
+    assert!(!server.required);
+    assert_eq!(
+        server.startup_timeout_sec,
+        Some(std::time::Duration::from_secs(120))
+    );
+    assert_eq!(
+        server.tool_timeout_sec,
+        Some(std::time::Duration::from_secs(60))
+    );
+    let crate::McpServerTransportConfig::Stdio {
+        command,
+        args,
+        env,
+        cwd,
+        ..
+    } = &server.transport
+    else {
+        panic!("XERJ uses the ordinary stdio MCP transport");
+    };
+    assert_eq!(command, "xerj");
+    assert_eq!(args, &["mcp", "--ensure-local"]);
+    assert!(
+        cwd.is_none(),
+        "the engine directory may not exist before startup"
+    );
+    let env = env.as_ref().expect("local XERJ environment");
+    assert_eq!(env["XERJ_URL"], "http://127.0.0.1:9200");
+    assert_eq!(env["XERJ_DISABLE_FEEDBACK"], "true");
+
+    std::fs::write(
+        &system_config_path,
+        "[mcp_servers.xerj]\ncommand='system-xerj'\ntool_timeout_sec=15\n",
+    )
+    .expect("system config");
+    let stack = load(tmp.path(), overrides.clone(), &[])
+        .await
+        .expect("system overrides");
+    assert_eq!(
+        stack.effective_config()["mcp_servers"]["xerj"]["command"].as_str(),
+        Some("system-xerj")
+    );
+    std::fs::write(
+        tmp.path().join(CONFIG_TOML_FILE),
+        "[mcp_servers.xerj]\nenabled=false\ncommand='user-xerj'\nstartup_timeout_sec=35\n",
+    )
+    .expect("user config");
+    let stack = load(tmp.path(), overrides.clone(), &[])
+        .await
+        .expect("user overrides");
+    let config: ConfigToml = stack.effective_config().try_into().expect("typed config");
+    let server = &config.mcp_servers["xerj"];
+    assert!(
+        !server.enabled,
+        "an explicit user disable must win over packaged defaults"
+    );
+    assert_eq!(
+        server.startup_timeout_sec,
+        Some(std::time::Duration::from_secs(35))
+    );
+    assert_eq!(
+        server.tool_timeout_sec,
+        Some(std::time::Duration::from_secs(15))
+    );
+    assert_eq!(
+        stack.effective_config()["mcp_servers"]["xerj"]["command"].as_str(),
+        Some("user-xerj")
+    );
+
+    let cli = [
+        ("mcp_servers.xerj.enabled".into(), TomlValue::Boolean(true)),
+        (
+            "mcp_servers.xerj.command".into(),
+            TomlValue::String("session-xerj".into()),
+        ),
+        (
+            "mcp_servers.xerj.env.XERJ_URL".into(),
+            TomlValue::String("http://127.0.0.1:19200".into()),
+        ),
+    ];
+    let stack = load(tmp.path(), overrides, &cli)
+        .await
+        .expect("session overrides");
+    let config: ConfigToml = stack.effective_config().try_into().expect("typed config");
+    let server = &config.mcp_servers["xerj"];
+    assert!(server.enabled);
+    assert!(!server.required);
+    let crate::McpServerTransportConfig::Stdio { command, env, .. } = &server.transport else {
+        panic!("stdio transport");
+    };
+    assert_eq!(command, "session-xerj");
+    let env = env.as_ref().expect("merged environment");
+    assert_eq!(env["XERJ_URL"], "http://127.0.0.1:19200");
+    assert_eq!(env["XERJ_DISABLE_FEEDBACK"], "true");
 }
 
 #[tokio::test]

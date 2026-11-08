@@ -1,0 +1,11 @@
+# Local search and agent memory supplied by the Codex Blueprint bundle.
+[mcp_servers.xerj]
+command = "xerj"
+args = ["mcp", "--ensure-local"]
+startup_timeout_sec = 120
+tool_timeout_sec = 60
+required = false
+
+[mcp_servers.xerj.env]
+XERJ_URL = "http://127.0.0.1:9200"
+XERJ_DISABLE_FEEDBACK = "true"
