@@ -50,6 +50,7 @@ use rama_tcp::client::Request as TcpRequest;
 use rama_tcp::server::TcpListener;
 use std::io;
 use std::net::SocketAddr;
+#[cfg(not(target_os = "trueos"))]
 use std::net::TcpListener as StdTcpListener;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -59,6 +60,8 @@ use std::time::Instant;
 use tokio::io::AsyncRead;
 use tokio::io::AsyncWrite;
 use tokio::io::ReadBuf;
+#[cfg(target_os = "trueos")]
+use tokio::net::TcpListener as StdTcpListener;
 use tracing::error;
 use tracing::info;
 use tracing::warn;
@@ -98,6 +101,9 @@ pub async fn run_socks5_with_std_listener(
     enable_socks5_udp: bool,
     guard: ShutdownGuard,
 ) -> Result<()> {
+    #[cfg(target_os = "trueos")]
+    let listener = TcpListener::from(listener);
+    #[cfg(not(target_os = "trueos"))]
     let listener =
         TcpListener::try_from(listener).context("convert std listener to SOCKS5 proxy listener")?;
     run_socks5_with_listener(

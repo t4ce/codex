@@ -403,10 +403,11 @@ fn render_debug_config_lines(
 fn render_non_file_layer_details(layer: &ConfigLayerEntry) -> Vec<Line<'static>> {
     match &layer.name {
         ConfigLayerSource::SessionFlags => render_session_flag_details(&layer.config),
-        ConfigLayerSource::Mdm { .. }
+        ConfigLayerSource::PackagedDefaults { file: None }
+        | ConfigLayerSource::Mdm { .. }
         | ConfigLayerSource::EnterpriseManaged { .. }
         | ConfigLayerSource::LegacyManagedConfigTomlFromMdm => render_non_file_layer_value(layer),
-        ConfigLayerSource::PackagedDefaults { .. }
+        ConfigLayerSource::PackagedDefaults { file: Some(_) }
         | ConfigLayerSource::System { .. }
         | ConfigLayerSource::User { .. }
         | ConfigLayerSource::Project { .. }
@@ -714,6 +715,24 @@ mod tests {
     use ratatui::text::Line;
     use std::collections::BTreeMap;
     use toml::Value as TomlValue;
+
+    #[test]
+    fn embedded_packaged_defaults_details_retain_raw_source() {
+        let raw = "# embedded defaults\nmodel = 'packaged-model'\n";
+        let layer = ConfigLayerEntry::new_with_raw_toml(
+            ConfigLayerSource::PackagedDefaults { file: None },
+            toml::from_str(raw).expect("defaults"),
+            raw.to_string(),
+            AbsolutePathBuf::resolve_path_against_base("home", std::env::temp_dir()),
+        );
+        let text = super::render_non_file_layer_details(&layer)
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(text.contains("# embedded defaults"));
+        assert!(text.contains("model = 'packaged-model'"));
+    }
 
     #[tokio::test]
     async fn debug_config_output_lists_agents_fields() {

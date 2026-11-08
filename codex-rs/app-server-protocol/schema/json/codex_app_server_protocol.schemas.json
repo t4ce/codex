@@ -10049,12 +10049,15 @@
             "description": "Default configuration supplied with the installed Codex package.",
             "properties": {
               "file": {
-                "allOf": [
+                "anyOf": [
                   {
                     "$ref": "#/definitions/v2/AbsolutePathBuf"
+                  },
+                  {
+                    "type": "null"
                   }
                 ],
-                "description": "Path to the packaged default configuration file."
+                "description": "Path identifying the packaged defaults, when a filesystem origin is available. Null when the defaults are embedded in a package without an executable file path."
               },
               "type": {
                 "enum": [
@@ -10065,7 +10068,6 @@
               }
             },
             "required": [
-              "file",
               "type"
             ],
             "title": "PackagedDefaultsConfigLayerSource",

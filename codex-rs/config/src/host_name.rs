@@ -1,6 +1,6 @@
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use dns_lookup::AddrInfoHints;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use dns_lookup::getaddrinfo;
 use std::sync::LazyLock;
 #[cfg(windows)]
@@ -10,8 +10,15 @@ use winapi_util::sysinfo::get_computer_name;
 
 static HOST_NAME: LazyLock<Option<String>> = LazyLock::new(compute_host_name);
 static OS_HOST_NAME: LazyLock<Option<String>> = LazyLock::new(|| {
-    let kernel_hostname = gethostname::gethostname();
-    normalize_host_name(&kernel_hostname.to_string_lossy())
+    #[cfg(target_os = "trueos")]
+    {
+        None
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        let kernel_hostname = gethostname::gethostname();
+        normalize_host_name(&kernel_hostname.to_string_lossy())
+    }
 });
 
 /// Returns a process-cached canonical hostname, falling back to the normalized
@@ -46,7 +53,7 @@ fn normalize_host_name(hostname: &str) -> Option<String> {
     (!hostname.is_empty()).then(|| hostname.to_ascii_lowercase())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn local_fqdn_for_hostname(hostname: &str) -> Option<String> {
     let hints = AddrInfoHints {
         flags: libc::AI_CANONNAME,
@@ -70,7 +77,7 @@ fn local_fqdn_for_hostname(_hostname: &str) -> Option<String> {
         .and_then(|hostname| normalize_fqdn_candidate(&hostname))
 }
 
-#[cfg(not(any(unix, windows)))]
+#[cfg(any(target_os = "trueos", not(any(unix, windows))))]
 fn local_fqdn_for_hostname(_hostname: &str) -> Option<String> {
     None
 }
@@ -86,6 +93,7 @@ mod tests {
     use super::os_host_name;
     use pretty_assertions::assert_eq;
 
+    #[cfg(not(target_os = "trueos"))]
     #[test]
     fn os_host_name_matches_normalized_kernel_hostname() {
         let kernel_hostname = gethostname::gethostname();

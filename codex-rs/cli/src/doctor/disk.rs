@@ -119,7 +119,7 @@ fn format_capacity(bytes: u64) -> String {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn available_space(path: &Path) -> io::Result<u64> {
     use std::ffi::CString;
     use std::mem::MaybeUninit;
@@ -165,7 +165,7 @@ fn available_space(path: &Path) -> io::Result<u64> {
     Ok(available)
 }
 
-#[cfg(not(any(unix, windows)))]
+#[cfg(any(target_os = "trueos", not(any(unix, windows))))]
 fn available_space(_path: &Path) -> io::Result<u64> {
     Err(io::Error::new(
         io::ErrorKind::Unsupported,

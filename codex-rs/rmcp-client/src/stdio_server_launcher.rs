@@ -21,15 +21,15 @@ use std::os::windows::io::OwnedHandle;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::sync::Mutex;
 use std::sync::OnceLock;
 use std::sync::Weak;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::thread::sleep;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::thread::spawn;
 use std::time::Duration;
 
@@ -45,17 +45,17 @@ use codex_exec_server::ExecProcess;
 use codex_protocol::config_types::ShellEnvironmentPolicyInherit;
 use codex_utils_paths::path_uri::LegacyAppPathString;
 use codex_utils_paths::path_uri::PathUri;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use codex_utils_pty::Child;
 use codex_utils_pty::Command;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use codex_utils_pty::DescriptorPolicy;
 use codex_utils_pty::ProcessMode;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use codex_utils_pty::process_group::kill_process_group;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use codex_utils_pty::process_group::terminate_process_group;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use codex_utils_pty::process_group::wait_for_process_group_exit;
 use futures::FutureExt;
 use futures::future::BoxFuture;
@@ -362,17 +362,17 @@ impl StdioServerLauncher for LocalStdioServerLauncher {
 
 // Local private implementation.
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 const PROCESS_GROUP_TERM_GRACE_PERIOD: Duration = Duration::from_secs(2);
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 const RESTART_DRAIN_GRACE_PERIOD: Duration = Duration::from_millis(250);
 
 // Keep queued stderr diagnostics before closing the reader, even when an
 // escaped descendant prevents the pipe from reaching EOF.
 const STDERR_READER_DRAIN_GRACE_PERIOD: Duration = Duration::from_millis(250);
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 enum LocalProcessTerminator {
     ProcessGroup(u32),
     // The SDK may drop the failed transport before the caller can decide whether to restart it.
@@ -382,11 +382,11 @@ enum LocalProcessTerminator {
     },
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 #[derive(Clone)]
 struct KillDiscoveryGroupOnDrop(Arc<Mutex<Option<Box<Child>>>>);
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 impl KillDiscoveryGroupOnDrop {
     fn new(child: Box<Child>) -> Self {
         Self(Arc::new(Mutex::new(Some(child))))
@@ -408,14 +408,14 @@ impl KillDiscoveryGroupOnDrop {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 impl Drop for KillDiscoveryGroupOnDrop {
     fn drop(&mut self) {
         let _ = self.kill();
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn kill_process_group_and_warn(pid: u32) -> io::Result<()> {
     kill_process_group(pid)
         .inspect_err(|error| warn!("Failed to kill MCP process group {pid}: {error}"))
@@ -442,6 +442,7 @@ pub(crate) struct StdioServerProcessHandle {
 }
 
 enum StdioServerProcessKind {
+    #[cfg(not(target_os = "trueos"))]
     Local(Option<LocalProcessTerminator>),
     #[cfg(any(target_os = "trueos", test))]
     Vmx(crate::vmx_stdio_transport::VmxProcess),
@@ -557,7 +558,7 @@ impl LocalStdioServerLauncher {
             // orchestrator descriptors from the server and commands it launches.
             // Descriptor allowlisting is Unix-only. Windows can still inherit unrelated
             // handles and needs a handle allowlist in the shared spawn backend.
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             command.descriptor_policy(DescriptorPolicy::Explicit);
             command
         };
@@ -638,7 +639,7 @@ impl LocalStdioServerLauncher {
                 }
             }),
         };
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let (transport, terminator) = {
             let mut transport = transport;
             let terminator = process_id.map(|pid| {
@@ -713,8 +714,9 @@ impl LocalStdioServerLauncher {
     }
 }
 
+#[cfg(not(target_os = "trueos"))]
 impl LocalProcessTerminator {
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     fn terminate_discovery(&self, reason: StdioTermination) -> io::Result<()> {
         let Self::DiscoveryLeader { leader, .. } = self else {
             return Err(io::Error::other("missing Unix MCP discovery leader"));
@@ -746,7 +748,7 @@ impl LocalProcessTerminator {
         Ok(())
     }
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     fn terminate(&self) {
         let (process_group_id, discovery) = match self {
             Self::ProcessGroup(pid) => (*pid, None),
@@ -831,6 +833,7 @@ impl LocalProcessTerminator {
 }
 
 impl StdioServerProcessHandle {
+    #[cfg(not(target_os = "trueos"))]
     fn local(
         program_name: String,
         terminator: Option<LocalProcessTerminator>,
@@ -863,6 +866,15 @@ impl StdioServerProcessHandle {
         true
     }
 
+    #[cfg(target_os = "trueos")]
+    fn terminate_discovery(&self, _reason: StdioTermination) -> io::Result<()> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "native MCP uses VMX lifecycle instead of local process-group discovery",
+        ))
+    }
+
+    #[cfg(not(target_os = "trueos"))]
     fn terminate_discovery(&self, reason: StdioTermination) -> io::Result<()> {
         if !self.begin_termination() {
             return Err(io::Error::new(
@@ -884,10 +896,12 @@ impl StdioServerProcessHandle {
             return Ok(());
         }
         match &self.kind {
+            #[cfg(not(target_os = "trueos"))]
             StdioServerProcessKind::Local(Some(terminator)) => {
                 terminator.terminate();
                 Ok(())
             }
+            #[cfg(not(target_os = "trueos"))]
             StdioServerProcessKind::Local(None) => Ok(()),
             #[cfg(any(target_os = "trueos", test))]
             StdioServerProcessKind::Vmx(process) => process.terminate(),
@@ -908,9 +922,11 @@ impl Drop for StdioServerProcessHandle {
         }
 
         match &self.kind {
+            #[cfg(not(target_os = "trueos"))]
             StdioServerProcessKind::Local(Some(terminator)) => {
                 terminator.terminate();
             }
+            #[cfg(not(target_os = "trueos"))]
             StdioServerProcessKind::Local(None) => {}
             #[cfg(any(target_os = "trueos", test))]
             StdioServerProcessKind::Vmx(process) => {

@@ -15,7 +15,7 @@ use tokio::process::ChildStdout;
 #[path = "posix_child.rs"]
 pub(super) mod posix;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 #[path = "child_reaper.rs"]
 pub(super) mod reaper;
 
@@ -29,7 +29,7 @@ pub struct Child {
 
 pub(super) enum ChildKind {
     Tokio(tokio::process::Child),
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     TokioReapOnly {
         child: Option<tokio::process::Child>,
         reaper: std::sync::mpsc::Sender<reaper::ChildToReap>,
@@ -42,7 +42,7 @@ impl Child {
     pub fn id(&self) -> Option<u32> {
         match &self.inner {
             ChildKind::Tokio(child) => child.id(),
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             ChildKind::TokioReapOnly { child, .. } => {
                 child.as_ref().and_then(tokio::process::Child::id)
             }
@@ -56,7 +56,7 @@ impl Child {
         self.stdin.take();
         match &mut self.inner {
             ChildKind::Tokio(child) => child.wait().await,
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             ChildKind::TokioReapOnly { child, .. } => {
                 child
                     .as_mut()
@@ -106,7 +106,7 @@ impl Child {
         self.stdin.take();
         match &mut self.inner {
             ChildKind::Tokio(child) => child.kill().await,
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             ChildKind::TokioReapOnly { child, .. } => {
                 child
                     .as_mut()
@@ -126,7 +126,7 @@ mod tests;
 
 impl Drop for ChildKind {
     fn drop(&mut self) {
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         if let Self::TokioReapOnly { child, reaper } = self
             && let Some(child) = child.take()
             && child.id().is_some()

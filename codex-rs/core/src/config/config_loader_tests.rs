@@ -1101,7 +1101,13 @@ async fn includes_thread_config_layers_in_stack() -> anyhow::Result<()> {
                 file: expected_system_config,
             },
             ConfigLayerSource::PackagedDefaults {
-                file: AbsolutePathBuf::from_absolute_path(std::env::current_exe()?)?,
+                file: if cfg!(target_os = "trueos") {
+                    None
+                } else {
+                    Some(AbsolutePathBuf::from_absolute_path(
+                        std::env::current_exe()?
+                    )?)
+                },
             },
         ]
     );
@@ -2907,7 +2913,13 @@ model_provider = "cloud-provider"
             .collect::<Vec<_>>(),
         vec![
             ConfigLayerSource::PackagedDefaults {
-                file: AbsolutePathBuf::from_absolute_path(std::env::current_exe()?)?,
+                file: if cfg!(target_os = "trueos") {
+                    None
+                } else {
+                    Some(AbsolutePathBuf::from_absolute_path(
+                        std::env::current_exe()?
+                    )?)
+                },
             },
             ConfigLayerSource::System {
                 file: AbsolutePathBuf::from_absolute_path(&system_config_path)?,

@@ -843,8 +843,11 @@ class PackagedDefaultsConfigLayerSource(BaseModel):
         populate_by_name=True,
     )
     file: Annotated[
-        AbsolutePathBuf, Field(description="Path to the packaged default configuration file.")
-    ]
+        AbsolutePathBuf | None,
+        Field(
+            description="Path identifying the packaged defaults, when a filesystem origin is available. Null when the defaults are embedded in a package without an executable file path."
+        ),
+    ] = None
     type: Annotated[
         Literal["packagedDefaults"], Field(title="PackagedDefaultsConfigLayerSourceType")
     ]

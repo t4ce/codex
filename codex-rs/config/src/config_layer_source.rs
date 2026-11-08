@@ -5,7 +5,10 @@ use serde_json::Value as JsonValue;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ConfigLayerSource {
     /// Default configuration supplied with the installed Codex package.
-    PackagedDefaults { file: AbsolutePathBuf },
+    PackagedDefaults {
+        /// None when the defaults are embedded without a filesystem origin.
+        file: Option<AbsolutePathBuf>,
+    },
     /// Managed preferences delivered by MDM.
     Mdm { domain: String, key: String },
     /// Host-wide configuration loaded from a file.
@@ -77,8 +80,11 @@ pub struct ConfigLayer {
 
 pub fn format_config_layer_source(source: &ConfigLayerSource, config_toml_file: &str) -> String {
     match source {
-        ConfigLayerSource::PackagedDefaults { file } => {
+        ConfigLayerSource::PackagedDefaults { file: Some(file) } => {
             format!("packaged defaults ({})", file.as_path().display())
+        }
+        ConfigLayerSource::PackagedDefaults { file: None } => {
+            "packaged defaults (embedded)".to_string()
         }
         ConfigLayerSource::Mdm { domain, key } => {
             format!("MDM ({domain}:{key})")

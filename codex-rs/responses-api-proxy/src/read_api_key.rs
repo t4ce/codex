@@ -3,6 +3,15 @@ use anyhow::Result;
 use anyhow::anyhow;
 use zeroize::Zeroize;
 
+#[cfg(target_os = "trueos")]
+#[path = "native_stdin.rs"]
+mod native_stdin;
+
+#[cfg(target_os = "trueos")]
+pub(crate) fn read_from_stdin(buffer: &mut [u8]) -> std::io::Result<usize> {
+    native_stdin::read(buffer)
+}
+
 /// Use a generous buffer size to avoid truncation and to allow for longer API
 /// keys in the future.
 const BUFFER_SIZE: usize = 1024;
@@ -44,7 +53,7 @@ pub(crate) fn read_from_stdin(buffer: &mut [u8]) -> std::io::Result<usize> {
 /// that can end up retaining a copy of stdin data in memory with no way to zero
 /// it out, whereas we aim to guarantee there is exactly one copy of the API key
 /// in memory, protected by mlock(2).
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub(crate) fn read_from_stdin(buffer: &mut [u8]) -> std::io::Result<usize> {
     use libc::c_void;
     use libc::read;
@@ -162,7 +171,7 @@ pub(crate) fn read_auth_header_with<const N: usize>(
     Ok(leaked)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn mlock_str(value: &'static str) {
     use libc::_SC_PAGESIZE;
     use libc::c_void;
@@ -201,7 +210,11 @@ fn mlock_str(value: &'static str) {
     let _ = unsafe { mlock(start as *const c_void, size) };
 }
 
-#[cfg(not(unix))]
+// TRUEOS guest heaps are resident physical HeapArena allocations; there is no
+// swap/pageout backend to lock against. Protected workspace runs also refuse
+// persistent/replicated checkpoint export. Keep the single allocation and
+// temporary-buffer zeroization above; no Unix page size or mlock applies.
+#[cfg(any(not(unix), target_os = "trueos"))]
 fn mlock_str(_value: &'static str) {}
 
 /// The key should match /^[A-Za-z0-9\-_]+$/. Ensure there is no funny business

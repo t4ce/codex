@@ -181,11 +181,20 @@ pub async fn load_config_layers_state(
             )
         })?;
         ConfigLayerEntry::new(
-            ConfigLayerSource::PackagedDefaults { file: file.clone() },
+            ConfigLayerSource::PackagedDefaults {
+                file: Some(file.clone()),
+            },
             resolve_relative_paths_in_config_toml(config, base_dir)?,
         )
     } else {
-        let file = AbsolutePathBuf::from_absolute_path(std::env::current_exe()?)?;
+        // Blueprint modules have no executable filesystem path. Embedded defaults
+        // retain their raw source and CODEX_HOME resolution base independently.
+        #[cfg(target_os = "trueos")]
+        let file = None;
+        #[cfg(not(target_os = "trueos"))]
+        let file = Some(AbsolutePathBuf::from_absolute_path(
+            std::env::current_exe()?
+        )?);
         let raw_toml = include_str!("../../defaults.toml");
         let config = toml::from_str(raw_toml).map_err(|error| {
             io::Error::new(

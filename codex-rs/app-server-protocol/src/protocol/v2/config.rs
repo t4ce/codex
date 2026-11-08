@@ -36,8 +36,9 @@ pub enum ConfigLayerSource {
     #[serde(rename_all = "camelCase")]
     #[ts(rename_all = "camelCase")]
     PackagedDefaults {
-        /// Path to the packaged default configuration file.
-        file: AbsolutePathBuf,
+        /// Path identifying the packaged defaults, when a filesystem origin is available.
+        /// Null when the defaults are embedded in a package without an executable file path.
+        file: Option<AbsolutePathBuf>,
     },
 
     /// Managed preferences layer delivered by MDM (macOS only).

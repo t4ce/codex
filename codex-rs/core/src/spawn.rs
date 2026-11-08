@@ -91,7 +91,7 @@ pub(crate) async fn spawn_child_async(request: SpawnChildRequest<'_>) -> std::io
     // any child processes that were spawned as part of a `"shell"` tool call
     // to also be terminated.
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     unsafe {
         let detach_from_tty = matches!(stdio_policy, StdioPolicy::RedirectForShellTool);
         #[cfg(target_os = "linux")]

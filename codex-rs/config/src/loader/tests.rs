@@ -566,6 +566,92 @@ impl ExecutorFileSystem for TestFileSystem {
 }
 
 #[tokio::test]
+async fn embedded_packaged_defaults_keep_source_and_resolution_base() {
+    let tmp = tempdir().expect("tempdir");
+    let mut overrides = LoaderOverrides::without_managed_config_for_tests();
+    overrides.system_config_path = Some(tmp.path().join("missing-system.toml"));
+    let stack = load_config_layers_state(
+        &TestFileSystem,
+        tmp.path(),
+        None,
+        &[],
+        overrides,
+        &crate::NoopThreadConfigLoader,
+    )
+    .await
+    .expect("load embedded defaults without an executable file");
+    let layer = stack.all_layers_low_to_high().next().expect("defaults");
+    #[cfg(target_os = "trueos")]
+    let expected_file = None;
+    #[cfg(not(target_os = "trueos"))]
+    let expected_file = Some(
+        AbsolutePathBuf::from_absolute_path(std::env::current_exe().expect("host executable"))
+            .expect("absolute host executable"),
+    );
+    assert_eq!(
+        layer.name,
+        ConfigLayerSource::PackagedDefaults {
+            file: expected_file
+        }
+    );
+    let embedded = include_str!("../../defaults.toml");
+    assert_eq!(layer.raw_toml(), Some(embedded));
+    assert_eq!(
+        layer.raw_toml_base_dir().map(|base| base.as_path()),
+        Some(tmp.path())
+    );
+    let parsed = toml::from_str::<TomlValue>(embedded).expect("embedded TOML");
+    assert_eq!(layer.config, parsed);
+    assert_eq!(layer.version, crate::version_for_toml(&parsed));
+    assert_eq!(layer.name.precedence(), -10);
+    assert_eq!(layer.config_folder(), None);
+    assert_eq!(layer.hooks_config_folder(), None);
+}
+
+#[tokio::test]
+async fn fileless_packaged_defaults_diagnostics_use_raw_source_and_home_base() {
+    #[derive(Debug, serde::Deserialize)]
+    struct DiagnosticConfig {
+        #[serde(rename = "model_instructions_file")]
+        _instructions: AbsolutePathBuf,
+        #[serde(rename = "model")]
+        _model: String,
+    }
+    let tmp = tempdir().expect("tempdir");
+    let raw = "model_instructions_file = 'instructions.md'\nmodel = 1\n";
+    let layer = ConfigLayerEntry::new_with_raw_toml(
+        ConfigLayerSource::PackagedDefaults { file: None },
+        toml::from_str(raw).expect("TOML value"),
+        raw.to_string(),
+        AbsolutePathBuf::from_absolute_path(tmp.path()).expect("home base"),
+    );
+    let error = crate::first_layer_config_error_from_entries::<DiagnosticConfig>(
+        &[layer],
+        CONFIG_TOML_FILE,
+    )
+    .await
+    .expect("raw source diagnostic");
+    assert_eq!(error.path, Path::new("packaged defaults (embedded)"));
+    assert_eq!(error.range.start.line, 2);
+    assert_eq!(error.range.start.column, 9);
+    assert!(error.message.contains("invalid type: integer `1`"));
+
+    // Fileless metadata alone must never become a diagnostic filesystem path.
+    let layer = ConfigLayerEntry::new(
+        ConfigLayerSource::PackagedDefaults { file: None },
+        toml::from_str(raw).expect("TOML value"),
+    );
+    assert!(
+        crate::first_layer_config_error_from_entries::<DiagnosticConfig>(
+            &[layer],
+            CONFIG_TOML_FILE
+        )
+        .await
+        .is_none()
+    );
+}
+
+#[tokio::test]
 async fn packaged_defaults_have_lower_precedence_than_existing_config_layers() {
     let tmp = tempdir().expect("tempdir");
     let packaged_defaults_path =
@@ -622,7 +708,7 @@ model_provider = "system-provider"
             .collect::<Vec<_>>(),
         vec![
             ConfigLayerSource::PackagedDefaults {
-                file: packaged_defaults_path,
+                file: Some(packaged_defaults_path),
             },
             ConfigLayerSource::System {
                 file: AbsolutePathBuf::from_absolute_path(system_config_path)

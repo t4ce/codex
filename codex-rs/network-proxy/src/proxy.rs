@@ -35,12 +35,15 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
+#[cfg(not(target_os = "trueos"))]
 use std::net::TcpListener as StdTcpListener;
 #[cfg(target_os = "windows")]
 use std::ops::RangeInclusive;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
+#[cfg(target_os = "trueos")]
+use tokio::net::TcpListener as StdTcpListener;
 use tracing::warn;
 
 use self::execution_scope::ExecutionScope;
@@ -436,8 +439,23 @@ pub(super) fn windows_managed_loopback_addr(addr: SocketAddr) -> SocketAddr {
 }
 
 fn reserve_loopback_ephemeral_listener() -> Result<StdTcpListener> {
-    StdTcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
-        .context("bind loopback ephemeral port")
+    #[cfg(target_os = "trueos")]
+    {
+        // Retain the exact native listener from reservation through serving;
+        // there is no close/rebind window or Unix-descriptor import.
+        let socket = tokio::net::TcpSocket::new_v4().context("create native proxy socket")?;
+        socket
+            .bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .context("reserve native loopback ephemeral port")?;
+        socket
+            .listen(32)
+            .context("listen on reserved native proxy socket")
+    }
+    #[cfg(not(target_os = "trueos"))]
+    {
+        StdTcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .context("bind loopback ephemeral port")
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

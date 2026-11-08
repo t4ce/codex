@@ -65,7 +65,7 @@ pub(crate) enum ChildDropPolicy {
 pub enum ChildStdin {
     Piped,
     Null,
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     File(std::os::fd::OwnedFd),
     #[cfg(windows)]
     File(std::os::windows::io::OwnedHandle),
@@ -85,9 +85,9 @@ pub struct Command {
     pub(crate) inherited_fds: Vec<std::os::fd::RawFd>,
     #[cfg(target_os = "linux")]
     parent_pid: Option<libc::pid_t>,
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     pub(crate) stdout_file: Option<std::os::fd::OwnedFd>,
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     pub(crate) stderr_file: Option<std::os::fd::OwnedFd>,
     #[cfg(unix)]
     pub(crate) arg0: Option<OsString>,
@@ -118,9 +118,9 @@ impl Command {
             inherited_fds: Vec::new(),
             #[cfg(target_os = "linux")]
             parent_pid: None,
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             stdout_file: None,
-            #[cfg(unix)]
+            #[cfg(all(unix, not(target_os = "trueos")))]
             stderr_file: None,
             #[cfg(unix)]
             arg0: None,
@@ -216,7 +216,7 @@ impl Command {
     /// The caller must keep them open until spawning returns. We do not duplicate
     /// or close them: closing even a duplicate releases the parent's POSIX record
     /// locks. Closed and CLOEXEC descriptors remain excluded.
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     pub fn preserve_fds(&mut self, fds: &[std::os::fd::RawFd]) -> &mut Self {
         self.inherited_fds = fds
             .iter()
@@ -232,7 +232,7 @@ impl Command {
 
     /// Explicit launch attachments, including CLOEXEC descriptors. The caller
     /// owns them through spawn; only the child's flags are changed.
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     pub(crate) fn inherit_fds(&mut self, fds: &[std::os::fd::RawFd]) -> &mut Self {
         self.inherited_fds = fds.to_vec();
         self

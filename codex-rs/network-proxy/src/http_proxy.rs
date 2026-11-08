@@ -80,9 +80,12 @@ use rama_tls_rustls::client::TlsConnectorLayer;
 use serde::Serialize;
 use std::convert::Infallible;
 use std::net::SocketAddr;
+#[cfg(not(target_os = "trueos"))]
 use std::net::TcpListener as StdTcpListener;
 use std::sync::Arc;
 use std::time::Instant;
+#[cfg(target_os = "trueos")]
+use tokio::net::TcpListener as StdTcpListener;
 use tracing::error;
 use tracing::info;
 use tracing::warn;
@@ -122,6 +125,9 @@ pub async fn run_http_proxy_with_std_listener(
     environment_id: Option<String>,
     guard: ShutdownGuard,
 ) -> Result<()> {
+    #[cfg(target_os = "trueos")]
+    let listener = TcpListener::from(listener);
+    #[cfg(not(target_os = "trueos"))]
     let listener =
         TcpListener::try_from(listener).context("convert std listener to HTTP proxy listener")?;
     run_http_proxy_with_listener(state, listener, policy_decider, environment_id, guard).await

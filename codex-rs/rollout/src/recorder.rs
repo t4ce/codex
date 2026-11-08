@@ -1721,6 +1721,11 @@ fn precompute_new_rollout_path(
     rollout_id_override: Option<RolloutId>,
 ) -> std::io::Result<(PathBuf, OffsetDateTime)> {
     // Resolve ~/.codex/sessions/YYYY/MM/DD path.
+    // TRUEOS has an authoritative UTC clock and no process-local timezone
+    // database. Name native rollout directories and files explicitly in UTC.
+    #[cfg(target_os = "trueos")]
+    let timestamp = OffsetDateTime::now_utc();
+    #[cfg(not(target_os = "trueos"))]
     let timestamp = OffsetDateTime::now_local()
         .map_err(|e| IoError::other(format!("failed to get local time: {e}")))?;
     let mut dir = config.codex_home().to_path_buf();

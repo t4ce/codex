@@ -452,10 +452,15 @@ fn load_toml_hooks_from_layer(
 
 fn config_toml_source_path(layer: &ConfigLayerEntry) -> AbsolutePathBuf {
     match &layer.name {
-        ConfigLayerSource::PackagedDefaults { file }
+        ConfigLayerSource::PackagedDefaults { file: Some(file) }
         | ConfigLayerSource::System { file }
         | ConfigLayerSource::User { file, .. }
         | ConfigLayerSource::LegacyManagedConfigTomlFromFile { file } => file.clone(),
+        // Hook source keys use display-only paths for non-file layers, as with
+        // MDM and session flags below. This is never a file to load.
+        ConfigLayerSource::PackagedDefaults { file: None } => {
+            synthetic_layer_path("<packaged-defaults>/config.toml")
+        }
         ConfigLayerSource::Project { dot_codex_folder } => layer
             .hooks_config_folder()
             .unwrap_or_else(|| dot_codex_folder.clone())
@@ -1097,6 +1102,21 @@ mod tests {
 
     fn source_path() -> AbsolutePathBuf {
         test_path_buf("/tmp/hooks.json").abs()
+    }
+
+    #[test]
+    fn embedded_defaults_keep_non_file_hook_provenance_unmanaged() {
+        let source = ConfigLayerSource::PackagedDefaults { file: None };
+        let layer = ConfigLayerEntry::new(source.clone(), TomlValue::Table(Default::default()));
+        assert_eq!(
+            super::config_toml_source_path(&layer),
+            super::synthetic_layer_path("<packaged-defaults>/config.toml")
+        );
+        assert_eq!(
+            super::hook_metadata_for_config_layer_source(&source),
+            (HookSource::Unknown, false)
+        );
+        assert_eq!(layer.hooks_config_folder(), None);
     }
 
     fn hook_source() -> HookSource {

@@ -5,9 +5,10 @@ import type { AbsolutePathBuf } from "../AbsolutePathBuf";
 
 export type ConfigLayerSource = { "type": "packagedDefaults",
 /**
- * Path to the packaged default configuration file.
+ * Path identifying the packaged defaults, when a filesystem origin is available.
+ * Null when the defaults are embedded in a package without an executable file path.
  */
-file: AbsolutePathBuf, } | { "type": "mdm", domain: string, key: string, } | { "type": "system",
+file: AbsolutePathBuf | null, } | { "type": "mdm", domain: string, key: string, } | { "type": "system",
 /**
  * This is the path to the system config.toml file, though it is not
  * guaranteed to exist.

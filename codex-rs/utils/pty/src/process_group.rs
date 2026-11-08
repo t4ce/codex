@@ -21,7 +21,7 @@ use std::io;
 
 use tokio::process::Child;
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", not(target_os = "trueos")))]
 /// Ensure the child receives SIGTERM when the original parent dies.
 ///
 /// This should run in `pre_exec` and uses `parent_pid` captured before spawn to
@@ -40,13 +40,13 @@ pub fn set_parent_death_signal(parent_pid: libc::pid_t) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(any(target_os = "linux", target_os = "trueos")))]
 /// No-op on non-Linux platforms.
 pub fn set_parent_death_signal(_parent_pid: i32) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 /// Detach from the controlling TTY by starting a new session.
 pub fn detach_from_tty() -> io::Result<()> {
     let result = unsafe { libc::setsid() };
@@ -66,7 +66,7 @@ pub fn detach_from_tty() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 /// Put the calling process into its own process group.
 ///
 /// Intended for use in `pre_exec` so the child becomes the group leader.
@@ -85,7 +85,7 @@ pub fn set_process_group() -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 /// Kill the process group for the given PID (best-effort).
 ///
 /// This resolves the PGID for `pid` and sends SIGKILL to the whole group.
@@ -119,7 +119,7 @@ pub fn kill_process_group_by_pid(_pid: u32) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn signal_process_group_id(pgid: libc::pid_t, signal: libc::c_int) -> io::Result<bool> {
     use std::io::ErrorKind;
 
@@ -224,7 +224,7 @@ fn signal_process_group_with_member_fallback(
     }
 }
 
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(any(target_os = "macos", target_os = "trueos"))))]
 /// Send SIGTERM to a specific process group ID (best-effort).
 ///
 /// Returns `Ok(true)` when SIGTERM was delivered to an existing group and
@@ -252,7 +252,7 @@ pub fn terminate_process_group(_process_group_id: u32) -> io::Result<bool> {
     Ok(false)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 /// Send SIGINT to a specific process group ID (best-effort).
 pub fn interrupt_process_group(process_group_id: u32) -> io::Result<()> {
     signal_process_group_id(process_group_id as libc::pid_t, libc::SIGINT).map(|_| ())
@@ -264,7 +264,7 @@ pub fn interrupt_process_group(_process_group_id: u32) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(all(unix, not(target_os = "macos")))]
+#[cfg(all(unix, not(any(target_os = "macos", target_os = "trueos"))))]
 /// Kill a specific process group ID (best-effort).
 pub fn kill_process_group(process_group_id: u32) -> io::Result<()> {
     signal_process_group_id(process_group_id as libc::pid_t, libc::SIGKILL).map(|_| ())
@@ -291,7 +291,7 @@ pub fn kill_process_group(_process_group_id: u32) -> io::Result<()> {
 /// Wait up to `grace` for a signaled group's members to release their resources.
 /// After that, allow the caller to proceed. An unreaped zombie or a recycled group ID
 /// can remain visible after the original processes have released their resources.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub fn wait_for_process_group_exit(process_group_id: u32, grace: std::time::Duration) {
     let deadline = std::time::Instant::now() + grace;
     loop {
@@ -315,7 +315,7 @@ pub fn wait_for_process_group_exit(process_group_id: u32, grace: std::time::Dura
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 /// Kill the process group for a tokio child (best-effort).
 pub fn kill_child_process_group(child: &mut Child) -> io::Result<()> {
     if let Some(pid) = child.id() {
@@ -334,3 +334,45 @@ pub fn kill_child_process_group(_child: &mut Child) -> io::Result<()> {
 #[cfg(all(test, target_os = "macos"))]
 #[path = "process_group_tests.rs"]
 mod tests;
+
+// Unix process groups and fork-time session bookkeeping have no native
+// provider. Shell3 ProcessDriver owns cancellation through its real transport.
+#[cfg(target_os = "trueos")]
+fn native_process_group_unavailable() -> io::Error {
+    io::Error::new(
+        io::ErrorKind::Unsupported,
+        "TRUEOS uses Shell3 process lifecycles, not Unix process groups",
+    )
+}
+#[cfg(target_os = "trueos")]
+pub fn set_parent_death_signal(_: i32) -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn detach_from_tty() -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn set_process_group() -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn kill_process_group_by_pid(_: u32) -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn terminate_process_group(_: u32) -> io::Result<bool> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn interrupt_process_group(_: u32) -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn kill_process_group(_: u32) -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
+#[cfg(target_os = "trueos")]
+pub fn kill_child_process_group(_: &mut Child) -> io::Result<()> {
+    Err(native_process_group_unavailable())
+}
