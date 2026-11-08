@@ -1,6 +1,36 @@
 use super::read_sensitive_file_to_string;
 use tempfile::TempDir;
 
+#[test]
+fn missing_config_probe_returns_not_found() {
+    let directory = TempDir::new().expect("temporary directory");
+    let path = directory.path().join("absent-config.toml");
+    let error = super::open_sync(&path, crate::protocol::FsOpenMode::Read)
+        .expect_err("missing config file");
+    assert_eq!(error.kind(), std::io::ErrorKind::NotFound);
+    assert!(!path.exists());
+}
+
+#[tokio::test]
+async fn missing_sensitive_config_probe_returns_not_found() {
+    let directory = TempDir::new().expect("temporary directory");
+    let path = directory.path().join("absent-role.toml");
+    let error = read_sensitive_file_to_string(&path)
+        .await
+        .expect_err("missing sensitive config file");
+    assert_eq!(error.kind(), std::io::ErrorKind::NotFound);
+    assert!(!path.exists());
+}
+
+#[test]
+fn regular_open_rejects_directory_without_altering_it() {
+    let directory = TempDir::new().expect("temporary directory");
+    let error = super::open_sync(directory.path(), crate::protocol::FsOpenMode::Read)
+        .expect_err("directory is not a regular file");
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidInput);
+    assert!(directory.path().is_dir());
+}
+
 #[tokio::test]
 async fn read_sensitive_file_reads_regular_file() {
     let directory = TempDir::new().expect("temporary directory");
@@ -28,7 +58,7 @@ async fn read_sensitive_file_rejects_directory() {
     );
 }
 
-#[cfg(any(unix, windows))]
+#[cfg(all(any(unix, windows), not(target_os = "trueos")))]
 #[tokio::test]
 async fn read_sensitive_file_rejects_symlink() {
     let directory = TempDir::new().expect("temporary directory");

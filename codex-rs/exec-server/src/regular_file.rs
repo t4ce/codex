@@ -1,5 +1,5 @@
 use std::io;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::OpenOptionsExt;
 #[cfg(windows)]
 use std::os::windows::fs::OpenOptionsExt;
@@ -26,6 +26,10 @@ pub(crate) fn open_sync(path: &Path, mode: FsOpenMode) -> io::Result<std::fs::Fi
             options.write(true).create(true).truncate(true);
         }
     }
+    // TRUEOS opens retained filesystem records; its namespace has no FIFOs,
+    // device nodes, or links. Unix open flags have no native contract. Keep the
+    // real opened-object file-kind check below on every platform.
+    #[cfg(not(target_os = "trueos"))]
     configure_open(&mut options);
 
     let file = options.open(path)?;
@@ -44,9 +48,10 @@ pub async fn read_sensitive_file_to_string(path: &Path) -> io::Result<String> {
     let std_file = tokio::task::spawn_blocking(move || {
         let mut options = std::fs::OpenOptions::new();
         options.read(true);
+        #[cfg(not(target_os = "trueos"))]
         configure_open(&mut options);
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
 
         #[cfg(windows)]
@@ -74,7 +79,7 @@ pub async fn read_sensitive_file_to_string(path: &Path) -> io::Result<String> {
     Ok(contents)
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn configure_open(options: &mut std::fs::OpenOptions) {
     options.custom_flags(libc::O_NONBLOCK);
 }
