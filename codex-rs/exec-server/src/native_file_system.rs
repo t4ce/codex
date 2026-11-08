@@ -50,7 +50,7 @@ pub(crate) fn check_path(
                 if metadata.file_type().is_symlink() {
                     return Err(denied(path));
                 }
-                #[cfg(unix)]
+                #[cfg(all(unix, not(target_os = "trueos")))]
                 if write && metadata.is_file() {
                     use std::os::unix::fs::MetadataExt;
                     if metadata.nlink() > 1 {

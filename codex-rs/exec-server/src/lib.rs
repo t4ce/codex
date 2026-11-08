@@ -57,11 +57,11 @@ mod sandbox_selection;
 mod sandboxed_file_open;
 mod sandboxed_file_system;
 mod server;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod shell_snapshot;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod shell_snapshot_file;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod shell_snapshot_process;
 mod telemetry;
 mod trace_context;

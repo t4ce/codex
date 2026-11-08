@@ -2,11 +2,11 @@
 //! Track their filesystem assumptions in docs/trueos-socket-paths.md.
 //! Cross-platform async Unix domain socket helpers.
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod daemon_directory;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub use daemon_directory::prepare_shared_daemon_socket_directory;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub use daemon_directory::shared_daemon_socket_directory;
 
 use std::io::Result as IoResult;
@@ -23,8 +23,8 @@ use tokio::io::ReadBuf;
 /// supported by the platform (0700 on Unix, a protected user-only DACL on Windows).
 /// Windows rejects existing directories unless they already have that owner and DACL;
 /// changing permissions cannot revoke access held through preexisting handles.
-/// TRUEOS uses TRUEOSFS access keys; Unix owner/mode restrictions are bypassed
-/// while access-key enforcement is being integrated on the development rig.
+/// TRUEOS reports Unsupported before creating a directory: filesystem access
+/// keys do not by themselves implement a local socket transport.
 pub async fn prepare_private_socket_directory(socket_dir: impl AsRef<Path>) -> IoResult<()> {
     platform::prepare_private_socket_directory(socket_dir.as_ref()).await
 }
@@ -102,7 +102,7 @@ impl AsyncWrite for UnixStream {
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod platform {
     use std::io;
     use std::io::ErrorKind;
@@ -210,6 +210,12 @@ mod platform {
             .is_socket())
     }
 }
+
+#[cfg(target_os = "trueos")]
+#[path = "native.rs"]
+mod platform;
+#[cfg(target_os = "trueos")]
+pub use platform::{prepare_shared_daemon_socket_directory, shared_daemon_socket_directory};
 
 #[cfg(windows)]
 mod platform {

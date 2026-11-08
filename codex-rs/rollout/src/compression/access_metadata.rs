@@ -5,11 +5,12 @@
 //! Reject delete-deny ACLs before installation so failed replacements remain removable.
 
 use std::fs::File;
+#[cfg(not(target_os = "trueos"))]
 use std::fs::FileTimes;
 use std::io;
 #[cfg(target_os = "macos")]
 use std::os::fd::AsRawFd;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::MetadataExt;
 
 // libc does not expose the macOS ACL APIs.
@@ -28,6 +29,17 @@ unsafe extern "C" {
     fn acl_free(acl: *mut libc::c_void) -> libc::c_int;
 }
 
+/// Verify effective native policy; never claim to copy Unix permissions or times.
+#[cfg(target_os = "trueos")]
+pub(super) fn copy(source: &File, destination: &File) -> io::Result<()> {
+    if !source.has_same_access_key(destination)? {
+        return Err(io::Error::new(io::ErrorKind::PermissionDenied,
+            "replacement file has different native access requirements"));
+    }
+    Ok(())
+}
+
+#[cfg(not(target_os = "trueos"))]
 pub(super) fn copy(source: &File, destination: &File) -> io::Result<()> {
     let metadata = source.metadata()?;
     #[cfg(unix)]

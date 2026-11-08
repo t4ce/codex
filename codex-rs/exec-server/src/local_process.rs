@@ -79,7 +79,7 @@ use crate::rpc::internal_error;
 use crate::rpc::invalid_params;
 use crate::rpc::invalid_request;
 use crate::rpc_server_requests::RpcServerRequestSender;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use crate::shell_snapshot::CapturePurpose;
 use crate::telemetry::ExecServerTelemetry;
 use crate::telemetry::ProcessMetricGuard;
@@ -164,7 +164,7 @@ struct Inner {
     processes: Mutex<HashMap<ProcessId, ProcessEntry>>,
     rpc_output_retention: Option<Duration>,
     credential_brokers: codex_network_proxy::RemoteCredentialBrokerCache,
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     shell_snapshots: crate::shell_snapshot::ShellSnapshotCache,
     telemetry: ExecServerTelemetry,
 }
@@ -233,7 +233,7 @@ impl LocalProcess {
                 processes: Mutex::new(HashMap::new()),
                 rpc_output_retention,
                 credential_brokers: codex_network_proxy::RemoteCredentialBrokerCache::default(),
-                #[cfg(unix)]
+                #[cfg(all(unix, not(target_os = "trueos")))]
                 shell_snapshots: crate::shell_snapshot::ShellSnapshotCache::default(),
                 telemetry,
             }),
@@ -369,7 +369,7 @@ impl LocalProcess {
                 let _ = notifications.try_notify(NETWORK_POLICY_DECISION_METHOD, &notification);
             }) as NetworkPolicyAuditObserver
         });
-        #[cfg(not(unix))]
+        #[cfg(any(not(unix), target_os = "trueos"))]
         if params.shell_snapshot.is_some() {
             return Err(invalid_params(
                 "shell snapshots are unsupported on this platform".to_string(),
@@ -385,9 +385,9 @@ impl LocalProcess {
             &telemetry,
         )
         .await?;
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let mut prepared = prepared;
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let snapshot_file = self
             .inner
             .shell_snapshots
@@ -424,12 +424,12 @@ impl LocalProcess {
             );
         }
 
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let inherited_fds = snapshot_file
             .iter()
             .map(std::os::fd::AsRawFd::as_raw_fd)
             .collect::<Vec<_>>();
-        #[cfg(not(unix))]
+        #[cfg(any(not(unix), target_os = "trueos"))]
         let inherited_fds = Vec::new();
         let spawned_result = codex_sandboxing::spawn_process(codex_sandboxing::SpawnRequest {
             command: &prepared.command,
@@ -443,7 +443,7 @@ impl LocalProcess {
             inherited_fds: codex_utils_pty::ChildFds::Attached(&inherited_fds),
         })
         .await;
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         drop(snapshot_file);
         let spawned = match spawned_result {
             Ok(spawned) => spawned,
@@ -836,7 +836,7 @@ impl ExecBackend for LocalProcess {
         Box::pin(LocalProcess::start(self, params))
     }
 
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     fn prewarm_shell_snapshot(&self, params: ExecParams) -> ExecProcessFuture<'_, ()> {
         Box::pin(async move {
             if params.enforce_managed_network

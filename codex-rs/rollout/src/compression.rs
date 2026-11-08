@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::time::Duration;
 use std::time::Instant;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::OpenOptionsExt;
 
 mod access_metadata;
@@ -143,11 +143,15 @@ pub(crate) fn materialize_rollout_for_append_blocking(path: &Path) -> io::Result
                     // Hard-link publication must not retain Windows' temporary-file attribute.
                     let mut options = std::fs::OpenOptions::new();
                     options.write(true).create_new(true);
-                    #[cfg(unix)]
+                    #[cfg(all(unix, not(target_os = "trueos")))]
                     options.mode(0o600);
                     options.open(path)
                 },
             )?;
+        // Check before writing any source bytes to a possibly less protected
+        // staging record; repeat the native check before publication below.
+        #[cfg(target_os = "trueos")]
+        access_metadata::copy(&input, output.as_file())?;
         {
             stage = "decode_and_write";
             let mut decoder = zstd::stream::read::Decoder::new(&input)?;
@@ -335,6 +339,14 @@ impl RolloutLineReader {
 
 type BlockingLineReader = std::io::Lines<std::io::BufReader<Box<dyn Read + Send>>>;
 
+#[cfg(target_os = "trueos")]
+mod worker {
+    pub(super) fn spawn(_codex_home: std::path::PathBuf, trigger: super::RolloutCompressionTrigger) {
+        tracing::warn!(trigger = trigger.tag(), "cold rollout compression unavailable: TRUEOSFS does not record wall-clock modification age; existing compressed rollout reads remain supported");
+    }
+}
+
+#[cfg(not(target_os = "trueos"))]
 mod worker {
     use std::ffi::OsStr;
     use std::fs::File;

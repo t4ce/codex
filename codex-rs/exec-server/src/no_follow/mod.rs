@@ -6,13 +6,17 @@ use std::time::SystemTime;
 #[cfg(windows)]
 use std::time::UNIX_EPOCH;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 mod unix;
+#[cfg(target_os = "trueos")]
+mod native;
 #[cfg(windows)]
 mod windows;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use unix as imp;
+#[cfg(target_os = "trueos")]
+use native as imp;
 #[cfg(windows)]
 use windows as imp;
 
@@ -48,12 +52,14 @@ impl BoundOutput {
                 destination: Destination::Stream { is_stdout: false },
             });
         }
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         if let Some(output) = unix::inherited_output(path)? {
             return Ok(output);
         }
-        #[cfg(unix)]
+        #[cfg(all(unix, not(target_os = "trueos")))]
         let path = unix::output_path(path)?;
+        #[cfg(target_os = "trueos")]
+        let path = native::output_path(path)?;
         #[cfg(windows)]
         let path = std::path::absolute(path)?;
         let file = imp::open_output(&path)?;

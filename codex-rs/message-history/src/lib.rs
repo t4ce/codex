@@ -43,9 +43,9 @@ pub use batch::HistoryBatchCursor;
 pub use batch::HistoryBatchEntry;
 pub use batch::lookup_batch;
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::OpenOptionsExt;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 use std::os::unix::fs::PermissionsExt;
 
 /// Filename that stores the message history inside `~/.codex`.
@@ -120,6 +120,8 @@ pub async fn append_entry(
 
     // Resolve `~/.codex/history.jsonl` and ensure the parent directory exists.
     let path = history_filepath(config);
+    #[cfg(target_os = "trueos")]
+    assert_private_history_path(&path)?;
     if let Some(parent) = path.parent() {
         tokio::fs::create_dir_all(parent).await?;
     }
@@ -146,12 +148,14 @@ pub async fn append_entry(
     #[cfg(unix)]
     {
         options.append(true);
+        #[cfg(not(target_os = "trueos"))]
         options.mode(0o600);
     }
 
     let mut history_file = options.open(&path)?;
 
     // Ensure permissions.
+    #[cfg(not(target_os = "trueos"))]
     ensure_owner_only_permissions(&history_file).await?;
 
     let history_max_bytes = config.max_bytes;
@@ -304,7 +308,7 @@ pub fn lookup(log_id: u64, offset: usize, config: &HistoryConfig) -> Option<Hist
 
 /// On Unix systems, ensure the file permissions are `0o600` (rw-------). If the
 /// permissions cannot be changed the error is propagated to the caller.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 async fn ensure_owner_only_permissions(file: &File) -> Result<()> {
     let metadata = file.metadata()?;
     let current_mode = metadata.permissions().mode() & 0o777;
@@ -316,6 +320,27 @@ async fn ensure_owner_only_permissions(file: &File) -> Result<()> {
         tokio::task::spawn_blocking(move || file_clone.set_permissions(perms_clone)).await??;
     }
     Ok(())
+}
+
+/// History is private through the captured user's native workspace key.
+#[cfg(target_os = "trueos")]
+fn assert_private_history_path(path: &Path) -> Result<()> {
+    trueos::async_fs::block_on(trueos::async_fs::assert_private_path(
+        path.as_os_str().as_encoded_bytes(),
+    ))
+    .map_err(|code| {
+        let kind = match code {
+            -1 | -4 | -6 => std::io::ErrorKind::InvalidInput,
+            -8 => std::io::ErrorKind::NotFound,
+            -19 => std::io::ErrorKind::PermissionDenied,
+            -20 => std::io::ErrorKind::Unsupported,
+            _ => std::io::ErrorKind::Other,
+        };
+        std::io::Error::new(
+            kind,
+            format!("history requires a native owner-authorized workspace ({code})"),
+        )
+    })
 }
 
 #[cfg(windows)]
@@ -456,8 +481,9 @@ fn trueos_log_identity(root: u64, file_id: u64) -> Option<u64> {
 }
 #[cfg(target_os = "trueos")]
 fn log_identity(metadata: &std::fs::Metadata) -> Option<u64> {
-    use std::os::unix::fs::MetadataExt;
-    trueos_log_identity(metadata.dev(), metadata.ino())
+    metadata
+        .file_id()
+        .and_then(|id| trueos_log_identity(u64::from(metadata.root_id()), id))
 }
 
 #[cfg(windows)]

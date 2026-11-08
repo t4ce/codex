@@ -332,7 +332,7 @@ impl EnvironmentInfo {
                 http_header_env_vars: true,
                 sandboxed_file_streaming: true,
                 file_write_streaming: !cfg!(target_os = "trueos"),
-                shell_snapshot_v2: cfg!(unix),
+                shell_snapshot_v2: cfg!(all(unix, not(target_os = "trueos"))),
                 windows_mxc,
                 linux_root_write_preserves_devices: cfg!(target_os = "linux"),
                 linux_approved_root_write_preserves_restrictions: cfg!(target_os = "linux"),
