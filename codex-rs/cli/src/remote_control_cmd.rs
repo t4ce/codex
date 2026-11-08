@@ -264,11 +264,21 @@ async fn run_foreground_remote_control(
 
 fn foreground_stop_signal() -> (watch::Receiver<bool>, JoinHandle<()>) {
     let (stop_tx, stop_rx) = watch::channel(false);
-    let task = tokio::spawn(async move {
-        if let Err(err) = tokio::signal::ctrl_c().await {
-            eprintln!("failed to listen for Ctrl-C: {err}");
+    let task: JoinHandle<()> = tokio::spawn(async move {
+        #[cfg(target_os = "trueos")]
+        {
+            // Keep the channel open without manufacturing an interrupt from
+            // Unsupported. VM Stop/Kill owns this foreground service's lifetime.
+            let _sender = stop_tx;
+            codex_utils_cli::native_lifecycle::wait_for_vm_stop().await
         }
-        let _ = stop_tx.send(true);
+        #[cfg(not(target_os = "trueos"))]
+        {
+            if let Err(err) = tokio::signal::ctrl_c().await {
+                eprintln!("failed to listen for Ctrl-C: {err}");
+            }
+            let _ = stop_tx.send(true);
+        }
     });
     (stop_rx, task)
 }

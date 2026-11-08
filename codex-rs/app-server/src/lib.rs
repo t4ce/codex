@@ -240,7 +240,13 @@ enum ShutdownSignal {
 }
 
 async fn shutdown_signal() -> IoResult<ShutdownSignal> {
-    #[cfg(unix)]
+    #[cfg(target_os = "trueos")]
+    {
+        // TRUEOS has no Unix signal subscription. Native VM lifecycle and
+        // transport EOF remain the real service cancellation mechanisms.
+        codex_utils_cli::native_lifecycle::wait_for_vm_stop().await
+    }
+    #[cfg(all(unix, not(target_os = "trueos")))]
     {
         use tokio::signal::unix::SignalKind;
         use tokio::signal::unix::signal;
@@ -502,6 +508,8 @@ pub struct AppServerRuntimeOptions {
     pub code_mode_host_transport: CodeModeHostTransport,
     pub plugin_startup_tasks: PluginStartupTasks,
     pub remote_control_startup_mode: RemoteControlStartupMode,
+    /// Install host signal handlers. TRUEOS services use VM lifecycle control
+    /// and transport EOF instead; its native default is false.
     pub install_shutdown_signal_handler: bool,
     pub managed_daemon: bool,
 }
@@ -513,7 +521,7 @@ impl Default for AppServerRuntimeOptions {
             code_mode_host_transport: CodeModeHostTransport::Local,
             plugin_startup_tasks: PluginStartupTasks::Start,
             remote_control_startup_mode: RemoteControlStartupMode::ResolvePersisted,
-            install_shutdown_signal_handler: true,
+            install_shutdown_signal_handler: !cfg!(target_os = "trueos"),
             managed_daemon: false,
         }
     }

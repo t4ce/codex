@@ -61,8 +61,9 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
     mode: McpLoginMode,
 ) -> Result<()> {
     let mut pending_input = None;
-    // Tokio retains its process-wide signal handler, so keep listening throughout
-    // token exchange and scope retries after the callback input reader is dropped.
+    // Host Tokio retains its process-wide signal handler, so keep listening
+    // throughout token exchange and scope retries. TRUEOS terminal input
+    // handles Ctrl-C/Ctrl-D directly; captured input cancellation uses EOF.
     let ctrl_c = tokio::signal::ctrl_c();
     tokio::pin!(ctrl_c);
     for (attempt, scopes) in [resolved_scopes.scopes.as_slice(), &[]]
@@ -115,7 +116,7 @@ pub(crate) async fn perform_oauth_login_retry_without_scopes(
         };
         let result = tokio::select! {
             result = login => result,
-            result = &mut ctrl_c, if matches!(mode, McpLoginMode::PasteCallback) => {
+            result = &mut ctrl_c, if !cfg!(target_os = "trueos") && matches!(mode, McpLoginMode::PasteCallback) => {
                 result.context("failed to listen for Ctrl-C")?;
                 bail!("OAuth login cancelled");
             }

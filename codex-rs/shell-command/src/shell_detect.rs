@@ -58,19 +58,19 @@ pub fn detect_shell_type(shell_path: impl AsRef<std::path::Path>) -> Option<Shel
     }
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn get_user_shell_path() -> Option<PathBuf> {
     get_user_path(|passwd| passwd.pw_shell)
         .map(|path| PathBuf::from(path.to_string_lossy().into_owned()))
 }
 
 /// Read the current account's home directory without consulting the environment.
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 pub fn get_user_home_path() -> Option<PathBuf> {
     get_user_path(|passwd| passwd.pw_dir).filter(|path| !path.as_os_str().is_empty())
 }
 
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "trueos")))]
 fn get_user_path(field: fn(&libc::passwd) -> *mut libc::c_char) -> Option<PathBuf> {
     let uid = unsafe { libc::getuid() };
     use std::ffi::CStr;
@@ -132,7 +132,18 @@ fn get_user_path(field: fn(&libc::passwd) -> *mut libc::c_char) -> Option<PathBu
     }
 }
 
-#[cfg(not(unix))]
+// TRUEOS executes ShellType::Sh through Sh3; there is no passwd shell record.
+#[cfg(target_os = "trueos")]
+fn get_user_shell_path() -> Option<PathBuf> { None }
+
+/// TRUEOS's captured launch HOME is authoritative. Missing and empty values
+/// have no Unix account-database fallback.
+#[cfg(target_os = "trueos")]
+pub fn get_user_home_path() -> Option<PathBuf> {
+    std::env::var_os("HOME").filter(|home| !home.is_empty()).map(PathBuf::from)
+}
+
+#[cfg(not(any(unix, target_os = "trueos")))]
 fn get_user_shell_path() -> Option<PathBuf> {
     None
 }

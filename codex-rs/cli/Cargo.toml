@@ -177,7 +177,7 @@ which = { workspace = true }
 tikv-jemallocator = { workspace = true }
 
 [target.'cfg(target_os = "trueos")'.dependencies]
-trueos = { workspace = true, features = ["native-c-alloc"] }
+trueos = { workspace = true, features = ["native-c-alloc", "native-c-clock"] }
 tokio = { version = "1", features = ["native-net"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]

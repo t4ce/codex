@@ -137,6 +137,8 @@ tracing = { workspace = true, features = ["log"] }
 url = { workspace = true }
 uuid = { workspace = true, features = ["serde", "v4", "v5", "v7"] }
 which = { workspace = true }
+
+[target.'cfg(not(target_os = "trueos"))'.dependencies]
 whoami = { workspace = true }
 
 # TRUEOS uses its native, non-JIT JavaScript runtime for Code Mode sessions.

@@ -31,7 +31,7 @@ pub async fn start_stdio_connection(
     install_shutdown_signal_handler: bool,
 ) -> IoResult<JoinHandle<()>> {
     let shutdown_signal = CancellationToken::new();
-    #[cfg(unix)]
+    #[cfg(all(unix, not(target_os = "trueos")))]
     if install_shutdown_signal_handler {
         use signal_hook::consts::SIGTERM;
         use signal_hook::iterator::Signals;
@@ -124,7 +124,7 @@ pub async fn start_stdio_connection(
 
         // EOF can finish the transport before RPC or runtime cleanup. Start
         // the same process deadline even if no SIGTERM arrives.
-        if cfg!(unix) && install_shutdown_signal_handler {
+        if cfg!(all(unix, not(target_os = "trueos"))) && install_shutdown_signal_handler {
             start_shutdown_watchdog();
         }
         let _ = transport_event_tx_for_reader

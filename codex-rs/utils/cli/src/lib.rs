@@ -1,3 +1,6 @@
+#[cfg(target_os = "trueos")]
+pub mod native_lifecycle;
+
 mod approval_mode_cli_arg;
 mod config_override;
 pub(crate) mod format_env_display;
