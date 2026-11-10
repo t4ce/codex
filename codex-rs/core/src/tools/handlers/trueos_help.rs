@@ -25,6 +25,9 @@ const STARTUP_READ_TIMEOUT: std::time::Duration = std::time::Duration::from_mill
 const STARTUP_MANIFEST_MAX_BYTES: usize = 1024 * 1024;
 const MAX_ALIAS_NAMES: usize = 64;
 const MAX_ALIAS_LINE_BYTES: usize = 1024;
+const MAX_APPDB_MANIFEST_BYTES: usize = 64 * 1024;
+const MAX_APPDB_NAMES: usize = 512;
+const MAX_APPDB_LINE_BYTES: usize = 8192;
 
 include!(concat!(env!("OUT_DIR"), "/trueos_shell3_catalog.rs"));
 
@@ -60,7 +63,7 @@ fn help_spec(include_environment_id: bool) -> ToolSpec {
     }
     ToolSpec::Function(ResponsesApiTool {
         name: "help".into(),
-        description: "Show local Codex tools and TRUEOS command guidance for the selected local TRUEOS environment. Reads live AKA names from vFile:startup when available; this help catalog does not enumerate installed AppDB names. Use exec_command with cmd=\"cmd help\" for the live installed app catalog. Does not start a shell session or run a process.".into(),
+        description: "Show local Codex tools, live installed AppDB names from vFile:appdb, live AKA names from vFile:startup, and TRUEOS Shell3 guidance for the selected local TRUEOS environment. Explains exact app names, online §§ launches, native modes and the initiating user's permissions. Reads are bounded and best effort. Does not start a shell session or run a process.".into(),
         strict: false,
         defer_loading: None,
         parameters: JsonSchema::object(properties, Some(Vec::new()), Some(false.into())),
@@ -112,20 +115,27 @@ fn selected_environment<'a>(
 /// Shared renderer used by the tool and the exec-command help fast path.
 /// `cwd` must come from the selected local execution environment.
 pub(super) async fn help_text(cwd: &str) -> String {
-    let (text, _) = help_document(cwd).await;
+    let (text, _, _) = help_document(cwd).await;
     text
 }
 
-async fn help_document(cwd: &str) -> (String, bool) {
-    let aliases = live_alias_names().await;
+async fn help_document(cwd: &str) -> (String, bool, bool) {
+    let (aliases, apps) = tokio::join!(live_alias_names(), live_appdb_names());
     let aliases_available = aliases.is_some();
+    let apps_available = apps.is_some();
     (
-        render_help(cwd, SHELL3_GROUPS, aliases.as_deref()),
+        render_help(cwd, SHELL3_GROUPS, aliases.as_deref(), apps.as_deref()),
         aliases_available,
+        apps_available,
     )
 }
 
-fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[String]>) -> String {
+fn render_help(
+    cwd: &str,
+    groups: &[(&str, &str, &[&str])],
+    aliases: Option<&[String]>,
+    apps: Option<&[String]>,
+) -> String {
     let mut lines = vec![
         String::from("Codex help · local TRUEOS environment"),
         format!("cwd={cwd}"),
@@ -139,28 +149,28 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
             "spirit=automatically configured at TRUEOS boot, with Lilly as her avatar; /spirit shows integration information; use the spirit tool for native OS interaction, with presentation and input sequencing managed by Spirit: action=windows lists live targets; focus then observe returns a PNG and target grid; pointer/type/key operate the observed target; pointer uses 0..1000 window coordinates while move uses 0..1 hardware-avatar scanout coordinates; emotion selects an expression",
         ),
         String::from(
-            "shell=TRUEOS native commands, not POSIX argv or bash; default exec_command uses captured text I/O without terminal repaint sequences; submit exact command names separated by newlines",
+            "shell=TRUEOS Shell3 native keyboard input, not POSIX argv or bash; every local exec_command uses the actual Shell3 parser and returns terminal updates, regardless of tty",
         ),
         String::from(
-            "captured=use explicit mode-qualified commands such as adm ram or hv status; help, env, ram, smp, net, gpu, and services also have direct text forms; services (or adm services) returns the central service readiness/start snapshot, refreshed about once per second; interactive-only commands require tty=true",
+            "permissions=the kernel binds command sessions and app launches to the initiating guest's user account; a later frontend login does not replace that account; hypervisor controls check the acting user's permissions",
         ),
         String::from(
-            "example=exec_command with cmd=\"adm ram\\nhv status\" captures both native diagnostics as one finite batch; its input closes after the batch and any session ID is for polling output",
+            "example=exec_command with cmd=\"\\tram\" sends Tab then ram from a fresh CMD session to open native memory information; cmd=\"§§link3d\" submits the existing online app launch operator",
         ),
         String::from(
-            "interactive=tty=true explicitly opens a full Shell3 terminal; fresh terminals start in CMD; Tab cycles HV->CMD->ADM->HV; when a VMX app is selected, the first Tab returns to shell; these sessions accept write_stdin until exit or cancellation",
+            "interactive=fresh terminals start in CMD; Tab cycles HV->CMD->ADM->HV; when a VMX app is selected, the first Tab returns to shell; terminal input stays open for write_stdin until exit or cancellation, including when tty is false or omitted",
         ),
         String::from(
-            "catalog=group labels describe the interactive Shell3 command registry; captured mode supports text forms and reports unsupported interactive-only requests instead of opening their UI",
+            "catalog=group labels describe where names are accepted; they are not command prefixes; send native Tab mode selection rather than adm/cmd/hv prefixes",
         ),
         String::from(
-            "session=an empty cmd opens a reusable plain command session for write_stdin; a nonempty captured cmd is a finite batch; neither mode uses POSIX shell syntax",
+            "session=empty and nonempty cmd requests open reusable Shell3 sessions; a session ID identifies command I/O, not a VMID or user account; a shell prompt does not finish the session",
         ),
         String::from(
-            "execution=interactive CMD AppDB names launch in shell context; AKA aliases launch in every interactive mode without Matrix slot selection",
+            "execution=exact AppDB names launch in CMD; AKA aliases launch in every mode; native §§name requests an online app and Enter submits it; use the existing hypervisor controls for running apps",
         ),
         String::from(
-            "appdb=this local help catalog does not enumerate installed apps; exec_command with cmd=\"cmd help\" reads the live installed AppDB and AKA names",
+            "appdb=live installed names are read from vFile:appdb; type the exact app name in CMD; do not substitute similarly named ADM helpers for apps",
         ),
     ];
 
@@ -192,24 +202,45 @@ fn render_help(cwd: &str, groups: &[(&str, &str, &[&str])], aliases: Option<&[St
             "group=Aka scope=all live_names=unavailable (vFile:startup could not be read or parsed)",
         )),
     }
+    match apps {
+        Some(apps) => lines.push(render_appdb_names(apps)),
+        None => lines.push(String::from(
+            "group=AppDB mode=CMD live_names=unavailable (vFile:appdb could not be read or parsed)",
+        )),
+    }
     lines.join("\n")
 }
 
 fn render_aliases(aliases: &[String]) -> String {
-    let prefix = "group=Aka scope=all live_names=[";
+    render_names(
+        "group=Aka scope=all live_names=[",
+        aliases,
+        MAX_ALIAS_NAMES,
+        MAX_ALIAS_LINE_BYTES,
+    )
+}
+
+fn render_appdb_names(apps: &[String]) -> String {
+    render_names(
+        "group=AppDB mode=CMD live_names=[",
+        apps,
+        MAX_APPDB_NAMES,
+        MAX_APPDB_LINE_BYTES,
+    )
+}
+
+fn render_names(prefix: &str, names: &[String], max_names: usize, max_line_bytes: usize) -> String {
     let mut line = String::from(prefix);
     let mut emitted = 0usize;
     let mut omitted = 0usize;
-    for name in aliases {
+    for name in names {
         if name.chars().any(char::is_control) {
             omitted += 1;
             continue;
         }
         let quoted = serde_json::to_string(name).unwrap_or_else(|_| String::from("\"<invalid>\""));
         let separator_len = usize::from(emitted != 0);
-        if emitted >= MAX_ALIAS_NAMES
-            || line.len() + separator_len + quoted.len() + 32 > MAX_ALIAS_LINE_BYTES
-        {
+        if emitted >= max_names || line.len() + separator_len + quoted.len() + 32 > max_line_bytes {
             omitted += 1;
             continue;
         }
@@ -224,6 +255,49 @@ fn render_aliases(aliases: &[String]) -> String {
         line.push_str(&format!(" omitted={omitted}"));
     }
     line
+}
+
+fn parse_appdb_names(bytes: &[u8]) -> Option<Vec<String>> {
+    if bytes.len() > MAX_APPDB_MANIFEST_BYTES {
+        return None;
+    }
+    let value: serde_json::Value = serde_json::from_slice(bytes).ok()?;
+    if value.get("version")?.as_u64()? != 1 {
+        return None;
+    }
+    value
+        .get("apps")?
+        .as_array()?
+        .iter()
+        .map(|app| {
+            let name = app.get("name")?.as_str()?;
+            let archive = app.get("archive")?.as_str()?;
+            if name.is_empty()
+                || name.chars().any(char::is_control)
+                || archive.strip_suffix(".bp") != Some(name)
+            {
+                return None;
+            }
+            Some(name.to_owned())
+        })
+        .collect()
+}
+
+#[cfg(target_os = "trueos")]
+async fn live_appdb_names() -> Option<Vec<String>> {
+    let bytes = tokio::time::timeout(
+        STARTUP_READ_TIMEOUT,
+        trueos_v::vfs_async::read_file(b"vFile:appdb"),
+    )
+    .await
+    .ok()?
+    .ok()?;
+    parse_appdb_names(&bytes)
+}
+
+#[cfg(not(target_os = "trueos"))]
+async fn live_appdb_names() -> Option<Vec<String>> {
+    None
 }
 
 #[cfg(target_os = "trueos")]
@@ -281,13 +355,13 @@ impl ToolExecutor<ToolInvocation> for HelpHandler {
             let args: HelpArgs = parse_arguments(arguments)?;
             let environment = selected_environment(&invocation, args.environment_id.as_deref())?;
             let cwd = environment.cwd().inferred_native_path_string();
-            let (text, live_aliases) = help_document(&cwd).await;
+            let (text, live_aliases, appdb_names_available) = help_document(&cwd).await;
             Ok(boxed_tool_output(JsonToolOutput::new(json!({
                 "cwd": cwd,
                 "text": text,
                 "catalog_source": catalog_source(),
                 "live_aliases": live_aliases,
-                "appdb_names_available": false,
+                "appdb_names_available": appdb_names_available,
                 "shell_session_created": false
             }))))
         })
@@ -321,26 +395,36 @@ mod tests {
             ("ADM", "System", &["net", "disc"][..]),
             ("VMX", "VME", &["stop", "tui"][..]),
         ];
-        let text = render_help("/apps/codex", groups, Some(&["weather".into()]));
+        let text = render_help(
+            "/apps/codex",
+            groups,
+            Some(&["weather".into()]),
+            Some(&["hull".into(), "link3d".into()]),
+        );
         for expected in [
             "cwd=/apps/codex",
             "calculate with no arguments lists the native operation registry",
             "not POSIX argv or bash",
             "HV->CMD->ADM->HV",
             "fresh terminals start in CMD",
-            "cmd=\"adm ram\\nhv status\"",
-            "default exec_command uses captured text I/O",
-            "interactive-only commands require tty=true",
-            "an empty cmd opens a reusable plain command session",
-            "group labels describe the interactive Shell3 command registry",
+            "cmd=\"\\tram\"",
+            "every local exec_command uses the actual Shell3 parser",
+            "including when tty is false or omitted",
+            "empty and nonempty cmd requests open reusable Shell3 sessions",
+            "group labels describe where names are accepted",
+            "initiating guest's user account",
+            "cmd=\"§§link3d\"",
             "mode=ADM group=System names=[net disc]",
             "group=Aka scope=all live_names=[\"weather\"]",
             "AppDB",
-            "this local help catalog does not enumerate installed apps",
-            "cmd=\"cmd help\" reads the live installed AppDB and AKA names",
+            "group=AppDB mode=CMD live_names=[\"hull\",\"link3d\"]",
+            "do not substitute similarly named ADM helpers for apps",
         ] {
             assert!(text.contains(expected), "missing {expected:?} in {text}");
         }
+        assert!(!text.contains("cmd help"));
+        assert!(!text.contains("adm ram"));
+        assert!(!text.contains("hv status"));
     }
 
     #[test]
@@ -360,9 +444,31 @@ mod tests {
 
     #[test]
     fn missing_live_sources_are_not_reported_as_empty_alias_catalogs() {
-        let text = render_help("/apps/codex", &[], None);
+        let text = render_help("/apps/codex", &[], None, None);
         assert!(text.contains("static command names unavailable"));
         assert!(text.contains("live_names=unavailable"));
+        assert!(text.contains("group=AppDB mode=CMD live_names=unavailable"));
+    }
+
+    #[test]
+    fn appdb_inventory_validates_version_and_exact_native_names() {
+        let bytes = br#"{"version":1,"apps":[{"name":"hull","archive":"hull.bp"},{"name":"link3d","archive":"link3d.bp"}]}"#;
+        assert_eq!(
+            parse_appdb_names(bytes),
+            Some(vec!["hull".into(), "link3d".into()])
+        );
+        assert_eq!(
+            parse_appdb_names(br#"{"version":1,"apps":[]}"#),
+            Some(Vec::new())
+        );
+        for invalid in [
+            br#"{"version":2,"apps":[]}"#.as_slice(),
+            br#"{"version":1,"apps":[{"name":"hull","archive":"other.bp"}]}"#.as_slice(),
+            br#"{"version":1,"apps":[{"name":"hull\n","archive":"hull\n.bp"}]}"#.as_slice(),
+        ] {
+            assert!(parse_appdb_names(invalid).is_none());
+        }
+        assert!(parse_appdb_names(&vec![b' '; MAX_APPDB_MANIFEST_BYTES + 1]).is_none());
     }
 
     #[test]

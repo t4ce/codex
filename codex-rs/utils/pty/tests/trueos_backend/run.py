@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory(prefix="trueos-native-command-adapter-") as tem
     catalog_start = help_source.index("fn catalog_source()")
     catalog_stop = help_source.index("\nfn text_error(", catalog_start)
     constants = "\n".join(line for line in help_source.splitlines()
-                          if line.startswith("const MAX_ALIAS_"))
+                          if line.startswith(("const MAX_ALIAS_", "const MAX_APPDB_")))
     source += "mod help_document {\n" + constants + "\n"
     source += 'const SHELL3_GROUPS: &[(&str, &str, &[&str])] = &[];\n'
     source += help_source[catalog_start:catalog_stop] + "\n"

@@ -608,6 +608,20 @@ async fn embedded_packaged_defaults_keep_source_and_resolution_base() {
     assert_eq!(layer.hooks_config_folder(), None);
 }
 
+#[test]
+fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
+    let config: ConfigToml =
+        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+    let server = &config.mcp_servers["robomcp"];
+    assert!(!server.enabled);
+    assert!(!server.required);
+    let crate::McpServerTransportConfig::Stdio { command, args, .. } = &server.transport else {
+        panic!("RoboMCP must use native child stdio");
+    };
+    assert_eq!(command, "robomcp");
+    assert!(args.is_empty());
+}
+
 #[tokio::test]
 async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     async fn load(
@@ -635,6 +649,10 @@ async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     let config: ConfigToml = stack.effective_config().try_into().expect("typed config");
     assert_eq!(
         config.mcp_servers.contains_key("xerj"),
+        cfg!(target_os = "trueos")
+    );
+    assert_eq!(
+        config.mcp_servers.contains_key("robomcp"),
         cfg!(target_os = "trueos")
     );
     if !cfg!(target_os = "trueos") {

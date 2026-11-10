@@ -25,6 +25,8 @@ use codex_utils_sandbox_summary::summarize_permission_profile;
 
 use super::status_state::TerminalTitleStatusKind;
 
+mod program_status;
+
 /// Items shown in the terminal title when the user has not configured a
 /// custom selection. Unnamed threads omit the name until one is available.
 pub(super) const DEFAULT_TERMINAL_TITLE_ITEMS: [&str; 3] =
@@ -333,29 +335,21 @@ impl ChatWidget {
     /// Reports the displayed thread's actual state independently of terminal
     /// title/notification settings. Replays never produce an unseen result.
     pub(crate) fn desired_program_status(&self) -> ProgramStatus {
-        if let Some(kind) = self.bottom_pane.program_status_blocked_kind() {
-            ProgramStatus::Blocked(kind)
-        } else if self.bottom_pane.is_task_running()
-            || self.is_user_turn_pending_or_running()
-            || !self.unified_exec_processes.is_empty()
-            || (self.status_state.program_status_after_turn == ProgramStatus::Done
-                && self
-                    .current_goal_status
-                    .as_ref()
-                    .is_some_and(GoalStatusState::is_active))
-        {
-            ProgramStatus::Working
-        } else {
-            self.status_state.program_status_after_turn
-        }
+        program_status::desired_status(
+            self.bottom_pane.program_status_blocked_kind(),
+            self.bottom_pane.is_task_running() || self.is_user_turn_pending_or_running(),
+            !self.unified_exec_processes.is_empty(),
+            self.current_goal_status
+                .as_ref()
+                .is_some_and(GoalStatusState::is_active),
+            self.status_state.program_status_after_turn,
+            cfg!(target_os = "trueos"),
+        )
     }
 
     pub(crate) fn acknowledge_program_status(&mut self) {
-        if matches!(
-            self.desired_program_status(),
-            ProgramStatus::Done | ProgramStatus::Error
-        ) {
-            self.status_state.program_status_after_turn = ProgramStatus::Idle;
+        if let Some(status) = program_status::acknowledged_status(self.desired_program_status()) {
+            self.status_state.program_status_after_turn = status;
             self.request_redraw();
         }
     }

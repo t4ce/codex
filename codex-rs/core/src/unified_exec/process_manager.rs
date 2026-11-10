@@ -1382,12 +1382,12 @@ impl UnifiedExecProcessManager {
                     "Shell3 accepts one native launch script, without a Unix argv wrapper".into(),
                 ));
             };
-            // Captured commands are finite batches. An empty script opens a
-            // reusable plain session; explicit TTY retains keyboard interaction.
+            // Local execution uses the same Shell3 parser and principal as an
+            // explicit terminal. Output preferences never restrict commands.
             let stdin_open = codex_utils_pty::shell3_stdin_open(script, tty);
             let spawned = codex_utils_pty::spawn_shell3_script(
                 script,
-                tty.then_some(codex_utils_pty::TerminalSize::default()),
+                Some(codex_utils_pty::TerminalSize::default()),
                 stdin_open,
             )
             .await

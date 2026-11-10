@@ -2,12 +2,15 @@
 
 Lightweight helpers for spawning interactive processes either under a PTY (pseudo terminal) or regular pipes. The public API is minimal and mirrors both backends so callers can switch based on their needs (e.g., enabling or disabling TTY).
 
-On TRUEOS, the `sh3` backend uses the local command-session ABI. Absent terminal
-geometry requests captured native command lines, without Shell3's screen redraws;
-explicit geometry requests the interactive terminal. The native unified-exec
-caller closes input for nonempty captured batches. Empty scripts deliberately
-open a reusable plain session, while explicit terminals retain keyboard input.
-Neither route invokes SSH or a POSIX shell. Run the native transport tests with
+On TRUEOS, the `sh3` backend uses the local command-session ABI and the actual
+Shell3 terminal for every local execution request. Absent terminal geometry uses
+the standard size. The `tty` preference never selects the kernel's restricted
+captured diagnostic-command handler. Native unified-exec keeps input open until
+exit or cancellation, including for nonempty scripts. Output contains Shell3's
+terminal updates, and later writes use the same native keyboard input, AppDB
+commands, Tab modes and Matrix operators as the user. The kernel binds the
+session to the initiating guest's account. It invokes neither SSH nor a POSIX
+shell. Run the native transport tests with
 `python3 utils/pty/tests/trueos_backend/run.py` from `codex-rs`.
 
 ## API surface

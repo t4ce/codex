@@ -167,7 +167,7 @@ async fn native_script_input_controls_and_final_output_survive_the_adapter() {
 }
 
 #[tokio::test]
-async fn captured_ctrl_c_signals_interrupt_while_terminal_keeps_keyboard_bytes() {
+async fn both_tty_preferences_keep_shell3_keyboard_bytes() {
     tokio::time::timeout(Duration::from_secs(2), async {
         for tty in [false, true] {
             let observed = Arc::new(Mutex::new(Observed::default()));
@@ -191,13 +191,9 @@ async fn captured_ctrl_c_signals_interrupt_while_terminal_keeps_keyboard_bytes()
                     let state = observed.lock().unwrap();
                     if !state.input.is_empty() || !state.signals.is_empty() {
                         assert!(state.stdin_open);
-                        if tty {
-                            assert_eq!(state.input, b"\x03");
-                            assert!(state.signals.is_empty());
-                        } else {
-                            assert!(state.input.is_empty());
-                            assert_eq!(state.signals, [Signal::Interrupt]);
-                        }
+                        assert!(state.geometry.is_some());
+                        assert_eq!(state.input, b"\x03");
+                        assert!(state.signals.is_empty());
                         break;
                     }
                 }
@@ -231,14 +227,20 @@ async fn missing_backend_is_an_explicit_error() {
 }
 
 #[tokio::test]
-async fn native_input_survives_separate_writes_without_terminal_geometry() {
+async fn default_geometry_keeps_actual_shell3_and_separate_input_writes() {
     tokio::time::timeout(Duration::from_secs(2), async {
         let observed = Arc::new(Mutex::new(Observed::default()));
         let backend = FakeBackend(Arc::clone(&observed));
         let spawned = spawn_with_backend(&backend, "status", None, true)
             .await
             .unwrap();
-        assert_eq!(observed.lock().unwrap().geometry, None);
+        assert_eq!(
+            observed.lock().unwrap().geometry,
+            Some(Geometry {
+                rows: TerminalSize::default().rows,
+                cols: TerminalSize::default().cols,
+            })
+        );
         assert!(observed.lock().unwrap().stdin_open);
         for input in [b"status\n".as_slice(), b"exit\n".as_slice()] {
             // Per-call senders go away after yielding; the retained session owns input.
@@ -302,15 +304,19 @@ async fn native_closed_stdin_rejects_writes_without_terminating_session() {
 }
 
 #[tokio::test]
-async fn captured_batches_and_explicit_sessions_use_their_actual_input_lifetimes() {
+async fn native_app_operators_and_modes_use_actual_shell3_with_both_tty_preferences() {
     tokio::time::timeout(Duration::from_secs(3), async {
-        for (script, tty, input_open) in [
-            ("adm ram\nhv status\n", false, false),
-            ("ram", false, false),
-            (" \n", false, false),
-            ("", false, true),
-            ("ram", true, true),
-            ("", true, true),
+        for (script, tty) in [
+            ("§§link3d", false),
+            ("hull", false),
+            ("\tram", false),
+            ("\t\tstatus", false),
+            ("", false),
+            ("§§link3d", true),
+            ("hull", true),
+            ("\tram", true),
+            ("\t\tstatus", true),
+            ("", true),
         ] {
             let observed = Arc::new(Mutex::new(Observed::default()));
             let backend = FakeBackend(Arc::clone(&observed));
@@ -326,22 +332,27 @@ async fn captured_batches_and_explicit_sessions_use_their_actual_input_lifetimes
             {
                 let state = observed.lock().unwrap();
                 assert_eq!(state.script, script);
-                assert_eq!(state.stdin_open, input_open, "{script:?}, tty={tty}");
-                assert_eq!(state.geometry.is_some(), tty);
+                assert!(state.stdin_open, "{script:?}, tty={tty}");
+                let expected_size = size.unwrap_or_default();
+                assert_eq!(
+                    state.geometry,
+                    Some(Geometry {
+                        rows: expected_size.rows,
+                        cols: expected_size.cols,
+                    })
+                );
             }
-            if input_open {
-                spawned
-                    .session
-                    .writer_sender()
-                    .send(b"env\n".to_vec())
-                    .await
-                    .unwrap();
-                while observed.lock().unwrap().input != b"env\n" {
-                    tokio::task::yield_now().await;
-                }
-                assert_eq!(observed.lock().unwrap().stdin_closed, 0);
-                spawned.session.close_stdin();
+            spawned
+                .session
+                .writer_sender()
+                .send(b"\t".to_vec())
+                .await
+                .unwrap();
+            while observed.lock().unwrap().input != b"\t" {
+                tokio::task::yield_now().await;
             }
+            assert_eq!(observed.lock().unwrap().stdin_closed, 0);
+            spawned.session.close_stdin();
             while observed.lock().unwrap().stdin_closed != 1 {
                 tokio::task::yield_now().await;
             }
@@ -355,17 +366,13 @@ async fn captured_batches_and_explicit_sessions_use_their_actual_input_lifetimes
                 rows: 50,
                 cols: 160,
             });
-            assert_eq!(resized.is_ok(), tty);
+            assert!(resized.is_ok());
             assert_eq!(
                 observed.lock().unwrap().geometry,
-                if tty {
-                    Some(Geometry {
-                        rows: 50,
-                        cols: 160,
-                    })
-                } else {
-                    None
-                }
+                Some(Geometry {
+                    rows: 50,
+                    cols: 160,
+                })
             );
             observed.lock().unwrap().finish = true;
             assert_eq!(spawned.exit_rx.await.unwrap(), 7);

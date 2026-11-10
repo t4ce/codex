@@ -42,10 +42,10 @@ pub fn conpty_supported() -> bool {
     false
 }
 
-/// Nonempty captured command batches finish at EOF. Empty scripts deliberately
-/// open reusable plain sessions; explicit terminals retain keyboard input.
-pub fn script_stdin_open(script: &str, tty: bool) -> bool {
-    tty || script.is_empty()
+/// Local execution always owns a reusable Shell3 session. Whether output was
+/// requested as a TTY must not select a different command language or close it.
+pub fn script_stdin_open(_script: &str, _tty: bool) -> bool {
+    true
 }
 
 /// Legacy Unix launches are rejected; argv must not be silently reinterpreted
@@ -64,8 +64,9 @@ pub async fn spawn_process(
     )
 }
 
-/// Submit native script text unchanged. An explicit terminal retains Tab mode
-/// selection; None requests native command lines and captured text output.
+/// Submit native Shell3 input unchanged, including Tab and Matrix operators.
+/// Absent geometry uses the standard terminal size; it never selects the
+/// kernel's separate captured diagnostic-command handler.
 pub async fn spawn_script(
     script: &str,
     size: Option<TerminalSize>,
@@ -86,6 +87,7 @@ async fn spawn_with_backend(
     size: Option<TerminalSize>,
     stdin_open: bool,
 ) -> Result<SpawnedProcess> {
+    let size = Some(size.unwrap_or_default());
     let session = Arc::new(Mutex::new(Session::open(
         backend,
         Launch {
@@ -108,23 +110,6 @@ async fn spawn_with_backend(
     let writer_handle = tokio::spawn(async move {
         if stdin_open {
             while let Some(bytes) = stdin_rx.recv().await {
-                // Captured input is command text, so Ctrl-C must use the
-                // transport control channel. Explicit terminals consume keys.
-                if size.is_none() && bytes == b"\x03" {
-                    let result = lock(&write_session).and_then(|mut session| {
-                        session
-                            .transport()
-                            .signal(Signal::Interrupt)
-                            .map_err(Into::into)
-                    });
-                    if result.is_err() {
-                        if let Ok(mut session) = lock(&write_session) {
-                            let _ = session.transport().signal(Signal::Terminate);
-                        }
-                        return;
-                    }
-                    continue;
-                }
                 let mut sent = 0;
                 while sent < bytes.len() {
                     let written = lock(&write_session).and_then(|mut session| {

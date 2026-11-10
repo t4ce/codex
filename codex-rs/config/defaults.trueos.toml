@@ -9,3 +9,9 @@ required = false
 [mcp_servers.xerj.env]
 XERJ_URL = "http://127.0.0.1:9200"
 XERJ_DISABLE_FEEDBACK = "true"
+
+# Robotics MCP Blueprint skeleton. Opt in per session or in user config.
+[mcp_servers.robomcp]
+command = "robomcp"
+enabled = false
+required = false

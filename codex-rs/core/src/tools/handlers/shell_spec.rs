@@ -83,10 +83,10 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     }
     if cfg!(target_os = "trueos") {
         properties.insert("cmd".into(), JsonSchema::string(Some(
-            "Native TRUEOS command lines for local execution. By default, submit exact commands separated by newlines for captured text output; use help for supported names and mode-qualified forms such as `adm ram` or `hv status`. No Tab navigation or bash interpretation. A standalone help request is answered locally without opening a session. With tty=true, input is a Shell3 keyboard script: Tab changes mode and the final line is submitted with Enter. Remote environments use their reported command language.".into(),
+            "Native Shell3 keyboard input for local TRUEOS execution, under the initiating user's permissions. Both tty settings use the actual Shell3 command parser. Fresh sessions start in CMD: type an exact AppDB app name, or `§§name` to request an online app. Tab changes mode; the final line is submitted with Enter. Use help for native names and modes. Group labels are not command prefixes: use Tab then `ram`, not `adm ram`. A standalone help request is answered locally without opening a session. No POSIX argv or bash interpretation. Remote environments use their reported command language.".into(),
         )));
         properties.insert("tty".into(), JsonSchema::boolean(Some(
-            "False or omitted uses native captured text I/O without terminal repaint sequences; a nonempty script closes stdin after its batch. True explicitly requests an interactive Shell3 terminal and keeps keyboard input open. An empty script also opens a reusable plain session for write_stdin. Remote environments retain their own stdin policy.".into(),
+            "Local TRUEOS execution always uses a full Shell3 terminal and keeps keyboard input open, whether true, false or omitted. Output includes terminal updates; tty does not change the available native commands. Remote environments retain their own terminal and stdin policy.".into(),
         )));
         if !include_environment_id {
             for key in ["shell", "login", "workdir"] {
@@ -101,7 +101,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     ToolSpec::Function(ResponsesApiTool {
         name: "exec_command".to_string(),
         description: if cfg!(target_os = "trueos") {
-            "For local TRUEOS discovery, call help first. The default executes a finite batch of native command lines and returns captured text without a terminal UI. A still-running batch may return a session ID for polling with write_stdin; its stdin is closed. To keep accepting input, start with an empty script, or explicitly request tty=true for Shell3's interactive terminal. Interactive sessions remain open until exit or cancellation; a prompt does not end them. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
+            "For local TRUEOS discovery, call help first. Executes actual Shell3 keyboard input with the initiating user's permissions and returns terminal output plus a session ID for continued input through write_stdin. AppDB app names, native `§§name` launches, Tab modes and hypervisor controls use the same parser as the user. Sessions remain open until exit or cancellation; a prompt does not end them. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
         } else if include_windows_shell_guidance {
             format!(
                 "Runs a command in a PTY, returning output or a session ID for ongoing interaction.\n\n{}",

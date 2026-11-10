@@ -2,6 +2,7 @@ use super::*;
 use pretty_assertions::assert_eq;
 
 use crate::terminal_program_status::ProgramStatus::Blocked;
+use crate::terminal_program_status::ProgramStatus::Done;
 use crate::terminal_program_status::ProgramStatus::Idle;
 use crate::terminal_program_status::ProgramStatus::Working;
 use crate::terminal_program_status::ProgramStatusKind;
@@ -59,10 +60,46 @@ async fn session_status_follows_existing_lifecycle_state() {
             Blocked(ProgramStatusKind::Permission),
             Working,
             Idle,
-            Working,
+            if cfg!(target_os = "trueos") {
+                Idle
+            } else {
+                Working
+            },
             Idle
         ]
     );
+}
+
+#[tokio::test]
+async fn native_completion_and_acknowledgement_keep_the_terminal_available() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    handle_turn_started(&mut chat, "shell-turn");
+    begin_unified_exec_startup(&mut chat, "shell-call", "shell-session", "");
+    assert_eq!(chat.desired_program_status(), Working);
+
+    handle_turn_completed(&mut chat, "shell-turn", /*duration_ms*/ None);
+    assert_eq!(
+        chat.desired_program_status(),
+        if cfg!(target_os = "trueos") {
+            Done
+        } else {
+            Working
+        },
+    );
+    chat.acknowledge_program_status();
+    assert_eq!(
+        chat.desired_program_status(),
+        if cfg!(target_os = "trueos") {
+            Idle
+        } else {
+            Working
+        },
+    );
+    assert_eq!(chat.unified_exec_processes.len(), 1);
+    assert_eq!(chat.unified_exec_processes[0].key, "shell-session");
+
+    handle_turn_started(&mut chat, "follow-up-turn");
+    assert_eq!(chat.desired_program_status(), Working);
 }
 
 #[tokio::test]
