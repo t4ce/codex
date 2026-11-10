@@ -142,7 +142,9 @@ pub mod tools {
             Function { arguments: String },
             Other,
         }
+        pub enum ToolEnvironments { All }
         pub struct ToolInvocation {
+            pub environments: ToolEnvironments,
             pub payload: ToolPayload,
             pub step_context: StepContext,
         }
@@ -152,6 +154,9 @@ pub mod tools {
         }
         pub struct Environment {
             pub environment: Machine,
+        }
+        impl Environment {
+            pub fn environment(&self) -> &Machine { &self.environment }
         }
         pub struct Machine(pub bool);
         impl Machine {
@@ -172,6 +177,12 @@ pub mod tools {
     pub mod registry {
         pub use crate::ToolExecutor;
         pub trait CoreToolRuntime: ToolExecutor<super::context::ToolInvocation> {
+            fn environments_for_input(
+                &self,
+                _: &super::context::ToolInvocation,
+            ) -> Result<super::context::ToolEnvironments, crate::function_tool::FunctionCallError> {
+                Ok(super::context::ToolEnvironments::All)
+            }
             fn is_builtin_control_tool(&self) -> bool {
                 false
             }
@@ -184,12 +195,23 @@ pub mod tools {
             serde_json::from_str(s)
                 .map_err(|e| crate::function_tool::FunctionCallError::RespondToModel(e.to_string()))
         }
-        pub fn resolve_tool_environment<'a>(
-            env: &'a [super::context::Environment],
+        #[derive(serde::Deserialize)]
+        pub struct ToolEnvironmentArgs { pub environment_id: Option<String> }
+        pub fn function_tool_environment<T: serde::de::DeserializeOwned>(
+            invocation: &super::context::ToolInvocation,
+            environment_id: impl FnOnce(T) -> Option<String>,
+        ) -> Result<super::context::ToolEnvironments, crate::function_tool::FunctionCallError> {
+            if let super::context::ToolPayload::Function { arguments } = &invocation.payload {
+                let _ = environment_id(parse_arguments(arguments)?);
+            }
+            Ok(super::context::ToolEnvironments::All)
+        }
+        pub fn selected_tool_environment<'a>(
+            _: &super::context::ToolEnvironments,
+            snapshot: &'a [super::context::Environment],
             _: Option<&str>,
-        ) -> Result<&'a super::context::Environment, crate::function_tool::FunctionCallError>
-        {
-            Ok(&env[0])
+        ) -> Result<&'a super::context::Environment, crate::function_tool::FunctionCallError> {
+            Ok(&snapshot[0])
         }
         pub use crate::spirit_handler as trueos_spirit;
     }
@@ -294,6 +316,7 @@ mod integration_tests {
         image: bool,
     ) -> Result<Box<dyn ToolOutput>, function_tool::FunctionCallError> {
         futures::executor::block_on(SpiritHandler::new(false).handle(ToolInvocation {
+            environments: ToolEnvironments::All,
             payload: ToolPayload::Function {
                 arguments: args.to_string(),
             },
@@ -318,6 +341,42 @@ mod integration_tests {
         f.calls.clear();
         f.error = 0;
     }
+    #[test]
+    fn all_expression_families_reach_the_native_abi_unchanged() {
+        let _serial = SERIAL.lock().unwrap();
+        reset();
+        for word in [
+            "anger",
+            "disgust",
+            "fear",
+            "joy",
+            "sadness",
+            "surprise",
+            "affection",
+            "blush",
+            "confused",
+            "disapprove",
+            "eat",
+            "facepalm",
+            "finger_guns",
+            "pout",
+            "flirt",
+            "idle",
+            "agree",
+            "idea",
+            "silly",
+            "talk",
+            "taunt",
+            "tired",
+            "wave",
+            "wink",
+        ] {
+            let output = run(json!({"action":"emotion","idea":word}), false, true).unwrap();
+            assert_eq!(output.code_mode_result(&ToolPayload::Other)["accepted"], true);
+            assert_eq!(FIXTURE.lock().unwrap().calls.last(), Some(&json!(["emotion", word])));
+        }
+    }
+
     #[test]
     fn all_mutations_reach_real_public_wrappers_and_native_abi() {
         let _serial = SERIAL.lock().unwrap();
