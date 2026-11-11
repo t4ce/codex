@@ -118,6 +118,10 @@ use indexmap::IndexMap;
 use pretty_assertions::assert_eq;
 use rmcp::model::ElicitationCapability;
 use rmcp::model::FormElicitationCapability;
+
+#[cfg(unix)]
+#[path = "trueos_common_export_tests.rs"]
+mod trueos_common_exports;
 use rmcp::model::UrlElicitationCapability;
 
 use codex_config::test_support::CloudConfigBundleFixture;

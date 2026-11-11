@@ -95,7 +95,19 @@ fn builtin_permission_profile(
     profile_name: &str,
     workspace_write: Option<&WorkspaceWriteSettings>,
 ) -> Option<PermissionProfile> {
-    match profile_name {
+    builtin_permission_profile_for_platform(
+        profile_name,
+        workspace_write,
+        cfg!(target_os = "trueos"),
+    )
+}
+
+pub(super) fn builtin_permission_profile_for_platform(
+    profile_name: &str,
+    workspace_write: Option<&WorkspaceWriteSettings>,
+    native_trueos: bool,
+) -> Option<PermissionProfile> {
+    let profile = match profile_name {
         BUILT_IN_READ_ONLY_PROFILE => Some(PermissionProfile::read_only()),
         BUILT_IN_WORKSPACE_PROFILE => Some(match workspace_write {
             Some(WorkspaceWriteSettings {
@@ -117,7 +129,20 @@ fn builtin_permission_profile(
         }),
         BUILT_IN_DANGER_FULL_ACCESS_PROFILE => Some(PermissionProfile::Disabled),
         _ => None,
+    }?;
+    if native_trueos && profile_name == BUILT_IN_WORKSPACE_PROFILE {
+        // Common is part of TRUEOS's workspace preset, including a selected or
+        // resumed :workspace profile. Keep this grant in the canonical policy
+        // so approval matching and native filesystem enforcement agree.
+        let common = PathUri::parse("file:///apps/common")
+            .expect("TRUEOS common output root is a valid absolute URI");
+        let (file_system, network) = profile.to_runtime_permissions();
+        return Some(PermissionProfile::from_runtime_permissions(
+            &file_system.with_materialized_project_roots_for_path_uris(&[common]),
+            network,
+        ));
     }
+    Some(profile)
 }
 
 pub(crate) fn validate_user_permission_profile_names(

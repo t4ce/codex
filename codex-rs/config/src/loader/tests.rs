@@ -609,6 +609,27 @@ async fn embedded_packaged_defaults_keep_source_and_resolution_base() {
 }
 
 #[test]
+#[cfg(unix)]
+fn trueos_packaged_defaults_add_common_without_selecting_a_permission_mode() {
+    let config: ConfigToml =
+        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+    let workspace = config.sandbox_workspace_write.expect("common output root");
+    assert_eq!(
+        workspace.writable_roots,
+        vec![AbsolutePathBuf::from_absolute_path("/apps/common").expect("absolute common root")]
+    );
+    // A user's explicit mode/profile and approval policy retain precedence.
+    assert!(config.sandbox_mode.is_none());
+    assert!(config.approval_policy.is_none());
+    assert!(config.permissions.is_none());
+    assert!(config.default_permissions.is_none());
+
+    let generic: ConfigToml =
+        toml::from_str(include_str!("../../defaults.toml")).expect("valid generic defaults");
+    assert!(generic.sandbox_workspace_write.is_none());
+}
+
+#[test]
 fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
     let config: ConfigToml =
         toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");

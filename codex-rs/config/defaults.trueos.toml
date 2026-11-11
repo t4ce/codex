@@ -1,3 +1,9 @@
+# Common is TRUEOS's public FFA output directory. Let ordinary workspace-write
+# sessions export there; TRUEOSFS still enforces access keys and assigns the
+# destination folder's key to newly created files.
+[sandbox_workspace_write]
+writable_roots = ["/apps/common"]
+
 # Local search and agent memory supplied by the Codex Blueprint bundle.
 # Keep tool discovery lightweight; start the local engine on its first tool call.
 [mcp_servers.xerj]
