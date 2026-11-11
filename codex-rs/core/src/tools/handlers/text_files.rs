@@ -1,4 +1,4 @@
-//! Exact UTF-8 file tools. Language syntax is independent of storage.
+//! Exact UTF-8 file tools and binary-safe copies. Storage chooses destination access keys.
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::io;
@@ -58,6 +58,7 @@ use crate::windows_sandbox::windows_sandbox_level_for_legacy_checks;
 
 const DEFAULT_READ_BYTES: usize = 64 * 1024;
 const MAX_TEXT_BYTES: usize = 1024 * 1024;
+const MAX_COPY_BYTES: usize = 32 * 1024 * 1024;
 const DEFAULT_DIRECTORY_ENTRIES: usize = 100;
 const MAX_DIRECTORY_ENTRIES: usize = 1000;
 
@@ -75,6 +76,18 @@ pub struct FileInfoHandler {
 
 pub struct WriteFileHandler {
     include_environment_id: bool,
+}
+
+pub struct CopyFileHandler {
+    include_environment_id: bool,
+}
+
+impl CopyFileHandler {
+    pub(crate) fn new(include_environment_id: bool) -> Self {
+        Self {
+            include_environment_id,
+        }
+    }
 }
 
 impl ReadFileHandler {
@@ -152,6 +165,15 @@ struct WriteArgs {
     expected_sha256: Option<String>,
     #[serde(default)]
     validate: Option<String>,
+    #[serde(default)]
+    environment_id: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CopyArgs {
+    source_path: String,
+    destination_path: String,
     #[serde(default)]
     environment_id: Option<String>,
 }
@@ -296,6 +318,32 @@ fn write_spec(include_environment_id: bool) -> ToolSpec {
             "path":{"type":"string"},"bytes":{"type":"integer"},"sha256":{"type":"string"},
             "content_type":{"type":["integer","null"]},"verified":{"type":"boolean"}
         },"required":["path","bytes","sha256","content_type","verified"],"additionalProperties":false}).into()),
+    })
+}
+
+fn copy_spec(include_environment_id: bool) -> ToolSpec {
+    let mut properties = parameters(include_environment_id);
+    properties.remove("path");
+    properties.insert(
+        "source_path".into(),
+        JsonSchema::string(Some(
+            "Existing regular file in the selected environment, absolute or relative to cwd."
+                .into(),
+        )),
+    );
+    properties.insert("destination_path".into(), JsonSchema::string(Some(
+        "New file path in the same environment. Parent directory must exist; existing files are never overwritten. On TRUEOS use /apps/common/<name> to export an FFA file visible to Termdir.".into(),
+    )));
+    ToolSpec::Function(ResponsesApiTool {
+        name: "copy_file".into(),
+        description: "Copy a regular file, including binary images, within the visible target runtime filesystem without a shell or loading bytes into model context. Supports files up to 33554432 bytes. Creates a new destination, leaves the original unchanged, and verifies the copied bytes. The destination inherits its folder's access key: unkeyed /apps/common output uses FFA, while workspace output stays private.".into(),
+        strict: false,
+        defer_loading: None,
+        parameters: JsonSchema::object(properties, Some(vec!["source_path".into(), "destination_path".into()]), Some(false.into())),
+        output_schema: Some(json!({"type":"object","properties":{
+            "source_path":{"type":"string"},"path":{"type":"string"},"bytes":{"type":"integer"},
+            "sha256":{"type":"string"},"content_type":{"type":["integer","null"]},"verified":{"type":"boolean"}
+        },"required":["source_path","path","bytes","sha256","content_type","verified"],"additionalProperties":false}).into()),
     })
 }
 
@@ -610,7 +658,7 @@ impl CoreToolRuntime for ReadFileHandler {
 struct WriteRequest {
     environment: TurnEnvironment,
     path: PathUri,
-    content: String,
+    content: WriteContent,
     options: WriteFileOptions,
     approval_requirement: ExecApprovalRequirement,
     additional_permissions: Option<AdditionalPermissionProfile>,
@@ -618,7 +666,130 @@ struct WriteRequest {
     change: FileChange,
 }
 
+enum WriteContent {
+    Text(String),
+    Copy { source: PathUri, bytes: Vec<u8> },
+}
+
+impl WriteContent {
+    fn bytes(&self) -> &[u8] {
+        match self {
+            Self::Text(text) => text.as_bytes(),
+            Self::Copy { bytes, .. } => bytes,
+        }
+    }
+
+    fn operation(&self, path: &PathUri, options: WriteFileOptions) -> Value {
+        let mut operation = json!({"path":path.inferred_native_path_string(),
+            "bytes":self.bytes().len(),"sha256":sha256_hex(self.bytes()),
+            "create_new":options.create_new,"expected_sha256":options.expected_sha256.map(|hash| hash.iter().map(|byte| format!("{byte:02x}")).collect::<String>())});
+        match self {
+            Self::Text(text) => {
+                operation["operation"] = json!("write_file");
+                operation["content"] = json!(text);
+            }
+            Self::Copy { source, .. } => {
+                operation["operation"] = json!("copy_file");
+                operation["source_path"] = json!(source.inferred_native_path_string());
+            }
+        }
+        operation
+    }
+}
+
 struct WriteRuntime;
+
+fn write_authorization(
+    invocation: &ToolInvocation,
+    environment: &TurnEnvironment,
+    path: &PathUri,
+) -> Result<
+    (
+        ExecApprovalRequirement,
+        Option<AdditionalPermissionProfile>,
+        bool,
+    ),
+    FunctionCallError,
+> {
+    let granted = invocation
+        .step_context
+        .turn
+        .granted_permissions(&environment.selection.environment_id);
+    let sandbox = environment.sandbox_context(granted.clone());
+    let policy_context = file_system_sandbox_policy_context_for_cwd(&sandbox, environment.cwd());
+    let route = if environment.environment().is_remote()
+        || codex_exec_server::uses_native_file_system_sandbox()
+    {
+        PatchSandboxRoute::ExecutorManaged
+    } else {
+        PatchSandboxRoute::Platform(windows_sandbox_level_for_legacy_checks(
+            environment.config().windows_sandbox_type,
+            environment.config().windows_sandbox_level,
+        ))
+    };
+    let policy = effective_file_system_sandbox_policy(
+        &environment
+            .permission_profile()
+            .file_system_sandbox_policy(),
+        granted.as_ref(),
+    );
+    let matching = route
+        .prepare_matching(&policy, &policy_context)
+        .map_err(text_error)?;
+    let requirement = match assess_write_safety(
+        matching.can_write_path(path).map_err(text_error)?,
+        invocation.step_context.settings.approval_policy(),
+        environment.permission_profile(),
+        &matching,
+    )
+    .map_err(text_error)?
+    {
+        SafetyCheck::AutoApprove => ExecApprovalRequirement::Skip {
+            bypass_sandbox: false,
+            proposed_execpolicy_amendment: None,
+        },
+        SafetyCheck::AskUser => ExecApprovalRequirement::NeedsApproval {
+            reason: None,
+            proposed_execpolicy_amendment: None,
+        },
+        SafetyCheck::Reject { reason } => return Err(text_error(reason)),
+    };
+    let additional =
+        write_permissions_for_paths(std::slice::from_ref(path), &matching).map_err(text_error)?;
+    let effective = apply_granted_turn_permissions(
+        &invocation.step_context,
+        environment,
+        environment.cwd(),
+        crate::sandboxing::SandboxPermissions::UseDefault,
+        additional,
+    );
+    Ok((
+        requirement,
+        effective.additional_permissions,
+        effective.permissions_preapproved,
+    ))
+}
+
+async fn execute_write(
+    invocation: ToolInvocation,
+    request: WriteRequest,
+) -> Result<Value, FunctionCallError> {
+    let ctx = ToolCtx {
+        session: invocation.session,
+        step_context: invocation.step_context,
+        cancellation_token: invocation.cancellation_token,
+        call_id: invocation.call_id,
+        tool_name: invocation.tool_name,
+    };
+    ToolOrchestrator::new()
+        .run(&mut WriteRuntime, &request, &ctx)
+        .await
+        .map(|result| result.output)
+        .map_err(|error| match error {
+            ToolError::Rejected(message) => text_error(message),
+            ToolError::Codex(error) => text_error(error),
+        })
+}
 
 impl Approvable<WriteRequest> for WriteRuntime {
     fn exec_approval_requirement(&self, req: &WriteRequest) -> Option<ExecApprovalRequirement> {
@@ -631,9 +802,7 @@ impl Approvable<WriteRequest> for WriteRuntime {
     fn approval_action(&self, req: &WriteRequest, call_id: &str) -> io::Result<ApprovalAction> {
         // Reuse the existing file-mutation review, including per-path approval caching.
         // The JSON operation records exact content and newline semantics; it is never executed as a patch.
-        let operation = json!({"operation":"write_file","path":req.path.inferred_native_path_string(),
-            "content":req.content,"bytes":req.content.len(),"sha256":sha256_hex(req.content.as_bytes()),
-            "create_new":req.options.create_new,"expected_sha256":req.options.expected_sha256.map(|hash| hash.iter().map(|byte| format!("{byte:02x}")).collect::<String>())});
+        let operation = req.content.operation(&req.path, req.options);
         Ok(ApprovalAction::ApplyPatch {
             id: call_id.to_string(),
             environment_id: req.environment.selection.environment_id.clone(),
@@ -695,44 +864,58 @@ impl ToolRuntime<WriteRequest, Value> for WriteRuntime {
             use_legacy_landlock: attempt.use_legacy_landlock,
         });
         let fs = req.environment.environment().get_filesystem();
-        fs.write_file(
+        write_verified(
+            fs.as_ref(),
             &req.path,
-            req.content.as_bytes().to_vec(),
+            &req.content,
             req.options,
             sandbox.as_ref(),
         )
         .await
-        .map_err(|error| ToolError::Rejected(format!("write_file failed: {error}")))?;
-        // A verification failure is not reported as an uncommitted write.
-        let bytes = read_bounded(fs.as_ref(), &req.path, MAX_TEXT_BYTES, sandbox.as_ref())
-            .await
-            .map_err(|error| {
-                ToolError::Rejected(format!(
-                    "write committed, but readback verification failed: {error}"
-                ))
-            })?;
-        if bytes != req.content.as_bytes() {
-            return Err(ToolError::Rejected("write committed, but readback content differs (the file may have changed concurrently)".into()));
-        }
-        let metadata = fs
-            .get_metadata(
-                &req.path,
-                GetMetadataOptions {
-                    follow_symlinks: false,
-                },
-                sandbox.as_ref(),
-            )
-            .await
-            .map_err(|error| {
-                ToolError::Rejected(format!(
-                    "write content verified, but metadata lookup failed: {error}"
-                ))
-            })?;
-        Ok(
-            json!({"path":req.path.inferred_native_path_string(),"bytes":bytes.len(),
-            "sha256":sha256_hex(&bytes),"content_type":metadata.content_type,"verified":true}),
-        )
     }
+}
+
+async fn write_verified(
+    fs: &dyn ExecutorFileSystem,
+    path: &PathUri,
+    content: &WriteContent,
+    options: WriteFileOptions,
+    sandbox: Option<&FileSystemSandboxContext>,
+) -> Result<Value, ToolError> {
+    fs.write_file(path, content.bytes().to_vec(), options, sandbox)
+        .await
+        .map_err(|error| ToolError::Rejected(format!("write_file failed: {error}")))?;
+    // A verification failure is not reported as an uncommitted write.
+    let bytes = read_bounded(fs, path, content.bytes().len(), sandbox)
+        .await
+        .map_err(|error| {
+            ToolError::Rejected(format!(
+                "write committed, but readback verification failed: {error}"
+            ))
+        })?;
+    if bytes != content.bytes() {
+        return Err(ToolError::Rejected("write committed, but readback content differs (the file may have changed concurrently)".into()));
+    }
+    let metadata = fs
+        .get_metadata(
+            path,
+            GetMetadataOptions {
+                follow_symlinks: false,
+            },
+            sandbox,
+        )
+        .await
+        .map_err(|error| {
+            ToolError::Rejected(format!(
+                "write content verified, but metadata lookup failed: {error}"
+            ))
+        })?;
+    let mut output = json!({"path":path.inferred_native_path_string(),"bytes":bytes.len(),
+            "sha256":sha256_hex(&bytes),"content_type":metadata.content_type,"verified":true});
+    if let WriteContent::Copy { source, .. } = content {
+        output["source_path"] = json!(source.inferred_native_path_string());
+    }
+    Ok(output)
 }
 
 impl ToolExecutor<ToolInvocation> for WriteFileHandler {
@@ -764,58 +947,8 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
                 .turn
                 .granted_permissions(&environment.selection.environment_id);
             let sandbox = environment.sandbox_context(granted_permissions);
-            let policy_context =
-                file_system_sandbox_policy_context_for_cwd(&sandbox, environment.cwd());
-            let route = if environment.environment().is_remote()
-                || codex_exec_server::uses_native_file_system_sandbox()
-            {
-                PatchSandboxRoute::ExecutorManaged
-            } else {
-                PatchSandboxRoute::Platform(windows_sandbox_level_for_legacy_checks(
-                    environment.config().windows_sandbox_type,
-                    environment.config().windows_sandbox_level,
-                ))
-            };
-            let granted = invocation
-                .step_context
-                .turn
-                .granted_permissions(&environment.selection.environment_id);
-            let policy = effective_file_system_sandbox_policy(
-                &environment
-                    .permission_profile()
-                    .file_system_sandbox_policy(),
-                granted.as_ref(),
-            );
-            let matching = route
-                .prepare_matching(&policy, &policy_context)
-                .map_err(text_error)?;
-            let requirement = match assess_write_safety(
-                matching.can_write_path(&path).map_err(text_error)?,
-                invocation.step_context.settings.approval_policy(),
-                environment.permission_profile(),
-                &matching,
-            )
-            .map_err(text_error)?
-            {
-                SafetyCheck::AutoApprove => ExecApprovalRequirement::Skip {
-                    bypass_sandbox: false,
-                    proposed_execpolicy_amendment: None,
-                },
-                SafetyCheck::AskUser => ExecApprovalRequirement::NeedsApproval {
-                    reason: None,
-                    proposed_execpolicy_amendment: None,
-                },
-                SafetyCheck::Reject { reason } => return Err(text_error(reason)),
-            };
-            let additional = write_permissions_for_paths(std::slice::from_ref(&path), &matching)
-                .map_err(text_error)?;
-            let effective = apply_granted_turn_permissions(
-                &invocation.step_context,
-                &environment,
-                environment.cwd(),
-                crate::sandboxing::SandboxPermissions::UseDefault,
-                additional,
-            );
+            let (requirement, additional_permissions, permissions_preapproved) =
+                write_authorization(&invocation, &environment, &path)?;
             let change = if let Some(expected) = options.expected_sha256 {
                 let fs = environment.environment().get_filesystem();
                 let previous = read_bounded(fs.as_ref(), &path, MAX_TEXT_BYTES, Some(&sandbox))
@@ -852,28 +985,15 @@ impl ToolExecutor<ToolInvocation> for WriteFileHandler {
             let request = WriteRequest {
                 environment,
                 path,
-                content: args.content,
+                content: WriteContent::Text(args.content),
                 options,
                 approval_requirement: requirement,
-                additional_permissions: effective.additional_permissions,
-                permissions_preapproved: effective.permissions_preapproved,
+                additional_permissions,
+                permissions_preapproved,
                 change,
             };
-            let ctx = ToolCtx {
-                session: invocation.session,
-                step_context: invocation.step_context,
-                cancellation_token: invocation.cancellation_token,
-                call_id: invocation.call_id,
-                tool_name: invocation.tool_name,
-            };
-            let result = ToolOrchestrator::new()
-                .run(&mut WriteRuntime, &request, &ctx)
-                .await
-                .map_err(|error| match error {
-                    ToolError::Rejected(message) => text_error(message),
-                    ToolError::Codex(error) => text_error(error),
-                })?;
-            Ok(boxed_tool_output(JsonToolOutput::new(result.output)))
+            let output = execute_write(invocation, request).await?;
+            Ok(boxed_tool_output(JsonToolOutput::new(output)))
         })
     }
 }
@@ -894,9 +1014,219 @@ impl CoreToolRuntime for WriteFileHandler {
     }
 }
 
+async fn copy_source(
+    fs: &dyn ExecutorFileSystem,
+    path: &PathUri,
+    sandbox: Option<&FileSystemSandboxContext>,
+) -> Result<Vec<u8>, FunctionCallError> {
+    let metadata = fs
+        .get_metadata(
+            path,
+            GetMetadataOptions {
+                follow_symlinks: false,
+            },
+            sandbox,
+        )
+        .await
+        .map_err(text_error)?;
+    if !metadata.is_file || metadata.is_symlink {
+        return Err(text_error(
+            "copy_file source must be a regular file, not a directory or symlink",
+        ));
+    }
+    if metadata.size > MAX_COPY_BYTES as u64 {
+        return Err(text_error(
+            "copy_file source exceeds the 33554432-byte limit",
+        ));
+    }
+    read_bounded(fs, path, MAX_COPY_BYTES, sandbox)
+        .await
+        .map_err(text_error)
+}
+
+impl ToolExecutor<ToolInvocation> for CopyFileHandler {
+    fn tool_name(&self) -> ToolName {
+        ToolName::plain("copy_file")
+    }
+    fn spec(&self) -> ToolSpec {
+        copy_spec(self.include_environment_id)
+    }
+    fn handle<'a>(&'a self, invocation: ToolInvocation) -> codex_tools::ToolExecutorFuture<'a>
+    where
+        ToolInvocation: 'a,
+    {
+        Box::pin(async move {
+            let ToolPayload::Function { arguments } = &invocation.payload else {
+                return Err(text_error("copy_file requires function arguments"));
+            };
+            let args: CopyArgs = parse_arguments(arguments)?;
+            let environment = selected_tool_environment(
+                &invocation.environments,
+                &invocation.step_context.environments,
+                args.environment_id.as_deref(),
+            )?
+            .clone();
+            let source = environment
+                .cwd()
+                .join(&args.source_path)
+                .map_err(text_error)?;
+            let path = environment
+                .cwd()
+                .join(&args.destination_path)
+                .map_err(text_error)?;
+            let (requirement, additional_permissions, permissions_preapproved) =
+                write_authorization(&invocation, &environment, &path)?;
+            let granted = invocation
+                .step_context
+                .turn
+                .granted_permissions(&environment.selection.environment_id);
+            let sandbox = environment.sandbox_context(granted);
+            let fs = environment.environment().get_filesystem();
+            let bytes = copy_source(fs.as_ref(), &source, Some(&sandbox)).await?;
+            let change = FileChange::Add {
+                content: format!(
+                    "Binary-safe copy from {} ({} bytes, SHA-256 {})",
+                    source.inferred_native_path_string(),
+                    bytes.len(),
+                    sha256_hex(&bytes),
+                ),
+            };
+            let request = WriteRequest {
+                environment,
+                path,
+                content: WriteContent::Copy { source, bytes },
+                options: WriteFileOptions {
+                    follow_symlinks: false,
+                    create_new: true,
+                    expected_sha256: None,
+                },
+                approval_requirement: requirement,
+                additional_permissions,
+                permissions_preapproved,
+                change,
+            };
+            let output = execute_write(invocation, request).await?;
+            Ok(boxed_tool_output(JsonToolOutput::new(output)))
+        })
+    }
+}
+
+impl CoreToolRuntime for CopyFileHandler {
+    fn environments_for_input(
+        &self,
+        invocation: &ToolInvocation,
+    ) -> Result<crate::tools::context::ToolEnvironments, FunctionCallError> {
+        crate::tools::handlers::function_tool_environment(
+            invocation,
+            |args: crate::tools::handlers::ToolEnvironmentArgs| args.environment_id,
+        )
+    }
+    fn is_builtin_control_tool(&self) -> bool {
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn new_copy_options() -> WriteFileOptions {
+        WriteFileOptions {
+            follow_symlinks: false,
+            create_new: true,
+            expected_sha256: None,
+        }
+    }
+
+    #[test]
+    fn copy_arguments_are_create_only_and_review_never_contains_binary_data() {
+        let args: CopyArgs = parse_arguments(
+            r#"{"source_path":".codex/image.png","destination_path":"/apps/common/image.png"}"#,
+        )
+        .unwrap();
+        assert_eq!(args.source_path, ".codex/image.png");
+        assert_eq!(args.destination_path, "/apps/common/image.png");
+        assert!(
+            parse_arguments::<CopyArgs>(
+                r#"{"source_path":"a","destination_path":"b","overwrite":true}"#
+            )
+            .is_err()
+        );
+        let source =
+            PathUri::from_host_native_path(std::env::temp_dir().join("private-image.png")).unwrap();
+        let target =
+            PathUri::from_host_native_path(std::env::temp_dir().join("public-image.png")).unwrap();
+        let payload = WriteContent::Copy {
+            source,
+            bytes: vec![0, 255, 1, 128],
+        };
+        let operation = payload.operation(&target, new_copy_options());
+        assert_eq!(operation["operation"], "copy_file");
+        assert_eq!(operation["create_new"], true);
+        assert_eq!(operation["bytes"], 4);
+        assert!(operation.get("source_path").is_some());
+        assert!(operation.get("content").is_none());
+        assert!(operation.get("record_key").is_none());
+    }
+
+    #[tokio::test]
+    async fn copy_binary_file_preserves_source_verifies_output_and_refuses_collisions() {
+        let directory = tempfile::tempdir().unwrap();
+        let source_path = directory.path().join("source.png");
+        let destination_path = directory.path().join("public.png");
+        let binary = [0x89, b'P', b'N', b'G', 0, 0xff, 0x80, 0, b'\n'];
+        std::fs::write(&source_path, binary).unwrap();
+        let source = PathUri::from_host_native_path(&source_path).unwrap();
+        let destination = PathUri::from_host_native_path(&destination_path).unwrap();
+        let fs = codex_exec_server::LocalFileSystem::unsandboxed();
+        let bytes = copy_source(&fs, &source, None).await.unwrap();
+        let payload = WriteContent::Copy {
+            source: source.clone(),
+            bytes,
+        };
+        let receipt = write_verified(&fs, &destination, &payload, new_copy_options(), None)
+            .await
+            .unwrap();
+        assert_eq!(std::fs::read(&source_path).unwrap(), binary);
+        assert_eq!(std::fs::read(&destination_path).unwrap(), binary);
+        assert_eq!(receipt["bytes"], binary.len());
+        assert_eq!(receipt["sha256"], sha256_hex(&binary));
+        assert_eq!(receipt["verified"], true);
+        assert_eq!(receipt["source_path"], source.inferred_native_path_string());
+        assert!(
+            write_verified(
+                &fs,
+                &destination,
+                &WriteContent::Text("replacement".into()),
+                new_copy_options(),
+                None
+            )
+            .await
+            .is_err()
+        );
+        assert_eq!(std::fs::read(&destination_path).unwrap(), binary);
+        assert!(
+            write_verified(&fs, &source, &payload, new_copy_options(), None)
+                .await
+                .is_err()
+        );
+        assert_eq!(std::fs::read(&source_path).unwrap(), binary);
+    }
+
+    #[tokio::test]
+    async fn copy_rejects_directories_and_oversized_sources_before_writing() {
+        let directory = tempfile::tempdir().unwrap();
+        let fs = codex_exec_server::LocalFileSystem::unsandboxed();
+        let path = PathUri::from_host_native_path(directory.path()).unwrap();
+        assert!(copy_source(&fs, &path, None).await.is_err());
+        let oversized = directory.path().join("oversized");
+        std::fs::File::create(&oversized)
+            .unwrap()
+            .set_len(MAX_COPY_BYTES as u64 + 1)
+            .unwrap();
+        let oversized = PathUri::from_host_native_path(&oversized).unwrap();
+        assert!(copy_source(&fs, &oversized, None).await.is_err());
+    }
 
     #[test]
     fn directory_arguments_default_to_cwd_and_first_page() {

@@ -3,6 +3,12 @@
 use super::*;
 
 impl ChatWidget {
+    pub(crate) fn attach_trueos_references(&mut self, paths: Vec<String>) -> bool {
+        self.trueos_prompt_ready()
+            && matches!(self.external_editor_state, ExternalEditorState::Closed)
+            && self.bottom_pane.attach_file_references(&paths)
+    }
+
     pub(crate) fn trueos_prompt_ready(&self) -> bool {
         self.is_session_configured()
             && !self.blocks_direct_input

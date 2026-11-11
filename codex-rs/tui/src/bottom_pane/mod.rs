@@ -1120,6 +1120,16 @@ impl BottomPane {
         self.request_redraw();
     }
 
+    #[cfg(any(target_os = "trueos", test))]
+    pub(crate) fn attach_file_references(&mut self, paths: &[String]) -> bool {
+        if !self.completion_can_yield_focus() || !self.composer.attach_file_references(paths) {
+            return false;
+        }
+        self.record_composer_activity_at(Instant::now());
+        self.request_redraw();
+        true
+    }
+
     pub(crate) fn pre_draw_tick(&mut self) {
         self.pre_draw_tick_at(Instant::now());
     }

@@ -11,6 +11,8 @@ use crate::tools::handlers::ApplyPatchHandler;
 use crate::tools::handlers::CalculatorHandler;
 use crate::tools::handlers::CodeModeExecuteHandler;
 use crate::tools::handlers::CodeModeWaitHandler;
+#[cfg(target_os = "trueos")]
+use crate::tools::handlers::CopyFileHandler;
 use crate::tools::handlers::CurrentTimeHandler;
 use crate::tools::handlers::DynamicToolHandler;
 use crate::tools::handlers::ExecCommandHandler;
@@ -1482,6 +1484,7 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         registry.add(FileInfoHandler::new(include_environment_id));
         registry.add(ReadFileHandler::new(include_environment_id));
         registry.add(WriteFileHandler::new(include_environment_id));
+        registry.add(CopyFileHandler::new(include_environment_id));
     }
 
     if context.model_info.apply_patch_tool_type.is_some() {

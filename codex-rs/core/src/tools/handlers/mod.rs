@@ -90,6 +90,8 @@ pub use send_message_to_user_async::SendMessageToUserAsyncHandler;
 pub use sleep::SleepHandler;
 pub use test_sync::TestSyncHandler;
 #[cfg(target_os = "trueos")]
+pub use text_files::CopyFileHandler;
+#[cfg(target_os = "trueos")]
 pub use text_files::FileInfoHandler;
 #[cfg(target_os = "trueos")]
 pub use text_files::ListDirectoryHandler;

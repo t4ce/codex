@@ -140,7 +140,7 @@ fn render_help(
         String::from("Codex help · local TRUEOS environment"),
         format!("cwd={cwd}"),
         String::from(
-            "filesystem=use list_directory to discover paths; file_info for metadata; read_file and write_file for UTF-8 text",
+            "filesystem=use list_directory to discover paths; file_info for metadata; read_file and write_file for UTF-8 text; copy_file copies binary files or images to a new destination without a shell. Save or copy to /apps/common/<name> for an FFA export visible to Termdir; files created in the private workspace inherit its key. Parent directories must exist.",
         ),
         String::from(
             "calculator=calculate with no arguments lists the native operation registry; calculate with operation=\"add\" and arguments=[20,22] returns 42 through the synchronous TRUEOS calculator ABI",

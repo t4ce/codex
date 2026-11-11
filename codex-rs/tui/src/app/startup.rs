@@ -1402,6 +1402,12 @@ See the Codex keymap documentation for supported actions and examples."
 
         #[cfg(target_os = "trueos")]
         let mut native_prompt_inbox = super::trueos_prompt::PromptInbox::spawn();
+        #[cfg(target_os = "trueos")]
+        let mut native_drop_inbox = super::trueos_drop::DropInbox::new();
+        #[cfg(target_os = "trueos")]
+        let mut native_drop_tick = tokio::time::interval(Duration::from_millis(100));
+        #[cfg(target_os = "trueos")]
+        native_drop_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
 
         let mut backends =
             super::backend_sessions::BackendSessions::from_initial(app_server, other_backends);
@@ -1606,8 +1612,26 @@ See the Codex keymap documentation for supported actions and examples."
                     native_prompt_inbox.try_deliver(scope.as_ref(), |text| {
                         app.chat_widget.submit_trueos_prompt(text)
                     });
+                    let drop_scope = scope.filter(|_| {
+                        !app.app_server_target.uses_remote_workspace()
+                            && app.overlay.is_none()
+                            && !app.backtrack.overlay_preview_active
+                    });
+                    if native_drop_inbox.poll(drop_scope, super::trueos_drop::take, |paths| {
+                        app.chat_widget.attach_trueos_references(paths)
+                    }) {
+                        app.chat_widget.add_error_message(
+                            "File drop not attached. Use an editable local Codex conversation; up to 16 references fit in a draft. Drop again after switching conversations.".into(),
+                        );
+                    }
                 }
                 let control = select! {
+                    () = async {
+                        #[cfg(target_os = "trueos")]
+                        { native_drop_tick.tick().await; return; }
+                        #[cfg(not(target_os = "trueos"))]
+                        std::future::pending::<()>().await;
+                    } => AppRunControl::Continue,
                     () = async {
                         #[cfg(target_os = "trueos")]
                         if native_prompt_inbox.can_receive() {

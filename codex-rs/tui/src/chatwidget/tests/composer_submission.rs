@@ -89,6 +89,32 @@ async fn composer_submission_sends_once_and_requests_latest() {
     assert_eq!(chat.composer_text_with_pending(), "");
 }
 
+#[tokio::test]
+async fn trueos_drop_stages_reference_and_only_enter_sends_it() {
+    let (mut chat, _events, mut operations) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.thread_id = Some(ThreadId::new());
+    chat.handle_paste("Please inspect this".into());
+    assert!(chat.attach_trueos_references(vec!["4:/project/mod.rs".into()]));
+    assert!(operations.try_recv().is_err(), "a drop must never submit");
+    let staged = chat.composer_text_with_pending();
+    assert!(staged.starts_with("Please inspect this"));
+    assert!(staged.contains("[File/folder reference: \"4:/project/mod.rs\"]"));
+    chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
+    let Op::UserTurn { items, .. } = next_submit_op(&mut operations) else {
+        panic!("expected user turn")
+    };
+    let UserInput::Text {
+        text,
+        text_elements,
+    } = &items[0]
+    else {
+        panic!("expected text")
+    };
+    assert_eq!(text, staged.trim());
+    assert_eq!(text_elements.len(), 1);
+    assert!(operations.try_recv().is_err());
+}
+
 fn paste_hidden_shell_payload(chat: &mut ChatWidget) -> String {
     let payload = format!("!echo {}", "x".repeat(1000));
     chat.handle_paste(payload.clone());

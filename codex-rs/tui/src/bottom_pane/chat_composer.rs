@@ -14,6 +14,11 @@
 //! search, or blocking view. The app reads clipboard text asynchronously and delivers a normal
 //! paste only while the same thread, draft, and cursor remain eligible. Intervening input or focus
 //! loss cancels the pending paste; a late clipboard result cannot overwrite newer input.
+//! TRUEOS UI4 file drops append quoted path references as atomic text elements. They do not read
+//! files or submit input. Existing drafts, large pastes, images, recall and rich registers retain
+//! their normal behavior; Backspace removes a reference and Enter submits its explicit path.
+//! Duplicate references are ignored; an oversized group is rejected before editing. Shell and
+//! slash-command drafts do not accept references.
 //! The live voice strip renders after effort ignition, followed by the Astra sparkle when eligible.
 //! Owned transcripts keep persistent status below the composer and hints on a separate final row.
 //! Shortcut help expands above the composer, with its close hint replacing the final shortcuts row
@@ -411,6 +416,8 @@ mod inline_input;
 mod mouse;
 mod next_prompt;
 pub(crate) use mouse::ClipboardPasteTarget;
+#[cfg(any(target_os = "trueos", test))]
+mod file_references;
 mod paste_input;
 mod popup_state;
 mod reconnect;
@@ -10623,6 +10630,68 @@ mod tests {
         composer.insert_selected_file_path("@sample".len().."@sample@other".len(), "src/main.rs");
 
         assert_eq!(composer.current_text(), "@sample src/main.rs ");
+    }
+
+    #[test]
+    fn trueos_drop_preserves_large_paste_images_and_expands_only_on_enter() {
+        let (mut composer, _rx) = new_test_composer();
+        let pasted = "existing pasted text ".repeat(100);
+        composer.handle_paste(pasted.clone());
+        composer.attach_image(PathBuf::from("/existing.png"));
+        let before = composer.draft_snapshot();
+        composer.draft.textarea.set_cursor(0);
+        assert!(composer.attach_file_references(&["4:/source folder/mod.rs".into()]));
+        let after = composer.draft_snapshot();
+        assert!(after.text.starts_with(&before.text));
+        assert_eq!(after.pending_pastes, before.pending_pastes);
+        assert_eq!(after.local_images, before.local_images);
+        assert_eq!(after.text_elements.len(), before.text_elements.len() + 1);
+        assert!(composer.attach_file_references(&["4:/source folder/mod.rs".into()]));
+        assert_eq!(composer.draft_snapshot(), after);
+        let (result, _) =
+            composer.handle_key_event(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+        let InputResult::Submitted { text, .. } = result else {
+            panic!("expected user message")
+        };
+        assert!(text.starts_with(&pasted));
+        assert!(text.contains("[File/folder reference: \"4:/source folder/mod.rs\"]"));
+        assert_eq!(
+            composer.take_recent_submission_images(),
+            [PathBuf::from("/existing.png")]
+        );
+    }
+
+    #[test]
+    fn trueos_drop_reference_is_removable_and_can_be_reattached() {
+        let (mut composer, _rx) = new_test_composer();
+        composer.insert_str("keep this draft");
+        let paths = ["4:/mod.rs".into()];
+        assert!(composer.attach_file_references(&paths));
+        // First remove the separator, then the whole atomic reference.
+        for _ in 0..2 {
+            composer.handle_key_event(KeyEvent::new(KeyCode::Backspace, KeyModifiers::NONE));
+        }
+        assert_eq!(composer.current_text(), "keep this draft ");
+        assert!(composer.draft_snapshot().text_elements.is_empty());
+        assert!(composer.attach_file_references(&paths));
+        assert_eq!(composer.draft_snapshot().text_elements.len(), 1);
+    }
+
+    #[test]
+    fn trueos_drop_group_overflow_and_command_drafts_leave_draft_untouched() {
+        let (mut composer, _rx) = new_test_composer();
+        let full: Vec<_> = (0..16).map(|n| format!("4:/{n}")).collect();
+        assert!(composer.attach_file_references(&full));
+        let before = composer.draft_snapshot();
+        assert!(!composer.attach_file_references(&["4:/extra".into()]));
+        assert_eq!(composer.draft_snapshot(), before);
+        for command in ["!echo keep", "/review"] {
+            composer.set_text_content(String::new(), Vec::new(), Vec::new());
+            composer.insert_str(command);
+            let before = composer.draft_snapshot();
+            assert!(!composer.attach_file_references(&["4:/foo".into()]));
+            assert_eq!(composer.draft_snapshot(), before);
+        }
     }
 
     #[test]

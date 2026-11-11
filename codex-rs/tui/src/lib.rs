@@ -137,6 +137,8 @@ mod copy_input_guard;
 pub(crate) mod custom_terminal;
 mod daybreak;
 mod experimental_features;
+#[cfg(any(target_os = "trueos", test))]
+mod file_references;
 mod markdown_copy;
 mod permission_discovery;
 #[cfg(not(target_os = "trueos"))]

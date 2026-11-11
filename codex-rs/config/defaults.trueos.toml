@@ -1,9 +1,11 @@
 # Local search and agent memory supplied by the Codex Blueprint bundle.
+# Keep tool discovery lightweight; start the local engine on its first tool call.
 [mcp_servers.xerj]
 command = "xerj"
-args = ["mcp", "--ensure-local"]
+args = ["mcp", "--lazy-local"]
 startup_timeout_sec = 120
-tool_timeout_sec = 60
+# Allow the first call to wait for local readiness and then execute its request.
+tool_timeout_sec = 150
 required = false
 
 [mcp_servers.xerj.env]

@@ -622,6 +622,24 @@ fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
     assert!(args.is_empty());
 }
 
+#[test]
+fn xerj_packaged_default_defers_local_engine_until_tool_use() {
+    let config: ConfigToml =
+        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+    let server = &config.mcp_servers["xerj"];
+    assert!(server.enabled);
+    assert!(!server.required);
+    let crate::McpServerTransportConfig::Stdio { command, args, .. } = &server.transport else {
+        panic!("XERJ must use native child stdio");
+    };
+    assert_eq!(command, "xerj");
+    assert_eq!(args, &["mcp", "--lazy-local"]);
+    assert_eq!(
+        server.tool_timeout_sec,
+        Some(std::time::Duration::from_secs(150))
+    );
+}
+
 #[tokio::test]
 async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     async fn load(
@@ -667,7 +685,7 @@ async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     );
     assert_eq!(
         server.tool_timeout_sec,
-        Some(std::time::Duration::from_secs(60))
+        Some(std::time::Duration::from_secs(150))
     );
     let crate::McpServerTransportConfig::Stdio {
         command,
@@ -680,7 +698,7 @@ async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
         panic!("XERJ uses the ordinary stdio MCP transport");
     };
     assert_eq!(command, "xerj");
-    assert_eq!(args, &["mcp", "--ensure-local"]);
+    assert_eq!(args, &["mcp", "--lazy-local"]);
     assert!(
         cwd.is_none(),
         "the engine directory may not exist before startup"
