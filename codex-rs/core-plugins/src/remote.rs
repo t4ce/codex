@@ -2175,28 +2175,70 @@ async fn fetch_directory_plugins_for_scope_with_cache(
     cache_mode: RemotePluginCatalogCacheMode,
 ) -> Result<DirectoryPluginsFetchOutcome, RemotePluginCatalogError> {
     if let Some(codex_home) = codex_home
-        && let Some(cached) = catalog_cache::load_cached_directory_plugins(
-            codex_home, config, auth, scope, collection, cache_mode,
-        )
+        && cache_mode != RemotePluginCatalogCacheMode::ForceRefetch
     {
-        return Ok(DirectoryPluginsFetchOutcome {
-            plugins: cached.plugins,
-            cache_refresh_needed: matches!(
-                cached.freshness,
-                catalog_cache::RemotePluginCatalogCacheFreshness::Stale
-            ),
-            catalog_cache_used: true,
-        });
+        let codex_home = codex_home.to_path_buf();
+        let config = config.clone();
+        let auth = auth.clone();
+        let collection = collection.map(str::to_owned);
+        // Disk access and decoding can stall the TUI when it shares one async worker.
+        match tokio::task::spawn_blocking(move || {
+            catalog_cache::load_cached_directory_plugins(
+                &codex_home,
+                &config,
+                &auth,
+                scope,
+                collection.as_deref(),
+                cache_mode,
+            )
+        })
+        .await
+        {
+            Ok(Some(cached)) => {
+                return Ok(DirectoryPluginsFetchOutcome {
+                    plugins: cached.plugins,
+                    cache_refresh_needed: matches!(
+                        cached.freshness,
+                        catalog_cache::RemotePluginCatalogCacheFreshness::Stale
+                    ),
+                    catalog_cache_used: true,
+                });
+            }
+            Ok(None) => {}
+            Err(err) => {
+                tracing::warn!("failed to join remote plugin catalog cache read task: {err}");
+            }
+        }
     }
 
     let plugins =
         fetch_directory_plugins_for_scope_with_optional_collection(config, auth, scope, collection)
             .await?;
-    if let Some(codex_home) = codex_home {
-        catalog_cache::write_cached_directory_plugins(
-            codex_home, config, auth, scope, collection, &plugins,
-        );
-    }
+    let plugins = if let Some(codex_home) = codex_home {
+        let codex_home = codex_home.to_path_buf();
+        let config = config.clone();
+        let auth = auth.clone();
+        let collection = collection.map(str::to_owned);
+        tokio::task::spawn_blocking(move || {
+            catalog_cache::write_cached_directory_plugins(
+                &codex_home,
+                &config,
+                &auth,
+                scope,
+                collection.as_deref(),
+                &plugins,
+            );
+            plugins
+        })
+        .await
+        .map_err(|err| {
+            RemotePluginCatalogError::UnexpectedResponse(format!(
+                "failed to join remote plugin catalog cache write task: {err}"
+            ))
+        })?
+    } else {
+        plugins
+    };
     Ok(DirectoryPluginsFetchOutcome {
         plugins,
         cache_refresh_needed: false,

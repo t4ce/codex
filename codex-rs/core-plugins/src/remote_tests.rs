@@ -459,6 +459,78 @@ async fn remote_catalog_cache_modes_control_refresh_and_persist_fetched_results(
     ));
 }
 
+#[cfg(unix)]
+#[tokio::test(flavor = "current_thread")]
+async fn catalog_cache_read_yields_on_single_async_worker() {
+    use std::os::unix::ffi::OsStrExt;
+
+    let codex_home = tempfile::tempdir().expect("create codex home");
+    let (config, selected_urls) =
+        recording_remote_plugin_service_config("https://chatgpt.example/backend-api".to_string());
+    let auth = CodexAuth::create_dummy_chatgpt_auth_for_testing();
+    catalog_cache::write_cached_directory_plugins(
+        codex_home.path(),
+        &config,
+        &auth,
+        RemotePluginScope::Global,
+        /*collection*/ None,
+        &[],
+    );
+    let cache_path = std::fs::read_dir(codex_home.path().join("cache/remote_plugin_catalog"))
+        .expect("read catalog cache directory")
+        .next()
+        .expect("catalog cache exists")
+        .expect("read cache entry")
+        .path();
+    let cache_contents = std::fs::read(&cache_path).expect("read catalog cache");
+    std::fs::remove_file(&cache_path).expect("remove catalog cache file");
+    let fifo_path = std::ffi::CString::new(cache_path.as_os_str().as_bytes())
+        .expect("cache path has no NUL bytes");
+    // SAFETY: fifo_path is a valid NUL-terminated path in this test's temporary directory.
+    assert_eq!(unsafe { libc::mkfifo(fifo_path.as_ptr(), 0o600) }, 0);
+
+    let (release_writer, wait_for_release) = std::sync::mpsc::channel();
+    let writer = std::thread::spawn(move || {
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .open(cache_path)
+            .expect("open catalog cache FIFO writer");
+        // Let the old blocking implementation finish too, so a regression fails without hanging.
+        let released_by_async_worker = wait_for_release
+            .recv_timeout(Duration::from_secs(5))
+            .is_ok();
+        std::io::Write::write_all(&mut file, &cache_contents).expect("write catalog cache FIFO");
+        released_by_async_worker
+    });
+
+    let fetch = fetch_directory_plugins_for_scope_with_cache(
+        Some(codex_home.path()),
+        &config,
+        &auth,
+        RemotePluginScope::Global,
+        /*collection*/ None,
+        RemotePluginCatalogCacheMode::PreferCache,
+    );
+    tokio::pin!(fetch);
+    let first_poll = futures::poll!(fetch.as_mut());
+    let _ = release_writer.send(());
+    let (yielded, outcome) = match first_poll {
+        std::task::Poll::Pending => (true, fetch.await),
+        std::task::Poll::Ready(outcome) => (false, outcome),
+    };
+    let outcome = outcome.expect("read cached catalog");
+    let released_by_async_worker = writer.join().expect("catalog cache writer completed");
+
+    assert!(
+        yielded,
+        "catalog cache IO must yield the single async worker"
+    );
+    assert!(released_by_async_worker);
+    assert!(outcome.catalog_cache_used);
+    assert!(outcome.plugins.is_empty());
+    assert!(recorded_http_client_urls(&selected_urls).is_empty());
+}
+
 #[test]
 fn catalog_cache_invalidation_clears_global_collections_and_preserves_other_scopes() {
     let codex_home = tempfile::tempdir().expect("create codex home");

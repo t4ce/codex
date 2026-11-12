@@ -137,24 +137,32 @@ impl PluginRequestProcessor {
             let roots = cwds.unwrap_or_default();
             let plugins_input = config.plugins_config_input();
             let plugins_manager = self.thread_manager.plugins_manager();
-            let shared_plugin_ids_by_local_path = load_shared_plugin_ids_by_local_path(&config)
-                .unwrap_or_else(|err| {
-                    warn!(
-                        error = %err.message,
-                        "plugin/search could not load shared plugin identities"
-                    );
-                    Default::default()
-                });
-            let outcome = tokio::task::spawn_blocking(move || {
-                plugins_manager.list_marketplaces_for_config(
-                    &plugins_input,
-                    &roots,
-                    /*include_openai_curated*/ !use_remote_global_catalog,
-                )
-            })
-            .await
-            .map_err(|err| internal_error(format!("failed to list marketplace plugins: {err}")))?
-            .map_err(|err| Self::marketplace_error(err, "list marketplace plugins"))?;
+            let codex_home = config.codex_home.clone();
+            let (outcome, shared_plugin_ids_by_local_path) =
+                tokio::task::spawn_blocking(move || {
+                    let shared_plugin_ids_by_local_path = load_shared_plugin_ids_by_local_path(
+                        codex_home.as_path(),
+                    )
+                    .unwrap_or_else(|err| {
+                        warn!(
+                            error = %err.message,
+                            "plugin/search could not load shared plugin identities"
+                        );
+                        Default::default()
+                    });
+                    plugins_manager
+                        .list_marketplaces_for_config(
+                            &plugins_input,
+                            &roots,
+                            /*include_openai_curated*/ !use_remote_global_catalog,
+                        )
+                        .map(|outcome| (outcome, shared_plugin_ids_by_local_path))
+                })
+                .await
+                .map_err(|err| {
+                    internal_error(format!("failed to list marketplace plugins: {err}"))
+                })?
+                .map_err(|err| Self::marketplace_error(err, "list marketplace plugins"))?;
 
             for error in outcome.errors {
                 warn!(

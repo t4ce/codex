@@ -147,16 +147,15 @@ fn marketplace_plugin_source_to_info(source: MarketplacePluginSource) -> PluginS
 }
 
 fn load_shared_plugin_ids_by_local_path(
-    config: &Config,
+    codex_home: &Path,
 ) -> Result<std::collections::BTreeMap<AbsolutePathBuf, String>, JSONRPCErrorError> {
-    codex_core_plugins::remote::load_plugin_share_remote_ids_by_local_path(
-        config.codex_home.as_path(),
+    codex_core_plugins::remote::load_plugin_share_remote_ids_by_local_path(codex_home).map_err(
+        |err| {
+            internal_error(format!(
+                "failed to load plugin share local path mapping: {err}"
+            ))
+        },
     )
-    .map_err(|err| {
-        internal_error(format!(
-            "failed to load plugin share local path mapping: {err}"
-        ))
-    })
 }
 
 fn remote_plugin_service_config(
@@ -619,13 +618,17 @@ impl PluginRequestProcessor {
         let (mut data, marketplace_load_errors, local_marketplaces) = if include_local {
             let context_for_marketplace_listing = context.clone();
             let plugins_manager_for_marketplace_listing = plugins_manager.clone();
-            let shared_plugin_ids_by_local_path = load_shared_plugin_ids_by_local_path(&config)?;
+            let codex_home = config.codex_home.clone();
             match tokio::task::spawn_blocking(move || {
+                // Share mappings read disk too; keep them with marketplace IO off the async worker.
+                let shared_plugin_ids_by_local_path =
+                    load_shared_plugin_ids_by_local_path(codex_home.as_path())?;
                 let outcome = plugins_manager_for_marketplace_listing
                     .list_marketplaces_for_context(
                         &context_for_marketplace_listing,
                         /*include_openai_curated*/ !use_remote_global_catalog,
-                    )?;
+                    )
+                    .map_err(|err| Self::marketplace_error(err, "list marketplace plugins"))?;
                 let local_marketplaces = outcome.marketplaces.clone();
                 Ok::<
                     (
@@ -633,7 +636,7 @@ impl PluginRequestProcessor {
                         Vec<codex_app_server_protocol::MarketplaceLoadErrorInfo>,
                         Vec<codex_core_plugins::ConfiguredMarketplace>,
                     ),
-                    MarketplaceError,
+                    JSONRPCErrorError,
                 >((
                     outcome
                         .marketplaces
@@ -672,9 +675,7 @@ impl PluginRequestProcessor {
             .await
             {
                 Ok(Ok(outcome)) => outcome,
-                Ok(Err(err)) => {
-                    return Err(Self::marketplace_error(err, "list marketplace plugins"));
-                }
+                Ok(Err(err)) => return Err(err),
                 Err(err) => {
                     return Err(internal_error(format!(
                         "failed to list marketplace plugins: {err}"
@@ -918,17 +919,22 @@ impl PluginRequestProcessor {
         ),
         JSONRPCErrorError,
     > {
-        let shared_plugin_ids_by_local_path = load_shared_plugin_ids_by_local_path(config)?;
+        let codex_home = config.codex_home.clone();
         let context = context.clone();
         match tokio::task::spawn_blocking(move || {
+            let shared_plugin_ids_by_local_path =
+                load_shared_plugin_ids_by_local_path(codex_home.as_path())?;
             let outcome = plugins_manager
-                .list_marketplaces_for_context(&context, /*include_openai_curated*/ true)?;
+                .list_marketplaces_for_context(&context, /*include_openai_curated*/ true)
+                .map_err(|err| {
+                    Self::marketplace_error(err, "list installed and suggested marketplace plugins")
+                })?;
             Ok::<
                 (
                     Vec<PluginMarketplaceEntry>,
                     Vec<codex_app_server_protocol::MarketplaceLoadErrorInfo>,
                 ),
-                MarketplaceError,
+                JSONRPCErrorError,
             >((
                 outcome
                     .marketplaces
@@ -974,10 +980,7 @@ impl PluginRequestProcessor {
         .await
         {
             Ok(Ok(outcome)) => Ok(outcome),
-            Ok(Err(err)) => Err(Self::marketplace_error(
-                err,
-                "list installed and suggested marketplace plugins",
-            )),
+            Ok(Err(err)) => Err(err),
             Err(err) => Err(internal_error(format!(
                 "failed to list installed and suggested plugins: {err}"
             ))),
@@ -1069,8 +1072,16 @@ impl PluginRequestProcessor {
                     .read_plugin_for_config(&plugins_input, &request)
                     .await
                     .map_err(|err| Self::marketplace_error(err, "read plugin details"))?;
-                let shared_plugin_ids_by_local_path =
-                    load_shared_plugin_ids_by_local_path(&config)?;
+                let codex_home = config.codex_home.clone();
+                let shared_plugin_ids_by_local_path = tokio::task::spawn_blocking(move || {
+                    load_shared_plugin_ids_by_local_path(codex_home.as_path())
+                })
+                .await
+                .map_err(|err| {
+                    internal_error(format!(
+                        "failed to load plugin share local path mapping: {err}"
+                    ))
+                })??;
                 let share_context = share_context_for_source(
                     &outcome.plugin.source,
                     &shared_plugin_ids_by_local_path,

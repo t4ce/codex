@@ -2671,7 +2671,17 @@ impl PluginsManager {
             return Err(MarketplaceError::PluginsDisabled);
         }
 
-        let plugin = find_marketplace_plugin(&request.marketplace_path, &request.plugin_name)?;
+        // Marketplace lookup reads the catalog and the selected plugin's manifest.
+        // Keep that synchronous filesystem work off the async worker serving TUI input.
+        let marketplace_path = request.marketplace_path.clone();
+        let plugin_name = request.plugin_name.clone();
+        let plugin = tokio::task::spawn_blocking(move || {
+            find_marketplace_plugin(&marketplace_path, &plugin_name)
+        })
+        .await
+        .map_err(|err| {
+            MarketplaceError::InvalidPlugin(format!("failed to read marketplace plugin: {err}"))
+        })??;
         MarketplacePolicy::from_requirements(config.config_layer_stack.requirements())
             .validate_install(
                 &config.config_layer_stack,
@@ -3541,12 +3551,24 @@ impl PluginsManager {
             };
 
             for scope in request.scopes {
-                if crate::remote::has_fresh_cached_remote_plugin_catalog(
-                    self.codex_home.as_path(),
-                    &request.service_config,
-                    request.auth.as_ref(),
-                    scope,
-                ) {
+                let codex_home = self.codex_home.clone();
+                let service_config = request.service_config.clone();
+                let auth = request.auth.clone();
+                // Freshness validation parses the catalog too, even in this background task.
+                let cache_is_fresh = tokio::task::spawn_blocking(move || {
+                    crate::remote::has_fresh_cached_remote_plugin_catalog(
+                        codex_home.as_path(),
+                        &service_config,
+                        auth.as_ref(),
+                        scope,
+                    )
+                })
+                .await
+                .unwrap_or_else(|err| {
+                    warn!("failed to join remote plugin catalog freshness task: {err}");
+                    false
+                });
+                if cache_is_fresh {
                     continue;
                 }
 

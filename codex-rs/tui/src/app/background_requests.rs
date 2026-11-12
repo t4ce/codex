@@ -1008,10 +1008,21 @@ pub(super) async fn fetch_additional_plugin_remote_sections(
         section_errors.push(plugin_sharing_disabled_remote_section_error());
     }
 
-    for (section_id, label, marketplace_kinds) in sections {
-        match request_plugin_list_for_kinds(request_handle.clone(), cwd.clone(), marketplace_kinds)
-            .await
-        {
+    // These sections are independent reads. Poll them together so a slow catalog
+    // does not delay starting the others, retaining section order in the result.
+    let requests = sections
+        .into_iter()
+        .map(|(section_id, label, marketplace_kinds)| {
+            let request_handle = request_handle.clone();
+            let cwd = cwd.clone();
+            async move {
+                let result =
+                    request_plugin_list_for_kinds(request_handle, cwd, marketplace_kinds).await;
+                (section_id, label, result)
+            }
+        });
+    for (section_id, label, result) in futures::future::join_all(requests).await {
+        match result {
             Ok(mut response) => {
                 hide_cli_only_plugin_marketplaces(&mut response);
                 marketplaces.extend(response.marketplaces);
@@ -1376,6 +1387,140 @@ mod tests {
     use codex_protocol::mcp::Tool;
     use codex_utils_paths::absolute_path::AbsolutePathBuf;
     use pretty_assertions::assert_eq;
+
+    #[tokio::test(start_paused = true)]
+    async fn additional_plugin_sections_start_before_delayed_replies_and_keep_section_order() {
+        let (client, mut commands, _events) =
+            codex_app_server_client::CloudClient::channel(/*capacity*/ 1);
+        let client = codex_app_server_client::AppServerClient::Cloud(client);
+        let cwd = test_absolute_path("/workspace/project");
+        let request_cwd = cwd.to_path_buf();
+        let request_handle = client.request_handle();
+        let fetch = tokio::spawn(async move {
+            fetch_additional_plugin_remote_sections(
+                request_handle,
+                request_cwd,
+                /*plugin_sharing_enabled*/ true,
+                /*remote_plugin_enabled*/ false,
+            )
+            .await
+        });
+
+        let mut replies = Vec::new();
+        // Withhold every reply until all sections have started. A serialized
+        // implementation times out here even if the individual reads succeed.
+        for kind in [
+            PluginListMarketplaceKind::Vertical,
+            PluginListMarketplaceKind::WorkspaceDirectory,
+            PluginListMarketplaceKind::SharedWithMe,
+        ] {
+            let command = tokio::time::timeout(Duration::from_secs(2), commands.recv())
+                .await
+                .expect("all section requests should start before any response")
+                .expect("plugin request channel should remain open");
+            let codex_app_server_client::CloudOperation::Request(request) = command.operation
+            else {
+                panic!("expected a plugin list request");
+            };
+            let ClientRequest::PluginList { params, .. } = *request else {
+                panic!("expected a plugin list request");
+            };
+            assert_eq!(params.marketplace_kinds, Some(vec![kind]));
+            assert_eq!(params.cwds, Some(vec![cwd.clone()]));
+            replies.push(command.response);
+        }
+
+        // Complete in reverse order and fail the middle section. Successful
+        // sections must still be returned in menu order, with the error retained.
+        for (index, reply) in replies.into_iter().enumerate().rev() {
+            let response = if index == 1 {
+                Err(codex_app_server_protocol::JSONRPCErrorError {
+                    code: -32603,
+                    message: "workspace catalog unavailable".to_string(),
+                    data: None,
+                })
+            } else {
+                Ok(serde_json::json!({
+                    "marketplaces": [
+                        {
+                            "name": if index == 0 { "openai-curated" } else { "shared-with-me" },
+                            "path": null,
+                            "interface": null,
+                            "plugins": [],
+                        },
+                        {
+                            "name": "openai-bundled",
+                            "path": null,
+                            "interface": null,
+                            "plugins": [],
+                        },
+                    ],
+                    "marketplaceLoadErrors": [],
+                    "featuredPluginIds": [],
+                }))
+            };
+            reply
+                .send(Ok(response))
+                .expect("section still awaiting reply");
+        }
+
+        let (marketplaces, errors) = fetch.await.expect("section fetch should finish");
+        assert_eq!(
+            marketplaces
+                .into_iter()
+                .map(|entry| entry.name)
+                .collect::<Vec<_>>(),
+            vec!["openai-curated", "shared-with-me"]
+        );
+        assert_eq!(errors.len(), 1);
+        assert_eq!(errors[0].section_id, "workspace");
+        assert_eq!(errors[0].label, "Workspace");
+        assert!(errors[0].message.contains("workspace catalog unavailable"));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn additional_plugin_sections_respect_remote_and_sharing_feature_flags() {
+        let (client, mut commands, _events) =
+            codex_app_server_client::CloudClient::channel(/*capacity*/ 1);
+        let client = codex_app_server_client::AppServerClient::Cloud(client);
+        let request_handle = client.request_handle();
+        let fetch = tokio::spawn(async move {
+            fetch_additional_plugin_remote_sections(
+                request_handle,
+                test_absolute_path("/workspace/project").to_path_buf(),
+                /*plugin_sharing_enabled*/ false,
+                /*remote_plugin_enabled*/ true,
+            )
+            .await
+        });
+        let command = tokio::time::timeout(Duration::from_secs(2), commands.recv())
+            .await
+            .expect("workspace section should start")
+            .expect("workspace section requested");
+        let codex_app_server_client::CloudOperation::Request(request) = command.operation else {
+            panic!("expected a plugin list request");
+        };
+        let ClientRequest::PluginList { params, .. } = *request else {
+            panic!("expected a plugin list request");
+        };
+        assert_eq!(
+            params.marketplace_kinds,
+            Some(vec![PluginListMarketplaceKind::WorkspaceDirectory])
+        );
+        command
+            .response
+            .send(Ok(Ok(serde_json::json!({
+                "marketplaces": [],
+                "marketplaceLoadErrors": [],
+                "featuredPluginIds": [],
+            }))))
+            .expect("workspace section still awaiting reply");
+
+        let (marketplaces, errors) = fetch.await.expect("section fetch should finish");
+        assert!(marketplaces.is_empty());
+        assert_eq!(errors, vec![plugin_sharing_disabled_remote_section_error()]);
+        assert!(commands.try_recv().is_err(), "no other sections requested");
+    }
 
     #[tokio::test]
     async fn fetch_thread_usage_uses_app_server_auth_after_persisted_account_changes() {

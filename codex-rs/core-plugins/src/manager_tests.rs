@@ -4392,6 +4392,49 @@ enabled = true
     assert!(matches!(err, MarketplaceError::PluginsDisabled));
 }
 
+#[cfg(unix)]
+#[tokio::test(flavor = "current_thread")]
+async fn read_plugin_for_config_yields_while_marketplace_read_is_blocked() {
+    use std::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    use std::sync::mpsc;
+
+    let tmp = tempfile::tempdir().unwrap();
+    let config = load_config(tmp.path(), tmp.path()).await;
+    let manager = test_plugins_manager(tmp.path().to_path_buf());
+    let marketplace_path = tmp.path().join("marketplace.json");
+    let fifo_path = CString::new(marketplace_path.as_os_str().as_bytes()).unwrap();
+    // A FIFO lets the test hold actual filesystem I/O without a timing threshold.
+    // SAFETY: fifo_path is a valid NUL-terminated path in the test's temporary directory.
+    assert_eq!(unsafe { libc::mkfifo(fifo_path.as_ptr(), 0o600) }, 0);
+    let (release_writer, wait_for_release) = mpsc::channel();
+    let writer_path = marketplace_path.clone();
+    let writer = std::thread::spawn(move || {
+        // Also release a regressed synchronous read so a failing test cannot hang.
+        let _ = wait_for_release.recv_timeout(Duration::from_secs(5));
+        fs::write(writer_path, r#"{"name":"debug","plugins":[]}"#).unwrap();
+    });
+    let request = PluginReadRequest {
+        plugin_name: "missing-plugin".to_string(),
+        marketplace_path: AbsolutePathBuf::try_from(marketplace_path).unwrap(),
+    };
+    let read = manager.read_plugin_for_config(&config, &request);
+    tokio::pin!(read);
+
+    let first_poll = futures::poll!(&mut read);
+    let _ = release_writer.send(());
+    assert!(
+        first_poll.is_pending(),
+        "marketplace I/O must yield so the single async worker can handle TUI input"
+    );
+    let error = tokio::time::timeout(Duration::from_secs(5), read)
+        .await
+        .expect("marketplace read completes after release")
+        .unwrap_err();
+    writer.join().unwrap();
+    assert!(matches!(error, MarketplaceError::PluginNotFound { .. }));
+}
+
 #[tokio::test]
 async fn read_plugin_for_config_filters_mcp_servers_for_codex_backend_auth() {
     let tmp = tempfile::tempdir().unwrap();
