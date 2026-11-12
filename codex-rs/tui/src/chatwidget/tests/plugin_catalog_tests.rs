@@ -2,6 +2,52 @@ use super::*;
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
+async fn plugins_popup_search_reaches_plugins_outside_the_first_window() {
+    let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    chat.set_feature_enabled(Feature::Plugins, /*enabled*/ true);
+    let response = plugins_test_response(vec![plugins_test_curated_marketplace(
+        (0..10_101)
+            .map(|index| {
+                let mut plugin = plugins_test_summary(
+                    &format!("plugin-{index:05}"),
+                    &format!("plugin-{index:05}"),
+                    Some(&format!("Plugin {index:05}")),
+                    Some("Catalog entry"),
+                    /*installed*/ false,
+                    /*enabled*/ true,
+                    PluginInstallPolicy::Available,
+                );
+                if index == 10_100 {
+                    plugin.keywords = vec!["needle-keyword".into()];
+                }
+                plugin
+            })
+            .collect(),
+    )]);
+    let popup = render_loaded_plugins_popup(&mut chat, response);
+    assert!(popup.contains("1–24 of 10101"), "{popup}");
+    assert!(popup.contains("Plugin 00023") && !popup.contains("Plugin 00100"));
+    for c in "needle-keyword".chars() {
+        chat.handle_key_event(KeyEvent::from(KeyCode::Char(c)));
+    }
+    let popup = render_bottom_popup(&chat, /*width*/ 120);
+    assert!(
+        popup.contains("Plugin 10100") && popup.contains("1–1 of 1"),
+        "{popup}"
+    );
+    while rx.try_recv().is_ok() {}
+    chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
+    assert!(
+        matches!(rx.try_recv(), Ok(AppEvent::OpenPluginDetailLoading { plugin_display_name })
+        if plugin_display_name == "Plugin 10100")
+    );
+    assert!(
+        matches!(rx.try_recv(), Ok(AppEvent::FetchPluginDetail { params, .. })
+        if params.plugin_name == "plugin-10100")
+    );
+}
+
+#[tokio::test]
 async fn plugins_popup_uses_product_labels_for_remote_and_personal_tabs() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
     chat.set_feature_enabled(Feature::Plugins, /*enabled*/ true);

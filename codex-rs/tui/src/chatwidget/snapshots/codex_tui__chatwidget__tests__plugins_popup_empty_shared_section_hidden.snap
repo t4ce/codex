@@ -8,7 +8,7 @@ expression: loaded_popup
 
    All Plugins   Installed (0)   OpenAI Curated   Workspace   Add Marketplace
 
-  Type to search plugins
+  Type to search names, IDs, descriptions, keywords
 
 › No workspace plugins available  No workspace directory plugins are available
 
@@ -19,4 +19,4 @@ expression: loaded_popup
 
 
 
-  ←/→ tabs · enter details · tab toggle · esc close
+  ←/→ tabs · enter details · pgup/pgdn page · home/end jump · tab toggle · esc close

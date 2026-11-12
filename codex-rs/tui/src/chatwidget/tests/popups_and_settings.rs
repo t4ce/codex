@@ -1711,7 +1711,10 @@ async fn plugins_popup_toggle_keys_preserve_search_and_selection() {
     let popup = render_bottom_popup(&chat, /*width*/ 100);
     assert_chatwidget_snapshot!("plugins_popup_toggle_refresh_preserves_search", popup);
     assert!(
-        popup.lines().any(|line| line.trim() == "dr")
+        popup
+            .lines()
+            .any(|line| line.split_whitespace().next() == Some("dr"))
+            && popup.contains("1–1 of 1")
             && popup.contains("› [*] Drive")
             && popup.contains("Tab to disable"),
         "expected the filtered plugin and search query to survive refresh, got:\n{popup}"

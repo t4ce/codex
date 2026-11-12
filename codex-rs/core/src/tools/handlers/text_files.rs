@@ -10,6 +10,8 @@ use codex_exec_server::FileSystemSandboxContext;
 use codex_exec_server::GetMetadataOptions;
 use codex_exec_server::ReadDirectoryEntry;
 use codex_exec_server::WriteFileOptions;
+use codex_protocol::exec_output::ExecToolCallOutput;
+use codex_protocol::exec_output::StreamOutput;
 use codex_protocol::models::AdditionalPermissionProfile;
 use codex_protocol::protocol::AskForApproval;
 use codex_protocol::protocol::FileChange;
@@ -37,6 +39,10 @@ use crate::session::turn_context::TurnEnvironment;
 use crate::tools::context::ToolInvocation;
 use crate::tools::context::ToolPayload;
 use crate::tools::context::boxed_tool_output;
+use crate::tools::events::ToolEmitter;
+use crate::tools::events::ToolEventCtx;
+use crate::tools::events::ToolEventFailure;
+use crate::tools::events::ToolEventStage;
 use crate::tools::handlers::apply_granted_turn_permissions;
 use crate::tools::handlers::apply_patch::write_permissions_for_paths;
 use crate::tools::handlers::file_system_sandbox_policy_context_for_cwd;
@@ -697,7 +703,10 @@ impl WriteContent {
     }
 }
 
-struct WriteRuntime;
+#[derive(Default)]
+struct WriteRuntime {
+    attempted: bool,
+}
 
 fn write_authorization(
     invocation: &ToolInvocation,
@@ -774,6 +783,7 @@ async fn execute_write(
     invocation: ToolInvocation,
     request: WriteRequest,
 ) -> Result<Value, FunctionCallError> {
+    let tracker = invocation.tracker;
     let ctx = ToolCtx {
         session: invocation.session,
         step_context: invocation.step_context,
@@ -781,14 +791,81 @@ async fn execute_write(
         call_id: invocation.call_id,
         tool_name: invocation.tool_name,
     };
-    ToolOrchestrator::new()
-        .run(&mut WriteRuntime, &request, &ctx)
+    // The app-server approval RPC references an existing file-change item.
+    // Publish that item before review so live and replayed TUI approvals can
+    // recover the exact destination and binary-safe copy description.
+    let emitter = ToolEmitter::apply_patch_for_environment(
+        HashMap::from([(request.path.to_path_buf(), request.change.clone())]),
+        matches!(
+            request.approval_requirement,
+            ExecApprovalRequirement::Skip { .. }
+        ),
+        request.environment.selection.environment_id.clone(),
+    );
+    let event_ctx = ToolEventCtx::new(
+        ctx.session.as_ref(),
+        ctx.step_context.turn.as_ref(),
+        &ctx.step_context.settings.model_info,
+        &ctx.call_id,
+        Some(&tracker),
+    );
+    emitter.begin(event_ctx).await;
+    let mut runtime = WriteRuntime::default();
+    let result = ToolOrchestrator::new()
+        .run(&mut runtime, &request, &ctx)
         .await
-        .map(|result| result.output)
-        .map_err(|error| match error {
-            ToolError::Rejected(message) => text_error(message),
-            ToolError::Codex(error) => text_error(error),
-        })
+        .map(|result| result.output);
+    emitter
+        .emit(event_ctx, write_result_event(&result, runtime.attempted))
+        .await;
+    result.map_err(|error| match error {
+        ToolError::Rejected(message) => text_error(message),
+        ToolError::Codex(error) => text_error(error),
+    })
+}
+
+fn write_result_event(
+    result: &Result<Value, ToolError>,
+    attempted: bool,
+) -> ToolEventStage<'static> {
+    match result {
+        Ok(receipt) => {
+            let text = receipt.to_string();
+            ToolEventStage::Success {
+                output: ExecToolCallOutput {
+                    stdout: StreamOutput::new(text.clone()),
+                    aggregated_output: StreamOutput::new(text),
+                    ..Default::default()
+                },
+                applied_patch_delta: None,
+            }
+        }
+        Err(ToolError::Rejected(message)) if !attempted => {
+            ToolEventStage::Failure(ToolEventFailure::Rejected {
+                message: message.clone(),
+                applied_patch_delta: None,
+            })
+        }
+        Err(error) => {
+            let message = match error {
+                ToolError::Rejected(message) => message.clone(),
+                ToolError::Codex(error) => error.to_string(),
+            };
+            if attempted {
+                // A filesystem or readback failure may follow a committed
+                // write. Report failure and invalidate any cached turn diff;
+                // only a decision made before execution is a declined edit.
+                ToolEventStage::Failure(ToolEventFailure::Output(ExecToolCallOutput {
+                    exit_code: 1,
+                    stderr: StreamOutput::new(message.clone()),
+                    aggregated_output: StreamOutput::new(message),
+                    ..Default::default()
+                }))
+            } else {
+                ToolEventStage::Failure(ToolEventFailure::Message(message))
+            }
+        }
+    }
 }
 
 impl Approvable<WriteRequest> for WriteRuntime {
@@ -845,6 +922,7 @@ impl ToolRuntime<WriteRequest, Value> for WriteRuntime {
         attempt: &SandboxAttempt<'_>,
         _ctx: &ToolCtx,
     ) -> Result<Value, ToolError> {
+        self.attempted = true;
         let sandbox = attempt.sandbox_requested.then(|| FileSystemSandboxContext {
             sandbox_override: attempt.sandbox_override,
             permissions: effective_permission_profile(
@@ -1044,6 +1122,17 @@ async fn copy_source(
         .map_err(text_error)
 }
 
+fn copy_file_change(source: &PathUri, bytes: &[u8]) -> FileChange {
+    FileChange::Add {
+        content: format!(
+            "Binary-safe copy from {} ({} bytes, SHA-256 {})",
+            source.inferred_native_path_string(),
+            bytes.len(),
+            sha256_hex(bytes),
+        ),
+    }
+}
+
 impl ToolExecutor<ToolInvocation> for CopyFileHandler {
     fn tool_name(&self) -> ToolName {
         ToolName::plain("copy_file")
@@ -1083,14 +1172,7 @@ impl ToolExecutor<ToolInvocation> for CopyFileHandler {
             let sandbox = environment.sandbox_context(granted);
             let fs = environment.environment().get_filesystem();
             let bytes = copy_source(fs.as_ref(), &source, Some(&sandbox)).await?;
-            let change = FileChange::Add {
-                content: format!(
-                    "Binary-safe copy from {} ({} bytes, SHA-256 {})",
-                    source.inferred_native_path_string(),
-                    bytes.len(),
-                    sha256_hex(&bytes),
-                ),
-            };
+            let change = copy_file_change(&source, &bytes);
             let request = WriteRequest {
                 environment,
                 path,
@@ -1129,6 +1211,191 @@ impl CoreToolRuntime for CopyFileHandler {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::PermissionProfileSnapshot;
+    use crate::session::step_context::StepContext;
+    use crate::session::tests::make_session_and_context_with_rx;
+    use crate::state::ActiveTurn;
+    use crate::tools::context::ToolCallSource;
+    use crate::turn_diff_tracker::TurnDiffTracker;
+    use codex_protocol::items::FileChangeItem;
+    use codex_protocol::items::TurnItem;
+    use codex_protocol::models::PermissionProfile;
+    use codex_protocol::protocol::Event;
+    use codex_protocol::protocol::EventMsg;
+    use codex_protocol::protocol::PatchApplyStatus;
+    use codex_protocol::protocol::ReviewDecision;
+    use std::path::Path;
+    use tokio::sync::Mutex;
+    use tokio_util::sync::CancellationToken;
+
+    async fn copy_write_fixture(
+        source_path: &Path,
+        destination_path: &Path,
+        approval_requirement: ExecApprovalRequirement,
+    ) -> (ToolInvocation, WriteRequest, async_channel::Receiver<Event>) {
+        let (session, turn, events) = make_session_and_context_with_rx().await;
+        *session.active_turn.lock().await = Some(ActiveTurn::default());
+        let step_context = StepContext::for_test(Arc::clone(&turn));
+        let mut environment = step_context
+            .environments
+            .primary()
+            .expect("test local environment")
+            .clone();
+        // Exercise explicit approval and filesystem outcomes independently of
+        // the fixture's platform sandbox and temporary workspace location.
+        environment.config_mut().permission_profile =
+            PermissionProfileSnapshot::legacy(PermissionProfile::Disabled);
+        let source = PathUri::from_host_native_path(source_path).unwrap();
+        let bytes = std::fs::read(source_path).unwrap();
+        let request = WriteRequest {
+            environment,
+            path: PathUri::from_host_native_path(destination_path).unwrap(),
+            change: copy_file_change(&source, &bytes),
+            content: WriteContent::Copy { source, bytes },
+            options: new_copy_options(),
+            approval_requirement,
+            additional_permissions: None,
+            permissions_preapproved: false,
+        };
+        let invocation = ToolInvocation {
+            session,
+            turn,
+            step_context,
+            cancellation_token: CancellationToken::new(),
+            tracker: Arc::new(Mutex::new(TurnDiffTracker::new())),
+            call_id: "copy-image".to_string(),
+            tool_name: ToolName::plain("copy_file"),
+            source: ToolCallSource::Direct,
+            payload: ToolPayload::Function {
+                arguments: "{}".to_string(),
+            },
+            native_call: None,
+            environments: Default::default(),
+        };
+        (invocation, request, events)
+    }
+
+    async fn next_file_change(
+        events: &async_channel::Receiver<Event>,
+        completed: bool,
+    ) -> FileChangeItem {
+        tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                let item = match events.recv().await.expect("file change event").msg {
+                    EventMsg::ItemStarted(event) if !completed => event.item,
+                    EventMsg::ItemCompleted(event) if completed => event.item,
+                    _ => continue,
+                };
+                if let TurnItem::FileChange(item) = item {
+                    break item;
+                }
+            }
+        })
+        .await
+        .expect("file change lifecycle should be emitted")
+    }
+
+    #[tokio::test]
+    async fn binary_copy_approval_has_destination_and_source_before_any_write() {
+        for accepted in [true, false] {
+            let directory = tempfile::tempdir().unwrap();
+            let source = directory.path().join("generated-tree.png");
+            let destination = directory.path().join("public-tree.png");
+            let binary = [0x89, b'P', b'N', b'G', 0, 0xff, 0x80, 0];
+            std::fs::write(&source, binary).unwrap();
+            let (invocation, request, events) = copy_write_fixture(
+                &source,
+                &destination,
+                ExecApprovalRequirement::NeedsHumanApproval { reason: None },
+            )
+            .await;
+            let expected_changes =
+                HashMap::from([(request.path.to_path_buf(), request.change.clone())]);
+            let session = Arc::clone(&invocation.session);
+            let pending = tokio::spawn(execute_write(invocation, request));
+            let started = next_file_change(&events, false).await;
+            assert_eq!(started.id, "copy-image");
+            assert_eq!(started.status, None);
+            assert_eq!(started.changes, expected_changes);
+            let FileChange::Add { content } = started.changes.values().next().unwrap() else {
+                panic!("copy review must describe the new destination");
+            };
+            assert!(content.contains(&source.display().to_string()));
+            assert!(content.contains("8 bytes"));
+            assert!(content.contains(&sha256_hex(&binary)));
+            let approval = tokio::time::timeout(Duration::from_secs(10), async {
+                loop {
+                    if let EventMsg::ApplyPatchApprovalRequest(approval) =
+                        events.recv().await.expect("approval event").msg
+                    {
+                        break approval;
+                    }
+                }
+            })
+            .await
+            .expect("copy should request human approval");
+            assert_eq!(approval.changes, expected_changes);
+            assert!(!destination.exists(), "approval must precede the write");
+            let decision = if accepted {
+                ReviewDecision::Approved
+            } else {
+                ReviewDecision::denied("rejected by user")
+            };
+            session.notify_approval(&approval.call_id, decision).await;
+            let result = pending.await.expect("copy task");
+            let completed = next_file_change(&events, true).await;
+            assert_eq!(completed.id, started.id);
+            assert_eq!(completed.changes, expected_changes);
+            assert_eq!(
+                completed.status,
+                Some(if accepted {
+                    PatchApplyStatus::Completed
+                } else {
+                    PatchApplyStatus::Declined
+                })
+            );
+            assert_eq!(std::fs::read(&source).unwrap(), binary);
+            if accepted {
+                assert_eq!(std::fs::read(&destination).unwrap(), binary);
+                let receipt = result.expect("approved copy should succeed");
+                assert_eq!(receipt["verified"], true);
+                assert_eq!(receipt["bytes"], binary.len());
+            } else {
+                assert!(result.is_err());
+                assert!(!destination.exists());
+            }
+            while let Ok(event) = events.try_recv() {
+                assert!(!matches!(event.msg, EventMsg::ItemCompleted(_)));
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn copy_collision_finishes_as_failed_without_overwriting_the_destination() {
+        let directory = tempfile::tempdir().unwrap();
+        let source = directory.path().join("generated.png");
+        let destination = directory.path().join("existing.png");
+        std::fs::write(&source, [0, 255, 1]).unwrap();
+        std::fs::write(&destination, b"keep existing").unwrap();
+        let (invocation, request, events) = copy_write_fixture(
+            &source,
+            &destination,
+            ExecApprovalRequirement::Skip {
+                bypass_sandbox: false,
+                proposed_execpolicy_amendment: None,
+            },
+        )
+        .await;
+        assert!(execute_write(invocation, request).await.is_err());
+        let started = next_file_change(&events, false).await;
+        let completed = next_file_change(&events, true).await;
+        assert_eq!(completed.id, started.id);
+        assert_eq!(completed.changes, started.changes);
+        assert_eq!(completed.status, Some(PatchApplyStatus::Failed));
+        assert!(completed.stderr.unwrap().contains("write_file failed"));
+        assert_eq!(std::fs::read(&source).unwrap(), [0, 255, 1]);
+        assert_eq!(std::fs::read(&destination).unwrap(), b"keep existing");
+    }
 
     fn new_copy_options() -> WriteFileOptions {
         WriteFileOptions {

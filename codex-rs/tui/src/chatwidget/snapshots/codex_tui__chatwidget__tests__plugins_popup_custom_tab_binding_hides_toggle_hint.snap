@@ -8,7 +8,7 @@ expression: popup
 
    All Plugins   Installed (1)   OpenAI Curated   Workspace   Add Marketplace
 
-  Type to search plugins
+  Type to search names, IDs, descriptions, keywords
 
 › [*] Drive      Installed   Press Enter to view plugin details
 
@@ -19,4 +19,4 @@ expression: popup
 
 
 
-  ←/→ tabs · enter details · esc close
+  ←/→ tabs · enter details · pgup/pgdn page · home/end jump · esc close

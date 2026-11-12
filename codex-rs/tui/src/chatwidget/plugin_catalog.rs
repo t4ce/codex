@@ -20,6 +20,7 @@ use crate::bottom_pane::SelectionRowDisplay;
 use crate::bottom_pane::SelectionTab;
 use crate::bottom_pane::SelectionToggle;
 use crate::bottom_pane::SelectionViewParams;
+use crate::bottom_pane::popup_consts::MAX_POPUP_ROWS;
 use crate::key_hint;
 use crate::legacy_core::config::Config;
 use crate::motion::MotionMode;
@@ -928,11 +929,15 @@ impl ChatWidget {
             )),
             tab_footer_hints,
             tabs,
+            max_visible_rows: total.clamp(MAX_POPUP_ROWS, 24),
+            windowed_results: true,
             reserve_result_rows: true,
             initial_tab_id,
             is_searchable: true,
             search_toggle_key: Some(crate::key_hint::plain(KeyCode::Tab)),
-            search_placeholder: Some("Type to search plugins".to_string()),
+            search_placeholder: Some(
+                "Type to search names, IDs, descriptions, keywords".to_string(),
+            ),
             col_width_mode: ColumnWidthMode::AutoAllRows,
             row_display: SelectionRowDisplay::SingleLine,
             name_column_width,
@@ -1299,6 +1304,31 @@ impl ChatWidget {
             hints.push("tab toggle".to_string());
         }
         hints.extend(["←/→ tabs", "enter details"].map(str::to_string));
+        for (actions, label) in [
+            (
+                [
+                    crate::keymap::ListAction::PageUp,
+                    crate::keymap::ListAction::PageDown,
+                ],
+                "page",
+            ),
+            (
+                [
+                    crate::keymap::ListAction::JumpTop,
+                    crate::keymap::ListAction::JumpBottom,
+                ],
+                "jump",
+            ),
+        ] {
+            let keys = actions
+                .into_iter()
+                .filter_map(|action| self.bottom_pane.list_keymap().primary_hint(action))
+                .map(|hint| hint.display_label())
+                .collect::<Vec<_>>();
+            if !keys.is_empty() {
+                hints.push(format!("{} {label}", keys.join("/")));
+            }
+        }
         if !can_remove_marketplace && !can_upgrade_marketplace && toggle_key_available {
             hints.push("tab toggle".to_string());
         }

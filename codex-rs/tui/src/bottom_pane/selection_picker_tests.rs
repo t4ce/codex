@@ -164,6 +164,81 @@ fn browser_page_navigation_uses_rows_that_fit() {
 }
 
 #[test]
+fn large_catalog_formats_only_a_window_and_keeps_full_list_actions() {
+    let (tx, mut rx) = unbounded_channel::<AppEvent>();
+    let mut view = ListSelectionView::new(
+        SelectionViewParams {
+            title: Some("Plugins".into()),
+            is_searchable: true,
+            max_visible_rows: 24,
+            windowed_results: true,
+            name_column_width: Some(30),
+            row_display: SelectionRowDisplay::SingleLine,
+            items: (0..10_101)
+                .map(|index| SelectionItem {
+                    name: format!("Plugin {index:05}"),
+                    search_value: Some(format!("Plugin {index:05} id-{index} keyword-{index}")),
+                    description: Some("Catalog description".into()),
+                    actions: vec![Box::new(move |tx| {
+                        tx.send(AppEvent::OpenPluginDetailLoading {
+                            plugin_display_name: format!("Plugin {index:05}"),
+                        });
+                    })],
+                    ..Default::default()
+                })
+                .collect(),
+            ..SelectionViewParams::picker()
+        },
+        AppEventSender::new(tx),
+        crate::keymap::RuntimeKeymap::defaults().list,
+    );
+
+    assert_eq!(view.rows_for_render().0.len(), 24);
+    let (text, _) = render_browser(&view, 100, 18);
+    let visible = view.rendered_item_count();
+    assert!(text.contains(&format!("1–{visible} of 10101")), "{text}");
+    assert!(visible < 24);
+    view.handle_key_event(KeyEvent::from(KeyCode::PageDown));
+    assert_eq!(view.selected_actual_idx(), Some(visible));
+    view.handle_key_event(KeyEvent::from(KeyCode::PageUp));
+    assert_eq!(view.selected_actual_idx(), Some(0));
+
+    view.handle_key_event(KeyEvent::from(KeyCode::End));
+    assert_eq!(view.selected_actual_idx(), Some(10_100));
+    assert!(view.rows_for_render().0.len() <= 24);
+    for height in [24, 13, 8, 32] {
+        let (text, _) = render_browser(&view, 100, height);
+        assert!(text.contains("› Plugin 10100"), "{text}");
+        assert!(text.contains("of 10101"), "{text}");
+    }
+    view.handle_key_event(KeyEvent::from(KeyCode::Home));
+    assert_eq!(view.selected_actual_idx(), Some(0));
+
+    view.set_search_query("keyword-10099".into());
+    assert_eq!(view.visible_len(), 1);
+    assert_eq!(view.rows_for_render().0.len(), 1);
+    assert_eq!(view.selected_actual_idx(), Some(10_099));
+    assert!(render_browser(&view, 100, 18).0.contains("1–1 of 1"));
+    view.handle_key_event(KeyEvent::from(KeyCode::Enter));
+    assert!(
+        matches!(rx.try_recv(), Ok(AppEvent::OpenPluginDetailLoading { plugin_display_name })
+        if plugin_display_name == "Plugin 10099")
+    );
+
+    view.set_search_query("missing plugin".into());
+    let (text, _) = render_browser(&view, 100, 18);
+    assert!(
+        text.contains("0–0 of 0") && text.contains("no matches"),
+        "{text}"
+    );
+    view.set_search_query("id-10098".into());
+    assert_eq!(view.selected_actual_idx(), Some(10_098));
+    view.set_search_query(String::new());
+    assert_eq!(view.visible_len(), 10_101);
+    assert_eq!(view.selected_actual_idx(), Some(10_098));
+}
+
+#[test]
 fn shrinking_the_browser_keeps_selection_visible_without_navigation() {
     for row_display in [
         SelectionRowDisplay::SingleLine,

@@ -2,6 +2,8 @@
 //! Selection and scrolling use filtered row indices; actions map back to source items.
 //! Controls and overflow indicators keep their own rows outside the result viewport.
 //! Letter-labeled children are indented and do not consume numeric shortcuts.
+//! Large searchable catalogs can format a bounded window while retaining full-list
+//! filtering, selection, and actions. Their search line includes the painted result range.
 
 use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
@@ -55,6 +57,7 @@ use super::selection_tabs::SelectionTab;
 use super::selection_tabs::render_tab_bar;
 use super::selection_tabs::tab_bar_height;
 use std::cell::Cell;
+use std::ops::Range;
 use unicode_width::UnicodeWidthStr;
 
 /// Minimum list width (in content columns) required before the side-by-side
@@ -216,6 +219,9 @@ pub(crate) struct SelectionViewParams {
     pub picker_surface: PickerSurface,
     /// Upper row budget; compact completion menus retain the default of eight.
     pub max_visible_rows: usize,
+    /// Format only a viewport of searchable, single-line results and show its range.
+    /// Requires a shared name column width; filtering and actions still use the full list.
+    pub windowed_results: bool,
     /// Keep the result area at its configured row budget when filtering shrinks it.
     pub reserve_result_rows: bool,
     /// Whether this picker can continue handling input without the app server.
@@ -287,6 +293,7 @@ impl Default for SelectionViewParams {
         Self {
             picker_surface: PickerSurface::default(),
             max_visible_rows: MAX_POPUP_ROWS,
+            windowed_results: false,
             reserve_result_rows: false,
             allow_input_when_disconnected: false,
             presentation: super::ViewPresentation::Inline,
@@ -343,6 +350,7 @@ pub(crate) struct ListSelectionView {
     presentation: super::ViewPresentation,
     picker_surface: PickerSurface,
     max_visible_rows: usize,
+    windowed_results: bool,
     reserve_result_rows: bool,
     allow_input_when_disconnected: bool,
     view_id: Option<&'static str>,
@@ -499,6 +507,10 @@ impl ListSelectionView {
         let mut s = Self {
             picker_surface: params.picker_surface,
             max_visible_rows: params.max_visible_rows.max(/*other*/ 1),
+            windowed_results: params.windowed_results
+                && params.is_searchable
+                && matches!(params.row_display, SelectionRowDisplay::SingleLine)
+                && params.name_column_width.is_some(),
             reserve_result_rows: params.reserve_result_rows,
             allow_input_when_disconnected: params.allow_input_when_disconnected,
             presentation: params.presentation,
@@ -739,24 +751,51 @@ impl ListSelectionView {
         }
     }
 
-    fn build_rows(&self) -> Vec<GenericDisplayRow> {
-        let enabled_row_number_width = self
-            .filtered_indices
-            .iter()
-            .filter(|actual_idx| {
-                self.active_items()
-                    .get(**actual_idx)
-                    .is_some_and(|item| Self::item_is_enabled(item) && item.child_label.is_none())
-            })
-            .count()
-            .max(1)
-            .to_string()
-            .len();
+    fn result_window(&self, limit: usize) -> Range<usize> {
+        let len = self.visible_len();
+        let mut state = self.state;
+        state.ensure_visible(len, limit.max(1));
+        let start = state.scroll_top.min(len);
+        start..start.saturating_add(limit).min(len)
+    }
+
+    fn rows_for_render(&self) -> (Vec<GenericDisplayRow>, ScrollState, Range<usize>) {
+        let range = if self.windowed_results {
+            self.result_window(self.max_visible_rows)
+        } else {
+            0..self.visible_len()
+        };
+        let mut state = self.state;
+        state.scroll_top = state.scroll_top.saturating_sub(range.start);
+        state.selected_idx = state
+            .selected_idx
+            .map(|idx| idx.saturating_sub(range.start));
+        (self.build_rows(range.clone()), state, range)
+    }
+
+    fn build_rows(&self, range: Range<usize>) -> Vec<GenericDisplayRow> {
+        let enabled_row_number_width = if self.is_searchable || !self.auto_number_shortcuts {
+            1
+        } else {
+            self.filtered_indices
+                .iter()
+                .filter(|actual_idx| {
+                    self.active_items().get(**actual_idx).is_some_and(|item| {
+                        Self::item_is_enabled(item) && item.child_label.is_none()
+                    })
+                })
+                .count()
+                .max(1)
+                .to_string()
+                .len()
+        };
         let mut enabled_row_number = 0;
         let row_selection_style = Some(selection_style());
         self.filtered_indices
             .iter()
             .enumerate()
+            .skip(range.start)
+            .take(range.len())
             .filter_map(|(visible_idx, actual_idx)| {
                 self.active_items().get(*actual_idx).map(|item| {
                     let is_selected = self.state.selected_idx == Some(visible_idx);
@@ -1072,7 +1111,7 @@ impl ListSelectionView {
             return Vec::new();
         };
         let mut lines = wrap_styled_line(hint, width);
-        if self.reserve_result_rows {
+        if self.reserve_result_rows && !self.windowed_results {
             let height = self
                 .tab_footer_hints
                 .iter()
@@ -1120,7 +1159,7 @@ impl ListSelectionView {
         }
         .or_else(|| self.footer_note.clone());
         let mut lines = note.map(&wrap).unwrap_or_default();
-        if self.reserve_result_rows && show_selected_description {
+        if self.reserve_result_rows && !self.windowed_results && show_selected_description {
             let height = self
                 .items
                 .iter()
@@ -1553,13 +1592,13 @@ impl Renderable for ListSelectionView {
         };
 
         // Measure at the same width as the painted rows, including any side panel.
-        let rows = self.build_rows();
+        let (rows, row_state, _) = self.rows_for_render();
         let column_width = ColumnWidthConfig::new(self.col_width_mode, self.name_column_width)
             .with_description_layout(self.description_layout);
         let rows_height = match self.row_display {
             SelectionRowDisplay::Wrapped => measure_rows_height_with_col_width_mode(
                 &rows,
-                &self.state,
+                &row_state,
                 self.max_visible_rows,
                 effective_rows_width,
                 column_width,
@@ -1598,7 +1637,7 @@ impl Renderable for ListSelectionView {
 
         let show_selected_description = should_show_selected_description_below(
             &rows,
-            &self.state,
+            &row_state,
             self.max_visible_rows,
             effective_rows_width,
             column_width,
@@ -1629,12 +1668,12 @@ impl Renderable for ListSelectionView {
         } else {
             area.width
         };
-        let rows = self.build_rows();
+        let (rows, row_state, row_range) = self.rows_for_render();
         let column_width = ColumnWidthConfig::new(self.col_width_mode, self.name_column_width)
             .with_description_layout(self.description_layout);
         let show_selected_description = should_show_selected_description_below(
             &rows,
-            &self.state,
+            &row_state,
             self.max_visible_rows,
             effective_rows_width,
             column_width,
@@ -1684,7 +1723,7 @@ impl Renderable for ListSelectionView {
         let rows_height = match self.row_display {
             SelectionRowDisplay::Wrapped => measure_rows_height_with_col_width_mode(
                 &rows,
-                &self.state,
+                &row_state,
                 self.max_visible_rows,
                 effective_rows_width,
                 column_width,
@@ -1753,6 +1792,40 @@ impl Renderable for ListSelectionView {
 
         // -- Search bar --
         if search_field_visible {
+            let search_area = if self.windowed_results
+                && (!self.search_query.is_empty() || self.visible_len() > self.max_visible_rows)
+            {
+                let range = self.result_window(usize::from(list_area.height));
+                let (first, last) = if range.is_empty() {
+                    (0, 0)
+                } else {
+                    (range.start + 1, range.end)
+                };
+                let label = format!("{first}–{last} of {}", self.visible_len());
+                let range_width = UnicodeWidthStr::width(label.as_str()) as u16;
+                if search_area.width > range_width + 12 {
+                    let query_width = search_area.width - range_width - 2;
+                    Line::from(label).dim().render(
+                        Rect::new(
+                            search_area.x + query_width + 2,
+                            search_area.y,
+                            range_width,
+                            search_area.height,
+                        ),
+                        buf,
+                    );
+                    Rect::new(
+                        search_area.x,
+                        search_area.y,
+                        query_width,
+                        search_area.height,
+                    )
+                } else {
+                    search_area
+                }
+            } else {
+                search_area
+            };
             let query_span: Span<'static> = if self.search_query.is_empty() {
                 self.search_placeholder
                     .as_ref()
@@ -1784,12 +1857,12 @@ impl Renderable for ListSelectionView {
                 width: effective_rows_width.max(1),
                 height: list_area.height,
             };
-            let rendered_rows = match self.row_display {
+            let mut rendered_rows = match self.row_display {
                 SelectionRowDisplay::Wrapped => render_rows_with_col_width_mode(
                     render_area,
                     buf,
                     &rows,
-                    &self.state,
+                    &row_state,
                     render_area.height as usize,
                     "no matches",
                     column_width,
@@ -1798,12 +1871,14 @@ impl Renderable for ListSelectionView {
                     render_area,
                     buf,
                     &rows,
-                    &self.state,
+                    &row_state,
                     render_area.height as usize,
                     "no matches",
                     column_width,
                 ),
             };
+            rendered_rows.has_above |= row_range.start > 0;
+            rendered_rows.has_below |= row_range.end < self.visible_len();
             self.rendered_item_count.set(rendered_rows.items);
             if above_area.height > 0 && below_area.height > 0 {
                 render_scroll_indicators(

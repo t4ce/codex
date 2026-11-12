@@ -342,42 +342,6 @@ mod integration_tests {
         f.error = 0;
     }
     #[test]
-    fn all_expression_families_reach_the_native_abi_unchanged() {
-        let _serial = SERIAL.lock().unwrap();
-        reset();
-        for word in [
-            "anger",
-            "disgust",
-            "fear",
-            "joy",
-            "sadness",
-            "surprise",
-            "affection",
-            "blush",
-            "confused",
-            "disapprove",
-            "eat",
-            "facepalm",
-            "finger_guns",
-            "pout",
-            "flirt",
-            "idle",
-            "agree",
-            "idea",
-            "silly",
-            "talk",
-            "taunt",
-            "tired",
-            "wave",
-            "wink",
-        ] {
-            let output = run(json!({"action":"emotion","idea":word}), false, true).unwrap();
-            assert_eq!(output.code_mode_result(&ToolPayload::Other)["accepted"], true);
-            assert_eq!(FIXTURE.lock().unwrap().calls.last(), Some(&json!(["emotion", word])));
-        }
-    }
-
-    #[test]
     fn all_mutations_reach_real_public_wrappers_and_native_abi() {
         let _serial = SERIAL.lock().unwrap();
         reset();

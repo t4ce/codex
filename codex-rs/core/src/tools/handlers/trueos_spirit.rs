@@ -84,82 +84,6 @@ enum Emotion {
     Joy,
     Sadness,
     Surprise,
-    Affection,
-    Blush,
-    Confused,
-    Disapprove,
-    Eat,
-    Facepalm,
-    FingerGuns,
-    Pout,
-    Flirt,
-    Idle,
-    Agree,
-    Idea,
-    Silly,
-    Talk,
-    Taunt,
-    Tired,
-    Wave,
-    Wink,
-}
-
-impl Emotion {
-    const WORDS: &'static [&'static str] = &[
-        "anger",
-        "disgust",
-        "fear",
-        "joy",
-        "sadness",
-        "surprise",
-        "affection",
-        "blush",
-        "confused",
-        "disapprove",
-        "eat",
-        "facepalm",
-        "finger_guns",
-        "pout",
-        "flirt",
-        "idle",
-        "agree",
-        "idea",
-        "silly",
-        "talk",
-        "taunt",
-        "tired",
-        "wave",
-        "wink",
-    ];
-
-    fn as_word(&self) -> &'static str {
-        match self {
-            Self::Anger => "anger",
-            Self::Disgust => "disgust",
-            Self::Fear => "fear",
-            Self::Joy => "joy",
-            Self::Sadness => "sadness",
-            Self::Surprise => "surprise",
-            Self::Affection => "affection",
-            Self::Blush => "blush",
-            Self::Confused => "confused",
-            Self::Disapprove => "disapprove",
-            Self::Eat => "eat",
-            Self::Facepalm => "facepalm",
-            Self::FingerGuns => "finger_guns",
-            Self::Pout => "pout",
-            Self::Flirt => "flirt",
-            Self::Idle => "idle",
-            Self::Agree => "agree",
-            Self::Idea => "idea",
-            Self::Silly => "silly",
-            Self::Talk => "talk",
-            Self::Taunt => "taunt",
-            Self::Tired => "tired",
-            Self::Wave => "wave",
-            Self::Wink => "wink",
-        }
-    }
 }
 
 impl SpiritAction {
@@ -230,7 +154,7 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
             ("x", JsonSchema::number(Some("Hardware avatar horizontal scanout position, inclusive 0..1.".into()))),
             ("y", JsonSchema::number(Some("Hardware avatar vertical scanout position, inclusive 0..1.".into()))),
         ]),
-        ("emotion", vec![("idea", names(Emotion::WORDS, "Expression family; Spirit chooses a variant and sequences arm transitions. Transition/static assets are internal."))]),
+        ("emotion", vec![("idea", names(&["anger", "disgust", "fear", "joy", "sadness", "surprise"], "Semantic emotion; Spirit chooses Lilly's expression."))]),
     ] {
         let mut properties = BTreeMap::from([("action".into(), names(&[action], "Native Spirit action."))]);
         let mut required = vec!["action".into()];
@@ -334,7 +258,14 @@ fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
                     Key::Right => spirit::Ui4Key::Right,
                 }),
                 SpiritAction::Move { x, y } => spirit::move_to(*x, *y),
-                SpiritAction::Emotion { idea } => spirit::play_emotion(idea.as_word()),
+                SpiritAction::Emotion { idea } => spirit::play_emotion(match idea {
+                    Emotion::Anger => "anger",
+                    Emotion::Disgust => "disgust",
+                    Emotion::Fear => "fear",
+                    Emotion::Joy => "joy",
+                    Emotion::Sadness => "sadness",
+                    Emotion::Surprise => "surprise",
+                }),
                 SpiritAction::Windows {} | SpiritAction::Observe {} => unreachable!(),
             };
             result.map_err(|code| native_error(action, code))?;
@@ -467,19 +398,6 @@ mod tests {
             json!({"action":"key","key":"unsupported"}),
         ] {
             assert!(parse_request(&input.to_string()).is_err(), "{input}");
-        }
-    }
-
-    #[test]
-    fn every_expression_family_round_trips_without_exposing_assets() {
-        for word in Emotion::WORDS {
-            let (action, _) = parse_request(&json!({"action":"emotion","idea":word}).to_string()).unwrap();
-            let SpiritAction::Emotion { idea } = action else { panic!("emotion action") };
-            assert_eq!(idea.as_word(), *word);
-            assert!(word.len() <= 16, "Spirit ABI word bound");
-        }
-        for word in ["transition", "static", "transition.uncross_arms", "wink.playful"] {
-            assert!(parse_request(&json!({"action":"emotion","idea":word}).to_string()).is_err());
         }
     }
 

@@ -111,6 +111,68 @@ async fn drain_pending_patch(app: &mut App, tui: &mut crate::tui::Tui) -> Result
         .await
 }
 
+#[tokio::test]
+async fn binary_copy_approval_recovers_destination_from_file_change_item() -> Result<()> {
+    let (mut app, mut rx, _op_rx) = make_test_app_with_channels().await;
+    let thread_id = ThreadId::new();
+    let mut tui = crate::tui::test_support::make_test_tui()?;
+    let cwd = app.chat_widget.config_ref().cwd.to_path_buf();
+    app.enqueue_primary_thread_session(test_thread_session(thread_id, cwd), Vec::new())
+        .await?;
+    let destination = "/apps/common/tree-with-bird.png";
+    let source = "/apps/codex/generated_images/thread/exec-image.png";
+    let description = format!("Binary-safe copy from {source} (8 bytes, SHA-256 test-digest)");
+    // Exercise the app-server's actual core-item conversion, then the TUI's
+    // notification store and approval-RPC recovery. The RPC deliberately
+    // carries no changes; the preceding item supplies these review details.
+    let core_item =
+        codex_protocol::items::TurnItem::FileChange(codex_protocol::items::FileChangeItem {
+            id: ITEM_ID.to_string(),
+            changes: HashMap::from([(
+                PathBuf::from(destination),
+                codex_protocol::protocol::FileChange::Add {
+                    content: description.clone(),
+                },
+            )]),
+            status: None,
+            auto_approved: Some(false),
+            stdout: None,
+            stderr: None,
+        });
+    app.enqueue_thread_notification(
+        thread_id,
+        ServerNotification::ItemStarted(ItemStartedNotification::new(
+            thread_id.to_string(),
+            TURN_ID.to_string(),
+            core_item.into(),
+            /*started_at_ms*/ 0,
+        )),
+    )
+    .await?;
+    let request = request(thread_id);
+    app.pending_app_server_requests
+        .note_server_request(&request);
+    app.enqueue_thread_request(thread_id, request).await?;
+    drain_pending_patch(&mut app, &mut tui).await?;
+    let rendered = crate::chatwidget::tests::helpers::render_bottom_popup(
+        &app.chat_widget,
+        /*width*/ 160,
+    );
+    assert!(rendered.contains(&format!("Destination: {destination}")));
+    assert!(!rendered.contains("Destination: unavailable"));
+    let approval = open_patch(&mut app, &mut rx);
+    assert_eq!(
+        approval.changes,
+        HashMap::from([(
+            PathBuf::from(destination),
+            FileChange::Add {
+                content: description,
+            },
+        )])
+    );
+    Ok(())
+}
+
 fn open_patch(app: &mut App, rx: &mut UnboundedReceiver<AppEvent>) -> ApplyPatchApprovalRequest {
     app.chat_widget
         .handle_key_event(KeyEvent::new(KeyCode::Char('a'), KeyModifiers::CONTROL));
