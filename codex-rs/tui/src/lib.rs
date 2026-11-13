@@ -251,6 +251,8 @@ mod token_usage;
 mod tool_output;
 mod tooltips;
 mod transcript_image;
+#[cfg(any(target_os = "trueos", test))]
+mod native_image_presentation;
 mod transcript_mode;
 mod transcript_reflow;
 mod transcript_view;

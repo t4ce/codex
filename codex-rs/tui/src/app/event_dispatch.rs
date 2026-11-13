@@ -60,7 +60,13 @@ impl App {
         if self.reconnect.offline && matches!(event, AppEvent::Exit(ExitMode::ShutdownFirst)) {
             return Ok(AppRunControl::Exit(ExitReason::UserRequested));
         }
+        let native_image_result = match &event {
+            #[cfg(any(target_os = "trueos", test))]
+            AppEvent::NativeImagePresentationFinished { .. } => true,
+            _ => false,
+        };
         if self.reconnect.offline
+            && !native_image_result
             && !matches!(
                 &event,
                 AppEvent::OpenDaemonMenu
@@ -2468,6 +2474,12 @@ impl App {
                     self.chat_widget.add_error_message(message);
                 } else {
                     self.background_voice_error = Some((thread_id, message));
+                }
+            }
+            #[cfg(any(target_os = "trueos", test))]
+            AppEvent::NativeImagePresentationFinished { thread_id, results } => {
+                if self.chat_widget.thread_id() == Some(thread_id) {
+                    self.chat_widget.on_native_image_presentation_finished(results);
                 }
             }
             AppEvent::RealtimeConversationStateChanged => {

@@ -585,6 +585,8 @@ impl ChatWidget {
             self.finalize_completed_assistant_message(Some(&message));
         }
         self.transcript.last_flushed_agent_message = None;
+        #[cfg(target_os = "trueos")]
+        self.present_native_reply_images(&parsed.visible_markdown, turn_id, &item.id, from_replay);
         if !parsed.visible_markdown.is_empty() {
             self.transcript
                 .record_agent_markdown(parsed.visible_markdown.clone(), message);

@@ -1324,6 +1324,11 @@ pub(crate) enum AppEvent {
     FollowTranscript,
 
     InsertHistoryCell(Box<dyn HistoryCell>),
+    #[cfg(any(target_os = "trueos", test))]
+    NativeImagePresentationFinished {
+        thread_id: ThreadId,
+        results: Vec<crate::native_image_presentation::ImagePresentationResult>,
+    },
     /// FIFO barrier after the completed turn's history insertions.
     TurnTipReady {
         thread_id: ThreadId,

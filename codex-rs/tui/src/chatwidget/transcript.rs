@@ -33,6 +33,8 @@ pub(super) struct StatusCopySource {
 
 #[derive(Default)]
 pub(super) struct TranscriptState {
+    #[cfg(any(target_os = "trueos", test))]
+    pub(super) native_images: crate::native_image_presentation::NativeImagePresentationState,
     pub(super) active_cell: Option<Box<dyn HistoryCell>>,
     /// Shared retained rows for concurrently running dynamic tools, removed on completion.
     pub(super) dynamic_calls:

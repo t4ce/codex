@@ -287,6 +287,8 @@ mod provider_error;
 mod reconnect;
 use self::input_queue::InputQueueState;
 mod image_submission;
+#[cfg(any(target_os = "trueos", test))]
+mod native_images;
 mod input_flow;
 mod input_receipts;
 mod input_restore;
