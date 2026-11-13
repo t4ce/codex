@@ -97,6 +97,8 @@ mod size_monitor;
 mod startup_tests;
 #[cfg(target_os = "trueos")]
 mod terminal_reentry;
+#[cfg(target_os = "trueos")]
+mod trueos_collapse;
 mod terminal_stderr;
 #[cfg(test)]
 pub(crate) mod test_support;
@@ -279,6 +281,8 @@ pub(crate) fn set_modes() -> Result<tmux::Options> {
     execute!(stdout(), EnableBracketedPaste)?;
 
     enable_raw_mode()?;
+    #[cfg(target_os = "trueos")]
+    trueos_collapse::register();
     #[cfg(windows)]
     windows_console::set_input_record_mode()?;
     // Enable keyboard enhancement flags so modifiers for keys like Enter are disambiguated.
