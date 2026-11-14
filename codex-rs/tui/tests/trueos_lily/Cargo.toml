@@ -1,0 +1,20 @@
+[package]
+name = "codex-trueos-lily-client-tests"
+version = "0.0.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+reqwest = { path = "../../../../../TRUEOS-Buildins/vendor/reqwest-0.13.3", default-features = false, features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "=1.54.1", features = ["macros", "rt", "sync", "net", "io-util", "time"] }
+tracing = "0.1"
+uuid = { version = "1", features = ["v4"] }
+
+[patch.crates-io]
+hyper = { path = "../../../../../TRUEOS/vendor/hyper-1.10.0" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("trueos"))'] }

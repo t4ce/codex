@@ -5241,7 +5241,6 @@ dependencies = [
  "itertools 0.14.0",
  "lazy_static",
  "libc",
- "lily2vec",
  "objc2-app-kit",
  "objc2-foundation",
  "opentelemetry_sdk",
@@ -5252,6 +5251,7 @@ dependencies = [
  "ratatui",
  "ratatui-macros",
  "regex-lite",
+ "reqwest 0.13.3",
  "rmcp",
  "semver",
  "serde",
@@ -10267,15 +10267,6 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
-]
-
-[[package]]
-name = "lily2vec"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "serde",
- "serde_json",
 ]
 
 [[package]]

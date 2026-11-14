@@ -2626,3 +2626,6 @@ pub(crate) mod tests;
 pub(crate) use tests::test_backend;
 #[cfg(test)]
 pub(crate) use tests::test_support;
+
+#[cfg(target_os = "trueos")]
+mod trueos_lily;
