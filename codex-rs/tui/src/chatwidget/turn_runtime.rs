@@ -86,6 +86,8 @@ impl ChatWidget {
     // Raw reasoning uses the same flow as summarized reasoning
 
     pub(super) fn on_task_started(&mut self) {
+        #[cfg(target_os = "trueos")]
+        self.spirit_response.clear();
         self.bottom_pane.dismiss_next_prompt();
         self.status_state.program_status_after_turn =
             crate::terminal_program_status::ProgramStatus::Idle;
@@ -149,6 +151,10 @@ impl ChatWidget {
             self.on_agent_reasoning_final();
         }
         self.input_queue.submit_pending_steers_after_interrupt = false;
+        #[cfg(target_os = "trueos")]
+        if !from_replay {
+            self.spirit_response.finish(last_agent_message.as_deref());
+        }
         let sanitized_last_agent_message = last_agent_message.as_deref().map(|message| {
             parse_assistant_markdown(message, self.config.cwd.as_path()).visible_markdown
         });
@@ -345,6 +351,8 @@ impl ChatWidget {
     /// This does not clear MCP startup tracking, because MCP startup can overlap with turn cleanup
     /// and should continue to drive the bottom-pane running indicator while it is in progress.
     pub(super) fn finalize_turn(&mut self) {
+        #[cfg(target_os = "trueos")]
+        self.spirit_response.clear();
         self.flush_answer_and_plan_streams();
         self.flush_interrupt_activity();
         self.finish_dynamic_activity();

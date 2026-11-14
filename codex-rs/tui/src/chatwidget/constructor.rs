@@ -122,6 +122,8 @@ impl ChatWidget {
                 skills: None,
             }),
             transcript: TranscriptState::new(active_cell),
+            #[cfg(target_os = "trueos")]
+            spirit_response: super::spirit_trueos::ResponsePresentation::default(),
             raw_output_mode: local_settings.tui.raw_output_mode,
             config,
             local_settings,

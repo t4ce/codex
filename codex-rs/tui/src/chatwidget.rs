@@ -543,6 +543,8 @@ pub(crate) struct ChatWidget {
     codex_op_target: CodexOpTarget,
     bottom_pane: BottomPane,
     transcript: TranscriptState,
+    #[cfg(target_os = "trueos")]
+    spirit_response: spirit_trueos::ResponsePresentation,
     config: Config,
     pub(crate) local_settings: crate::local_settings::LocalSettings,
     pub(crate) config_panel_tui: codex_config::types::Tui,

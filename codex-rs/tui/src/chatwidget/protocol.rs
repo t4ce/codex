@@ -140,8 +140,24 @@ impl ChatWidget {
                             &notification.item_id,
                         ))
                 {
+                    #[cfg(target_os = "trueos")]
+                    if !from_replay
+                        && self
+                            .transcript
+                            .active_streamed_agent_message
+                            .as_ref()
+                            .is_some_and(|(turn, item)| {
+                                turn != &notification.turn_id || item != &notification.item_id
+                            })
+                    {
+                        self.spirit_response.clear();
+                    }
                     self.transcript.active_streamed_agent_message =
                         Some((notification.turn_id, notification.item_id));
+                    #[cfg(target_os = "trueos")]
+                    if !from_replay {
+                        self.spirit_response.delta(&notification.delta);
+                    }
                     self.on_agent_message_delta(notification.delta);
                 }
             }
@@ -615,7 +631,15 @@ impl ChatWidget {
                 if self.transcript.active_streamed_agent_message.as_ref() != Some(&key)
                     && self.transcript.last_flushed_agent_message.as_ref() != Some(&key)
                 {
+                    #[cfg(target_os = "trueos")]
+                    if replay_kind.is_none() {
+                        self.spirit_response.clear();
+                    }
                     self.transcript.active_streamed_agent_message = Some(key);
+                    #[cfg(target_os = "trueos")]
+                    if replay_kind.is_none() {
+                        self.spirit_response.delta(&text);
+                    }
                     self.on_agent_message_delta(text);
                 }
             }
