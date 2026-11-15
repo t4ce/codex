@@ -507,6 +507,25 @@ impl ChatWidget {
                 if replay_kind.is_none()
                     && let Some((item, _)) = last_agent_message
                 {
+                    #[cfg(target_os = "trueos")]
+                    if self.local_settings.tui.trueos_tts
+                        && live_turn
+                        && !self.is_realtime_delegated_reasoning_turn(&notification.turn.id)
+                        && !realtime::is_private_realtime_agent_item(item)
+                        && let Some(thread_id) = self.thread_id()
+                    {
+                        let visible = parse_assistant_markdown(
+                            last_agent_message.map(|(_, text)| text).unwrap_or_default(),
+                            self.config.cwd.as_path(),
+                        )
+                        .visible_markdown;
+                        self.local_speech.speak(
+                            &thread_id.to_string(),
+                            &notification.turn.id,
+                            item.id(),
+                            &visible,
+                        );
+                    }
                     self.speak_completed_realtime_delegation(&notification.turn.id, item);
                 }
                 if replay_kind.is_none() {

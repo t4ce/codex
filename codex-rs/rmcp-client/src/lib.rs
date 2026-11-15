@@ -38,6 +38,8 @@ mod startup_error;
 mod stdio_server_launcher;
 mod tool_list_changes;
 mod trace_context;
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_xerj;
 mod user_verification;
 mod utils;
 #[cfg(any(target_os = "trueos", test))]

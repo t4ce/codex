@@ -2629,3 +2629,5 @@ pub(crate) use tests::test_support;
 
 #[cfg(target_os = "trueos")]
 mod trueos_lily;
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_tts;

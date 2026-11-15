@@ -184,6 +184,7 @@ arboard = { workspace = true, optional = true }
 
 
 [dev-dependencies]
+reqwest = { workspace = true, features = ["json"] }
 app_test_support = { workspace = true }
 codex-mcp = { workspace = true }
 codex-protocol-test-support = { workspace = true }

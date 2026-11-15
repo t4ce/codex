@@ -5073,6 +5073,73 @@ async fn executor_owned_chatgpt_mcp_accepts_only_safe_explicit_authorization() -
 }
 
 #[tokio::test]
+async fn disabled_xerj_has_no_startup_connection_or_discoverable_tools() -> anyhow::Result<()> {
+    let codex_home = tempdir()?;
+    // Even a required entry must remain completely inactive when disabled.
+    let server_config: McpServerConfig = serde_json::from_value(serde_json::json!({
+        "command": "xerj",
+        "args": ["mcp", "--lazy-local"],
+        "enabled": false,
+        "required": true,
+    }))?;
+    let (tx_event, rx_event) = async_channel::unbounded();
+    let manager = McpConnectionSet::new(
+        /*ema_auth*/ None,
+        /*existing_ema*/ None,
+        /*previous*/ None,
+        McpPublicationGate::already_published(),
+        McpRuntimeInput {
+            network_policy_metadata: None,
+            runtime_auth: None,
+            startup_policy: McpStartupPolicy::Eager,
+            config: Arc::new(crate::mcp::tests::test_mcp_config(
+                codex_home.path().to_path_buf(),
+            )),
+            plugins_available: false,
+            ready_selected_capability_roots: Vec::new(),
+            mcp_servers: HashMap::from([(
+                "xerj".to_string(),
+                EffectiveMcpServer::from_host_config(server_config),
+            )]),
+            submit_id: "test".to_string(),
+            tx_event: Some(tx_event),
+            startup_cancellation_token: CancellationToken::new(),
+            runtime_context: reusable_server_runtime_context(),
+            codex_apps_tools_cache: ConnectorRuntimeManager::default(),
+            tool_catalog_cache: McpToolCatalogCache::default(),
+            codex_apps_tools_cache_key: ConnectorRuntimeContextKey::personal(
+                /*account_id*/ None, /*chatgpt_user_id*/ None,
+            ),
+            client_mcp_extensions: ClientMcpExtensions::default(),
+            auth: None,
+            auth_manager: None,
+            elicitation_reviewer: None,
+            elicitation_lifecycle: None,
+        },
+        ElicitationRequestRouter::default(),
+    )
+    .await;
+
+    // Startup/spawn futures are owned by server connections: no connection means
+    // neither executable lookup nor the native launcher's demand install can run.
+    assert!(!manager.contains_server("xerj"));
+    assert!(manager.servers.is_empty());
+    assert!(manager.required_servers.is_empty());
+    assert_eq!(manager.disabled_servers, vec!["xerj"]);
+    assert!(manager.list_all_tools().await.is_empty());
+    while let Ok(event) = rx_event.try_recv() {
+        assert!(
+            !matches!(
+                event.msg,
+                codex_protocol::protocol::EventMsg::McpStartupUpdate(_)
+            ),
+            "disabled XERJ must not attempt startup"
+        );
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn no_local_runtime_fails_local_stdio_but_keeps_local_http_server() {
     let codex_home = tempdir().expect("tempdir");
     let mcp_servers = HashMap::from([

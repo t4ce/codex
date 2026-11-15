@@ -348,6 +348,10 @@ impl StdioServerLauncher for LocalStdioServerLauncher {
     ) -> BoxFuture<'static, io::Result<StdioServerTransport>> {
         let fallback_cwd = self.fallback_cwd.clone();
         async move {
+            // Disabled MCP entries never reach the launcher. Keep installation here so
+            // a disabled XERJ does not pull a Blueprint as a startup side effect.
+            #[cfg(target_os = "trueos")]
+            crate::trueos_xerj::ensure_installed(&command.program).await?;
             // Cancel queued launches when startup is dropped. A worker that already started
             // drops its transport and cleans up the child when it finishes.
             AbortOnDropHandle::new(tokio::task::spawn_blocking(move || {

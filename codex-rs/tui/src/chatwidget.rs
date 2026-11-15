@@ -545,6 +545,8 @@ pub(crate) struct ChatWidget {
     transcript: TranscriptState,
     #[cfg(target_os = "trueos")]
     spirit_response: spirit_trueos::ResponsePresentation,
+    #[cfg(target_os = "trueos")]
+    local_speech: crate::trueos_tts::ReadAloud,
     config: Config,
     pub(crate) local_settings: crate::local_settings::LocalSettings,
     pub(crate) config_panel_tui: codex_config::types::Tui,

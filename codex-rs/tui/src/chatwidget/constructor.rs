@@ -124,6 +124,8 @@ impl ChatWidget {
             transcript: TranscriptState::new(active_cell),
             #[cfg(target_os = "trueos")]
             spirit_response: super::spirit_trueos::ResponsePresentation::default(),
+            #[cfg(target_os = "trueos")]
+            local_speech: crate::trueos_tts::ReadAloud::default(),
             raw_output_mode: local_settings.tui.raw_output_mode,
             config,
             local_settings,

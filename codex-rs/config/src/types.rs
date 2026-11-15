@@ -874,6 +874,11 @@ impl QuickDial {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct Tui {
+    /// Read completed public replies through the on-demand TRUEOS ttstt Blueprint.
+    /// Disabled by default; never starts cloud realtime or microphone capture.
+    #[serde(default)]
+    pub trueos_tts: bool,
+
     /// Preferred hosts for new conversations, indexed by project and local user identity.
     /// Read from the user configuration only; values are never endpoints or credentials.
     #[serde(default)]

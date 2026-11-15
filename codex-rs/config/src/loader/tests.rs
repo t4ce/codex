@@ -661,6 +661,22 @@ fn xerj_packaged_default_defers_local_engine_until_tool_use() {
     );
 }
 
+#[test]
+fn xerj_can_be_disabled_without_repeating_its_packaged_transport() {
+    let mut effective: TomlValue =
+        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+    let user = toml::from_str("[mcp_servers.xerj]\nenabled=false\n").expect("user disable");
+    merge_toml_values(&mut effective, &user);
+    let config: ConfigToml = effective.try_into().expect("typed disabled config");
+    let server = &config.mcp_servers["xerj"];
+    assert!(!server.enabled);
+    let crate::McpServerTransportConfig::Stdio { command, args, .. } = &server.transport else {
+        panic!("XERJ keeps its transport for later opt-in");
+    };
+    assert_eq!(command, "xerj");
+    assert_eq!(args, &["mcp", "--lazy-local"]);
+}
+
 #[tokio::test]
 async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     async fn load(
