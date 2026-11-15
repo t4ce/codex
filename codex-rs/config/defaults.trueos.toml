@@ -4,12 +4,15 @@
 [sandbox_workspace_write]
 writable_roots = ["/apps/common"]
 
-# Optional local search and agent memory, installed on demand at MCP startup.
-# Disable completely with: codex -c mcp_servers.xerj.enabled=false
-# Keep tool discovery lightweight; start the local engine on its first tool call.
+# Native speech is part of the standard TRUEOS Blueprint launch.
+[tui]
+trueos_tts = true
+
+# Optional local search and memory are disabled in the standard TRUEOS build.
+# An explicit config override can opt in; the engine remains lazy.
 [mcp_servers.xerj]
 command = "xerj"
-enabled = true
+enabled = false
 args = ["mcp", "--lazy-local"]
 startup_timeout_sec = 120
 # Allow the first call to wait for local readiness and then execute its request.

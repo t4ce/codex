@@ -644,11 +644,16 @@ fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
 }
 
 #[test]
-fn xerj_packaged_default_defers_local_engine_until_tool_use() {
+fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
     let config: ConfigToml =
-        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+        toml::from_str(concat!(
+            include_str!("../../defaults.toml"),
+            "\n",
+            include_str!("../../defaults.trueos.toml")
+        )).expect("valid TRUEOS defaults");
+    assert_eq!(config.tui.as_ref().map(|tui| tui.trueos_tts), Some(true));
     let server = &config.mcp_servers["xerj"];
-    assert!(server.enabled);
+    assert!(!server.enabled);
     assert!(!server.required);
     let crate::McpServerTransportConfig::Stdio { command, args, .. } = &server.transport else {
         panic!("XERJ must use native child stdio");
@@ -662,14 +667,14 @@ fn xerj_packaged_default_defers_local_engine_until_tool_use() {
 }
 
 #[test]
-fn xerj_can_be_disabled_without_repeating_its_packaged_transport() {
+fn xerj_can_be_enabled_without_repeating_its_packaged_transport() {
     let mut effective: TomlValue =
         toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
-    let user = toml::from_str("[mcp_servers.xerj]\nenabled=false\n").expect("user disable");
+    let user = toml::from_str("[mcp_servers.xerj]\nenabled=true\n").expect("user opt in");
     merge_toml_values(&mut effective, &user);
-    let config: ConfigToml = effective.try_into().expect("typed disabled config");
+    let config: ConfigToml = effective.try_into().expect("typed enabled config");
     let server = &config.mcp_servers["xerj"];
-    assert!(!server.enabled);
+    assert!(server.enabled);
     let crate::McpServerTransportConfig::Stdio { command, args, .. } = &server.transport else {
         panic!("XERJ keeps its transport for later opt-in");
     };
@@ -714,7 +719,7 @@ async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
         return;
     }
     let server = &config.mcp_servers["xerj"];
-    assert!(server.enabled);
+    assert!(!server.enabled);
     assert!(!server.required);
     assert_eq!(
         server.startup_timeout_sec,

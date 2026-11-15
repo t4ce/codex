@@ -1,4 +1,4 @@
-//! Opt-in local read-aloud. Only completed public final answers enter here.
+//! Native TRUEOS read-aloud. Only completed public final answers enter here.
 //! Model inference and lexicalization belong to the ttstt Blueprint, not Codex.
 use std::time::Duration;
 use std::time::Instant;
@@ -53,6 +53,15 @@ pub(crate) struct ReadAloud {
     last: Option<(String, String, String)>,
 }
 impl ReadAloud {
+    pub(crate) fn new(enabled: bool) -> Self {
+        let mut reader = Self::default();
+        if enabled {
+            let (tx, rx) = watch::channel(None);
+            tokio::spawn(worker(rx));
+            reader.latest = Some(tx);
+        }
+        reader
+    }
     pub(crate) fn speak(&mut self, thread: &str, turn: &str, item: &str, text: &str) {
         let identity = (thread.to_owned(), turn.to_owned(), item.to_owned());
         if self.last.as_ref() == Some(&identity) {
@@ -120,6 +129,28 @@ fn launch() -> Result<(), String> {
     #[cfg(not(target_os = "trueos"))]
     Err("ttstt launch requires TRUEOS".into())
 }
+async fn ensure_service(
+    client: &reqwest::Client,
+    rx: &watch::Receiver<Option<Speech>>,
+) -> Result<(), String> {
+    if ready(client).await {
+        return Ok(());
+    }
+    launch()?;
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(120);
+    loop {
+        if rx.has_changed().is_err() {
+            return Err("speech client closed".into());
+        }
+        if ready(client).await {
+            return Ok(());
+        }
+        if tokio::time::Instant::now() >= deadline {
+            return Err("ttstt readiness timed out".into());
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+}
 async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
     let client = match reqwest::Client::builder()
         .no_proxy()
@@ -134,6 +165,10 @@ async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
             return;
         }
     };
+    // Start speech alongside Lily and SQLite, independently of the first reply.
+    if let Err(e) = ensure_service(&client, &rx).await {
+        tracing::warn!("ttstt startup: {e}");
+    }
     while rx.changed().await.is_ok() {
         let Some(speech) = rx.borrow_and_update().clone() else {
             continue;
@@ -141,22 +176,9 @@ async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
         if speech.queued.elapsed() > MAX_AGE {
             continue;
         }
-        if !ready(&client).await {
-            if let Err(e) = launch() {
-                tracing::warn!("ttstt unavailable: {e}");
-                continue;
-            }
-            let deadline = tokio::time::Instant::now() + Duration::from_secs(120);
-            while !ready(&client).await && tokio::time::Instant::now() < deadline {
-                if rx.has_changed().unwrap_or(true) {
-                    break;
-                }
-                tokio::time::sleep(Duration::from_millis(250)).await;
-            }
-            if !ready(&client).await {
-                tracing::warn!("ttstt readiness timed out");
-                continue;
-            }
+        if let Err(e) = ensure_service(&client, &rx).await {
+            tracing::warn!("ttstt unavailable: {e}");
+            continue;
         }
         // Pending answers may be replaced/cleared during service startup. Never
         // speak that stale snapshot, and never retry a possibly accepted POST.

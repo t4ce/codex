@@ -10,7 +10,7 @@ use pretty_assertions::assert_eq;
 #[tokio::test]
 async fn trueos_tts_uses_host_preferences_and_ignores_project_opt_in() -> anyhow::Result<()> {
     for (user, project_enabled, cli, expected) in [
-        (None, true, None, false),
+        (None, true, None, cfg!(target_os = "trueos")),
         (Some(false), true, None, false),
         (Some(true), false, None, true),
         (Some(false), false, Some(true), true),

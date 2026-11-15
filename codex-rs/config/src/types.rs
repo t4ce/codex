@@ -875,7 +875,7 @@ impl QuickDial {
 #[schemars(deny_unknown_fields)]
 pub struct Tui {
     /// Read completed public replies through the on-demand TRUEOS ttstt Blueprint.
-    /// Disabled by default; never starts cloud realtime or microphone capture.
+    /// TRUEOS packaged defaults enable this; never starts cloud realtime or microphone capture.
     #[serde(default)]
     pub trueos_tts: bool,
 

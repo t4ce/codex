@@ -5672,7 +5672,7 @@
         },
         "trueos_tts": {
           "default": false,
-          "description": "Read completed public replies through the on-demand TRUEOS ttstt Blueprint. Disabled by default; never starts cloud realtime or microphone capture.",
+          "description": "Read completed public replies through the on-demand TRUEOS ttstt Blueprint. TRUEOS packaged defaults enable this; never starts cloud realtime or microphone capture.",
           "type": "boolean"
         },
         "vim_mode_default": {

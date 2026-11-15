@@ -25,52 +25,48 @@ next_prompt_suggestions = false
 
 ## Optional XERJ on TRUEOS
 
-Disable XERJ for a session with:
+The standard TRUEOS Blueprint disables XERJ. No XERJ process, engine or
+Blueprint download is requested by the default Codex launch. Its disabled
+entry may remain visible in configuration/status views; existing installations
+are retained.
 
-```sh
-codex -c mcp_servers.xerj.enabled=false
-```
-
-Or persist the setting in your Codex home `config.toml`:
+Optional opt-in belongs in the user's `config.toml`:
 
 ```toml
 [mcp_servers.xerj]
-enabled = false
+enabled = true
 ```
 
-This removes XERJ from MCP startup and tool discovery: no XERJ child, engine,
-or Blueprint download is requested by Codex. The disabled entry may still appear
-in configuration and MCP status views. Existing installations are retained.
-
-XERJ remains enabled by default. When enabled and its native `xerj.bp` executable
-is absent from AppDB, the local MCP launcher asks Apps to install `xerj-service`
-before starting the MCP child. The engine stays lazy until a tool needs it.
-Custom replacement commands and explicit executable paths keep their normal
-launch behavior. Re-enable with `-c mcp_servers.xerj.enabled=true`.
+When explicitly enabled and `xerj.bp` is absent from AppDB, the native MCP
+launcher asks Apps to install `xerj-service` before starting its MCP child.
+The engine stays lazy until a tool needs it. Custom commands and explicit
+executable paths retain their normal launch behavior.
 
 ## TRUEOS local read-aloud
 
-Opt in with `codex -c tui.trueos_tts=true`, or add to your user config:
+The standard TRUEOS Blueprint enables read-aloud automatically. No launch
+arguments or launch script are required. A user configuration can disable it:
 
 ```toml
 [tui]
-trueos_tts = true
+trueos_tts = false
 ```
 
-The default is off. This preference ignores project configuration. Completed
-public replies in the active TUI launch the on-demand `ttstt` Blueprint and
-use its loopback speech service. Reasoning, tools, history replay and realtime
+This preference ignores project configuration. The native TUI warms the
+on-demand `ttstt` Blueprint at startup and reuses an existing healthy service.
+Completed public replies use its loopback speech service. Reasoning, tools, history replay and realtime
 delegated voice replies are excluded. Hidden display directives, code blocks
-and link destinations are omitted; Kokoro's lexicon and G2P frontend own
+and link destinations are omitted; Kokoro's English G2P frontend owns
 pronunciation. No plugin, MCP server, microphone or cloud realtime session is
 required. This setting currently applies to the TRUEOS Rust TUI, not the
 VS Code extension or noninteractive `codex exec`.
 
-ttstt requires the existing Kokoro native model assets under `/models/kokoro`.
-It does not require Whisper. Startup and speech requests run away from the
+ttstt ships the Kokoro model, English G2P and Heart (`af_heart`) voice inside
+the Blueprint. It needs no setup, model directory, downloads or Whisper.
+This integration bundle supports English and Heart only. Startup and speech requests run away from the
 render loop; failures preserve the displayed reply. Pending answers may be
 cleared or replaced, but already playing speech runs to completion. See
-`TRUEOS-Blueprints/apps/ttstt/README.md` for assets, host WAV verification and
+`TRUEOS-Blueprints/apps/ttstt/README.md` for host WAV verification and
 the local service contract.
 
 Upstream already provides `thread/realtime/appendSpeech`, but it is tied to
