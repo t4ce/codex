@@ -175,6 +175,30 @@ unsafe fn dispatch(
                 .output(FunctionCallOutputContentItem::InputText { text });
             Ok(q::JSValue::undefined())
         }
+        "image" => {
+            let image_url = string(ctx, arg(1))?;
+            let detail = if arg(2).tag == q::JS_TAG_UNDEFINED {
+                DEFAULT_IMAGE_DETAIL
+            } else {
+                match string(ctx, arg(2))?.as_str() {
+                    "auto" => ImageDetail::Auto,
+                    "low" => ImageDetail::Low,
+                    "high" => ImageDetail::High,
+                    "original" => ImageDetail::Original,
+                    _ => {
+                        return Err("image detail must be one of: auto, low, high, original".into());
+                    }
+                }
+            };
+            ready(state)?;
+            (*state)
+                .cell
+                .output(FunctionCallOutputContentItem::InputImage {
+                    image_url,
+                    detail: Some(detail),
+                });
+            Ok(q::JSValue::undefined())
+        }
         "store" => {
             let key = string(ctx, arg(1))?;
             let serialized = string(ctx, arg(2))?;
@@ -631,6 +655,47 @@ const BOOTSTRAP: &str = r#"
  globalThis.clearTimeout = id => native('clear_timer',String(id));
  globalThis.exit = () => {native('exit');throw new Error('execution exited')};
  globalThis.yield_control = () => native('yield');
- for(const name of ['image','audio','generatedImage'])globalThis[name]=()=>{throw new Error(name+' output is not supported by the QuickJS backend yet')};
+ const imageError = 'image expects a non-empty image URL string, an object with image_url and optional detail, or a raw MCP image block';
+ const parseDetail = value => {
+  if(value == null)return undefined;
+  if(typeof value !== 'string')throw new TypeError('image detail must be a string when provided');
+  return value;
+ };
+ const normalizeImage = (value, override) => {
+  let url, detail;
+  if(typeof value === 'string')url=value;
+  else if(value && typeof value === 'object' && !Array.isArray(value)){
+   url=value.image_url;
+   if(url !== undefined){
+    if(typeof url !== 'string')throw new TypeError(imageError);
+    detail=parseDetail(value.detail);
+   }else{
+    const block=JSON.parse(JSON.stringify(value));
+    if(typeof block.type !== 'string')throw new TypeError(imageError);
+    if(block.type !== 'image')throw new TypeError('image only accepts MCP image blocks, got "'+block.type+'"');
+    if(typeof block.data !== 'string' || !block.data)throw new TypeError('image expected MCP image data');
+    const mime=block.mimeType ?? block.mime_type;
+    url=/^data:/i.test(block.data)?block.data:'data:'+(typeof mime === 'string' && mime?mime:'application/octet-stream')+';base64,'+block.data;
+    const meta=block._meta?.['codex/imageDetail'];
+    if(['auto','low','high','original'].includes(meta))detail=meta;
+   }
+  }else throw new TypeError(imageError);
+  if(!url)throw new TypeError(imageError);
+  if(/^https?:/i.test(url))throw new TypeError('Tool call failed: remote image URLs are not supported in tool outputs. Pass a base64 data URI instead');
+  if(!/^data:/i.test(url))throw new TypeError('Tool call failed: invalid image output. Pass a base64 data URI instead');
+  detail=(override ?? detail)?.toLowerCase();
+  if(detail !== undefined && !['auto','low','high','original'].includes(detail))throw new TypeError('image detail must be one of: auto, low, high, original');
+  return [url,detail];
+ };
+ globalThis.image = (value,detail) => native('image',...normalizeImage(value,parseDetail(detail)));
+ globalThis.generatedImage = value => {
+  if(!value || typeof value !== 'object')throw new TypeError('generatedImage expects an image generation result object');
+  const hint=value.output_hint;
+  if(hint !== undefined && typeof hint !== 'string')throw new TypeError('generatedImage output_hint must be a string when provided');
+  const normalized=normalizeImage(value);
+  native('image',...normalized);
+  if(hint !== undefined)native('text',hint);
+ };
+ globalThis.audio = () => {throw new Error('audio output is not supported by the QuickJS backend yet')};
 })
 "#;

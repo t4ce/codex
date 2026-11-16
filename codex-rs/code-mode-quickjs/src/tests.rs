@@ -764,3 +764,97 @@ async fn server_output_mode_uses_each_observations_own_budget() {
     };
     assert_eq!(texts(second), vec!["second"]);
 }
+
+#[tokio::test]
+async fn image_helpers_forward_tool_images_and_preserve_order_and_detail() {
+    let session = QuickJsCodeModeSessionProvider
+        .create_session()
+        .await
+        .unwrap();
+    let result = execute(&session, request(r#"
+        text('before');
+        const result = await tools.exec_command({type:'image', data:'AA==', mimeType:'image/png', _meta:{'codex/imageDetail':'original'}});
+        image(result.output);
+        image('data:image/png;base64,BB==');
+        image({image_url:'data:image/png;base64,CC==', detail:'low'}, 'HIGH');
+        image({type:'image', data:'data:image/jpeg;base64,DD==', mime_type:'image/jpeg'});
+        generatedImage({image_url:'data:image/png;base64,EE==', output_hint:'saved'});
+    "#), Arc::new(Delegate::default())).await;
+    let RuntimeResponse::Result {
+        content_items,
+        error_text,
+        ..
+    } = result
+    else {
+        panic!("expected completed execution");
+    };
+    assert_eq!(error_text, None);
+    let image = |data: &str, detail| FunctionCallOutputContentItem::InputImage {
+        image_url: data.into(),
+        detail: Some(detail),
+    };
+    assert_eq!(
+        content_items,
+        vec![
+            FunctionCallOutputContentItem::InputText {
+                text: "before".into()
+            },
+            image("data:image/png;base64,AA==", ImageDetail::Original),
+            image("data:image/png;base64,BB==", DEFAULT_IMAGE_DETAIL),
+            image("data:image/png;base64,CC==", ImageDetail::High),
+            image("data:image/jpeg;base64,DD==", DEFAULT_IMAGE_DETAIL),
+            image("data:image/png;base64,EE==", DEFAULT_IMAGE_DETAIL),
+            FunctionCallOutputContentItem::InputText {
+                text: "saved".into()
+            },
+        ]
+    );
+}
+
+#[tokio::test]
+async fn image_helpers_reject_invalid_inputs_and_recover() {
+    let session = QuickJsCodeModeSessionProvider
+        .create_session()
+        .await
+        .unwrap();
+    let result = execute(
+        &session,
+        request(
+            r#"
+        const invalid = [
+          () => image(), () => image([]), () => image(''),
+          () => image('https://example.com/test.png'), () => image('/apps/test.png'),
+          () => image({image_url:42}), () => image({type:'text',data:'AA=='}),
+          () => image({type:'image',data:''}),
+          () => image('data:image/png;base64,AA==',42),
+          () => image({image_url:'data:image/png;base64,AA==',detail:'bad'}),
+          () => generatedImage({image_url:'data:image/png;base64,AA==',output_hint:null}),
+          () => image({get image_url(){throw new Error('getter failed')}})
+        ];
+        let rejected=0;
+        for(const call of invalid){try{call()}catch{rejected++}}
+        text(rejected);
+    "#,
+        ),
+        Arc::new(Delegate::default()),
+    )
+    .await;
+    assert_eq!(texts(result), vec!["12"]);
+}
+
+#[tokio::test]
+async fn image_getters_cannot_emit_after_exit() {
+    let session = QuickJsCodeModeSessionProvider
+        .create_session()
+        .await
+        .unwrap();
+    for source in [
+        "image({get image_url(){try{exit()}catch{};return 'data:image/png;base64,AA=='}})",
+        "generatedImage({image_url:'data:image/png;base64,AA==',get output_hint(){try{exit()}catch{};return 'late'}})",
+    ] {
+        assert!(
+            texts(execute(&session, request(source), Arc::new(Delegate::default())).await)
+                .is_empty()
+        );
+    }
+}
