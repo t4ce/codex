@@ -1,21 +1,25 @@
 //! Native TRUEOS read-aloud. Only completed public final answers enter here.
-//! Model inference and lexicalization belong to the ttstt Blueprint, not Codex.
+//! Model inference and pronunciation belong to the speech Blueprint, not Codex.
+use std::sync::Arc;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
 use std::time::Duration;
-use std::time::Instant;
 
 use pulldown_cmark::Event;
 use pulldown_cmark::Parser;
 use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
 use serde::Deserialize;
-use tokio::sync::watch;
+use tokio::sync::mpsc;
 
-const ENDPOINT: &str = "http://127.0.0.1:9772";
+const SERVICE_ENDPOINT: &str = "http://127.0.0.1:9773";
+const SERVICE_PROTOCOL: &str = "ptts-v1";
+const LAUNCH_COMMAND: &str = "launch --headless ptts\n";
 const MAX_TEXT_BYTES: usize = 16 * 1024;
-const MAX_AGE: Duration = Duration::from_secs(30);
+const QUEUED_TEXT_WARNING_BYTES: usize = 1024;
 
 /// Preserve prose and link labels; omit code blocks, raw HTML and image URLs.
-/// Number expansion and pronunciation stay in Kokoro's lexicon/G2P frontend.
+/// Number expansion and pronunciation stay in Pocket TTS.
 fn speech_text(markdown: &str) -> Option<String> {
     let mut out = String::new();
     let mut skip = 0usize;
@@ -42,23 +46,17 @@ fn speech_text(markdown: &str) -> Option<String> {
     (!text.is_empty()).then_some(text)
 }
 
-#[derive(Clone)]
-struct Speech {
-    text: String,
-    queued: Instant,
-}
 #[derive(Default)]
 pub(crate) struct ReadAloud {
-    latest: Option<watch::Sender<Option<Speech>>>,
+    queue: Option<mpsc::UnboundedSender<String>>,
+    pending_bytes: Arc<AtomicUsize>,
     last: Option<(String, String, String)>,
 }
 impl ReadAloud {
     pub(crate) fn new(enabled: bool) -> Self {
         let mut reader = Self::default();
         if enabled {
-            let (tx, rx) = watch::channel(None);
-            tokio::spawn(worker(rx));
-            reader.latest = Some(tx);
+            reader.queue = Some(start_worker(Arc::clone(&reader.pending_bytes)));
         }
         reader
     }
@@ -71,28 +69,37 @@ impl ReadAloud {
         let Some(text) = speech_text(text) else {
             return;
         };
-        let latest = self.latest.get_or_insert_with(|| {
-            let (tx, rx) = watch::channel(None);
-            tokio::spawn(worker(rx));
-            tx
-        });
-        latest.send_replace(Some(Speech {
-            text,
-            queued: Instant::now(),
-        }));
-    }
-    // Clearing a pending answer does not abort the HTTP request already playing
-    // in the service. In-flight interruption is a separate future protocol step.
-    pub(crate) fn clear(&mut self) {
-        if let Some(latest) = &self.latest {
-            latest.send_replace(None);
+        let pending_bytes = Arc::clone(&self.pending_bytes);
+        let queue = self
+            .queue
+            .get_or_insert_with(|| start_worker(Arc::clone(&pending_bytes)));
+        let text_bytes = text.len();
+        let queued_bytes = pending_bytes.fetch_add(text_bytes, Ordering::Relaxed) + text_bytes;
+        if queue.send(text).is_err() {
+            pending_bytes.fetch_sub(text_bytes, Ordering::Relaxed);
+            tracing::warn!(service = "ptts", "speech queue unavailable");
+        } else if queued_bytes > QUEUED_TEXT_WARNING_BYTES {
+            tracing::warn!(
+                service = "ptts",
+                queued_bytes,
+                warning_bytes = QUEUED_TEXT_WARNING_BYTES,
+                "speech queue exceeds 1 KiB; keep response text small"
+            );
         }
     }
 }
-impl Drop for ReadAloud {
-    fn drop(&mut self) {
-        self.clear();
-    }
+fn start_worker(pending_bytes: Arc<AtomicUsize>) -> mpsc::UnboundedSender<String> {
+    let (tx, rx) = mpsc::unbounded_channel();
+    tokio::spawn(worker(rx, pending_bytes));
+    tx
+}
+async fn next_speech(
+    rx: &mut mpsc::UnboundedReceiver<String>,
+    pending_bytes: &AtomicUsize,
+) -> Option<String> {
+    let text = rx.recv().await?;
+    pending_bytes.fetch_sub(text.len(), Ordering::Relaxed);
+    Some(text)
 }
 
 #[derive(Deserialize)]
@@ -101,9 +108,14 @@ struct Health {
     ready: bool,
     tts: bool,
 }
+impl Health {
+    fn is_ready(&self) -> bool {
+        self.protocol == SERVICE_PROTOCOL && self.ready && self.tts
+    }
+}
 async fn ready(client: &reqwest::Client) -> bool {
     let Ok(response) = client
-        .get(format!("{ENDPOINT}/health"))
+        .get(format!("{SERVICE_ENDPOINT}/health"))
         .timeout(Duration::from_millis(750))
         .send()
         .await
@@ -116,42 +128,36 @@ async fn ready(client: &reqwest::Client) -> bool {
     response
         .json::<Health>()
         .await
-        .is_ok_and(|h| h.protocol == "ttstt-v1" && h.ready && h.tts)
+        .is_ok_and(|health| health.is_ready())
 }
 fn launch() -> Result<(), String> {
     #[cfg(target_os = "trueos")]
     return trueos::vshell::launch_with_destination(
         "apps",
-        "launch --headless ttstt\n",
+        LAUNCH_COMMAND,
         trueos::vshell::LaunchDestination::Headless,
     )
-    .map_err(|code| format!("ttstt Blueprint launch ({code})"));
+    .map_err(|code| format!("ptts Blueprint launch ({code})"));
     #[cfg(not(target_os = "trueos"))]
-    Err("ttstt launch requires TRUEOS".into())
+    Err("ptts launch requires TRUEOS".into())
 }
-async fn ensure_service(
-    client: &reqwest::Client,
-    rx: &watch::Receiver<Option<Speech>>,
-) -> Result<(), String> {
+async fn ensure_service(client: &reqwest::Client) -> Result<(), String> {
     if ready(client).await {
         return Ok(());
     }
     launch()?;
     let deadline = tokio::time::Instant::now() + Duration::from_secs(120);
     loop {
-        if rx.has_changed().is_err() {
-            return Err("speech client closed".into());
-        }
         if ready(client).await {
             return Ok(());
         }
         if tokio::time::Instant::now() >= deadline {
-            return Err("ttstt readiness timed out".into());
+            return Err("ptts readiness timed out".into());
         }
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
 }
-async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
+async fn worker(mut rx: mpsc::UnboundedReceiver<String>, pending_bytes: Arc<AtomicUsize>) {
     let client = match reqwest::Client::builder()
         .no_proxy()
         .redirect(reqwest::redirect::Policy::none())
@@ -161,40 +167,31 @@ async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
     {
         Ok(client) => client,
         Err(e) => {
-            tracing::warn!("ttstt client: {e}");
+            tracing::warn!(service = "ptts", "speech client: {e}");
             return;
         }
     };
     // Start speech alongside Lily and SQLite, independently of the first reply.
-    if let Err(e) = ensure_service(&client, &rx).await {
-        tracing::warn!("ttstt startup: {e}");
+    if let Err(e) = ensure_service(&client).await {
+        tracing::warn!(service = "ptts", "speech startup: {e}");
     }
-    while rx.changed().await.is_ok() {
-        let Some(speech) = rx.borrow_and_update().clone() else {
-            continue;
-        };
-        if speech.queued.elapsed() > MAX_AGE {
+    while let Some(text) = next_speech(&mut rx, &pending_bytes).await {
+        if let Err(e) = ensure_service(&client).await {
+            tracing::warn!(service = "ptts", "speech unavailable: {e}");
             continue;
         }
-        if let Err(e) = ensure_service(&client, &rx).await {
-            tracing::warn!("ttstt unavailable: {e}");
-            continue;
-        }
-        // Pending answers may be replaced/cleared during service startup. Never
-        // speak that stale snapshot, and never retry a possibly accepted POST.
-        // An answer fresh when selected may wait through a cold model load.
-        if rx.has_changed().unwrap_or(true) {
-            continue;
-        }
+        // Submit FIFO entries once; never retry a possibly accepted POST.
         match client
-            .post(format!("{ENDPOINT}/speech"))
-            .json(&serde_json::json!({"text":speech.text}))
+            .post(format!("{SERVICE_ENDPOINT}/speech"))
+            .json(&serde_json::json!({"text":text}))
             .send()
             .await
         {
             Ok(response) if response.status().is_success() => {}
-            Ok(response) => tracing::warn!("ttstt speech rejected: {}", response.status()),
-            Err(e) => tracing::warn!("ttstt speech request: {e}"),
+            Ok(response) => {
+                tracing::warn!(service = "ptts", "speech rejected: {}", response.status())
+            }
+            Err(e) => tracing::warn!(service = "ptts", "speech request: {e}"),
         }
     }
 }
@@ -202,6 +199,30 @@ async fn worker(mut rx: watch::Receiver<Option<Speech>>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn service_endpoint_protocol_and_launch_identity_stay_together() {
+        assert_eq!(SERVICE_ENDPOINT, "http://127.0.0.1:9773");
+        assert_eq!(SERVICE_PROTOCOL, "ptts-v1");
+        assert_eq!(LAUNCH_COMMAND, "launch --headless ptts\n");
+    }
+    #[test]
+    fn readiness_requires_pocket_protocol_and_a_ready_tts_model() {
+        for protocol in ["ptts-v1", "other"] {
+            for ready in [false, true] {
+                for tts in [false, true] {
+                    let health = Health {
+                        protocol: protocol.into(),
+                        ready,
+                        tts,
+                    };
+                    assert_eq!(
+                        health.is_ready(),
+                        protocol == SERVICE_PROTOCOL && ready && tts
+                    );
+                }
+            }
+        }
+    }
     #[test]
     fn speaks_prose_and_labels_without_code_or_url_destinations() {
         assert_eq!(
@@ -217,19 +238,49 @@ mod tests {
         assert!(speech_text(&"é".repeat(MAX_TEXT_BYTES)).is_none());
     }
     #[tokio::test]
-    async fn deduplicates_completion_and_clears_pending_answers() {
-        let (tx, mut rx) = watch::channel(None);
+    async fn keeps_completion_order_and_counts_pending_utf8_bytes() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
         let mut reader = ReadAloud {
-            latest: Some(tx),
-            last: None,
+            queue: Some(tx),
+            ..ReadAloud::default()
         };
+        let pending_bytes = Arc::clone(&reader.pending_bytes);
         reader.speak("thread", "turn", "item", "Hello");
-        assert_eq!(rx.borrow_and_update().as_ref().unwrap().text, "Hello");
         reader.speak("thread", "turn", "item", "Hello again");
-        assert!(!rx.has_changed().unwrap());
-        reader.clear();
-        assert!(rx.borrow_and_update().is_none());
-        reader.speak("thread", "next", "item", "Next answer");
-        assert_eq!(rx.borrow_and_update().as_ref().unwrap().text, "Next answer");
+        reader.speak("thread", "next", "item", "Grüße");
+        assert_eq!(pending_bytes.load(Ordering::Relaxed), "HelloGrüße".len());
+        drop(reader);
+        assert_eq!(
+            next_speech(&mut rx, &pending_bytes).await.as_deref(),
+            Some("Hello")
+        );
+        assert_eq!(pending_bytes.load(Ordering::Relaxed), "Grüße".len());
+        assert_eq!(
+            next_speech(&mut rx, &pending_bytes).await.as_deref(),
+            Some("Grüße")
+        );
+        assert_eq!(pending_bytes.load(Ordering::Relaxed), 0);
+        assert!(next_speech(&mut rx, &pending_bytes).await.is_none());
+    }
+    #[tokio::test]
+    async fn warning_threshold_preserves_all_queued_text() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        let mut reader = ReadAloud {
+            queue: Some(tx),
+            ..ReadAloud::default()
+        };
+        let first = "a".repeat(QUEUED_TEXT_WARNING_BYTES);
+        reader.speak("thread", "first", "item", &first);
+        reader.speak("thread", "next", "item", "é");
+        assert_eq!(reader.pending_bytes.load(Ordering::Relaxed), 1026);
+        assert_eq!(
+            next_speech(&mut rx, &reader.pending_bytes).await.as_deref(),
+            Some(first.as_str())
+        );
+        assert_eq!(
+            next_speech(&mut rx, &reader.pending_bytes).await.as_deref(),
+            Some("é")
+        );
+        assert_eq!(reader.pending_bytes.load(Ordering::Relaxed), 0);
     }
 }

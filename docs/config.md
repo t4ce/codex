@@ -52,22 +52,23 @@ arguments or launch script are required. A user configuration can disable it:
 trueos_tts = false
 ```
 
-This preference ignores project configuration. The native TUI warms the
-on-demand `ttstt` Blueprint at startup and reuses an existing healthy service.
+This preference ignores project configuration. The native TUI starts the
+on-demand `ptts` Blueprint at startup and reuses an existing healthy service.
 Completed public replies use its loopback speech service. Reasoning, tools, history replay and realtime
 delegated voice replies are excluded. Hidden display directives, code blocks
-and link destinations are omitted; Kokoro's English G2P frontend owns
+and link destinations are omitted; Pocket TTS owns
 pronunciation. No plugin, MCP server, microphone or cloud realtime session is
 required. This setting currently applies to the TRUEOS Rust TUI, not the
 VS Code extension or noninteractive `codex exec`.
 
-ttstt ships the Kokoro model, English G2P and Heart (`af_heart`) voice inside
-the Blueprint. It needs no setup, model directory, downloads or Whisper.
-This integration bundle supports English and Heart only. Startup and speech requests run away from the
-render loop; failures preserve the displayed reply. Pending answers may be
-cleared or replaced, but already playing speech runs to completion. See
-`TRUEOS-Blueprints/apps/ttstt/README.md` for host WAV verification and
-the local service contract.
+`ptts` ships the English Pocket TTS model and Azelma voice inside the Blueprint,
+running Rust CPU inference without Python or a GPU. Its loopback service uses
+port 9773 and protocol `ptts-v1`. Startup and speech requests run away from the
+render loop; failures preserve the displayed reply. Replies enter one FIFO and
+play in order, with no skip or reset controls or age expiry. When waiting text
+exceeds 1 KiB in UTF-8, the producer logs a warning to keep replies small; the
+threshold does not truncate or discard queued speech. See
+`TRUEOS-Blueprints/apps/ptts/README.md` for the local service contract.
 
 Upstream already provides `thread/realtime/appendSpeech`, but it is tied to
 an active cloud realtime conversation ([upstream implementation, checked
