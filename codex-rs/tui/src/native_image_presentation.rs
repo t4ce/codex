@@ -1,6 +1,6 @@
-//! Present images selected by a completed assistant reply in TRUEOS's native img.
+//! Present generated images and assistant reply images in TRUEOS's native img.
 //!
-//! Markdown rendering remains side-effect free. Only live completion takes sources;
+//! Markdown rendering remains side-effect free. Only live completions take sources;
 //! decoding and retained-file writes run away from the terminal event loop.
 
 use base64::Engine;
@@ -36,9 +36,18 @@ pub(crate) struct NativeImagePresentationState {
     completed: VecDeque<(String, String, String)>,
 }
 
-pub(crate) struct ImageSource {
-    destination: String,
-    cwd: PathBuf,
+pub(crate) enum ImageSource {
+    Markdown { destination: String, cwd: PathBuf },
+    GeneratedFile(PathBuf),
+}
+
+impl ImageSource {
+    fn label(&self) -> String {
+        match self {
+            Self::Markdown { destination, .. } => source_label(destination),
+            Self::GeneratedFile(path) => path.display().to_string(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -51,18 +60,16 @@ pub(crate) struct ImagePresentationResult {
 }
 
 impl NativeImagePresentationState {
-    pub(crate) fn take_images(
+    pub(crate) fn is_new_live_completion(
         &mut self,
         thread_id: &str,
         turn_id: &str,
         item_id: &str,
-        markdown: &str,
-        cwd: &Path,
         from_replay: bool,
-    ) -> Vec<ImageSource> {
+    ) -> bool {
         let identity = (thread_id.to_owned(), turn_id.to_owned(), item_id.to_owned());
         if self.completed.contains(&identity) {
-            return Vec::new();
+            return false;
         }
         // Remember replayed identities too: a subsequent duplicate notification
         // does not turn historical content into a request to open a window.
@@ -70,25 +77,26 @@ impl NativeImagePresentationState {
         if self.completed.len() > MAX_COMPLETED_ITEMS {
             self.completed.pop_front();
         }
-        if from_replay {
-            return Vec::new();
-        }
-        let mut seen = HashSet::new();
-        Parser::new(markdown)
-            .filter_map(|event| match event {
-                Event::Start(Tag::Image { dest_url, .. })
-                    if !dest_url.is_empty() && seen.insert(dest_url.to_string()) =>
-                {
-                    Some(ImageSource {
-                        destination: dest_url.to_string(),
-                        cwd: cwd.to_owned(),
-                    })
-                }
-                _ => None,
-            })
-            .take(MAX_IMAGES)
-            .collect()
+        !from_replay
     }
+}
+
+pub(crate) fn markdown_image_sources(markdown: &str, cwd: &Path) -> Vec<ImageSource> {
+    let mut seen = HashSet::new();
+    Parser::new(markdown)
+        .filter_map(|event| match event {
+            Event::Start(Tag::Image { dest_url, .. })
+                if !dest_url.is_empty() && seen.insert(dest_url.to_string()) =>
+            {
+                Some(ImageSource::Markdown {
+                    destination: dest_url.to_string(),
+                    cwd: cwd.to_owned(),
+                })
+            }
+            _ => None,
+        })
+        .take(MAX_IMAGES)
+        .collect()
 }
 
 pub(crate) async fn present_images(
@@ -96,7 +104,13 @@ pub(crate) async fn present_images(
     presentation_root: PathBuf,
     http_client_factory: HttpClientFactory,
 ) -> Vec<ImagePresentationResult> {
-    present_images_with(sources, presentation_root, http_client_factory, native_present).await
+    present_images_with(
+        sources,
+        presentation_root,
+        http_client_factory,
+        native_present,
+    )
+    .await
 }
 
 #[cfg(target_os = "trueos")]
@@ -123,7 +137,7 @@ async fn present_images_with(
     let directory = presentation_root.join("presented_images");
     let mut results = Vec::new();
     for source in sources.into_iter().take(MAX_IMAGES) {
-        let label = source_label(&source.destination);
+        let label = source.label();
         let materialized = match read_source(&source, &client).await {
             Ok(bytes) => {
                 let directory = directory.clone();
@@ -176,7 +190,10 @@ fn source_label(destination: &str) -> String {
 }
 
 async fn read_source(source: &ImageSource, client: &HttpClient) -> Result<Vec<u8>, String> {
-    let destination = &source.destination;
+    let (destination, cwd) = match source {
+        ImageSource::Markdown { destination, cwd } => (destination, cwd),
+        ImageSource::GeneratedFile(path) => return read_local_file(path).await,
+    };
     if destination.starts_with("data:") {
         let (metadata, encoded) = destination
             .split_once(',')
@@ -222,9 +239,13 @@ async fn read_source(source: &ImageSource, client: &HttpClient) -> Result<Vec<u8
     let path = if path.is_absolute() {
         path
     } else {
-        source.cwd.join(path)
+        cwd.join(path)
     };
-    let metadata = tokio::fs::metadata(&path)
+    read_local_file(&path).await
+}
+
+async fn read_local_file(path: &Path) -> Result<Vec<u8>, String> {
+    let metadata = tokio::fs::metadata(path)
         .await
         .map_err(|_| "image file could not be read")?;
     if !metadata.is_file() {

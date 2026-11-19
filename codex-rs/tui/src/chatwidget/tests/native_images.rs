@@ -2,6 +2,73 @@ use super::*;
 use crate::native_image_presentation::ImagePresentationResult;
 
 #[tokio::test]
+async fn native_image_presentation_queues_live_generation_without_a_reply_embed() {
+    let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(None).await;
+    let thread_id = ThreadId::new();
+    chat.thread_id = Some(thread_id);
+    let temp = tempfile::tempdir().unwrap();
+    let saved_path = temp.path().join("generated%20image.png").abs();
+
+    handle_image_generation_end(
+        &mut chat,
+        "failed",
+        "failed",
+        None,
+        Some(saved_path.clone()),
+    );
+    chat.snapshot_local_images = true;
+    handle_image_generation_end(
+        &mut chat,
+        "remote",
+        "completed",
+        None,
+        Some(saved_path.clone()),
+    );
+    chat.snapshot_local_images = false;
+    for _ in 0..2 {
+        handle_image_generation_end(
+            &mut chat,
+            "local",
+            "completed",
+            None,
+            Some(saved_path.clone()),
+        );
+    }
+    let results = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            if let Some(AppEvent::NativeImagePresentationFinished {
+                thread_id: owner,
+                results,
+            }) = rx.recv().await
+            {
+                assert_eq!(owner, thread_id);
+                break results;
+            }
+        }
+    })
+    .await
+    .expect("a completed generation queues presentation even without an assistant reply");
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].source, saved_path.display().to_string());
+    assert_eq!(
+        results[0].error.as_deref(),
+        Some("image file could not be read")
+    );
+    // A duplicate dispatch would create another independently scheduled task.
+    assert!(
+        tokio::time::timeout(Duration::from_millis(100), async {
+            while let Some(event) = rx.recv().await {
+                if matches!(event, AppEvent::NativeImagePresentationFinished { .. }) {
+                    return;
+                }
+            }
+        })
+        .await
+        .is_err()
+    );
+}
+
+#[tokio::test]
 async fn native_image_presentation_live_completion_queues_once_and_reports_failure() {
     let (mut chat, mut rx, _op_rx) = make_chatwidget_manual(None).await;
     let thread_id = ThreadId::new();

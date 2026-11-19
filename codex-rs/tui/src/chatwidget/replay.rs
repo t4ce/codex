@@ -397,6 +397,12 @@ impl ChatWidget {
                 self.on_view_image_tool_call(id, path);
             }
             ThreadItemPayload::ImageGeneration(item) => {
+                #[cfg(any(target_os = "trueos", test))]
+                if item.status == "completed"
+                    && let Some(path) = &item.saved_path
+                {
+                    self.present_native_generated_image(path, &turn_id, &item.id, from_replay);
+                }
                 self.on_image_generation_end(
                     item.id,
                     item.status,

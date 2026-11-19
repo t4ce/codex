@@ -8,8 +8,7 @@ use wiremock::matchers::method;
 use wiremock::matchers::path;
 
 fn sources(markdown: &str, cwd: &Path) -> Vec<ImageSource> {
-    NativeImagePresentationState::default()
-        .take_images("thread", "turn", "message", markdown, cwd, false)
+    markdown_image_sources(markdown, cwd)
 }
 
 fn factory() -> HttpClientFactory {
@@ -42,7 +41,10 @@ fn extracts_only_markdown_images_with_reference_and_literal_path_support() {
 "#;
     let found: Vec<_> = sources(markdown, Path::new("/workspace"))
         .into_iter()
-        .map(|source| source.destination)
+        .map(|source| match source {
+            ImageSource::Markdown { destination, .. } => destination,
+            ImageSource::GeneratedFile(_) => panic!("expected a Markdown source"),
+        })
         .collect();
     assert_eq!(
         found,
@@ -59,32 +61,13 @@ fn extracts_only_markdown_images_with_reference_and_literal_path_support() {
 #[test]
 fn completion_identity_and_replay_prevent_reopening_with_bounded_state() {
     let mut state = NativeImagePresentationState::default();
-    let cwd = Path::new("/workspace");
-    let image = "![map](map.png)";
-    assert_eq!(state.take_images("a", "b", "c", image, cwd, false).len(), 1);
-    assert!(
-        state
-            .take_images("a", "b", "c", image, cwd, false)
-            .is_empty()
-    );
-    assert_eq!(
-        state
-            .take_images("other-thread", "b", "c", image, cwd, false)
-            .len(),
-        1
-    );
-    assert!(
-        state
-            .take_images("a", "b", "replayed", image, cwd, true)
-            .is_empty()
-    );
-    assert!(
-        state
-            .take_images("a", "b", "replayed", image, cwd, false)
-            .is_empty()
-    );
+    assert!(state.is_new_live_completion("a", "b", "c", false));
+    assert!(!state.is_new_live_completion("a", "b", "c", false));
+    assert!(state.is_new_live_completion("other-thread", "b", "c", false));
+    assert!(!state.is_new_live_completion("a", "b", "replayed", true));
+    assert!(!state.is_new_live_completion("a", "b", "replayed", false));
     for n in 0..MAX_COMPLETED_ITEMS + 1 {
-        state.take_images("a", "b", &n.to_string(), image, cwd, false);
+        state.is_new_live_completion("a", "b", &n.to_string(), false);
     }
     assert_eq!(state.completed.len(), MAX_COMPLETED_ITEMS);
 }
@@ -97,7 +80,31 @@ fn repeated_destinations_are_taken_once_and_native_source_cap_applies() {
         .join("\n");
     let found = sources(&markdown, Path::new("/workspace"));
     assert_eq!(found.len(), MAX_IMAGES);
-    assert_eq!(found.last().unwrap().destination, "map31.png");
+    assert_eq!(found.last().unwrap().label(), "map31.png");
+}
+
+#[tokio::test]
+async fn generated_file_is_read_by_literal_path_and_sent_to_img() {
+    let home = tempfile::tempdir().unwrap();
+    let workspace = tempfile::tempdir().unwrap();
+    let path = workspace.path().join("generated%20image.png");
+    let original = image_bytes(ImageFormat::Png);
+    std::fs::write(&path, &original).unwrap();
+
+    let results = present_images_with(
+        vec![ImageSource::GeneratedFile(path.clone())],
+        home.path().to_owned(),
+        factory(),
+        |paths| {
+            assert_eq!(paths.len(), 1);
+            assert!(Path::new(&paths[0]).starts_with(home.path().join("presented_images")));
+            assert_eq!(std::fs::read(&paths[0]).unwrap(), original);
+            Ok(())
+        },
+    )
+    .await;
+    assert!(results[0].error.is_none());
+    assert_eq!(std::fs::read(path).unwrap(), original);
 }
 
 #[tokio::test]
