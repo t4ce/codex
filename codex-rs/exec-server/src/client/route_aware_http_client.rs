@@ -95,6 +95,23 @@ impl RouteAwareHttpClient {
         }
     }
 
+    /// Connects directly while retaining the factory's destination policy and refusing redirects.
+    #[cfg(target_os = "trueos")]
+    pub fn direct_without_redirects(http_client_factory: HttpClientFactory) -> Self {
+        let pool = RouteAwareClientPool::with_builder(
+            http_client_factory,
+            ClientRouteClass::Other,
+            codex_transport::http::HttpClientBuilder::new()
+                .without_redirects()
+                .without_request_logging(),
+        )
+        .with_direct_proxy();
+        Self {
+            follow_redirects: pool.clone(),
+            stop_redirects: pool,
+        }
+    }
+
     /// Enables narrowly scoped TLS-backend fallback for both redirect policies.
     pub fn with_tls_backend_fallback(mut self) -> Self {
         self.follow_redirects = self.follow_redirects.with_tls_backend_fallback();

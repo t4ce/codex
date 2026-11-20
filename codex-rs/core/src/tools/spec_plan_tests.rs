@@ -962,6 +962,28 @@ async fn request_user_input_stays_direct_in_code_mode_only() {
     assert!(!exec.description.contains("request_user_input"));
 }
 
+#[cfg(target_os = "trueos")]
+#[tokio::test]
+async fn native_spirit_stays_direct_in_code_mode_only() {
+    for (mode, exposure, nested) in [
+        (ToolMode::Direct, ToolExposure::Direct, false),
+        (ToolMode::CodeMode, ToolExposure::Direct, true),
+        (ToolMode::CodeModeOnly, ToolExposure::DirectModelOnly, false),
+    ] {
+        let plan = probe(|turn| {
+            turn.code_mode_available = true;
+            update_turn_settings_for_test(turn, |settings| {
+                Arc::make_mut(&mut settings.model_info).tool_mode = Some(mode);
+            });
+        })
+        .await;
+
+        plan.assert_visible_contains(&["spirit"]);
+        assert_eq!(plan.exposure("spirit"), exposure);
+        assert_eq!(plan.code_mode_tool_names.contains_key("spirit"), nested);
+    }
+}
+
 #[tokio::test]
 async fn shell_family_registers_only_unified_exec_tools() {
     let plan = probe(|turn| {

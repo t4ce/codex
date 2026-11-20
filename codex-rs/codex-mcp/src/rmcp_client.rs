@@ -1434,6 +1434,10 @@ pub(crate) async fn make_rmcp_client(
     protocol_mode: McpProtocolMode,
 ) -> Result<RmcpClient, StartupOutcomeError> {
     let config = server.config().clone();
+    #[cfg(target_os = "trueos")]
+    let native_lico = crate::trueos_lico::is_builtin_endpoint(&config);
+    #[cfg(not(target_os = "trueos"))]
+    let native_lico = false;
     if server.credential_policy() == McpCredentialPolicy::ExecutorOnly {
         // Executor HTTP declarations cannot acquire host header helpers through
         // cached registration materialization.
@@ -1564,7 +1568,14 @@ pub(crate) async fn make_rmcp_client(
             } else {
                 false
             };
-            let (http_client, resolved_bearer_token) = if executor_resolves_bearer_token
+            let (http_client, resolved_bearer_token) = if native_lico {
+                // The kernel supplies peer authorization for this direct HTTP
+                // connection. Do not load or send stored OAuth credentials.
+                (
+                    http_client,
+                    Some(StreamableHttpBearerToken::ProvidedByHttpClient),
+                )
+            } else if executor_resolves_bearer_token
                 && let Some(env_var) = bearer_token_env_var.as_ref()
             {
                 (

@@ -8,6 +8,9 @@ use codex_protocol::models::input_text;
 
 pub(crate) struct EnvironmentsInstructions;
 
+#[cfg(target_os = "trueos")]
+pub(super) const TRUEOS_GUIDANCE_HEADING: &str = "## Local TRUEOS tools";
+
 impl ContextualUserFragment for EnvironmentsInstructions {
     fn content_kind(&self) -> ContentItemKind {
         ContentItemKind("environments.instructions".to_string())
@@ -38,7 +41,12 @@ Wait only when the current task needs that environment. Continue using tools tha
             .to_string();
         #[cfg(target_os = "trueos")]
         let body = format!(
-            "{body}\nThe local runtime is TRUEOS. Call `help` for local capabilities and native command groups before opening a command session; Codex answers it locally. For small numeric computations, use `calculate` to call TRUEOS's synchronous calculator ABI directly; call it with no arguments to discover operations. For filesystem discovery, call `list_directory` with no path to start at the environment cwd, then use the returned paths with `file_info`, `read_file`, and `write_file`. These tools use the selected environment's filesystem and permissions. Build-host checkout paths are not automatically present in this runtime. Spirit starts configured with Lilly as her avatar at TRUEOS boot. Use `/spirit` for integration information and the permanent `spirit` tool for native OS interaction. Spirit manages avatar presentation, animation transitions, and paired input sequencing. The tool accesses the same resident service and native UI4: windows lists targets; focus then observe returns an actual image and coordinate metadata; pointer/type/key act on the observed target. Pointer coordinates are selected-window grid units 0..1000; move instead positions Lilly's hardware avatar on the scanout in 0..1 coordinates. Spirit is available automatically in every TRUEOS Codex session. Local `exec_command` always sends actual Shell3 keyboard input under the initiating user's permissions, regardless of tty: exact AppDB app names run in CMD, `§§name` requests an online app, and Tab changes mode. Session input stays open for `write_stdin` until exit or cancellation; output contains terminal updates. Command group labels are not prefixes. Use the direct filesystem tools for file operations. Remote environments retain their reported filesystem and shell semantics.\n"
+            "{body}\n{TRUEOS_GUIDANCE_HEADING}\n\
+- Open app or desktop task: call `spirit` with `action=windows` first, then `action=observe` with the target `window_id`. This focuses the shared UI4 window and returns a PNG and its coordinate grid in one call. Use `pointer`, `type`, and `key` to perform the requested UI work, then observe to verify it. A request for a UI outcome is enough to choose and carry out routine input steps. `pointer` uses the window's 0..1000 grid. `move` moves Lilly herself in 0..1 scanout coordinates. `filmstrip` samples a window over time.\n\
+- `windows` lists visible frames shared with Spirit. If the requested open window is missing, tell the user to right-drag that window onto the green circle around Lilly and release, then check again. Shared windows show an AI badge. A Document Control or app MCP inventory only describes its own integration. The native UI path works independently.\n\
+- Use collaboration tools for independent work when that helps complete the task. A simple cursor move or a short UI sequence can be done directly. Lilly's UI4 window selection, pointer, and keyboard are shared, so designate one agent to drive them while other agents handle independent work.\n\
+- For ordinary files use `list_directory`, `file_info`, `read_file`, `write_file`, and `copy_file`. With no path, `list_directory` starts in the environment cwd. Use the returned paths and the environment's own filesystem permissions. Host checkout paths may be absent. Use `calculate` for small local computations.\n\
+- For a native command or app launch, call `help` for the live AppDB and Shell3 groups. Local `exec_command` sends keyboard input to Shell3 under the initiating user's permissions. Send an exact AppDB name in CMD, `§§name` followed by Enter for an online app, or Tab to change mode (CMD → ADM → HV → CMD). Group names are labels. Use `write_stdin` for follow-up input until exit or cancellation. The local command accepts Shell3 input without Unix argv, shell, login, or workdir options. Remote environments use their reported shell and filesystem.\n"
         );
         input_text(body)
     }

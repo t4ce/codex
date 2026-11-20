@@ -644,6 +644,28 @@ fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
 }
 
 #[test]
+fn lico_packaged_default_is_local_optional_and_automatic() {
+    let config: ConfigToml =
+        toml::from_str(include_str!("../../defaults.trueos.toml")).expect("valid TRUEOS defaults");
+    let server = &config.mcp_servers["lico"];
+    assert!(server.enabled);
+    assert!(!server.required);
+    assert!(server.is_local_environment());
+    let crate::McpServerTransportConfig::StreamableHttp {
+        url,
+        bearer_token_env_var,
+        http_headers,
+        ..
+    } = &server.transport
+    else {
+        panic!("Lico must use the kernel-protected HTTP endpoint");
+    };
+    assert_eq!(url, "http://127.0.0.1:42127/mcp");
+    assert!(bearer_token_env_var.is_none());
+    assert!(http_headers.is_none());
+}
+
+#[test]
 fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
     let config: ConfigToml =
         toml::from_str(TRUEOS_EMBEDDED_PACKAGED_DEFAULTS).expect("valid TRUEOS defaults");
@@ -728,6 +750,10 @@ async fn embedded_xerj_defaults_are_native_only_and_follow_config_precedence() {
     );
     assert_eq!(
         config.mcp_servers.contains_key("robomcp"),
+        cfg!(target_os = "trueos")
+    );
+    assert_eq!(
+        config.mcp_servers.contains_key("lico"),
         cfg!(target_os = "trueos")
     );
     if !cfg!(target_os = "trueos") {

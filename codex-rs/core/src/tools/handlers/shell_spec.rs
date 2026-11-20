@@ -101,7 +101,7 @@ pub(crate) fn create_exec_command_tool_with_environment_id(
     ToolSpec::Function(ResponsesApiTool {
         name: "exec_command".to_string(),
         description: if cfg!(target_os = "trueos") {
-            "For local TRUEOS discovery, call help first. Executes actual Shell3 keyboard input with the initiating user's permissions and returns terminal output plus a session ID for continued input through write_stdin. AppDB app names, native `§§name` launches, Tab modes and hypervisor controls use the same parser as the user. Sessions remain open until exit or cancellation; a prompt does not end them. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
+            "Use this for TRUEOS Shell3 commands and app launches. For an open app, use spirit. For ordinary files, use the filesystem tools. Call help first for exact AppDB names and native commands. Local exec_command sends keyboard input to Shell3 with the initiating user's permissions and returns terminal output plus a session ID for write_stdin. AppDB names, native `§§name` launches, Tab modes and hypervisor controls use the same parser as the user. Sessions remain open until exit or cancellation; a prompt does not end them. The native `§<slot>§` operator frees a named Matrix slot. Remote environments retain their own shell semantics.".into()
         } else if include_windows_shell_guidance {
             format!(
                 "Runs a command in a PTY, returning output or a session ID for ongoing interaction.\n\n{}",

@@ -106,6 +106,9 @@ pub(crate) fn effective_multi_agent_mode(step_context: &StepContext) -> Option<M
                 };
             match message {
                 ResolvedMessage::Catalog(text) => MultiAgentMode::Custom(text.to_owned()),
+                ResolvedMessage::Bundled(_) if cfg!(target_os = "trueos") => {
+                    MultiAgentMode::Proactive
+                }
                 ResolvedMessage::Bundled(_) => builtin,
             }
         }

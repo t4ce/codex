@@ -28,6 +28,7 @@ const MAX_ALIAS_LINE_BYTES: usize = 1024;
 const MAX_APPDB_MANIFEST_BYTES: usize = 64 * 1024;
 const MAX_APPDB_NAMES: usize = 512;
 const MAX_APPDB_LINE_BYTES: usize = 8192;
+pub(super) const SPIRIT_SHARE_WINDOW: &str = "Right-drag the open window onto the green circle around Lilly and release. A shared window shows an AI badge.";
 
 include!(concat!(env!("OUT_DIR"), "/trueos_shell3_catalog.rs"));
 
@@ -145,8 +146,8 @@ fn render_help(
         String::from(
             "calculator=calculate with no arguments lists the native operation registry; calculate with operation=\"add\" and arguments=[20,22] returns 42 through the synchronous TRUEOS calculator ABI",
         ),
-        String::from(
-            "spirit=automatically configured at TRUEOS boot, with Lilly as her avatar; /spirit shows integration information; use the spirit tool for native OS interaction, with presentation and input sequencing managed by Spirit: action=windows lists live targets; focus then observe returns a PNG and target grid; filmstrip captures 8 to 16 samples of the selected shared window over 1 to 10 seconds in one PNG; pointer/type/key operate the observed target; pointer uses 0..1000 window coordinates while move uses 0..1 hardware-avatar scanout coordinates; emotion selects an expression",
+        format!(
+            "spirit=use the spirit tool for native UI4. action=windows lists the visible windows shared with Spirit. action=observe with window_id selects a window and returns its PNG and input grid. Use pointer/type/key in that window and observe again to verify. Pointer uses the window's 0..1000 grid. The move action positions Lilly herself in 0..1 scanout coordinates. Filmstrip samples a window over time. If the open target is missing, the user can share it. {SPIRIT_SHARE_WINDOW}",
         ),
         String::from(
             "shell=TRUEOS Shell3 native keyboard input, not POSIX argv or bash; every local exec_command uses the actual Shell3 parser and returns terminal updates, regardless of tty",

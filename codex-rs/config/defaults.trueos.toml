@@ -31,3 +31,9 @@ XERJ_DISABLE_FEEDBACK = "true"
 command = "robomcp"
 enabled = false
 required = false
+
+# Lico is discovered when its protected local endpoint is reachable.
+[mcp_servers.lico]
+url = "http://127.0.0.1:42127/mcp"
+required = false
+startup_timeout_sec = 1

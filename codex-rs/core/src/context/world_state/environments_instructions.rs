@@ -22,6 +22,10 @@ impl WorldStateSection for EnvironmentsInstructionsState {
     type Snapshot = bool;
 
     fn matches_legacy_fragment(role: &str, text: &str) -> bool {
+        #[cfg(target_os = "trueos")]
+        if !text.contains(crate::context::environments_instructions::TRUEOS_GUIDANCE_HEADING) {
+            return false;
+        }
         role == "developer" && EnvironmentsInstructions::matches_text(text)
     }
 

@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::sync::Mutex;
+use std::time::Duration;
 
 use codex_protocol::models::DEFAULT_IMAGE_DETAIL;
 use codex_protocol::models::FunctionCallOutputBody;
@@ -18,8 +19,10 @@ use codex_utils_image::data_url_from_bytes;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
+use tokio::time::Instant;
 use trueos::spirit;
 
+use super::trueos_help::SPIRIT_SHARE_WINDOW;
 use super::trueos_spirit_filmstrip::FilmstripRequest;
 use crate::function_tool::FunctionCallError;
 use crate::tools::context::ToolInvocation;
@@ -34,6 +37,24 @@ use crate::tools::registry::ToolExecutor;
 // Observe reads several pieces of a VM-scoped snapshot. Serialize it with
 // focus and other Spirit calls in this process, releasing between samples.
 static SPIRIT_CALL: Mutex<()> = Mutex::new(());
+const UI4_RETRY_DELAY: Duration = Duration::from_millis(50);
+const UI4_RETRY_TIMEOUT: Duration = Duration::from_secs(8);
+const NAMED_KEYS: &[(&str, spirit::Ui4Key)] = &[
+    ("enter", spirit::Ui4Key::Enter),
+    ("escape", spirit::Ui4Key::Escape),
+    ("tab", spirit::Ui4Key::Tab),
+    ("space", spirit::Ui4Key::Space),
+    ("backspace", spirit::Ui4Key::Backspace),
+    ("up", spirit::Ui4Key::Up),
+    ("down", spirit::Ui4Key::Down),
+    ("left", spirit::Ui4Key::Left),
+    ("right", spirit::Ui4Key::Right),
+    ("delete", spirit::Ui4Key::Delete),
+    ("home", spirit::Ui4Key::Home),
+    ("end", spirit::Ui4Key::End),
+    ("page_up", spirit::Ui4Key::PageUp),
+    ("page_down", spirit::Ui4Key::PageDown),
+];
 
 pub struct SpiritHandler {
     include_environment_id: bool,
@@ -51,14 +72,33 @@ impl SpiritHandler {
 #[serde(tag = "action", rename_all = "snake_case", deny_unknown_fields)]
 enum SpiritAction {
     Windows {},
-    Focus { window_id: String },
-    Observe {},
+    Focus {
+        window_id: String,
+    },
+    Observe {
+        window_id: Option<String>,
+    },
     Filmstrip(FilmstripRequest),
-    Pointer { x: u16, y: u16, kind: PointerKind },
-    Type { text: String },
-    Key { key: Key },
-    Move { x: f32, y: f32 },
-    Emotion { idea: Emotion },
+    Pointer {
+        x: u16,
+        y: u16,
+        kind: PointerKind,
+    },
+    Type {
+        text: String,
+    },
+    Key {
+        key: String,
+        #[serde(default)]
+        modifiers: Vec<KeyModifier>,
+    },
+    Move {
+        x: f32,
+        y: f32,
+    },
+    Emotion {
+        idea: Emotion,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -70,16 +110,11 @@ enum PointerKind {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
-enum Key {
-    Enter,
-    Escape,
-    Tab,
-    Space,
-    Backspace,
-    Up,
-    Down,
-    Left,
-    Right,
+enum KeyModifier {
+    Control,
+    Shift,
+    Alt,
+    Meta,
 }
 
 #[derive(Debug, Deserialize)]
@@ -98,7 +133,7 @@ impl SpiritAction {
         match self {
             Self::Windows {} => "windows",
             Self::Focus { .. } => "focus",
-            Self::Observe {} => "observe",
+            Self::Observe { .. } => "observe",
             Self::Filmstrip(_) => "filmstrip",
             Self::Pointer { .. } => "pointer",
             Self::Type { .. } => "type",
@@ -110,7 +145,9 @@ impl SpiritAction {
 
     fn validate(&self) -> Result<(), String> {
         match self {
-            Self::Focus { window_id } if window_id.parse::<u32>().ok().is_none_or(|id| id == 0) =>
+            Self::Focus { window_id }
+            | Self::Observe { window_id: Some(window_id) }
+                if window_id.parse::<u32>().ok().is_none_or(|id| id == 0) =>
                 Err("window_id must be a nonzero decimal id returned by spirit action=windows".into()),
             Self::Pointer { x, y, .. } if *x > 1000 || *y > 1000 =>
                 Err("pointer coordinates use the observed selected-window grid, inclusive 0..1000".into()),
@@ -118,6 +155,8 @@ impl SpiritAction {
                 Err("move coordinates position the hardware avatar on the scanout, inclusive 0..1".into()),
             Self::Type { text } if text.is_empty() || text.len() > 1024 || text.chars().count() > 64 =>
                 Err("type accepts 1..64 Unicode scalars and at most 1024 UTF-8 bytes per call; send longer text in ordered chunks".into()),
+            Self::Key { key, .. } if native_key(key).is_none() =>
+                Err("key must be a named key or a lowercase ASCII letter a..z".into()),
             _ => Ok(()),
         }
     }
@@ -138,6 +177,15 @@ fn parse_request(arguments: &str) -> Result<(SpiritAction, Option<String>), Func
     Ok((action, environment_id))
 }
 
+fn native_key(key: &str) -> Option<spirit::Ui4Key> {
+    if let [letter @ b'a'..=b'z'] = key.as_bytes() {
+        return Some(spirit::Ui4Key::Letter(char::from(*letter)));
+    }
+    NAMED_KEYS
+        .iter()
+        .find_map(|(name, native)| (*name == key).then_some(*native))
+}
+
 fn names(values: &[&str], description: &str) -> JsonSchema {
     JsonSchema::string_enum(
         values.iter().map(|value| json!(value)).collect(),
@@ -147,10 +195,15 @@ fn names(values: &[&str], description: &str) -> JsonSchema {
 
 fn spirit_spec(include_environment_id: bool) -> ToolSpec {
     let mut variants = Vec::new();
+    let keys = NAMED_KEYS
+        .iter()
+        .map(|(name, _)| json!(name))
+        .chain(('a'..='z').map(|letter| json!(letter)))
+        .collect();
     for (action, fields) in [
         ("windows", vec![]),
         ("focus", vec![("window_id", JsonSchema::string(Some("Decimal window id from windows inventory.".into())))]),
-        ("observe", vec![]),
+        ("observe", vec![("window_id", JsonSchema::string(Some("Decimal window id from windows. Omit to refresh the selected window. When provided, select the window before capturing it.".into())))]),
         ("filmstrip", vec![
             ("duration_seconds", JsonSchema::integer(Some("Capture duration from 1 to 10 seconds.".into()))),
             ("frames", JsonSchema::integer(Some("8 to 16 evenly spaced samples. Defaults to 12. Fewer frames give each tile more space.".into()))),
@@ -161,7 +214,13 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
             ("kind", names(&["move", "click"], "Move Spirit's software pointer or queue one primary click.")),
         ]),
         ("type", vec![("text", JsonSchema::string(Some("1..64 Unicode scalars, at most 1024 UTF-8 bytes. Input is queued through Spirit's paired keyboard.".into())))]),
-        ("key", vec![("key", names(&["enter", "escape", "tab", "space", "backspace", "up", "down", "left", "right"], "One key on Spirit's paired keyboard."))]),
+        ("key", vec![
+            ("key", JsonSchema::string_enum(keys, Some("One named key or lowercase letter on Spirit's paired keyboard.".into()))),
+            ("modifiers", JsonSchema::array(
+                names(&["control", "shift", "alt", "meta"], "Keyboard modifier."),
+                Some("Optional held modifiers. For Alt+R use key r and modifiers [alt].".into()),
+            )),
+        ]),
         ("move", vec![
             ("x", JsonSchema::number(Some("Hardware avatar horizontal scanout position, inclusive 0..1.".into()))),
             ("y", JsonSchema::number(Some("Hardware avatar vertical scanout position, inclusive 0..1.".into()))),
@@ -172,7 +231,7 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
         let mut required = vec!["action".into()];
         for (name, schema) in fields {
             properties.insert(name.into(), schema);
-            if name != "frames" {
+            if !matches!((action, name), ("filmstrip", "frames") | ("observe", "window_id") | ("key", "modifiers")) {
                 required.push(name.into());
             }
         }
@@ -186,7 +245,7 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
     parameters.one_of = Some(variants.into());
     ToolSpec::Function(ResponsesApiTool {
         name: "spirit".into(),
-        description: "Use resident TRUEOS Spirit directly for native OS interaction. Spirit is configured automatically at OS boot, with Lilly as her avatar. /spirit shows the native integration information. Spirit manages avatar presentation, animation transitions, and paired input sequencing. windows lists live UI4 windows; focus selects one; observe returns its actual PNG and coordinate metadata. filmstrip samples that same shared window over 1 to 10 seconds and returns one PNG with tiles in time order and their timestamps in metadata. Use it to inspect dynamic UI. Before pointer/type/key, focus then observe the current target; observe again after focus or window geometry changes. pointer uses selected-window grid coordinates 0..1000. move positions Lilly's hardware avatar on the scanout using 0..1 coordinates. emotion requests an expression. Input actions are queued, not proof of completion: observe to verify results. Calls are serial; BUSY means nothing from this call was queued, so wait and retry it. Do not replay accepted text or clicks. This tool is available automatically in every TRUEOS Codex session.".into(),
+        description: "Use this native tool first for open TRUEOS apps. Call windows for visible UI4 windows shared with Spirit, then observe with window_id to select and see the target in one call. Send pointer/type/key as needed and observe again to verify the visible result. Pointer moves or clicks within the observed window's 0..1000 grid. The separate move action positions Lilly herself in 0..1 scanout coordinates. For a shortcut, send key with modifiers. Filmstrip samples the selected window over 1 to 10 seconds, and emotion requests a Lilly expression. Focus is also available on its own. Observe again after a selection or geometry change. Input actions queue once. Calls wait briefly for earlier input to drain, and BUSY means this call queued nothing. Only one agent should drive the shared UI at a time. Spirit works independently of app MCP and Document Control.".into(),
         strict: false,
         defer_loading: None,
         parameters,
@@ -204,10 +263,22 @@ fn native_error(action: &SpiritAction, code: spirit::Error) -> FunctionCallError
             "earlier Spirit input is still draining; this call queued nothing; wait and retry this call"
         }
         spirit::UI4_BAD_STATE => {
-            "focus the target and observe it again before sending pointer or keyboard input"
+            "call observe with the target window_id again before sending pointer or keyboard input"
         }
         spirit::UI4_NOT_FOUND => {
             "target is no longer available; refresh windows and select a live target"
+        }
+        spirit::UI4_DENIED
+            if !matches!(
+                action,
+                SpiritAction::Windows {} | SpiritAction::Move { .. } | SpiritAction::Emotion { .. }
+            ) =>
+        {
+            return error(format!(
+                "spirit {} lost or was denied native access (code {}). Check windows again. If the target is missing, share it from the desktop. {SPIRIT_SHARE_WINDOW}",
+                action.name(),
+                code.0,
+            ));
         }
         spirit::UI4_DENIED => "the running Blueprint does not have native Spirit UI access",
         spirit::UI4_BAD_INPUT => "the native API rejected this action's input",
@@ -228,32 +299,98 @@ struct SpiritOutput {
     image_url: Option<String>,
 }
 
-fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
+fn with_spirit<T>(call: impl FnOnce() -> T) -> T {
     let _call = SPIRIT_CALL
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
+    call()
+}
+
+async fn wait_for_ui4<T>(
+    mut call: impl FnMut() -> Result<T, spirit::Error>,
+) -> Result<T, spirit::Error> {
+    let deadline = Instant::now() + UI4_RETRY_TIMEOUT;
+    loop {
+        match with_spirit(&mut call) {
+            Err(spirit::UI4_BUSY) if Instant::now() < deadline => {
+                tokio::time::sleep_until((Instant::now() + UI4_RETRY_DELAY).min(deadline)).await;
+            }
+            result => return result,
+        }
+    }
+}
+
+async fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
     let mut value = json!({"backend":"trueos_spirit", "action":action.name()});
     let mut image_url = None;
     match action {
         SpiritAction::Windows {} => {
-            let inventory = spirit::ui4_windows().map_err(|code| native_error(action, code))?;
+            let inventory =
+                with_spirit(spirit::ui4_windows).map_err(|code| native_error(action, code))?;
             value["inventory"] = serde_json::from_str(&inventory).map_err(error)?;
+            value["scope"] = json!("Visible UI4 windows shared with Spirit");
+            value["share_window"] = json!(SPIRIT_SHARE_WINDOW);
         }
-        SpiritAction::Observe {} => {
-            let observation = spirit::ui4_observe().map_err(|code| native_error(action, code))?;
+        SpiritAction::Observe { window_id } => {
+            let window_id = window_id
+                .as_deref()
+                .map(str::parse::<u64>)
+                .transpose()
+                .map_err(error)?;
+            let observation = wait_for_ui4(|| {
+                if let Some(id) = window_id {
+                    spirit::ui4_focus(id)?;
+                }
+                spirit::ui4_observe()
+            })
+            .await
+            .map_err(|code| native_error(action, code))?;
             if !observation.png.starts_with(b"\x89PNG\r\n\x1a\n") {
                 return Err(error(
                     "native Spirit observation did not contain a PNG image",
                 ));
             }
-            value["observation"] = serde_json::from_str(&observation.metadata).map_err(error)?;
+            let metadata: Value = serde_json::from_str(&observation.metadata).map_err(error)?;
+            if let Some(id) = window_id
+                && metadata["id"].as_str().and_then(|id| id.parse().ok()) != Some(id)
+            {
+                return Err(error(
+                    "Spirit's selected window changed during capture; observe again with the target window_id",
+                ));
+            }
+            value["observation"] = metadata;
             image_url = Some(data_url_from_bytes("image/png", &observation.png));
         }
-        _ => {
-            let result = match action {
-                SpiritAction::Focus { window_id } => {
-                    spirit::ui4_focus(window_id.parse().map_err(error)?)
-                }
+        SpiritAction::Focus { window_id } => {
+            let window_id = window_id.parse().map_err(error)?;
+            wait_for_ui4(|| spirit::ui4_focus(window_id))
+                .await
+                .map_err(|code| native_error(action, code))?;
+            value["accepted"] = json!(true);
+            value["completion"] = json!("selected; observe before sending input");
+        }
+        SpiritAction::Move { x, y } => {
+            with_spirit(|| spirit::move_to(*x, *y)).map_err(|code| native_error(action, code))?;
+            value["accepted"] = json!(true);
+            value["completion"] = json!("queued");
+        }
+        SpiritAction::Emotion { idea } => {
+            with_spirit(|| {
+                spirit::play_emotion(match idea {
+                    Emotion::Anger => "anger",
+                    Emotion::Disgust => "disgust",
+                    Emotion::Fear => "fear",
+                    Emotion::Joy => "joy",
+                    Emotion::Sadness => "sadness",
+                    Emotion::Surprise => "surprise",
+                })
+            })
+            .map_err(|code| native_error(action, code))?;
+            value["accepted"] = json!(true);
+            value["completion"] = json!("queued");
+        }
+        SpiritAction::Pointer { .. } | SpiritAction::Type { .. } | SpiritAction::Key { .. } => {
+            wait_for_ui4(|| match action {
                 SpiritAction::Pointer { x, y, kind } => spirit::ui4_pointer(
                     *x,
                     *y,
@@ -263,34 +400,26 @@ fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
                     },
                 ),
                 SpiritAction::Type { text } => spirit::ui4_type(text),
-                SpiritAction::Key { key } => spirit::ui4_key(match key {
-                    Key::Enter => spirit::Ui4Key::Enter,
-                    Key::Escape => spirit::Ui4Key::Escape,
-                    Key::Tab => spirit::Ui4Key::Tab,
-                    Key::Space => spirit::Ui4Key::Space,
-                    Key::Backspace => spirit::Ui4Key::Backspace,
-                    Key::Up => spirit::Ui4Key::Up,
-                    Key::Down => spirit::Ui4Key::Down,
-                    Key::Left => spirit::Ui4Key::Left,
-                    Key::Right => spirit::Ui4Key::Right,
-                }),
-                SpiritAction::Move { x, y } => spirit::move_to(*x, *y),
-                SpiritAction::Emotion { idea } => spirit::play_emotion(match idea {
-                    Emotion::Anger => "anger",
-                    Emotion::Disgust => "disgust",
-                    Emotion::Fear => "fear",
-                    Emotion::Joy => "joy",
-                    Emotion::Sadness => "sadness",
-                    Emotion::Surprise => "surprise",
-                }),
-                SpiritAction::Windows {}
-                | SpiritAction::Observe {}
-                | SpiritAction::Filmstrip(_) => unreachable!(),
-            };
-            result.map_err(|code| native_error(action, code))?;
+                SpiritAction::Key { key, modifiers } => {
+                    let key = native_key(key).ok_or(spirit::UI4_BAD_INPUT)?;
+                    let modifiers = modifiers.iter().fold(0, |bits, modifier| {
+                        bits | match modifier {
+                            KeyModifier::Control => spirit::UI4_KEY_CONTROL,
+                            KeyModifier::Shift => spirit::UI4_KEY_SHIFT,
+                            KeyModifier::Alt => spirit::UI4_KEY_ALT,
+                            KeyModifier::Meta => spirit::UI4_KEY_META,
+                        }
+                    });
+                    spirit::ui4_key_with_modifiers(key, modifiers)
+                }
+                _ => unreachable!("handled before the input queue"),
+            })
+            .await
+            .map_err(|code| native_error(action, code))?;
             value["accepted"] = json!(true);
             value["completion"] = json!("queued; observe to verify the visible result");
         }
+        SpiritAction::Filmstrip(_) => unreachable!("filmstrip is handled separately"),
     }
     Ok(SpiritOutput { value, image_url })
 }
@@ -325,7 +454,7 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
             }
             if matches!(
                 action,
-                SpiritAction::Observe {} | SpiritAction::Filmstrip(_)
+                SpiritAction::Observe { .. } | SpiritAction::Filmstrip(_)
             ) && !invocation
                 .step_context
                 .settings
@@ -340,11 +469,8 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
             }
             if let SpiritAction::Filmstrip(request) = &action {
                 let capture = request.capture(|| {
-                    let _call = SPIRIT_CALL
-                        .lock()
-                        .unwrap_or_else(std::sync::PoisonError::into_inner);
-                    let observation =
-                        spirit::ui4_observe().map_err(|code| native_error(&action, code))?;
+                    let observation = with_spirit(spirit::ui4_observe)
+                        .map_err(|code| native_error(&action, code))?;
                     Ok((observation.metadata, observation.png))
                 });
                 let (metadata, png) = tokio::select! {
@@ -359,7 +485,14 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
                     image_url: Some(data_url_from_bytes("image/png", &png)),
                 }));
             }
-            Ok(boxed_tool_output(execute(&action)?))
+            let output = tokio::select! {
+                biased;
+                _ = invocation.cancellation_token.cancelled() => {
+                    return Err(error("Spirit action was cancelled"));
+                }
+                result = execute(&action) => result?,
+            };
+            Ok(boxed_tool_output(output))
         })
     }
 }
@@ -429,6 +562,10 @@ mod tests {
             json!({"action":"pointer","x":1000,"y":0,"kind":"click"}),
             json!({"action":"move","x":0.25,"y":1.0}),
             json!({"action":"focus","window_id":"42","environment_id":"local"}),
+            json!({"action":"observe"}),
+            json!({"action":"observe","window_id":"42"}),
+            json!({"action":"key","key":"r","modifiers":["alt"]}),
+            json!({"action":"key","key":"enter","modifiers":["control"]}),
             json!({"action":"filmstrip","duration_seconds":2}),
         ] {
             assert!(parse_request(&input.to_string()).is_ok(), "{input}");
@@ -438,8 +575,11 @@ mod tests {
             json!({"action":"move","x":500,"y":1}),
             json!({"action":"windows","text":"unexpected"}),
             json!({"action":"focus","window_id":"0"}),
+            json!({"action":"observe","window_id":"expired"}),
             json!({"action":"emotion","idea":"arbitrary animation"}),
             json!({"action":"key","key":"unsupported"}),
+            json!({"action":"key","key":"R"}),
+            json!({"action":"key","key":"r","modifiers":["unknown"]}),
         ] {
             assert!(parse_request(&input.to_string()).is_err(), "{input}");
         }
@@ -519,5 +659,29 @@ mod tests {
             panic!("model error")
         };
         assert!(message.contains("completion is unknown"));
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn waits_for_busy_and_stops_at_the_first_other_result() {
+        for last_result in [Ok(()), Err(spirit::UI4_TRANSPORT)] {
+            let mut calls = 0;
+            let result = wait_for_ui4(|| {
+                calls += 1;
+                if calls < 3 {
+                    Err(spirit::UI4_BUSY)
+                } else {
+                    last_result
+                }
+            })
+            .await;
+            assert_eq!(calls, 3);
+            assert_eq!(result, last_result);
+        }
+        let start = Instant::now();
+        assert_eq!(
+            wait_for_ui4(|| Err::<(), _>(spirit::UI4_BUSY)).await,
+            Err(spirit::UI4_BUSY)
+        );
+        assert_eq!(start.elapsed(), UI4_RETRY_TIMEOUT);
     }
 }

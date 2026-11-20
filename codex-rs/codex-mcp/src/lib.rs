@@ -151,3 +151,6 @@ mod tool_catalog_cache;
 mod tool_request_meta;
 pub(crate) mod tools;
 mod trusted_access;
+
+#[cfg(target_os = "trueos")]
+pub mod trueos_lico;

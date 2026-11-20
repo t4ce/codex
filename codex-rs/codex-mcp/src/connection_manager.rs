@@ -358,6 +358,18 @@ impl McpConnectionSet {
         input: McpRuntimeInput,
         elicitation_router: ElicitationRequestRouter,
     ) -> Self {
+        #[cfg(target_os = "trueos")]
+        let input = {
+            let mut input = input;
+            let name = crate::trueos_lico::SERVER;
+            if input.mcp_servers.get(name).is_some_and(|server| {
+                server.enabled() && crate::trueos_lico::is_builtin_endpoint(server.config())
+            }) && !crate::trueos_lico::endpoint_is_listening().await
+            {
+                input.mcp_servers.remove(name);
+            }
+            input
+        };
         let same_owner = previous.as_ref().is_some_and(|state| state.same_owner);
         let previous = previous.map(|state| state.connections);
         let trusted_access = TrustedAccessContext::from_runtime(&input);
@@ -1250,6 +1262,19 @@ impl McpConnectionSet {
                 Vec::new()
             }
         }
+    }
+
+    #[cfg(target_os = "trueos")]
+    pub(crate) async fn lico_needs_reconnect(&self) -> bool {
+        let Some(view) = self.servers.get(crate::trueos_lico::SERVER) else {
+            return false;
+        };
+        let client = &view.connection.client;
+        client.startup_complete.load(Ordering::Acquire)
+            && match client.ready_transport() {
+                Some(transport) => transport.is_closed().await,
+                None => true,
+            }
     }
 
     pub(crate) async fn wait_for_server_startup(&self, server_name: &str) -> bool {

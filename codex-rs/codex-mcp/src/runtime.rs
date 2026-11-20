@@ -190,6 +190,16 @@ fn ensure_host_owned_apps_registration(
 }
 
 impl PublishedMcpRuntime {
+    #[cfg(target_os = "trueos")]
+    fn expects_lico(&self) -> bool {
+        self.config
+            .as_ref()
+            .and_then(|config| config.mcp_server_catalog.server(crate::trueos_lico::SERVER))
+            .is_some_and(|server| {
+                server.config().enabled && crate::trueos_lico::is_builtin_endpoint(server.config())
+            })
+    }
+
     // Shared by dirty detection and cache-key publication so their auth rules agree.
     fn auth_matches(&self, auth: Option<&CodexAuth>) -> bool {
         match (self.auth.as_ref(), auth) {
@@ -655,6 +665,25 @@ impl McpRuntime {
             .connections
             .prepare_call_for_tool(Arc::clone(current.config.as_ref()?), advertised_tool)
             .await
+    }
+
+    #[cfg(target_os = "trueos")]
+    pub async fn lico_needs_reconnect(&self) -> bool {
+        let current = self.current.load_full();
+        current.expects_lico()
+            && (!current
+                .connections
+                .contains_server(crate::trueos_lico::SERVER)
+                || current.connections.lico_needs_reconnect().await)
+    }
+
+    #[cfg(target_os = "trueos")]
+    pub fn has_current_lico(&self) -> bool {
+        let current = self.current.load();
+        current.expects_lico()
+            && current
+                .connections
+                .contains_server(crate::trueos_lico::SERVER)
     }
 
     /// Captures the current runtime after its selected server has finished startup.
@@ -1143,6 +1172,17 @@ impl McpRuntimeContext {
         config: &codex_config::McpServerConfig,
         environment: Option<&Arc<Environment>>,
     ) -> Result<Arc<dyn HttpClient>, String> {
+        #[cfg(target_os = "trueos")]
+        if crate::trueos_lico::is_builtin_endpoint(config) {
+            if !crate::trueos_lico::kernel_protects_endpoint() {
+                return Err(
+                    "the TRUEOS kernel does not authorize this process for Lico MCP".to_string(),
+                );
+            }
+            return Ok(Arc::new(RouteAwareHttpClient::direct_without_redirects(
+                self.http_client_factory(),
+            )));
+        }
         let client = match environment {
             Some(environment) if environment.is_remote() => environment.get_http_client(),
             Some(_) | None => self.local_http_client(),

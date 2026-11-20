@@ -1478,7 +1478,15 @@ fn add_core_utility_tools(context: &CoreToolPlanContext<'_>, registry: &mut Tool
         let include_environment_id = matches!(environment_mode, ToolEnvironmentMode::Multiple);
         registry.add(HelpHandler::new(include_environment_id));
         registry.add(CalculatorHandler::new(include_environment_id));
-        registry.add(SpiritHandler::new(include_environment_id));
+        let spirit_exposure = if effective_tool_mode(turn_context, context.model_info)
+            == ToolMode::CodeModeOnly
+        {
+            // Send observations as model image inputs through the native tool response.
+            ToolExposure::DirectModelOnly
+        } else {
+            ToolExposure::Direct
+        };
+        registry.add_with_exposure(SpiritHandler::new(include_environment_id), spirit_exposure);
         registry.add(IdeHandler::new(include_environment_id));
         registry.add(ListDirectoryHandler::new(include_environment_id));
         registry.add(FileInfoHandler::new(include_environment_id));
@@ -1631,7 +1639,8 @@ fn add_collaboration_tools(context: &CoreToolPlanContext<'_>, registry: &mut Too
         } else {
             let agent_type_description =
                 agent_type_description(turn_context, context.default_agent_type_description);
-            let exposure = if context.model_info.supports_search_tool {
+            let exposure = if context.model_info.supports_search_tool && !cfg!(target_os = "trueos")
+            {
                 ToolExposure::Deferred
             } else {
                 ToolExposure::Direct

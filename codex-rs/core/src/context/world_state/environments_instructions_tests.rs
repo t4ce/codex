@@ -60,3 +60,32 @@ fn persisted_guidance_is_restored_only_when_missing_from_history() {
             .is_empty()
     );
 }
+
+#[cfg(target_os = "trueos")]
+#[test]
+fn resumed_trueos_thread_refreshes_old_platform_guidance() {
+    let mut world_state = super::super::WorldState::default();
+    world_state.add_section(EnvironmentsInstructionsState::new(/*enabled*/ true));
+    let snapshot = world_state.render_full().0;
+    let mut old_guidance: ResponseItem = ContextualUserFragment::into(EnvironmentsInstructions);
+    let ResponseItem::Message { content, .. } = &mut old_guidance else {
+        panic!("environment instructions should be a message");
+    };
+    let codex_protocol::models::ContentItem::InputText { text } = &mut content[0] else {
+        panic!("environment instructions should be text");
+    };
+    *text = text.replace(
+        crate::context::environments_instructions::TRUEOS_GUIDANCE_HEADING,
+        "The local runtime is TRUEOS.",
+    );
+
+    for previous in [None, Some(&snapshot)] {
+        assert_eq!(
+            world_state
+                .render_history_fragment_diff(previous, std::slice::from_ref(&old_guidance))
+                .1
+                .len(),
+            1
+        );
+    }
+}

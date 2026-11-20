@@ -6,7 +6,7 @@ use super::ChatWidget;
 impl ChatWidget {
     pub(crate) fn show_spirit_info(&mut self) {
         self.add_info_message(
-            "Spirit is configured automatically at TRUEOS boot, with Lilly as her avatar. This Codex session uses Spirit for native OS interaction and reports its activity to her. Live assistant responses also drive existing Lilly expressions from bounded text snapshots through the separate Lily service Blueprint, which owns VNNI classification and Spirit signaling. Spirit owns avatar presentation, transitions, and the paired cursor and keyboard."
+            "Codex uses Spirit to see and operate shared TRUEOS windows through Lilly’s cursor and keyboard. To share a window, right-drag it onto the green circle around Lilly and release. The window’s AI badge confirms access. Repeat the gesture to revoke it. You can then ask Codex for the result you want in that window."
                 .to_string(),
             None,
         );

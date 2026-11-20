@@ -730,13 +730,23 @@ fn spawn_agent_tool_description(
     } else {
         "\n"
     };
+    let delegation_guidance = if cfg!(target_os = "trueos") {
+        "Proactively delegate independent work that can run in parallel when it would save time \
+         or improve the result. You can spawn agents without a separate request from the user.\n\
+         Handle simple UI4 actions directly. Give one agent at a time control of shared Spirit \
+         focus, observation, and input through verification."
+    } else {
+        "Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions \
+         explicitly ask for sub-agents, delegation, or parallel agent work.\n\
+         Requests for depth, thoroughness, research, investigation, or detailed codebase analysis \
+         do not count as permission to spawn."
+    };
     format!(
         r#"
         {tool_description}
 This spawn_agent tool provides you access to sub-agents that inherit your current model by default. Do not set the `model` field unless the user explicitly asks for a different model. You should follow the rules and guidelines below to use this tool.
 
-Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work.
-Requests for depth, thoroughness, research, investigation, or detailed codebase analysis do not count as permission to spawn.{agent_role_usage_hint}
+{delegation_guidance}{agent_role_usage_hint}
 
 ### When to delegate vs. do the subtask yourself
 - First, quickly analyze the overall user task and form a succinct high-level plan. Identify which tasks are immediate blockers on the critical path, and which tasks are sidecar tasks that are needed but can run in parallel without blocking the next local step. As part of that plan, explicitly decide what immediate task you should do locally right now. Do this planning step before delegating to agents so you do not hand off the immediate blocking task to a submodel and then waste time waiting on it.

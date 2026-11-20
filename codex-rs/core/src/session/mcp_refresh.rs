@@ -8,6 +8,8 @@ use tokio::sync::SemaphorePermit;
 pub(super) struct McpRefresh {
     pending: AtomicBool,
     gate: Semaphore,
+    #[cfg(target_os = "trueos")]
+    lico: tokio::sync::Mutex<Option<(tokio::time::Instant, bool)>>,
 }
 
 impl McpRefresh {
@@ -15,6 +17,8 @@ impl McpRefresh {
         Self {
             pending: AtomicBool::new(false),
             gate: Semaphore::new(/*permits*/ 1),
+            #[cfg(target_os = "trueos")]
+            lico: tokio::sync::Mutex::new(None),
         }
     }
 
@@ -34,6 +38,23 @@ impl McpRefresh {
     #[tracing::instrument(name = "mcp.runtime.refresh_wait", skip_all)]
     pub(super) async fn acquire(&self) -> Result<SemaphorePermit<'_>, AcquireError> {
         self.gate.acquire().await
+    }
+
+    /// Recheck local Lico on demand and invalidate when its listener comes or goes.
+    #[cfg(target_os = "trueos")]
+    pub(super) async fn probe_lico(&self) -> bool {
+        let mut state = self.lico.lock().await;
+        if state.is_some_and(|(last_probe, _)| {
+            last_probe.elapsed() < std::time::Duration::from_millis(250)
+        }) {
+            return false;
+        }
+        let listening = codex_mcp::trueos_lico::endpoint_is_listening().await;
+        if listening != state.is_some_and(|(_, listening)| listening) {
+            self.invalidate();
+        }
+        *state = Some((tokio::time::Instant::now(), listening));
+        listening
     }
 
     pub(super) fn close(&self) {

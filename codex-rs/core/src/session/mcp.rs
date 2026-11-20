@@ -191,6 +191,12 @@ impl Session {
             error!("MCP runtime refresh semaphore closed");
             return;
         };
+        #[cfg(target_os = "trueos")]
+        if self.mcp_refresh.probe_lico().await
+            && self.services.mcp_runtime.lico_needs_reconnect().await
+        {
+            self.mark_mcp_runtime_dirty();
+        }
         loop {
             // Compare and rebuild from current environments, not choices saved for a future turn.
             let environments = self.services.turn_environments.snapshot().await;
@@ -450,6 +456,16 @@ impl Session {
             .chain(&recovered_oauth_servers)
             .cloned()
             .collect::<Vec<_>>();
+        #[cfg(target_os = "trueos")]
+        let required_servers = {
+            let mut servers = required_servers;
+            if self.services.mcp_runtime.has_current_lico() {
+                // Give a newly discovered Lico its bounded startup time before the
+                // first model request captures the available tool set.
+                servers.push(codex_mcp::trueos_lico::SERVER.to_owned());
+            }
+            servers
+        };
         if let Some(binding) = self
             .services
             .mcp_runtime
