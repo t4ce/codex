@@ -54,8 +54,9 @@ trueos_tts = false
 
 This preference ignores project configuration. The native TUI starts the
 on-demand `ptts` Blueprint at startup and reuses an existing healthy service.
-Completed public replies use its loopback speech service. Reasoning, tools, history replay and realtime
-delegated voice replies are excluded. Hidden display directives, code blocks
+The loopback speech service reads completed public replies and the first complete
+sentence of each live reasoning summary. Raw reasoning, tools, history replay
+and realtime delegated voice replies are excluded. Hidden display directives, code blocks
 and link destinations are omitted; Pocket TTS owns
 pronunciation. No plugin, MCP server, microphone or cloud realtime session is
 required. This setting currently applies to the TRUEOS Rust TUI, not the

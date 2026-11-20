@@ -172,6 +172,17 @@ impl ChatWidget {
                 ) && self.status_state.reasoning_item_id.as_deref()
                     == Some(&notification.item_id)
                 {
+                    #[cfg(target_os = "trueos")]
+                    if !from_replay
+                        && self.local_settings.tui.trueos_tts
+                        && !self.safety_buffering_is_waiting()
+                    {
+                        self.local_speech.speak_summary(
+                            &notification.item_id,
+                            &notification.delta,
+                            false,
+                        );
+                    }
                     self.on_agent_reasoning_delta(notification.delta);
                 }
             }
@@ -193,6 +204,14 @@ impl ChatWidget {
                 ) && self.status_state.reasoning_item_id.as_deref()
                     == Some(&notification.item_id)
                 {
+                    #[cfg(target_os = "trueos")]
+                    if !from_replay
+                        && self.local_settings.tui.trueos_tts
+                        && !self.safety_buffering_is_waiting()
+                    {
+                        self.local_speech
+                            .speak_summary(&notification.item_id, "\n", true);
+                    }
                     self.on_reasoning_section_break();
                 }
             }
@@ -772,6 +791,15 @@ impl ChatWidget {
             && self.status_state.reasoning_item_id.as_ref() != Some(id)
         {
             return;
+        }
+        #[cfg(target_os = "trueos")]
+        if replay_kind.is_none()
+            && self.local_settings.tui.trueos_tts
+            && !self.safety_buffering_is_waiting()
+            && let ThreadItemPayload::Reasoning { id, .. } = &notification.item.payload
+            && !self.is_realtime_delegated_reasoning_item(&notification.turn_id, id)
+        {
+            self.local_speech.speak_summary(id, "", true);
         }
         match notification.item.payload {
             item @ ThreadItemPayload::CommandExecution { .. } => {

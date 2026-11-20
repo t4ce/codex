@@ -1,4 +1,4 @@
-//! Native TRUEOS read-aloud. Only completed public final answers enter here.
+//! Native TRUEOS read-aloud. Reads live summary excerpts and completed public replies.
 //! Model inference and pronunciation belong to the speech Blueprint, not Codex.
 use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
@@ -11,6 +11,7 @@ use pulldown_cmark::Tag;
 use pulldown_cmark::TagEnd;
 use serde::Deserialize;
 use tokio::sync::mpsc;
+use unicode_segmentation::UnicodeSegmentation;
 
 const SERVICE_ENDPOINT: &str = "http://127.0.0.1:9773";
 const SERVICE_PROTOCOL: &str = "ptts-v1";
@@ -47,10 +48,44 @@ fn speech_text(markdown: &str) -> Option<String> {
 }
 
 #[derive(Default)]
+struct SummarySpeech {
+    item_id: String,
+    buffer: Option<String>,
+}
+
+impl SummarySpeech {
+    fn sentence(&mut self, item_id: &str, delta: &str, at_boundary: bool) -> Option<String> {
+        if self.item_id != item_id {
+            self.item_id = item_id.to_owned();
+            self.buffer = Some(String::new());
+        }
+        let buffer = self.buffer.as_mut()?;
+        if delta.len() > MAX_TEXT_BYTES - buffer.len() {
+            self.buffer = None;
+            return None;
+        }
+        buffer.push_str(delta);
+
+        let text = speech_text(buffer)?;
+        let sentence = text.split_sentence_bounds().next()?.trim_end();
+        // A trailing period in a delta can still become part of a decimal or filename.
+        let ends_with_punctuation = sentence
+            .trim_end_matches(['"', '\'', '”', '’', ')', ']', '»'])
+            .ends_with(['.', '!', '?', '。', '！', '？', '…']);
+        if !ends_with_punctuation || (sentence.len() == text.len() && !at_boundary) {
+            return None;
+        }
+        self.buffer = None;
+        Some(sentence.to_owned())
+    }
+}
+
+#[derive(Default)]
 pub(crate) struct ReadAloud {
     queue: Option<mpsc::UnboundedSender<String>>,
     pending_bytes: Arc<AtomicUsize>,
     last: Option<(String, String, String)>,
+    summary: SummarySpeech,
 }
 impl ReadAloud {
     pub(crate) fn new(enabled: bool) -> Self {
@@ -60,6 +95,12 @@ impl ReadAloud {
         }
         reader
     }
+    pub(crate) fn speak_summary(&mut self, item: &str, delta: &str, at_boundary: bool) {
+        if let Some(sentence) = self.summary.sentence(item, delta, at_boundary) {
+            self.enqueue(sentence);
+        }
+    }
+
     pub(crate) fn speak(&mut self, thread: &str, turn: &str, item: &str, text: &str) {
         let identity = (thread.to_owned(), turn.to_owned(), item.to_owned());
         if self.last.as_ref() == Some(&identity) {
@@ -69,6 +110,10 @@ impl ReadAloud {
         let Some(text) = speech_text(text) else {
             return;
         };
+        self.enqueue(text);
+    }
+
+    fn enqueue(&mut self, text: String) {
         let pending_bytes = Arc::clone(&self.pending_bytes);
         let queue = self
             .queue
@@ -199,6 +244,32 @@ async fn worker(mut rx: mpsc::UnboundedReceiver<String>, pending_bytes: Arc<Atom
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn queues_only_the_first_complete_sentence_per_summary_item() {
+        let (tx, mut rx) = mpsc::unbounded_channel();
+        let mut reader = ReadAloud {
+            queue: Some(tx),
+            ..ReadAloud::default()
+        };
+
+        reader.speak_summary("first", "The version is 1.", false);
+        assert!(rx.try_recv().is_err());
+        reader.speak_summary("first", "2. I will", false);
+        assert_eq!(rx.try_recv().unwrap(), "The version is 1.2.");
+        reader.speak_summary("first", " check the logs.", true);
+        assert!(rx.try_recv().is_err());
+
+        reader.speak_summary("second", "The logs are clear.", false);
+        assert!(rx.try_recv().is_err());
+        reader.speak_summary("second", "", true);
+        reader.speak("thread", "turn", "reply", "Done.");
+        assert_eq!(rx.try_recv().unwrap(), "The logs are clear.");
+        assert_eq!(rx.try_recv().unwrap(), "Done.");
+
+        reader.speak_summary("third", "An unfinished fragment", true);
+        assert!(rx.try_recv().is_err());
+    }
+
     #[test]
     fn service_endpoint_protocol_and_launch_identity_stay_together() {
         assert_eq!(SERVICE_ENDPOINT, "http://127.0.0.1:9773");
