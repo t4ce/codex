@@ -54,13 +54,16 @@ trueos_tts = false
 
 This preference ignores project configuration. The native TUI starts the
 on-demand `ptts` Blueprint at startup and reuses an existing healthy service.
-The loopback speech service reads completed public replies and the first complete
-sentence of each live reasoning summary. Raw reasoning, tools, history replay
-and realtime delegated voice replies are excluded. Hidden display directives, code blocks
-and link destinations are omitted; Pocket TTS owns
-pronunciation. No plugin, MCP server, microphone or cloud realtime session is
-required. This setting currently applies to the TRUEOS Rust TUI, not the
-VS Code extension or noninteractive `codex exec`.
+Codex queues a plain-prose opening sentence as soon as it has a complete
+sentence in a streamed item marked as a final answer. It queues the rest when
+the item completes. Replies with an unknown phase are read at turn completion.
+The TRUEOS package also requests concise reasoning summaries on supported
+models and reads the first complete sentence of each live summary. Set
+`model_reasoning_summary = "none"` at the top level to disable summaries.
+
+Speech is local to the TRUEOS Rust TUI. It skips tool output, raw reasoning,
+history replay, realtime delegated voice replies, hidden display directives,
+code blocks and link destinations. Pocket TTS handles pronunciation.
 
 `ptts` ships the English Pocket TTS model and Azelma voice inside the Blueprint,
 running Rust CPU inference without Python or a GPU. Its loopback service uses

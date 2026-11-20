@@ -1,4 +1,4 @@
-//! Native TRUEOS read-aloud. Reads live summary excerpts and completed public replies.
+//! Native TRUEOS read-aloud for reasoning summaries and public replies.
 //! Model inference and pronunciation belong to the speech Blueprint, not Codex.
 use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
@@ -17,6 +17,7 @@ const SERVICE_ENDPOINT: &str = "http://127.0.0.1:9773";
 const SERVICE_PROTOCOL: &str = "ptts-v1";
 const LAUNCH_COMMAND: &str = "launch --headless ptts\n";
 const MAX_TEXT_BYTES: usize = 16 * 1024;
+const OPENING_BUFFER_BYTES: usize = 1024;
 const QUEUED_TEXT_WARNING_BYTES: usize = 1024;
 
 /// Preserve prose and link labels; omit code blocks, raw HTML and image URLs.
@@ -47,6 +48,16 @@ fn speech_text(markdown: &str) -> Option<String> {
     (!text.is_empty()).then_some(text)
 }
 
+fn first_complete_sentence(text: &str, at_boundary: bool) -> Option<&str> {
+    let sentence = text.split_sentence_bounds().next()?.trim_end();
+    // A trailing period in a delta can still become part of a decimal or filename.
+    let ends_with_punctuation = sentence
+        .trim_end_matches(['"', '\'', '”', '’', ')', ']', '»'])
+        .ends_with(['.', '!', '?', '。', '！', '？', '…']);
+    (ends_with_punctuation && (at_boundary || sentence.len() < text.trim_end().len()))
+        .then_some(sentence)
+}
+
 #[derive(Default)]
 struct SummarySpeech {
     item_id: String,
@@ -67,16 +78,52 @@ impl SummarySpeech {
         buffer.push_str(delta);
 
         let text = speech_text(buffer)?;
-        let sentence = text.split_sentence_bounds().next()?.trim_end();
-        // A trailing period in a delta can still become part of a decimal or filename.
-        let ends_with_punctuation = sentence
-            .trim_end_matches(['"', '\'', '”', '’', ')', ']', '»'])
-            .ends_with(['.', '!', '?', '。', '！', '？', '…']);
-        if !ends_with_punctuation || (sentence.len() == text.len() && !at_boundary) {
-            return None;
-        }
+        let sentence = first_complete_sentence(&text, at_boundary)?;
         self.buffer = None;
         Some(sentence.to_owned())
+    }
+
+    fn finish(&mut self, item_id: &str, parts: &[String]) -> Option<String> {
+        if self.item_id == item_id && self.buffer.is_none() {
+            return None;
+        }
+        self.item_id = item_id.to_owned();
+        self.buffer = None;
+        parts.iter().find_map(|part| {
+            let text = speech_text(part)?;
+            first_complete_sentence(&text, /*at_boundary*/ true).map(str::to_owned)
+        })
+    }
+}
+
+struct AnswerOpening {
+    turn: String,
+    item: String,
+    markdown: String,
+    spoken: Option<String>,
+}
+
+impl AnswerOpening {
+    fn push(&mut self, delta: &str) -> Option<String> {
+        if self.spoken.is_some() || self.markdown.len() == OPENING_BUFFER_BYTES {
+            return None;
+        }
+        let room = OPENING_BUFFER_BYTES - self.markdown.len();
+        self.markdown
+            .push_str(&delta[..delta.floor_char_boundary(room)]);
+        let markdown = self.markdown.trim_start_matches(['\r', '\n']);
+        let sentence = first_complete_sentence(markdown, /*at_boundary*/ false)?;
+        // Only start early for plain prose. Incomplete Markdown (including links,
+        // directives and code) can change meaning when later text arrives.
+        if !markdown[sentence.len()..].starts_with(char::is_whitespace)
+            || !sentence.starts_with(char::is_alphabetic)
+            || sentence.contains(['\n', '\r', '`', '[', ']', '<', '>', '*', '_', '&', '\\'])
+        {
+            return None;
+        }
+        let text = speech_text(sentence)?;
+        self.spoken = Some(text.clone());
+        Some(text)
     }
 }
 
@@ -86,8 +133,21 @@ pub(crate) struct ReadAloud {
     pending_bytes: Arc<AtomicUsize>,
     last: Option<(String, String, String)>,
     summary: SummarySpeech,
+    opening: Option<AnswerOpening>,
 }
 impl ReadAloud {
+    #[cfg(test)]
+    pub(crate) fn with_test_queue() -> (Self, mpsc::UnboundedReceiver<String>) {
+        let (tx, rx) = mpsc::unbounded_channel();
+        (
+            Self {
+                queue: Some(tx),
+                ..Self::default()
+            },
+            rx,
+        )
+    }
+
     pub(crate) fn new(enabled: bool) -> Self {
         let mut reader = Self::default();
         if enabled {
@@ -101,16 +161,65 @@ impl ReadAloud {
         }
     }
 
+    pub(crate) fn finish_summary(&mut self, item: &str, parts: &[String]) {
+        if let Some(sentence) = self.summary.finish(item, parts) {
+            self.enqueue(sentence);
+        }
+    }
+
+    pub(crate) fn start_answer(&mut self, turn: &str, item: &str, text: &str) {
+        if self
+            .opening
+            .as_ref()
+            .is_some_and(|opening| opening.turn == turn && opening.item == item)
+            || self
+                .last
+                .as_ref()
+                .is_some_and(|(_, last_turn, last_item)| last_turn == turn && last_item == item)
+        {
+            return;
+        }
+        self.opening = Some(AnswerOpening {
+            turn: turn.to_owned(),
+            item: item.to_owned(),
+            markdown: String::new(),
+            spoken: None,
+        });
+        self.answer_delta(turn, item, text);
+    }
+
+    pub(crate) fn answer_delta(&mut self, turn: &str, item: &str, delta: &str) {
+        if let Some(opening) = self.opening.as_mut()
+            && opening.turn == turn
+            && opening.item == item
+            && let Some(sentence) = opening.push(delta)
+        {
+            self.enqueue(sentence);
+        }
+    }
+
     pub(crate) fn speak(&mut self, thread: &str, turn: &str, item: &str, text: &str) {
         let identity = (thread.to_owned(), turn.to_owned(), item.to_owned());
         if self.last.as_ref() == Some(&identity) {
             return;
         }
         self.last = Some(identity);
+        let opening = self
+            .opening
+            .take_if(|opening| opening.turn == turn && opening.item == item);
         let Some(text) = speech_text(text) else {
             return;
         };
-        self.enqueue(text);
+        if let Some(spoken) = opening.and_then(|opening| opening.spoken)
+            && let Some(rest) = text.strip_prefix(&spoken)
+            && (rest.is_empty() || rest.starts_with(' '))
+        {
+            if !rest.is_empty() {
+                self.enqueue(rest.trim_start().to_owned());
+            }
+        } else {
+            self.enqueue(text);
+        }
     }
 
     fn enqueue(&mut self, text: String) {

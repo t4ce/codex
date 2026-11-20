@@ -71,6 +71,99 @@ fn configured_thread_session(thread_id: ThreadId) -> crate::session_state::Threa
 }
 
 #[tokio::test]
+async fn trueos_tts_queues_opening_from_live_deltas_and_queues_the_rest_once() {
+    let (mut chat, _events, _ops) = make_chatwidget_manual(None).await;
+    let thread = ThreadId::new();
+    chat.thread_id = Some(thread);
+    chat.local_settings.tui.trueos_tts = true;
+    let (speech, mut queue) = crate::trueos_tts::ReadAloud::with_test_queue();
+    chat.local_speech = speech;
+    handle_turn_started(&mut chat, "turn-1");
+
+    let answer = |text: &str, phase| AppServerThreadItemPayload::AgentMessage {
+        id: "msg-1".into(),
+        text: text.into(),
+        phase,
+        moderation: None,
+        memory_citation: None,
+        delivery: None,
+        questions: None,
+    };
+    chat.handle_server_notification(
+        ServerNotification::ItemStarted(ItemStartedNotification::new(
+            thread.to_string(),
+            "turn-1".to_owned(),
+            answer("", Some(MessagePhase::FinalAnswer)),
+            /*started_at_ms*/ 0,
+        )),
+        /*replay_kind*/ None,
+    );
+    replay_agent_message_delta(
+        &mut chat,
+        "A replayed sentence. This is history.",
+        ReplayKind::ThreadSnapshot,
+    );
+    assert!(queue.try_recv().is_err());
+
+    handle_agent_message_delta(&mut chat, "The service is");
+    assert!(queue.try_recv().is_err());
+    handle_agent_message_delta(&mut chat, " ready. The remainder");
+    assert_eq!(queue.try_recv().unwrap(), "The service is ready.");
+    assert!(queue.try_recv().is_err());
+
+    let completed = "The service is ready. The remainder has [docs](https://example.com).";
+    complete_assistant_message(
+        &mut chat,
+        "msg-1",
+        completed,
+        Some(MessagePhase::FinalAnswer),
+    );
+    assert_eq!(queue.try_recv().unwrap(), "The remainder has docs.");
+    let mut turn = app_server_turn("turn-1", AppServerTurnStatus::Completed, None, None);
+    turn.items = vec![ThreadItem::untimed(answer(
+        completed,
+        Some(MessagePhase::FinalAnswer),
+    ))];
+    chat.handle_server_notification(
+        ServerNotification::TurnCompleted(TurnCompletedNotification {
+            thread_id: thread.to_string(),
+            turn,
+        }),
+        /*replay_kind*/ None,
+    );
+    assert!(queue.try_recv().is_err());
+}
+
+#[tokio::test]
+async fn trueos_tts_can_read_a_completed_summary_without_deltas() {
+    let (mut chat, _events, _ops) = make_chatwidget_manual(None).await;
+    let thread = ThreadId::new();
+    chat.thread_id = Some(thread);
+    chat.local_settings.tui.trueos_tts = true;
+    let (speech, mut queue) = crate::trueos_tts::ReadAloud::with_test_queue();
+    chat.local_speech = speech;
+    handle_turn_started(&mut chat, "turn-1");
+
+    let completed = ServerNotification::ItemCompleted(ItemCompletedNotification::new(
+        thread.to_string(),
+        "turn-1".to_owned(),
+        AppServerThreadItemPayload::Reasoning {
+            id: "reasoning-1".into(),
+            summary: vec!["The synthesis service is ready. Now check the caller.".into()],
+            content: vec!["This is raw reasoning.".into()],
+        },
+        /*started_at_ms*/ None,
+        /*completed_at_ms*/ 0,
+    ));
+    chat.handle_server_notification(completed.clone(), Some(ReplayKind::ThreadSnapshot));
+    assert!(queue.try_recv().is_err());
+    chat.handle_server_notification(completed.clone(), /*replay_kind*/ None);
+    assert_eq!(queue.try_recv().unwrap(), "The synthesis service is ready.");
+    chat.handle_server_notification(completed, /*replay_kind*/ None);
+    assert!(queue.try_recv().is_err());
+}
+
+#[tokio::test]
 async fn session_header_uses_catalog_display_name_without_changing_model() {
     let slug = "us.openai.gpt-5.6-luna";
     for (name, first_event, display_name) in [

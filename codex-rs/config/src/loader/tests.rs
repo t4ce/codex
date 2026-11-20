@@ -646,11 +646,7 @@ fn robomcp_packaged_default_is_optional_stdio_and_opt_in() {
 #[test]
 fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
     let config: ConfigToml =
-        toml::from_str(concat!(
-            include_str!("../../defaults.toml"),
-            "\n",
-            include_str!("../../defaults.trueos.toml")
-        )).expect("valid TRUEOS defaults");
+        toml::from_str(TRUEOS_EMBEDDED_PACKAGED_DEFAULTS).expect("valid TRUEOS defaults");
     assert_eq!(config.tui.as_ref().map(|tui| tui.trueos_tts), Some(true));
     let server = &config.mcp_servers["xerj"];
     assert!(!server.enabled);
@@ -663,6 +659,25 @@ fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
     assert_eq!(
         server.tool_timeout_sec,
         Some(std::time::Duration::from_secs(150))
+    );
+}
+
+#[test]
+fn trueos_packaged_summary_default_preserves_explicit_opt_out() {
+    let mut defaults: TomlValue =
+        toml::from_str(TRUEOS_EMBEDDED_PACKAGED_DEFAULTS).expect("valid TRUEOS defaults");
+    let config: ConfigToml = defaults.clone().try_into().expect("typed TRUEOS defaults");
+    assert_eq!(
+        config.model_reasoning_summary,
+        Some(codex_protocol::config_types::ReasoningSummary::Concise)
+    );
+
+    let user = toml::from_str("model_reasoning_summary = 'none'").expect("user opt out");
+    merge_toml_values(&mut defaults, &user);
+    let config: ConfigToml = defaults.try_into().expect("typed user config");
+    assert_eq!(
+        config.model_reasoning_summary,
+        Some(codex_protocol::config_types::ReasoningSummary::None)
     );
 }
 

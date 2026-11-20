@@ -14,5 +14,5 @@ hide_agent_reasoning = false
 chatgpt_base_url = "https://chatgpt.com/backend-api/"
 project_root_markers = [".git"]
 
-[history]
-persistence = "save-all"
+# Keep these defaults at the root so the TRUEOS overlay can add root keys.
+history.persistence = "save-all"

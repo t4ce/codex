@@ -83,12 +83,14 @@ const SYSTEM_CONFIG_TOML_FILE_UNIX: &str = "/etc/codex/config.toml";
 #[cfg(windows)]
 const DEFAULT_PROGRAM_DATA_DIR_WINDOWS: &str = r"C:\ProgramData";
 
-#[cfg(target_os = "trueos")]
-const EMBEDDED_PACKAGED_DEFAULTS: &str = concat!(
+#[cfg(any(target_os = "trueos", test))]
+const TRUEOS_EMBEDDED_PACKAGED_DEFAULTS: &str = concat!(
     include_str!("../../defaults.toml"),
     "\n",
     include_str!("../../defaults.trueos.toml")
 );
+#[cfg(target_os = "trueos")]
+const EMBEDDED_PACKAGED_DEFAULTS: &str = TRUEOS_EMBEDDED_PACKAGED_DEFAULTS;
 #[cfg(not(target_os = "trueos"))]
 const EMBEDDED_PACKAGED_DEFAULTS: &str = include_str!("../../defaults.toml");
 

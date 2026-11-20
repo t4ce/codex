@@ -152,6 +152,17 @@ impl ChatWidget {
                     {
                         self.spirit_response.clear();
                     }
+                    #[cfg(any(target_os = "trueos", test))]
+                    if !from_replay
+                        && self.local_speech_enabled(&notification.turn_id)
+                        && !self.safety_buffering_is_waiting()
+                    {
+                        self.local_speech.answer_delta(
+                            &notification.turn_id,
+                            &notification.item_id,
+                            &notification.delta,
+                        );
+                    }
                     self.transcript.active_streamed_agent_message =
                         Some((notification.turn_id, notification.item_id));
                     #[cfg(target_os = "trueos")]
@@ -172,9 +183,9 @@ impl ChatWidget {
                 ) && self.status_state.reasoning_item_id.as_deref()
                     == Some(&notification.item_id)
                 {
-                    #[cfg(target_os = "trueos")]
+                    #[cfg(any(target_os = "trueos", test))]
                     if !from_replay
-                        && self.local_settings.tui.trueos_tts
+                        && self.local_speech_enabled(&notification.turn_id)
                         && !self.safety_buffering_is_waiting()
                     {
                         self.local_speech.speak_summary(
@@ -204,9 +215,9 @@ impl ChatWidget {
                 ) && self.status_state.reasoning_item_id.as_deref()
                     == Some(&notification.item_id)
                 {
-                    #[cfg(target_os = "trueos")]
+                    #[cfg(any(target_os = "trueos", test))]
                     if !from_replay
-                        && self.local_settings.tui.trueos_tts
+                        && self.local_speech_enabled(&notification.turn_id)
                         && !self.safety_buffering_is_waiting()
                     {
                         self.local_speech
@@ -526,25 +537,8 @@ impl ChatWidget {
                 if replay_kind.is_none()
                     && let Some((item, _)) = last_agent_message
                 {
-                    #[cfg(target_os = "trueos")]
-                    if self.local_settings.tui.trueos_tts
-                        && live_turn
-                        && !self.is_realtime_delegated_reasoning_turn(&notification.turn.id)
-                        && !realtime::is_private_realtime_agent_item(item)
-                        && let Some(thread_id) = self.thread_id()
-                    {
-                        let visible = parse_assistant_markdown(
-                            last_agent_message.map(|(_, text)| text).unwrap_or_default(),
-                            self.config.cwd.as_path(),
-                        )
-                        .visible_markdown;
-                        self.local_speech.speak(
-                            &thread_id.to_string(),
-                            &notification.turn.id,
-                            item.id(),
-                            &visible,
-                        );
-                    }
+                    #[cfg(any(target_os = "trueos", test))]
+                    self.speak_local_answer(&notification.turn.id, item);
                     self.speak_completed_realtime_delegation(&notification.turn.id, item);
                 }
                 if replay_kind.is_none() {
@@ -638,6 +632,22 @@ impl ChatWidget {
         replay_kind: Option<ReplayKind>,
     ) {
         self.restore_realtime_transcripts_before_turn(&notification.turn_id);
+        #[cfg(any(target_os = "trueos", test))]
+        if replay_kind.is_none()
+            && self.local_speech_enabled(&notification.turn_id)
+            && !self.safety_buffering_is_waiting()
+            && let ThreadItemPayload::AgentMessage {
+                id,
+                text,
+                phase: Some(MessagePhase::FinalAnswer),
+                delivery: None,
+                questions: None,
+                ..
+            } = &notification.item.payload
+        {
+            self.local_speech
+                .start_answer(&notification.turn_id, id, text);
+        }
         match notification.item.payload {
             ThreadItemPayload::UserMessage { content, .. } if replay_kind.is_none() => {
                 self.note_realtime_user_item_started(&notification.turn_id, &content);
@@ -786,20 +796,30 @@ impl ChatWidget {
         {
             self.add_async_questions(id, questions);
         }
+        #[cfg(any(target_os = "trueos", test))]
+        if replay_kind.is_none() && self.local_speech_enabled(&notification.turn_id) {
+            match &notification.item.payload {
+                ThreadItemPayload::Reasoning { id, summary, .. }
+                    if !self.safety_buffering_is_waiting()
+                        && !self
+                            .is_realtime_delegated_reasoning_item(&notification.turn_id, id) =>
+                {
+                    self.local_speech.finish_summary(id, summary);
+                }
+                item @ ThreadItemPayload::AgentMessage {
+                    phase: Some(MessagePhase::FinalAnswer),
+                    delivery: None,
+                    questions: None,
+                    ..
+                } => self.speak_local_answer(&notification.turn_id, item),
+                _ => {}
+            }
+        }
         if replay_kind.is_none()
             && let ThreadItemPayload::Reasoning { id, .. } = &notification.item.payload
             && self.status_state.reasoning_item_id.as_ref() != Some(id)
         {
             return;
-        }
-        #[cfg(target_os = "trueos")]
-        if replay_kind.is_none()
-            && self.local_settings.tui.trueos_tts
-            && !self.safety_buffering_is_waiting()
-            && let ThreadItemPayload::Reasoning { id, .. } = &notification.item.payload
-            && !self.is_realtime_delegated_reasoning_item(&notification.turn_id, id)
-        {
-            self.local_speech.speak_summary(id, "", true);
         }
         match notification.item.payload {
             item @ ThreadItemPayload::CommandExecution { .. } => {
@@ -810,6 +830,27 @@ impl ChatWidget {
                 notification.turn_id,
                 replay_kind.map_or(ThreadItemRenderSource::Live, ThreadItemRenderSource::Replay),
             ),
+        }
+    }
+
+    #[cfg(any(target_os = "trueos", test))]
+    fn local_speech_enabled(&self, turn: &str) -> bool {
+        self.local_settings.tui.trueos_tts
+            && self.last_turn_id() == Some(turn)
+            && !self.is_realtime_delegated_reasoning_turn(turn)
+    }
+
+    #[cfg(any(target_os = "trueos", test))]
+    fn speak_local_answer(&mut self, turn: &str, item: &ThreadItemPayload) {
+        if self.local_speech_enabled(turn)
+            && !realtime::is_private_realtime_agent_item(item)
+            && let Some(thread) = self.thread_id()
+            && let ThreadItemPayload::AgentMessage { id, text, .. } = item
+        {
+            let visible =
+                parse_assistant_markdown(text, self.config.cwd.as_path()).visible_markdown;
+            self.local_speech
+                .speak(&thread.to_string(), turn, id, &visible);
         }
     }
 }

@@ -1,6 +1,7 @@
 //! Direct access to Spirit's resident avatar and paired UI4 input devices.
 
 use std::collections::BTreeMap;
+use std::sync::Mutex;
 
 use codex_protocol::models::DEFAULT_IMAGE_DETAIL;
 use codex_protocol::models::FunctionCallOutputBody;
@@ -19,6 +20,7 @@ use serde_json::Value;
 use serde_json::json;
 use trueos::spirit;
 
+use super::trueos_spirit_filmstrip::FilmstripRequest;
 use crate::function_tool::FunctionCallError;
 use crate::tools::context::ToolInvocation;
 use crate::tools::context::ToolOutput;
@@ -28,6 +30,10 @@ use crate::tools::handlers::parse_arguments;
 use crate::tools::handlers::selected_tool_environment;
 use crate::tools::registry::CoreToolRuntime;
 use crate::tools::registry::ToolExecutor;
+
+// Observe reads several pieces of a VM-scoped snapshot. Serialize it with
+// focus and other Spirit calls in this process, releasing between samples.
+static SPIRIT_CALL: Mutex<()> = Mutex::new(());
 
 pub struct SpiritHandler {
     include_environment_id: bool,
@@ -47,6 +53,7 @@ enum SpiritAction {
     Windows {},
     Focus { window_id: String },
     Observe {},
+    Filmstrip(FilmstripRequest),
     Pointer { x: u16, y: u16, kind: PointerKind },
     Type { text: String },
     Key { key: Key },
@@ -92,6 +99,7 @@ impl SpiritAction {
             Self::Windows {} => "windows",
             Self::Focus { .. } => "focus",
             Self::Observe {} => "observe",
+            Self::Filmstrip(_) => "filmstrip",
             Self::Pointer { .. } => "pointer",
             Self::Type { .. } => "type",
             Self::Key { .. } => "key",
@@ -143,6 +151,10 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
         ("windows", vec![]),
         ("focus", vec![("window_id", JsonSchema::string(Some("Decimal window id from windows inventory.".into())))]),
         ("observe", vec![]),
+        ("filmstrip", vec![
+            ("duration_seconds", JsonSchema::integer(Some("Capture duration from 1 to 10 seconds.".into()))),
+            ("frames", JsonSchema::integer(Some("8 to 16 evenly spaced samples. Defaults to 12. Fewer frames give each tile more space.".into()))),
+        ]),
         ("pointer", vec![
             ("x", JsonSchema::integer(Some("Selected-window horizontal grid coordinate, inclusive 0..1000.".into()))),
             ("y", JsonSchema::integer(Some("Selected-window vertical grid coordinate, inclusive 0..1000.".into()))),
@@ -160,7 +172,9 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
         let mut required = vec!["action".into()];
         for (name, schema) in fields {
             properties.insert(name.into(), schema);
-            required.push(name.into());
+            if name != "frames" {
+                required.push(name.into());
+            }
         }
         if include_environment_id {
             properties.insert("environment_id".into(), JsonSchema::string(Some("Environment id from <environment_context>; the environment must be local TRUEOS.".into())));
@@ -172,7 +186,7 @@ fn spirit_spec(include_environment_id: bool) -> ToolSpec {
     parameters.one_of = Some(variants.into());
     ToolSpec::Function(ResponsesApiTool {
         name: "spirit".into(),
-        description: "Use resident TRUEOS Spirit directly for native OS interaction. Spirit is configured automatically at OS boot, with Lilly as her avatar. /spirit shows the native integration information. Spirit manages avatar presentation, animation transitions, and paired input sequencing. windows lists live UI4 windows; focus selects one; observe returns its actual PNG and coordinate metadata. Before pointer/type/key, focus then observe the current target; observe again after focus or window geometry changes. pointer uses selected-window grid coordinates 0..1000. move positions Lilly's hardware avatar on the scanout using 0..1 coordinates. emotion requests an expression. Input actions are queued, not proof of completion: observe to verify results. Calls are serial; BUSY means nothing from this call was queued, so wait and retry it. Do not replay accepted text or clicks. This tool is available automatically in every TRUEOS Codex session.".into(),
+        description: "Use resident TRUEOS Spirit directly for native OS interaction. Spirit is configured automatically at OS boot, with Lilly as her avatar. /spirit shows the native integration information. Spirit manages avatar presentation, animation transitions, and paired input sequencing. windows lists live UI4 windows; focus selects one; observe returns its actual PNG and coordinate metadata. filmstrip samples that same shared window over 1 to 10 seconds and returns one PNG with tiles in time order and their timestamps in metadata. Use it to inspect dynamic UI. Before pointer/type/key, focus then observe the current target; observe again after focus or window geometry changes. pointer uses selected-window grid coordinates 0..1000. move positions Lilly's hardware avatar on the scanout using 0..1 coordinates. emotion requests an expression. Input actions are queued, not proof of completion: observe to verify results. Calls are serial; BUSY means nothing from this call was queued, so wait and retry it. Do not replay accepted text or clicks. This tool is available automatically in every TRUEOS Codex session.".into(),
         strict: false,
         defer_loading: None,
         parameters,
@@ -215,6 +229,9 @@ struct SpiritOutput {
 }
 
 fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
+    let _call = SPIRIT_CALL
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut value = json!({"backend":"trueos_spirit", "action":action.name()});
     let mut image_url = None;
     match action {
@@ -266,7 +283,9 @@ fn execute(action: &SpiritAction) -> Result<SpiritOutput, FunctionCallError> {
                     Emotion::Sadness => "sadness",
                     Emotion::Surprise => "surprise",
                 }),
-                SpiritAction::Windows {} | SpiritAction::Observe {} => unreachable!(),
+                SpiritAction::Windows {}
+                | SpiritAction::Observe {}
+                | SpiritAction::Filmstrip(_) => unreachable!(),
             };
             result.map_err(|code| native_error(action, code))?;
             value["accepted"] = json!(true);
@@ -304,17 +323,41 @@ impl ToolExecutor<ToolInvocation> for SpiritHandler {
                     "spirit uses local TRUEOS hardware; the selected environment is remote",
                 ));
             }
-            if matches!(action, SpiritAction::Observe {})
-                && !invocation
-                    .step_context
-                    .settings
-                    .model_info
-                    .input_modalities
-                    .contains(&InputModality::Image)
+            if matches!(
+                action,
+                SpiritAction::Observe {} | SpiritAction::Filmstrip(_)
+            ) && !invocation
+                .step_context
+                .settings
+                .model_info
+                .input_modalities
+                .contains(&InputModality::Image)
             {
-                return Err(error(
-                    "spirit observe requires a model that supports image inputs",
-                ));
+                return Err(error(format!(
+                    "spirit {} requires a model that supports image inputs",
+                    action.name(),
+                )));
+            }
+            if let SpiritAction::Filmstrip(request) = &action {
+                let capture = request.capture(|| {
+                    let _call = SPIRIT_CALL
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
+                    let observation =
+                        spirit::ui4_observe().map_err(|code| native_error(&action, code))?;
+                    Ok((observation.metadata, observation.png))
+                });
+                let (metadata, png) = tokio::select! {
+                    biased;
+                    _ = invocation.cancellation_token.cancelled() => {
+                        return Err(error("Spirit filmstrip capture was cancelled"));
+                    }
+                    result = capture => result?,
+                };
+                return Ok(boxed_tool_output(SpiritOutput {
+                    value: json!({"backend":"trueos_spirit", "action":"filmstrip", "filmstrip":metadata}),
+                    image_url: Some(data_url_from_bytes("image/png", &png)),
+                }));
             }
             Ok(boxed_tool_output(execute(&action)?))
         })
@@ -386,6 +429,7 @@ mod tests {
             json!({"action":"pointer","x":1000,"y":0,"kind":"click"}),
             json!({"action":"move","x":0.25,"y":1.0}),
             json!({"action":"focus","window_id":"42","environment_id":"local"}),
+            json!({"action":"filmstrip","duration_seconds":2}),
         ] {
             assert!(parse_request(&input.to_string()).is_ok(), "{input}");
         }
@@ -418,7 +462,7 @@ mod tests {
                 panic!("function spec")
             };
             let variants = spec.parameters.one_of.unwrap();
-            assert_eq!(variants.len(), 8);
+            assert_eq!(variants.len(), 9);
             for variant in variants {
                 assert_eq!(
                     variant.properties.unwrap().contains_key("environment_id"),

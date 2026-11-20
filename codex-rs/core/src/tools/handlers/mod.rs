@@ -41,6 +41,8 @@ pub(crate) mod trueos_help;
 mod trueos_ide;
 #[cfg(target_os = "trueos")]
 mod trueos_spirit;
+#[cfg(any(target_os = "trueos", test))]
+mod trueos_spirit_filmstrip;
 pub(crate) mod unified_exec;
 mod view_image;
 pub(crate) mod view_image_spec;

@@ -1,3 +1,6 @@
+# Request the public summaries used by native read-aloud when the model supports them.
+model_reasoning_summary = "concise"
+
 # Common is TRUEOS's public FFA output directory. Let ordinary workspace-write
 # sessions export there; TRUEOSFS still enforces access keys and assigns the
 # destination folder's key to newly created files.
