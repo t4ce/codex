@@ -13,10 +13,16 @@ impl<S: Eq> DropInbox<S> {
     pub(super) fn poll(
         &mut self,
         scope: Option<S>,
+        poll_due: bool,
         mut take: impl FnMut() -> Option<Result<Vec<String>, ()>>,
         mut attach: impl FnMut(Vec<String>) -> bool,
     ) -> bool {
-        let accepts = scope.is_some() && self.scope == scope;
+        let same_scope = self.scope == scope;
+        if same_scope && !poll_due {
+            return false;
+        }
+        // A scope change must discard pending drops before the new scope can receive any.
+        let accepts = scope.is_some() && same_scope;
         self.scope = scope;
         let mut rejected = false;
         // UI4 bounds its mailbox to 32 drops. Do not monopolize the app loop.
@@ -49,10 +55,11 @@ mod tests {
     fn drops_stay_in_the_receiving_conversation_and_are_consumed_once() {
         let mut inbox = DropInbox { scope: None };
         let mut delivered = Vec::new();
-        assert!(!inbox.poll(Some((1, "thread")), || None, |_| panic!("empty")));
+        assert!(!inbox.poll(Some((1, "thread")), false, || None, |_| panic!("empty")));
         let mut queue = [Ok(vec!["4:/foo.rs".into()])].into_iter();
         assert!(!inbox.poll(
             Some((1, "thread")),
+            true,
             || queue.next(),
             |paths| {
                 delivered.push(paths);
@@ -62,15 +69,42 @@ mod tests {
         assert_eq!(delivered, [vec!["4:/foo.rs".to_owned()]]);
         assert!(!inbox.poll(
             Some((1, "thread")),
+            true,
             || queue.next(),
             |_| panic!("already taken")
         ));
         // Identical thread names on different backends must not inherit a drop.
         for scope in [Some((2, "thread")), Some((2, "other")), None] {
             let mut queue = [Ok(vec!["/late".into()])].into_iter();
-            assert!(inbox.poll(scope, || queue.next(), |_| panic!("retargeted")));
+            assert!(inbox.poll(scope, false, || queue.next(), |_| panic!("retargeted")));
             assert!(queue.next().is_none());
         }
+    }
+
+    #[test]
+    fn unrelated_events_do_not_check_an_unchanged_mailbox_between_ticks() {
+        let mut inbox = DropInbox::new();
+        assert!(!inbox.poll(Some(1), false, || None, |_| panic!("empty")));
+
+        let mut queue = [Ok(vec!["4:/foo.rs".into()])].into_iter();
+        for _ in 0..100 {
+            assert!(!inbox.poll(
+                Some(1),
+                false,
+                || panic!("mailbox queried before its timer"),
+                |_| panic!("unscheduled attachment"),
+            ));
+        }
+        assert!(!inbox.poll(
+            Some(1),
+            true,
+            || queue.next(),
+            |paths| {
+                assert_eq!(paths, ["4:/foo.rs"]);
+                true
+            }
+        ));
+        assert!(queue.next().is_none());
     }
 
     #[test]
@@ -80,6 +114,7 @@ mod tests {
         let mut attempts = 0;
         assert!(inbox.poll(
             Some(1),
+            true,
             || queue.next(),
             |_| {
                 attempts += 1;

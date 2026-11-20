@@ -75,8 +75,7 @@ async fn trueos_tts_queues_opening_from_live_deltas_and_queues_the_rest_once() {
     let (mut chat, _events, _ops) = make_chatwidget_manual(None).await;
     let thread = ThreadId::new();
     chat.thread_id = Some(thread);
-    chat.local_settings.tui.trueos_tts = true;
-    let (speech, mut queue) = crate::trueos_tts::ReadAloud::with_test_queue();
+    let (speech, mut queue) = crate::trueos_tts::ReadAloud::channel();
     chat.local_speech = speech;
     handle_turn_started(&mut chat, "turn-1");
 
@@ -139,8 +138,7 @@ async fn trueos_tts_can_read_a_completed_summary_without_deltas() {
     let (mut chat, _events, _ops) = make_chatwidget_manual(None).await;
     let thread = ThreadId::new();
     chat.thread_id = Some(thread);
-    chat.local_settings.tui.trueos_tts = true;
-    let (speech, mut queue) = crate::trueos_tts::ReadAloud::with_test_queue();
+    let (speech, mut queue) = crate::trueos_tts::ReadAloud::channel();
     chat.local_speech = speech;
     handle_turn_started(&mut chat, "turn-1");
 

@@ -1405,9 +1405,14 @@ See the Codex keymap documentation for supported actions and examples."
         #[cfg(target_os = "trueos")]
         let mut native_drop_inbox = super::trueos_drop::DropInbox::new();
         #[cfg(target_os = "trueos")]
-        let mut native_drop_tick = tokio::time::interval(Duration::from_millis(100));
+        let mut native_drop_tick = {
+            let period = Duration::from_millis(100);
+            tokio::time::interval_at(tokio::time::Instant::now() + period, period)
+        };
         #[cfg(target_os = "trueos")]
         native_drop_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        #[cfg(target_os = "trueos")]
+        let mut native_drop_poll_due = true;
 
         let mut backends =
             super::backend_sessions::BackendSessions::from_initial(app_server, other_backends);
@@ -1617,9 +1622,12 @@ See the Codex keymap documentation for supported actions and examples."
                             && app.overlay.is_none()
                             && !app.backtrack.overlay_preview_active
                     });
-                    if native_drop_inbox.poll(drop_scope, super::trueos_drop::take, |paths| {
-                        app.chat_widget.attach_trueos_references(paths)
-                    }) {
+                    if native_drop_inbox.poll(
+                        drop_scope,
+                        std::mem::take(&mut native_drop_poll_due),
+                        super::trueos_drop::take,
+                        |paths| app.chat_widget.attach_trueos_references(paths),
+                    ) {
                         app.chat_widget.add_error_message(
                             "File drop not attached. Use an editable local Codex conversation; up to 16 references fit in a draft. Drop again after switching conversations.".into(),
                         );
@@ -1631,7 +1639,11 @@ See the Codex keymap documentation for supported actions and examples."
                         { native_drop_tick.tick().await; return; }
                         #[cfg(not(target_os = "trueos"))]
                         std::future::pending::<()>().await;
-                    } => AppRunControl::Continue,
+                    } => {
+                        #[cfg(target_os = "trueos")]
+                        { native_drop_poll_due = true; }
+                        AppRunControl::Continue
+                    },
                     () = async {
                         #[cfg(target_os = "trueos")]
                         if native_prompt_inbox.can_receive() {

@@ -3,6 +3,7 @@
 use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
+#[cfg(not(test))]
 use std::time::Duration;
 
 use pulldown_cmark::Event;
@@ -127,34 +128,43 @@ impl AnswerOpening {
     }
 }
 
-#[derive(Default)]
 pub(crate) struct ReadAloud {
-    queue: Option<mpsc::UnboundedSender<String>>,
+    queue: mpsc::UnboundedSender<String>,
     pending_bytes: Arc<AtomicUsize>,
     last: Option<(String, String, String)>,
     summary: SummarySpeech,
     opening: Option<AnswerOpening>,
 }
 impl ReadAloud {
-    #[cfg(test)]
-    pub(crate) fn with_test_queue() -> (Self, mpsc::UnboundedReceiver<String>) {
-        let (tx, rx) = mpsc::unbounded_channel();
+    pub(crate) fn channel() -> (Self, mpsc::UnboundedReceiver<String>) {
+        let (queue, rx) = mpsc::unbounded_channel();
         (
             Self {
-                queue: Some(tx),
-                ..Self::default()
+                queue,
+                pending_bytes: Arc::new(AtomicUsize::new(0)),
+                last: None,
+                summary: SummarySpeech::default(),
+                opening: None,
             },
             rx,
         )
     }
 
-    pub(crate) fn new(enabled: bool) -> Self {
-        let mut reader = Self::default();
-        if enabled {
-            reader.queue = Some(start_worker(Arc::clone(&reader.pending_bytes)));
-        }
+    pub(crate) fn new() -> Self {
+        let (reader, rx) = Self::channel();
+        #[cfg(not(test))]
+        tokio::spawn(worker(rx, Arc::clone(&reader.pending_bytes)));
+        // Speech tests inject their own receiver, keeping other widget tests offline.
+        #[cfg(test)]
+        drop(rx);
         reader
     }
+
+    #[cfg(test)]
+    pub(crate) fn has_test_receiver(&self) -> bool {
+        !self.queue.is_closed()
+    }
+
     pub(crate) fn speak_summary(&mut self, item: &str, delta: &str, at_boundary: bool) {
         if let Some(sentence) = self.summary.sentence(item, delta, at_boundary) {
             self.enqueue(sentence);
@@ -223,14 +233,10 @@ impl ReadAloud {
     }
 
     fn enqueue(&mut self, text: String) {
-        let pending_bytes = Arc::clone(&self.pending_bytes);
-        let queue = self
-            .queue
-            .get_or_insert_with(|| start_worker(Arc::clone(&pending_bytes)));
         let text_bytes = text.len();
-        let queued_bytes = pending_bytes.fetch_add(text_bytes, Ordering::Relaxed) + text_bytes;
-        if queue.send(text).is_err() {
-            pending_bytes.fetch_sub(text_bytes, Ordering::Relaxed);
+        let queued_bytes = self.pending_bytes.fetch_add(text_bytes, Ordering::Relaxed) + text_bytes;
+        if self.queue.send(text).is_err() {
+            self.pending_bytes.fetch_sub(text_bytes, Ordering::Relaxed);
             tracing::warn!(service = "ptts", "speech queue unavailable");
         } else if queued_bytes > QUEUED_TEXT_WARNING_BYTES {
             tracing::warn!(
@@ -242,11 +248,7 @@ impl ReadAloud {
         }
     }
 }
-fn start_worker(pending_bytes: Arc<AtomicUsize>) -> mpsc::UnboundedSender<String> {
-    let (tx, rx) = mpsc::unbounded_channel();
-    tokio::spawn(worker(rx, pending_bytes));
-    tx
-}
+
 async fn next_speech(
     rx: &mut mpsc::UnboundedReceiver<String>,
     pending_bytes: &AtomicUsize,
@@ -267,6 +269,7 @@ impl Health {
         self.protocol == SERVICE_PROTOCOL && self.ready && self.tts
     }
 }
+#[cfg(not(test))]
 async fn ready(client: &reqwest::Client) -> bool {
     let Ok(response) = client
         .get(format!("{SERVICE_ENDPOINT}/health"))
@@ -284,17 +287,16 @@ async fn ready(client: &reqwest::Client) -> bool {
         .await
         .is_ok_and(|health| health.is_ready())
 }
+#[cfg(not(test))]
 fn launch() -> Result<(), String> {
-    #[cfg(target_os = "trueos")]
-    return trueos::vshell::launch_with_destination(
+    trueos::vshell::launch_with_destination(
         "apps",
         LAUNCH_COMMAND,
         trueos::vshell::LaunchDestination::Headless,
     )
-    .map_err(|code| format!("ptts Blueprint launch ({code})"));
-    #[cfg(not(target_os = "trueos"))]
-    Err("ptts launch requires TRUEOS".into())
+    .map_err(|code| format!("ptts Blueprint launch ({code})"))
 }
+#[cfg(not(test))]
 async fn ensure_service(client: &reqwest::Client) -> Result<(), String> {
     if ready(client).await {
         return Ok(());
@@ -311,6 +313,7 @@ async fn ensure_service(client: &reqwest::Client) -> Result<(), String> {
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
 }
+#[cfg(not(test))]
 async fn worker(mut rx: mpsc::UnboundedReceiver<String>, pending_bytes: Arc<AtomicUsize>) {
     let client = match reqwest::Client::builder()
         .no_proxy()
@@ -355,11 +358,7 @@ mod tests {
     use super::*;
     #[test]
     fn queues_only_the_first_complete_sentence_per_summary_item() {
-        let (tx, mut rx) = mpsc::unbounded_channel();
-        let mut reader = ReadAloud {
-            queue: Some(tx),
-            ..ReadAloud::default()
-        };
+        let (mut reader, mut rx) = ReadAloud::channel();
 
         reader.speak_summary("first", "The version is 1.", false);
         assert!(rx.try_recv().is_err());
@@ -419,11 +418,7 @@ mod tests {
     }
     #[tokio::test]
     async fn keeps_completion_order_and_counts_pending_utf8_bytes() {
-        let (tx, mut rx) = mpsc::unbounded_channel();
-        let mut reader = ReadAloud {
-            queue: Some(tx),
-            ..ReadAloud::default()
-        };
+        let (mut reader, mut rx) = ReadAloud::channel();
         let pending_bytes = Arc::clone(&reader.pending_bytes);
         reader.speak("thread", "turn", "item", "Hello");
         reader.speak("thread", "turn", "item", "Hello again");
@@ -444,11 +439,7 @@ mod tests {
     }
     #[tokio::test]
     async fn warning_threshold_preserves_all_queued_text() {
-        let (tx, mut rx) = mpsc::unbounded_channel();
-        let mut reader = ReadAloud {
-            queue: Some(tx),
-            ..ReadAloud::default()
-        };
+        let (mut reader, mut rx) = ReadAloud::channel();
         let first = "a".repeat(QUEUED_TEXT_WARNING_BYTES);
         reader.speak("thread", "first", "item", &first);
         reader.speak("thread", "next", "item", "é");

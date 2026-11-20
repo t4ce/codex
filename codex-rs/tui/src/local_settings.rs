@@ -63,7 +63,6 @@ impl LocalSettings {
                 config.tui_alternate_screen != codex_config::types::AltScreenMode::Never,
             ),
             tui: Tui {
-                trueos_tts: false,
                 default_hosts: Default::default(),
                 notification_settings: config.tui_notifications.clone(),
                 animations: config.animations,
@@ -187,16 +186,7 @@ impl LocalSettings {
         }
         self.tui.animations &= system_motion == crate::motion::MotionMode::Animated;
         let mut audio = toml::Value::Table(Default::default());
-        self.tui.trueos_tts = false;
         for layer in layers.layers_low_to_high() {
-            if !matches!(layer.name, codex_config::ConfigLayerSource::Project { .. })
-                && let Some(enabled) = layer.config
-                    .get("tui")
-                    .and_then(|tui| tui.get("trueos_tts"))
-                    .and_then(toml::Value::as_bool)
-            {
-                self.tui.trueos_tts = enabled;
-            }
             if !matches!(layer.name, codex_config::ConfigLayerSource::Project { .. })
                 && let Some(value) = layer.config.get("audio")
             {

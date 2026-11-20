@@ -7,10 +7,6 @@ model_reasoning_summary = "concise"
 [sandbox_workspace_write]
 writable_roots = ["/apps/common"]
 
-# Native speech is part of the standard TRUEOS Blueprint launch.
-[tui]
-trueos_tts = true
-
 # Optional local search and memory are disabled in the standard TRUEOS build.
 # An explicit config override can opt in; the engine remains lazy.
 [mcp_servers.xerj]

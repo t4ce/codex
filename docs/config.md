@@ -44,16 +44,8 @@ executable paths retain their normal launch behavior.
 
 ## TRUEOS local read-aloud
 
-The standard TRUEOS Blueprint enables read-aloud automatically. No launch
-arguments or launch script are required. A user configuration can disable it:
-
-```toml
-[tui]
-trueos_tts = false
-```
-
-This preference ignores project configuration. The native TUI starts the
-on-demand `ptts` Blueprint at startup and reuses an existing healthy service.
+Read-aloud is part of the TRUEOS TUI build. The TUI starts the on-demand
+`ptts` Blueprint at startup and reuses an existing healthy service.
 Codex queues a plain-prose opening sentence as soon as it has a complete
 sentence in a streamed item marked as a final answer. It queues the rest when
 the item completes. Replies with an unknown phase are read at turn completion.
@@ -65,13 +57,13 @@ Speech is local to the TRUEOS Rust TUI. It skips tool output, raw reasoning,
 history replay, realtime delegated voice replies, hidden display directives,
 code blocks and link destinations. Pocket TTS handles pronunciation.
 
-`ptts` ships the English Pocket TTS model and Azelma voice inside the Blueprint,
-running Rust CPU inference without Python or a GPU. Its loopback service uses
-port 9773 and protocol `ptts-v1`. Startup and speech requests run away from the
-render loop; failures preserve the displayed reply. Replies enter one FIFO and
-play in order, with no skip or reset controls or age expiry. When waiting text
-exceeds 1 KiB in UTF-8, the producer logs a warning to keep replies small; the
-threshold does not truncate or discard queued speech. See
+`ptts` packages the tokenizer and Azelma voice and loads the English Pocket TTS
+checkpoint from app storage, fetching it on first use if needed. Its Rust CPU
+inference service uses loopback port 9773 and protocol `ptts-v1`. Startup and
+speech requests run away from the render loop. Failures preserve the displayed
+reply. Replies enter one FIFO and play in order, with no skip or reset controls
+or age expiry. When waiting text exceeds 1 KiB in UTF-8, the producer logs a
+warning and keeps the queued speech. See
 `TRUEOS-Blueprints/apps/ptts/README.md` for the local service contract.
 
 Upstream already provides `thread/realtime/appendSpeech`, but it is tied to

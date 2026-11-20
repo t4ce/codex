@@ -8,67 +8,6 @@ use codex_terminal_detection::Multiplexer;
 use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn trueos_tts_uses_host_preferences_and_ignores_project_opt_in() -> anyhow::Result<()> {
-    for (user, project_enabled, cli, expected) in [
-        (None, true, None, cfg!(target_os = "trueos")),
-        (Some(false), true, None, false),
-        (Some(true), false, None, true),
-        (Some(false), false, Some(true), true),
-        (Some(true), true, Some(false), false),
-    ] {
-        let home = tempfile::tempdir()?;
-        let project = tempfile::tempdir()?;
-        let project_cwd = AbsolutePathBuf::from_absolute_path(project.path())?;
-        std::fs::write(
-            home.path().join("config.toml"),
-            user.map(|enabled| format!("[tui]\ntrueos_tts = {enabled}\n"))
-                .unwrap_or_default(),
-        )?;
-        std::fs::create_dir(project.path().join(".codex"))?;
-        std::fs::write(
-            project.path().join(".codex/config.toml"),
-            format!("[tui]\ntrueos_tts = {project_enabled}\n"),
-        )?;
-        crate::legacy_core::config::set_project_trust_level(
-            home.path(),
-            project.path(),
-            codex_protocol::config_types::TrustLevel::Trusted,
-        )?;
-        let cli_overrides = cli
-            .map(|enabled| ("tui.trueos_tts".into(), toml::Value::Boolean(enabled)))
-            .into_iter()
-            .collect::<Vec<_>>();
-        let config = ConfigBuilder::default()
-            .codex_home(home.path().to_path_buf())
-            .fallback_cwd(Some(project.path().to_path_buf()))
-            .strict_config(true)
-            .loader_overrides(LoaderOverrides::without_managed_config_for_tests())
-            .cli_overrides(cli_overrides.clone())
-            .build()
-            .await?;
-        let bootstrap = crate::legacy_core::config::load_config_toml_with_layer_stack(
-            home.path(),
-            Some(&project_cwd),
-            cli_overrides,
-            codex_config::ConfigLoadOptions {
-                loader_overrides: LoaderOverrides::without_managed_config_for_tests(),
-                strict_config: true,
-                ..Default::default()
-            },
-        )
-        .await?;
-        assert_eq!(LocalSettings::from(&config).tui.trueos_tts, expected);
-        assert_eq!(
-            LocalSettings::from_bootstrap(&bootstrap, config.codex_home.clone())?
-                .tui
-                .trueos_tts,
-            expected,
-        );
-    }
-    Ok(())
-}
-
-#[tokio::test]
 async fn launch_screen_mode_survives_configuration_reload() -> anyhow::Result<()> {
     use crate::transcript_mode::TranscriptMode;
     use codex_config::types::AltScreenMode;

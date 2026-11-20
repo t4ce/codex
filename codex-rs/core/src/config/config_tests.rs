@@ -1394,7 +1394,6 @@ fn config_toml_deserializes_model_availability_nux() {
     assert_eq!(
         cfg.tui.expect("tui config should deserialize"),
         Tui {
-            trueos_tts: false,
             default_hosts: Default::default(),
             notification_settings: TuiNotificationSettings::default(),
             animations: true,
@@ -4760,7 +4759,6 @@ fn tui_config_missing_notifications_field_defaults_to_enabled() {
     assert_eq!(
         tui,
         Tui {
-            trueos_tts: false,
             default_hosts: Default::default(),
             notification_settings: TuiNotificationSettings::default(),
             animations: true,

@@ -154,7 +154,7 @@ impl ChatWidget {
                     }
                     #[cfg(any(target_os = "trueos", test))]
                     if !from_replay
-                        && self.local_speech_enabled(&notification.turn_id)
+                        && self.should_speak_locally(&notification.turn_id)
                         && !self.safety_buffering_is_waiting()
                     {
                         self.local_speech.answer_delta(
@@ -185,7 +185,7 @@ impl ChatWidget {
                 {
                     #[cfg(any(target_os = "trueos", test))]
                     if !from_replay
-                        && self.local_speech_enabled(&notification.turn_id)
+                        && self.should_speak_locally(&notification.turn_id)
                         && !self.safety_buffering_is_waiting()
                     {
                         self.local_speech.speak_summary(
@@ -217,7 +217,7 @@ impl ChatWidget {
                 {
                     #[cfg(any(target_os = "trueos", test))]
                     if !from_replay
-                        && self.local_speech_enabled(&notification.turn_id)
+                        && self.should_speak_locally(&notification.turn_id)
                         && !self.safety_buffering_is_waiting()
                     {
                         self.local_speech
@@ -634,7 +634,7 @@ impl ChatWidget {
         self.restore_realtime_transcripts_before_turn(&notification.turn_id);
         #[cfg(any(target_os = "trueos", test))]
         if replay_kind.is_none()
-            && self.local_speech_enabled(&notification.turn_id)
+            && self.should_speak_locally(&notification.turn_id)
             && !self.safety_buffering_is_waiting()
             && let ThreadItemPayload::AgentMessage {
                 id,
@@ -797,7 +797,7 @@ impl ChatWidget {
             self.add_async_questions(id, questions);
         }
         #[cfg(any(target_os = "trueos", test))]
-        if replay_kind.is_none() && self.local_speech_enabled(&notification.turn_id) {
+        if replay_kind.is_none() && self.should_speak_locally(&notification.turn_id) {
             match &notification.item.payload {
                 ThreadItemPayload::Reasoning { id, summary, .. }
                     if !self.safety_buffering_is_waiting()
@@ -834,15 +834,17 @@ impl ChatWidget {
     }
 
     #[cfg(any(target_os = "trueos", test))]
-    fn local_speech_enabled(&self, turn: &str) -> bool {
-        self.local_settings.tui.trueos_tts
-            && self.last_turn_id() == Some(turn)
-            && !self.is_realtime_delegated_reasoning_turn(turn)
+    fn should_speak_locally(&self, turn: &str) -> bool {
+        #[cfg(test)]
+        if !self.local_speech.has_test_receiver() {
+            return false;
+        }
+        self.last_turn_id() == Some(turn) && !self.is_realtime_delegated_reasoning_turn(turn)
     }
 
     #[cfg(any(target_os = "trueos", test))]
     fn speak_local_answer(&mut self, turn: &str, item: &ThreadItemPayload) {
-        if self.local_speech_enabled(turn)
+        if self.should_speak_locally(turn)
             && !realtime::is_private_realtime_agent_item(item)
             && let Some(thread) = self.thread_id()
             && let ThreadItemPayload::AgentMessage { id, text, .. } = item

@@ -125,7 +125,7 @@ impl ChatWidget {
             #[cfg(target_os = "trueos")]
             spirit_response: super::spirit_trueos::ResponsePresentation::default(),
             #[cfg(any(target_os = "trueos", test))]
-            local_speech: crate::trueos_tts::ReadAloud::new(local_settings.tui.trueos_tts),
+            local_speech: crate::trueos_tts::ReadAloud::new(),
             raw_output_mode: local_settings.tui.raw_output_mode,
             config,
             local_settings,

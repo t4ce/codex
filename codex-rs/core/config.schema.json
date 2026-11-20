@@ -5670,11 +5670,6 @@
           "description": "Syntax highlighting theme name (kebab-case).\n\nWhen set, overrides automatic light/dark theme detection. Use `/theme` in the TUI or see `$CODEX_HOME/themes` for custom themes.",
           "type": "string"
         },
-        "trueos_tts": {
-          "default": false,
-          "description": "Read completed public replies through the on-demand TRUEOS Pocket TTS/Azelma Blueprint. TRUEOS packaged defaults enable this; never starts cloud realtime or microphone capture.",
-          "type": "boolean"
-        },
         "vim_mode_default": {
           "default": false,
           "description": "Start the composer in Vim mode (`Normal`) by default. Defaults to `false`.",

@@ -666,10 +666,9 @@ fn lico_packaged_default_is_local_optional_and_automatic() {
 }
 
 #[test]
-fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
+fn xerj_packaged_default_is_disabled() {
     let config: ConfigToml =
         toml::from_str(TRUEOS_EMBEDDED_PACKAGED_DEFAULTS).expect("valid TRUEOS defaults");
-    assert_eq!(config.tui.as_ref().map(|tui| tui.trueos_tts), Some(true));
     let server = &config.mcp_servers["xerj"];
     assert!(!server.enabled);
     assert!(!server.required);
@@ -681,6 +680,22 @@ fn xerj_packaged_default_is_disabled_and_speech_is_enabled() {
     assert_eq!(
         server.tool_timeout_sec,
         Some(std::time::Duration::from_secs(150))
+    );
+}
+
+#[test]
+fn retired_trueos_speech_toggle_follows_unknown_config_field_policy() {
+    let config: TomlValue = toml::from_str("[tui]\ntrueos_tts = false\nanimations = false")
+        .expect("valid legacy config");
+    let parsed: ConfigToml = config.clone().try_into().expect("typed legacy config");
+    assert!(!parsed.tui.expect("TUI config").animations);
+
+    let dir = tempdir().expect("tempdir");
+    let error = validate_cli_overrides_strictly(&config, dir.path())
+        .expect_err("retired CLI override should be rejected");
+    assert_eq!(
+        error.to_string(),
+        "unknown configuration field `tui.trueos_tts` in -c/--config override"
     );
 }
 
