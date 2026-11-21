@@ -542,8 +542,8 @@ impl ChatWidget {
             }
         }
         #[cfg(target_os = "trueos")]
-        if !from_replay {
-            self.spirit_response.finish(Some(&message));
+        if !from_replay && matches!(item.phase, Some(MessagePhase::FinalAnswer) | None) {
+            self.spirit_response.remember(&message);
         }
         let parsed = parse_assistant_markdown(&message, self.config.cwd.as_path());
         let questions = item.questions.as_deref().unwrap_or_default();

@@ -87,7 +87,7 @@ impl ChatWidget {
 
     pub(super) fn on_task_started(&mut self) {
         #[cfg(target_os = "trueos")]
-        self.spirit_response.clear();
+        self.spirit_response.begin_turn();
         self.bottom_pane.dismiss_next_prompt();
         self.status_state.program_status_after_turn =
             crate::terminal_program_status::ProgramStatus::Idle;

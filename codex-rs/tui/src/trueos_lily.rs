@@ -1,22 +1,19 @@
-//! Text-only response tee to the independent Lily Blueprint VM.
-//!
-//! The TUI never performs inference or waits for HTTP/readiness. Its watch slot
-//! retains only the newest bounded snapshot; the background worker owns launch,
-//! readiness and transport. The service owns VNNI and all Spirit signaling.
+//! Completed assistant turns sent to the independent Lily Blueprint VM.
+//! The terminal only buffers bounded response text. The background transport
+//! owns service readiness and submits each completed turn in order.
 use serde::Deserialize;
 use serde::Serialize;
 use std::time::Duration;
 use std::time::Instant;
-use tokio::sync::watch;
+use tokio::sync::mpsc;
 
 const ENDPOINT: &str = "http://127.0.0.1:9771";
 #[cfg(target_os = "trueos")]
 const START_SCRIPT: &str = "launch --headless lily2vec\n";
 const SOFT_CHARS: usize = 384;
 const RETAIN_CHARS: usize = 768;
-const MIN_SENTENCE_CHARS: usize = 96;
-const INTERVAL: Duration = Duration::from_millis(2500);
-const MAX_PENDING_AGE: Duration = Duration::from_secs(10);
+const PENDING_TURNS: usize = 32;
+const MAX_PENDING_AGE: Duration = Duration::from_secs(30);
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(20);
 const RETRY_DELAY: Duration = Duration::from_secs(5);
 
@@ -40,120 +37,86 @@ fn snapshot(text: &str) -> String {
     text[chars[natural.or(word).unwrap_or(hard)].0..].to_owned()
 }
 
-#[derive(Default)]
-struct Sampler {
-    pending: String,
-    last_sample: Option<Duration>,
-}
-impl Sampler {
-    fn due(&self, now: Duration) -> bool {
-        self.last_sample
-            .is_none_or(|last| now.saturating_sub(last) >= INTERVAL)
-    }
-    fn push(&mut self, delta: &str, now: Duration) -> Option<String> {
-        let tail = snapshot(delta);
-        if tail.len() != delta.len() {
-            self.pending = tail;
-        } else {
-            self.pending.push_str(&tail);
-        }
-        if self.pending.chars().count() > RETAIN_CHARS {
-            self.pending = snapshot(&self.pending);
-        }
-        let count = self.pending.chars().count();
-        let sentence_end = self.pending.trim_end().ends_with(['.', '!', '?']);
-        if self.due(now)
-            && (count >= SOFT_CHARS
-                || self.pending.contains("\n\n")
-                || (count >= MIN_SENTENCE_CHARS && sentence_end))
-        {
-            self.last_sample = Some(now);
-            return Some(snapshot(&std::mem::take(&mut self.pending)));
-        }
-        None
-    }
-    fn finish(&mut self, response: Option<&str>, now: Duration) -> Option<String> {
-        let text = response
-            .map(snapshot)
-            .unwrap_or_else(|| std::mem::take(&mut self.pending));
-        self.pending.clear();
-        if text.trim().is_empty() || !self.due(now) {
-            return None;
-        }
-        self.last_sample = Some(now);
-        Some(snapshot(&text))
-    }
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-struct Snapshot {
+struct Turn {
     source: String,
     sequence: u64,
     text: String,
-    clear: bool,
-    // Monotonic local age is transport bookkeeping, not a service protocol field.
     #[serde(skip, default = "Instant::now")]
     queued_at: Instant,
 }
-impl Snapshot {
-    fn expired(&self, now: Instant) -> bool {
-        !self.clear && now.saturating_duration_since(self.queued_at) >= MAX_PENDING_AGE
+
+pub(crate) struct ResponsePresentation {
+    pending: String,
+    finished: bool,
+    source: String,
+    sequence: u64,
+    turns: mpsc::Sender<Turn>,
+}
+
+impl Default for ResponsePresentation {
+    fn default() -> Self {
+        let (turns, receiver) = mpsc::channel(PENDING_TURNS);
+        tokio::spawn(worker(receiver, ENDPOINT.to_owned()));
+        Self {
+            pending: String::new(),
+            finished: false,
+            source: format!("codex-{}", uuid::Uuid::new_v4()),
+            sequence: 0,
+            turns,
+        }
     }
 }
 
-pub(crate) struct ResponsePresentation {
-    started: Instant,
-    sampler: Sampler,
-    source: String,
-    sequence: u64,
-    latest: watch::Sender<Option<Snapshot>>,
-}
-impl Default for ResponsePresentation {
-    fn default() -> Self {
-        let source = format!("codex-{}", uuid::Uuid::new_v4());
-        let (latest, receiver) = watch::channel(None);
-        // Start readiness/launch immediately, independently of the first reply.
-        tokio::spawn(worker(receiver, ENDPOINT.to_owned()));
-        Self {
-            started: Instant::now(),
-            sampler: Sampler::default(),
-            source,
-            sequence: 0,
-            latest,
+impl ResponsePresentation {
+    pub(crate) fn begin_turn(&mut self) {
+        self.finished = false;
+        self.clear();
+    }
+
+    pub(crate) fn delta(&mut self, text: &str) {
+        let tail = snapshot(text);
+        if tail.len() != text.len() {
+            self.pending = tail;
+        } else {
+            self.pending.push_str(&tail);
+            if self.pending.chars().count() > RETAIN_CHARS {
+                self.pending = snapshot(&self.pending);
+            }
         }
     }
-}
-impl ResponsePresentation {
-    fn send(&mut self, text: String, clear: bool) {
+
+    pub(crate) fn remember(&mut self, response: &str) {
+        self.pending = snapshot(response);
+    }
+
+    pub(crate) fn finish(&mut self, response: Option<&str>) {
+        if self.finished {
+            return;
+        }
+        self.finished = true;
+        let text = response
+            .filter(|text| !text.trim().is_empty())
+            .map(snapshot)
+            .unwrap_or_else(|| std::mem::take(&mut self.pending));
+        self.clear();
+        if text.trim().is_empty() {
+            return;
+        }
         self.sequence = self.sequence.saturating_add(1);
-        self.latest.send_replace(Some(Snapshot {
+        let turn = Turn {
             source: self.source.clone(),
             sequence: self.sequence,
             text,
-            clear,
             queued_at: Instant::now(),
-        }));
-    }
-    pub(crate) fn delta(&mut self, text: &str) {
-        if let Some(text) = self.sampler.push(text, self.started.elapsed()) {
-            self.send(text, false);
+        };
+        if let Err(error) = self.turns.try_send(turn) {
+            tracing::warn!(%error, sequence = self.sequence, "Lily completed turn was not queued");
         }
     }
-    pub(crate) fn finish(&mut self, response: Option<&str>) {
-        if let Some(text) = self.sampler.finish(response, self.started.elapsed()) {
-            self.send(text, false);
-        }
-    }
+
     pub(crate) fn clear(&mut self) {
-        self.sampler.pending.clear();
-        self.send(String::new(), true);
-    }
-}
-impl Drop for ResponsePresentation {
-    fn drop(&mut self) {
-        // The worker flushes this final clear with its bounded request timeout,
-        // then exits when the watch channel closes. The service outlives Codex.
-        self.clear();
+        self.pending.clear();
     }
 }
 
@@ -183,7 +146,7 @@ async fn health_ready(client: &reqwest::Client, endpoint: &str) -> bool {
     let Ok(health) = response.json::<Health>().await else {
         return false;
     };
-    health.ready && health.protocol == "lily2vec-v1" && health.backend == "avx-vnni"
+    health.ready && health.protocol == "lily2vec-v2" && health.backend == "avx-vnni"
 }
 
 fn launch_service() -> Result<(), String> {
@@ -219,32 +182,21 @@ async fn ensure_service(client: &reqwest::Client, endpoint: &str) -> Result<(), 
     }
 }
 
-async fn post(client: &reqwest::Client, endpoint: &str, snapshot: &Snapshot) -> Result<(), String> {
+async fn post(client: &reqwest::Client, endpoint: &str, turn: &Turn) -> Result<(), String> {
     let response = client
-        .post(format!("{endpoint}/v1/snapshots"))
-        .json(snapshot)
+        .post(format!("{endpoint}/v1/turns"))
+        .json(turn)
         .send()
         .await
         .map_err(|error| error.to_string())?;
     if response.status() == reqwest::StatusCode::ACCEPTED {
         Ok(())
     } else {
-        Err(format!("Lily snapshot rejected ({})", response.status()))
+        Err(format!("Lily turn rejected ({})", response.status()))
     }
 }
 
-async fn final_clear(
-    client: &reqwest::Client,
-    endpoint: &str,
-    receiver: &watch::Receiver<Option<Snapshot>>,
-) {
-    let message = receiver.borrow().clone().filter(|s| s.clear);
-    if let Some(message) = message {
-        let _ = post(client, endpoint, &message).await;
-    }
-}
-
-async fn worker(mut receiver: watch::Receiver<Option<Snapshot>>, endpoint: String) {
+async fn worker(mut receiver: mpsc::Receiver<Turn>, endpoint: String) {
     let client = match client() {
         Ok(client) => client,
         Err(error) => {
@@ -253,59 +205,33 @@ async fn worker(mut receiver: watch::Receiver<Option<Snapshot>>, endpoint: Strin
         }
     };
     let mut ready = false;
-    let mut current = None;
-    let mut last_error = None;
-    loop {
-        if !ready {
-            if receiver.has_changed().is_err() {
-                // A prior POST may have been admitted even if its response
-                // failed. Do not lose the final cancellation while reconnecting.
-                final_clear(&client, &endpoint, &receiver).await;
-                return;
-            }
-            match ensure_service(&client, &endpoint).await {
-                Ok(()) => {
-                    ready = true;
-                    last_error = None;
+    while let Some(turn) = receiver.recv().await {
+        let mut last_error = None;
+        while turn.queued_at.elapsed() < MAX_PENDING_AGE {
+            if !ready {
+                match ensure_service(&client, &endpoint).await {
+                    Ok(()) => ready = true,
+                    Err(error) => {
+                        if last_error.as_ref() != Some(&error) {
+                            tracing::warn!(%error, "Lily service unavailable");
+                        }
+                        last_error = Some(error);
+                        tokio::time::sleep(RETRY_DELAY).await;
+                        continue;
+                    }
                 }
+            }
+            match post(&client, &endpoint, &turn).await {
+                Ok(()) => break,
                 Err(error) => {
                     if last_error.as_ref() != Some(&error) {
-                        tracing::warn!(%error,"Lily service unavailable; response tee retained latest snapshot");
+                        tracing::warn!(%error, sequence = turn.sequence, "Lily turn transport failed");
                     }
                     last_error = Some(error);
+                    ready = false;
                     tokio::time::sleep(RETRY_DELAY).await;
-                    continue;
                 }
             }
-            // Startup may have taken time; send only the latest response.
-            current = receiver.borrow_and_update().clone();
-        }
-        if let Some(snapshot) = current
-            .take()
-            .filter(|s: &Snapshot| !s.expired(Instant::now()))
-        {
-            tokio::select! {
-                changed = receiver.changed() => {
-                    if changed.is_err() {
-                        // Drop publishes a final clear before closing the sender.
-                        final_clear(&client, &endpoint, &receiver).await;
-                        return;
-                    }
-                    current = receiver.borrow_and_update().clone();
-                }
-                result = post(&client,&endpoint,&snapshot) => {
-                    if let Err(error) = result {
-                        tracing::debug!(%error,"Lily response snapshot transport failed");
-                        ready = false;
-                        tokio::time::sleep(RETRY_DELAY).await;
-                    }
-                }
-            }
-        } else {
-            if receiver.changed().await.is_err() {
-                return;
-            }
-            current = receiver.borrow_and_update().clone();
         }
     }
 }
@@ -320,11 +246,7 @@ mod tests {
 
     async fn server(
         health: &'static str,
-    ) -> (
-        String,
-        Arc<Mutex<Vec<Snapshot>>>,
-        tokio::task::JoinHandle<()>,
-    ) {
+    ) -> (String, Arc<Mutex<Vec<Turn>>>, tokio::task::JoinHandle<()>) {
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let endpoint = format!("http://{}", listener.local_addr().unwrap());
         let received = Arc::new(Mutex::new(Vec::new()));
@@ -366,7 +288,7 @@ mod tests {
                     let (status, body) = if first.starts_with("GET /health ") {
                         ("200 OK", health)
                     } else {
-                        assert!(first.starts_with("POST /v1/snapshots "));
+                        assert!(first.starts_with("POST /v1/turns "));
                         received
                             .lock()
                             .unwrap()
@@ -383,8 +305,8 @@ mod tests {
         });
         (endpoint, received, task)
     }
-    const READY: &str = r#"{"protocol":"lily2vec-v1","backend":"avx-vnni","ready":true}"#;
-    async fn wait_count(received: &Arc<Mutex<Vec<Snapshot>>>, count: usize) {
+    const READY: &str = r#"{"protocol":"lily2vec-v2","backend":"avx-vnni","ready":true}"#;
+    async fn wait_count(received: &Arc<Mutex<Vec<Turn>>>, count: usize) {
         tokio::time::timeout(Duration::from_secs(3), async {
             while received.lock().unwrap().len() < count {
                 tokio::time::sleep(Duration::from_millis(5)).await;
@@ -394,64 +316,42 @@ mod tests {
         .unwrap();
     }
     #[test]
-    fn snapshots_are_bounded_verbatim_even_when_transport_skips_a_large_prefix() {
+    fn completed_turns_are_bounded_and_only_sent_once() {
+        let (turns, mut receiver) = mpsc::channel(PENDING_TURNS);
+        let mut view = ResponsePresentation {
+            pending: String::new(),
+            finished: false,
+            source: "view".into(),
+            sequence: 0,
+            turns,
+        };
         for text in [
             "🙂愛 ".repeat(10_000),
             "word ".repeat(10_000),
             "x".repeat(10_000),
         ] {
-            let tail = snapshot(&text);
-            assert!(text.ends_with(&tail));
-            assert!(tail.chars().count() <= RETAIN_CHARS);
+            view.begin_turn();
+            view.delta(&text);
+            assert!(receiver.try_recv().is_err());
+            view.finish(None);
+            view.finish(Some("duplicate turn completion"));
+            let turn = receiver.try_recv().unwrap();
+            assert!(text.ends_with(&turn.text));
+            assert!(turn.text.chars().count() <= RETAIN_CHARS);
+            assert!(receiver.try_recv().is_err());
         }
-        let mut sampler = Sampler::default();
-        assert!(sampler.push("old prefix", Duration::ZERO).is_none());
-        let delta = "new words ".repeat(2000);
-        let tail = sampler.push(&delta, Duration::ZERO).unwrap();
-        assert!(delta.ends_with(&tail));
-        assert!(!tail.contains("old prefix"));
-    }
-    #[test]
-    fn sampling_coalesces_fast_text_and_finishes_short_responses() {
-        let mut sampler = Sampler::default();
-        assert!(sampler.push("hi", Duration::ZERO).is_none());
-        assert_eq!(sampler.finish(Some("hi"), Duration::ZERO).unwrap(), "hi");
+        view.begin_turn();
+        view.remember("final assistant item");
+        view.finish(None);
+        let turn = receiver.try_recv().unwrap();
+        assert_eq!(turn.sequence, 4);
+        assert_eq!(turn.text, "final assistant item");
         assert!(
-            sampler
-                .push(&"hello ".repeat(1000), Duration::from_secs(1))
+            serde_json::to_value(&turn)
+                .unwrap()
+                .get("queued_at")
                 .is_none()
         );
-        assert!(sampler.pending.chars().count() <= RETAIN_CHARS);
-        assert!(
-            sampler
-                .finish(Some("complete tail"), Duration::from_secs(1))
-                .is_none()
-        );
-        assert_eq!(
-            sampler
-                .finish(Some("next answer"), Duration::from_secs(3))
-                .unwrap(),
-            "next answer"
-        );
-    }
-    #[test]
-    fn stale_text_expires_but_cancellation_is_always_deliverable() {
-        let now = Instant::now();
-        let mut message = Snapshot {
-            source: "age-test".into(),
-            sequence: 1,
-            text: "obsolete response".into(),
-            clear: false,
-            queued_at: now - MAX_PENDING_AGE,
-        };
-        assert!(message.expired(now));
-        message.clear = true;
-        assert!(!message.expired(now));
-        message.clear = false;
-        message.queued_at = now;
-        assert!(!message.expired(now));
-        let json = serde_json::to_value(&message).unwrap();
-        assert!(json.get("queued_at").is_none());
     }
 
     #[tokio::test]
@@ -459,8 +359,8 @@ mod tests {
         for health in [
             READY,
             r#"{"protocol":"other","backend":"avx-vnni","ready":true}"#,
-            r#"{"protocol":"lily2vec-v1","backend":"scalar","ready":true}"#,
-            r#"{"protocol":"lily2vec-v1","backend":"avx-vnni","ready":false}"#,
+            r#"{"protocol":"lily2vec-v2","backend":"scalar","ready":true}"#,
+            r#"{"protocol":"lily2vec-v2","backend":"avx-vnni","ready":false}"#,
         ] {
             let (endpoint, _, server) = server(health).await;
             assert_eq!(
@@ -471,85 +371,31 @@ mod tests {
         }
     }
     #[tokio::test]
-    async fn worker_only_sends_latest_snapshot_then_final_clear() {
+    async fn worker_delivers_completed_turns_in_order() {
         let (endpoint, received, server) = server(READY).await;
-        let (sender, receiver) = watch::channel(None);
-        // No yield until all writes complete: the bounded slot must contain
-        // only the latest request even if readiness has not started yet.
-        for sequence in 1..=500 {
-            sender.send_replace(Some(Snapshot {
-                source: "test-source".into(),
-                sequence,
-                text: format!("response {sequence}"),
-                clear: false,
-                queued_at: Instant::now(),
-            }));
+        let (sender, receiver) = mpsc::channel(PENDING_TURNS);
+        for sequence in 1..=3 {
+            sender
+                .try_send(Turn {
+                    source: "test-source".into(),
+                    sequence,
+                    text: format!("response {sequence}"),
+                    queued_at: Instant::now(),
+                })
+                .unwrap();
         }
-        let task = tokio::spawn(worker(receiver, endpoint));
-        wait_count(&received, 1).await;
-        assert_eq!(received.lock().unwrap()[0].sequence, 500);
-        sender.send_replace(Some(Snapshot {
-            source: "test-source".into(),
-            sequence: 501,
-            text: String::new(),
-            clear: true,
-            queued_at: Instant::now(),
-        }));
         drop(sender);
+        let task = tokio::spawn(worker(receiver, endpoint));
+        wait_count(&received, 3).await;
         tokio::time::timeout(Duration::from_secs(3), task)
             .await
             .unwrap()
             .unwrap();
-        let received = received.lock().unwrap();
-        assert_eq!(received.len(), 2);
-        assert!(received[1].clear);
-        assert_eq!(received[1].sequence, 501);
-        server.abort();
-    }
-    #[tokio::test]
-    async fn a_closed_view_still_sends_final_clear_when_service_was_not_ready() {
-        let (endpoint, received, server) = server(READY).await;
-        let (sender, receiver) = watch::channel(Some(Snapshot {
-            source: "closed-view".into(),
-            sequence: 42,
-            text: String::new(),
-            clear: true,
-            queued_at: Instant::now(),
-        }));
-        drop(sender);
-        tokio::time::timeout(Duration::from_secs(3), worker(receiver, endpoint))
-            .await
-            .unwrap();
-        let received = received.lock().unwrap();
-        assert_eq!(received.len(), 1);
-        assert!(received[0].clear);
-        assert_eq!(received[0].sequence, 42);
-        server.abort();
-    }
-
-    #[tokio::test]
-    async fn dropping_the_view_cancels_its_pending_service_work() {
-        let (endpoint, received, server) = server(READY).await;
-        let (latest, receiver) = watch::channel(None);
-        let mut view = ResponsePresentation {
-            started: Instant::now(),
-            sampler: Sampler::default(),
-            source: "view".into(),
-            sequence: 0,
-            latest,
-        };
-        let task = tokio::spawn(worker(receiver, endpoint));
-        view.finish(Some("hi"));
-        wait_count(&received, 1).await;
-        drop(view);
-        tokio::time::timeout(Duration::from_secs(3), task)
-            .await
-            .unwrap()
-            .unwrap();
-        let received = received.lock().unwrap();
-        assert_eq!(received[0].text, "hi");
-        assert!(received.last().unwrap().clear);
-        assert!(received.last().unwrap().sequence > received[0].sequence);
+        let got = received.lock().unwrap();
+        assert_eq!(
+            got.iter().map(|turn| turn.sequence).collect::<Vec<_>>(),
+            [1, 2, 3]
+        );
         server.abort();
     }
 }
